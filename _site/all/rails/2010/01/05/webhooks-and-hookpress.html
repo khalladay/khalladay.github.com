@@ -1,0 +1,120 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"  />
+<meta name="description" content="Dan Hixon Codes" />
+<meta name="keywords" content="video,games,programming,software,development,unity3d" />
+<meta name="author" content="Dan Hixon" />
+<link rel="stylesheet" type="text/css" href="/css/default.css" />
+<link rel="stylesheet" type="text/css" href="/css/pretty_code.css" />
+<link rel="alternate" type="application/atom+xml" href="http://danhixon.github.com/atom.xml" />
+
+<title>kylehalladay.com</title>
+</head>
+
+<body>
+<div id="wrap">
+	<div id="header">
+		<p id="toplinks">
+
+		</p>
+
+		<h1><a href="/"><div id="logo"></div>über<span class="fade">duper</span></a></h1>
+		<div class="slogan">
+				<a href="/code.html" class="pink">code{web}</a> :|: 
+				<a href="/os.html" class="green">software{apple}</a> :|: 
+				<a href="/life.html" class="orange">life{me}</a>
+		</div>
+
+</div>
+
+<div id="content">  
+  <div id="post">
+<h2>Webhooks and Hookpress</h2>
+<p class="publish_date">05 Jan 2010</p>
+<blockquote>
+<p>Webhooks: so simple you&#8217;ll think they&#8217;re stupid.<br />
+<span class="attributed">&#8212; Jeff Lindsay</span></p>
+</blockquote>
+<p>A couple weeks ago we launched blog.spokt.com and we wanted to have links to recent blog posts in the footer at spokt.com (hosted on different servers):</p>
+<p><img src="/images/posts-in-footer.png" title="recent blog posts listed in spokt.com footer" alt="recent blog posts listed in spokt.com footer" /></p>
+<p>To accomplish this I created a url at spokt which when accessed would download the blog&#8217;s rss feed, parse it, and store it for later listing.  I then used my nearly-zero wordpress &amp; php experience to create plugin that just curl&#8217;d the url.  Here&#8217;s the plugin code:</p>
+<pre name="code" class="php">
+	&lt;?php
+
+	function notify_spokt() {
+		$ch = curl_init('http://spokt.com/blog_update');
+		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
+		curl_setopt( $ch, CURLOPT_HEADER, 0 );
+		$page = curl_exec($ch);
+		curl_close($ch);
+	}
+
+	add_filter('publish_post','notify_spokt');
+
+	?&gt;
+</pre>
+<p>I thought that this kind of functionality might be useful and considered investigating how to make the url configurable.</p>
+<p>Yesterday I learned about <a href="http://www.webhooks.org/">webhooks</a> and thought about how I might go about creating a wordpress plugin using the &#8220;hooks&#8221; already built in and exposing them as webhooks. I figured someone probably already had and sure enough: the <a href="http://wordpress.org/extend/plugins/hookpress/">hookpress plugin</a> by Michael 芳貴 Erlewine</p>
+<p>Once installed Click &#8220;Settings&#8221; in the wp admin then the &#8220;Webhooks&#8221; link. That will bring up an easy-to-use admin interface. Click &#8220;Add webhook&#8221; then choose your action, any fields you want to pass, and enter the url.</p>
+<p>See Also: <a href="http://mitcho.com/code/hookpress/">Useful hookpress screencast by Michael 芳貴 Erlewine</a></p>
+<p><img src="/images/hookpress-screenshot.png" title="easy to use admin interface" alt="easy to use admin interface" /></p>
+</div>
+
+<div id="disqus">
+    <div id="disqus_thread"></div><script type="text/javascript" src="http://disqus.com/forums/dantech/embed.js"></script><noscript><a href="http://dantech.disqus.com/?url=ref">View the discussion thread.</a></noscript><a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+
+
+<div id="related">
+  <h3>Possibly Related Posts</h3>
+  <ul class="posts">
+    
+      <li><span>26 Mar 2012</span> &raquo; <a href="/all/life/2012/03/26/steep-learning-curve-is-a-misnomer.html">Steep Learning Curve</a></li>
+    
+      <li><span>16 Sep 2011</span> &raquo; <a href="/all/rails/2011/09/16/pgerror-unable-to-connect-on-port-5432.html">PGError Unable to connect on port 5432</a></li>
+    
+      <li><span>07 Feb 2011</span> &raquo; <a href="/all/rails/2011/02/07/slideshowpro-director-ruby-wrapper.html">SlideShowPro Director Ruby API Wrapper</a></li>
+    
+  </ul>
+</div>
+
+<!-- This is for code colorization which doesn't seem to work very well in IE... i guess I don't care very much -->
+<script language="javascript" src="http://communicatopia.s3.amazonaws.com/js/shCore.js"></script>
+<script language="javascript" src="http://communicatopia.s3.amazonaws.com/js/shBrushRuby.js"></script>
+<script language="javascript" src="http://communicatopia.s3.amazonaws.com/js/shBrushPhp.js"></script>
+<script language="javascript" src="http://communicatopia.s3.amazonaws.com/js/shBrushXml.js"></script>
+<script language="javascript" src="http://communicatopia.s3.amazonaws.com/js/shBrushCss.js"></script>
+<script language="javascript" src="http://communicatopia.s3.amazonaws.com/js/shBrushBash.js"></script>
+<script language="javascript" src="http://communicatopia.s3.amazonaws.com/js/shBrushJScript.js"></script>
+<script language="javascript">
+dp.SyntaxHighlighter.ClipboardSwf = 'http://communicatopia.s3.amazonaws.com/js/clipboard.swf';
+//name, showGutter, showControls, collapseAll, firstLine , showColumns
+dp.SyntaxHighlighter.HighlightAll('code',false, false,false,1,false);
+</script>
+</div>
+
+<div id="footer">
+
+    Keep in touch with family:<a href="http://www.spokt.com">spokt.com</a> ||
+    <a href="ca.linkedin.com/pub/kyle-halladay/2b/658/a14/">Linkedin</a> ||
+    <a href="http://twitter.com/khalladay">twitter</a>
+
+<p>&copy; 2010 <a href="/about.html">Kyle Halladay</a>
+
+</div>
+
+</div>
+
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-4105222-2");
+pageTracker._trackPageview();
+} catch(err) {}</script>
+</body>
+</html>
+

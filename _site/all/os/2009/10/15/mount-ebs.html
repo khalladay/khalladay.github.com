@@ -3,13 +3,13 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=UTF-8"  />
 <meta name="description" content="Dan Hixon Codes" />
-<meta name="keywords" content="life,code,software,development,photography" />
+<meta name="keywords" content="video,games,programming,software,development,unity3d" />
 <meta name="author" content="Dan Hixon" />
 <link rel="stylesheet" type="text/css" href="/css/default.css" />
 <link rel="stylesheet" type="text/css" href="/css/pretty_code.css" />
 <link rel="alternate" type="application/atom+xml" href="http://danhixon.github.com/atom.xml" />
 
-<title>über duper - dan's tech blog</title>
+<title>kylehalladay.com</title>
 </head>
 
 <body>
@@ -30,8 +30,15 @@
 
 <div id="content">  
   <div id="post">
-<p>This is a test post writen in markdown. To learn more about markdown check out the <a href="http://daringfireball.net/projects/markdown/">documentation</a> on <a href="http://daringfireball.net/">Daring Fireball</a>.</p>
-
+<h2>Mount <span class="caps">EBS</span> Volume</h2>
+<p class="publish_date">15 Oct 2009</p>
+<p>I use RightScale to manage my EC2 environment. I recently was unable to create a bundle of one of my servers and discovered the problem was I was running out of disk space.  I was using 2.7GB of 10GB but the bundle image would use up the rest of the disk and fail.  How can you get more space? Elastic Block Storage (<span class="caps">ESB</span>).</p>
+<h3>Step 1: Create &amp; Attach <span class="caps">ESB</span></h3>
+<p>In RightScale click &#8220;Clouds&#8221; then Navigate to <span class="caps">AWS</span> US &#8594; <span class="caps">EBS</span> Volumes &#8211; New.  Fill out the form (I needed 10GB &#8211; it will also be easier to follow along here if you choose /dev/sdm).  Navigate to the volume you created and click the &#8220;Attach&#8221; button. This will allow you to choose a server.</p>
+<h3>Step 2: Format &amp; Mount</h3>
+<p>Follow steps here: <a href="https://learningspaces.njit.edu/content/how-format-and-mount-ebs-volume">how format and mount ebs volume</a>. Except mount to /mnt instead of /data.  If you do mount to data you can also mount to /mnt without issue: mount /dev/sdm /mnt</p>
+<h3>Step 3: Create Bundle</h3>
+<p>Navigate to your server in RightScale and click the bundle button.  It should work now.  You can monitor your disk space on your server using the &#8220;df -h&#8221; command.</p>
 </div>
 
 <div id="disqus">
@@ -42,6 +49,12 @@
 <div id="related">
   <h3>Possibly Related Posts</h3>
   <ul class="posts">
+    
+      <li><span>26 Mar 2012</span> &raquo; <a href="/all/life/2012/03/26/steep-learning-curve-is-a-misnomer.html">Steep Learning Curve</a></li>
+    
+      <li><span>16 Sep 2011</span> &raquo; <a href="/all/rails/2011/09/16/pgerror-unable-to-connect-on-port-5432.html">PGError Unable to connect on port 5432</a></li>
+    
+      <li><span>07 Feb 2011</span> &raquo; <a href="/all/rails/2011/02/07/slideshowpro-director-ruby-wrapper.html">SlideShowPro Director Ruby API Wrapper</a></li>
     
   </ul>
 </div>
@@ -64,11 +77,10 @@ dp.SyntaxHighlighter.HighlightAll('code',false, false,false,1,false);
 <div id="footer">
 
     Keep in touch with family:<a href="http://www.spokt.com">spokt.com</a> ||
-    <a href="http://shotbydan.com">shot by dan photograpy</a> ||
-    <a href="http://communicatopia.com">personal blog</a> ||
-    <a href="http://twitter.com/danhixon">twitter</a>
+    <a href="ca.linkedin.com/pub/kyle-halladay/2b/658/a14/">Linkedin</a> ||
+    <a href="http://twitter.com/khalladay">twitter</a>
 
-<p>&copy; 2010 <a href="/about.html">Dan Hixon</a>
+<p>&copy; 2010 <a href="/about.html">Kyle Halladay</a>
 
 </div>
 
