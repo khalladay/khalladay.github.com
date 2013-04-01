@@ -110,7 +110,7 @@ h1 a:hover { color:#fba919 ;}
 #logo {
 	margin: -65px 10px -30px -50px;
 	float:right;
-	background: url('/images/gems-15.png');
+	background: url('/images/habanero.png');
 	height: 213px; width:204px;
 }
 
@@ -133,6 +133,7 @@ h1 a:hover { color:#fba919 ;}
 .purple{color: #7673d9;}
 .paleorange{color:#ff9500;}
 .lime{color:#87f03c;}
+
 
 a.pink:hover { border: solid 2px #f5a2c6;padding:1px; text-decoration:none;  }
 a.green:hover { color:#212121; background-color:#23af4c;text-decoration:none; }
