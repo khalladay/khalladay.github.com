@@ -1,0 +1,65 @@
+---
+layout: post
+title: Visuals Affect
+---
+
+h2. {{ page.title }}
+
+p(publish_date). 17 Apr 2008
+
+<p>Found <a href="http://www.toothpastefordinner.com/">these comics</a> the other day.  I didn't get or like most of them but this one is excellent:</p>
+
+<p><img src="http://communicatopia.s3.amazonaws.com/images/didnt-forget-sound-effects.gif" alt="power point" class="scoot" /></p>
+
+<p>I used to think Power Point was evil.  In a way I guess I still do.  I use Keynote instead of Power Point but they both make it way too easy to make a really bad presentation.  Text and bullet points are the path of least resistance and will be travelled most frequently.</p>
+
+<p>Whenever I create a presentation I enforce constraints on myself that make it challenging and hopefully less boring for my audiences.  One of them is: No bullet points allowed.  If you have a list of things to say don't write them on the slide and read them to me.  Give me something to look at while you <i>tell</i> me.  </p>
+
+<p>I ask "Is there any word on the slide that I cannot get rid of?"  It's my mouth's job to say the words - my mouth can't display pictures, charts, and diagrams.</p>
+
+<p>I also don't use clipart... Mostly because I detest it but it's nice to know that it isn't even part of Keynote.</p>
+
+<p>Ok, here are some examples.  I was present an implementation plan for three technologies:</p>
+
+<ul>
+<li>Cast Iron Integration Appliance</li>
+<li>Data Warehouse</li>
+<li>Ruby On Rails</li>
+</ul>
+
+<p>Instead of the bullet points like you see above here is the slide I created:
+<img alt="Cast Iron, DW, Rails" src="http://communicatopia.s3.amazonaws.com/images/castiron-dw-rails.png" class="scoot" /></p>
+
+<p>I was presenting a new architecture plan and got done explaining the problems with our current setup.  The next slide was to describe the consequences.  I could have used this bullet list:</p>
+
+<ul>
+<li>Frustrated users</li>
+<li>Upset managers</li>
+<li>Unhappy developers</li>
+</ul>
+
+<p>My slide:
+<img alt="Cast Iron, DW, Rails" src="http://communicatopia.s3.amazonaws.com/images/sadusersetc.png" class="scoot" /></p>
+
+<p>There were three kinds of reports that were going to be migrated to a new environment:</p>
+
+<ul>
+
+<li>All New Reports</li>
+<li>Problematic Reports</li>
+<li>Reports which need major enhancements</li>
+</ul>
+
+<p>My Slide:
+<img alt="What to move" src="http://communicatopia.s3.amazonaws.com/images/carslide.png" class="scoot" /></p>
+
+<p>I think adding visuals helps a lot.  They get attention, they create memories.  </p>
+
+<p>Sometimes you might have a list of abstract elements that can't be described pictorially.  I was trying to make a slide for the end of one of my presentations where we discussed a list of requests we have received that were potential candidates to do next in Ruby on Rails.  There were 11 projects to choose from and software that hasn't been written yet is very difficult to photograph.  Some projects seemed more likely than others.  Here is what I did:
+<img alt="Tag Cloud" src="http://communicatopia.s3.amazonaws.com/images/rails-candidates.png" class="scoot" /></p>
+
+<p>It's not a traditional bullet list - it's more like a tag cloud.  The more likely/important names are larger.</p>
+
+<p>Presentation software makes it easy for users to make very bad presentations but there are ways to defeat them.</p>
+		
+	

@@ -1,0 +1,36 @@
+---
+layout: post
+title: "Still Loving Shoulda (macros)"
+---
+
+h2. {{ page.title }}
+
+p(publish_date). 09 Mar 2009
+
+p. I've been using shoulda for one month and I am still loving it.  Today I created my first macro:
+
+<notextile><pre name="code" class="ruby">
+def self.should_display_error_message()
+  should "do display error message" do
+    assert_tag :tag=>"div", 
+		:attributes => {
+						:class => "errorExplanation", 
+						:id => "errorExplanation" 
+						}
+  end
+end
+</pre>
+</notextile>
+
+<notextile><pre name="code" class="ruby">context "post to :create with invalid parameters" do
+  setup do 
+    post :create, :segment => {:name=>"", :match_type=>" OR "}
+  end
+  should_not_change "Segment.count"
+  should_assign_to :segment
+  should_respond_with :success
+  should_render_a_form
+  should_render_with_layout 'application'
+  should_render_template :new
+  should_display_error_message
+end</pre></notextile>	

@@ -1,0 +1,61 @@
+---
+layout: post
+title: "Debugging in Cucumber"
+---
+
+<h2>{{ page.title }}</h2>
+
+<p class="publish_date">30 Mar 2010</p>
+
+<p>I never used the ruby debugger until today. It is pretty handy in cucumber.</p>
+
+<p>Step 1: in environments/cucumber.rb</p>
+<pre name="code" class="ruby">
+  config.gem "ruby-debug"
+</pre>
+<p>Step 2: Install Gem:</p>
+<pre name="code" class="terminal">
+  $ RAILS_ENV=cucumber sudo rake gems:install
+</pre>
+
+<p>Step 3: Add this step to one of your step files (<a href="http://technicalpickles.com/posts/debugging-cucumber/">see technical pickles for more information)</a>:</p>
+<pre name="code" class="ruby">
+  Then 'I debug' do
+    breakpoint
+    0
+  end
+</pre>
+<p> And then add that step wherever you want:</p>
+<pre name="code" class="ruby">
+  Scenario: A Provider should be able to post feedback
+    Given a contract exists
+    And I am on the list contracts page
+    Then I debug
+</pre>
+
+
+<p>Step 4: Run the step that is giving you grief:</p>
+<pre name="code" class="terminal">
+  $ cucumber features/providers.feature:133
+  Using the default profile...
+  ......[30, 39] in /Users/me/listz/features/step_definitions/contracts_steps.rb
+     30    @another_auction.save
+     31  end
+     32  
+     33  Then /^I debug$/ do
+     34    breakpoint
+  => 35    0
+     36  end
+  /Users/me/listz/features/step_definitions/contracts_steps.rb:35
+  0
+  (rdb:1) @provider.id
+  1243
+  (rdb:1) continue
+  .......
+
+  1 scenario (1 passed)
+  11 steps (11 passed)
+  0m3.521s
+</pre>
+
+<p>You have access to everything.  You might want to run a tail -f log/cucumber.log to watch your queries as well.</p>

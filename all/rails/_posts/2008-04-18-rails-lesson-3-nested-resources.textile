@@ -1,0 +1,139 @@
+---
+layout: post
+title: "Rails Lesson #3: Nested Resources"
+---
+
+h2. {{ page.title }}
+
+p(publish_date). 15 Apr 2008
+
+<p>In <a href="/2008/04/15/rails-lesson-2-the-console.html">Lesson #2</a> we established a relationship between our Recipe model and our Cookbook model. We used the rails console to wire up the recipe record so that it belonged to the cookbook record.  In this lesson we'll make changes to our UI that will allow us to add recipes to cookbooks.  First let's learn a little about controllers.</p>
+
+<h4>Controller Actions</h4>
+<p>Rails uses the URL to direct traffic.  All requests are directed to an action of a controller.  It's a good idea to follow RESTful conventions and give your controller a maximum of these 7 actions:
+</p>
+<ul>
+<li>index - used to list entities</li>
+<li>show - used to display a specific entity</li>
+<li>new - used to display form to create a new entity</li>
+<li>edit - used to display a form to edit a specific entity</li>
+<li>create - accessed to create a new entity (No UI)</li>
+<li>update - accessed to update an entity (No UI)</li>
+
+<li>destroy - accessed to delete an entity (No UI)</li>
+</ul>
+<p>Rails will direct a request to http://localhost:3000/cookbooks to the "index" action of the cookbooks controller.  If you look in the app/controllers/cookbooks_controller.rb file you'll see seven methods defined; one for each action.  The first one is index:</p>
+
+<pre name="code" class="ruby">
+  def index
+    @cookbooks = Cookbook.find(:all)
+
+    respond_to do |format|
+      format.html # index.html.erb
+      format.xml  { render :xml => @cookbooks }
+    end
+  end
+</pre>
+
+<p>The default behavior is to grab all the Cookbooks and then pass to the view for rendering.  In a later lesson we'll do more with that respond_to part - it basically lets us represent our entities with more than just HTML.  Visit <a href="http://localhost:3000/cookbooks.xml">http://localhost:3000/cookbooks.xml</a> you'll see an XML representation of the list of cookbooks instead of HTML.  Cool!</p>
+
+<p>When we are requesting HTML rails looks in the app/views/{controller_name}/{action_name}.html.erb or /app/views/cookbooks/index.html.erb  If you take a look at that file you'll see a heading, and code for generating an HTML table.  While we have it open, let's just capitalize the word "cookbooks" in the title.</p>
+
+<h4>Nested Resources</h4>
+<p>What we really want to do is add a list of recipes and a link to add more to this page: <a href="http://localhost:3000/cookbooks/1">http://localhost:3000/cookbooks/1</a>.  Rails directs that URL to the "show" action of the cookbooks controller.  The show action retrieves a specific cookbook from the database (id = 1 in our case) and passes control to the app/views/cookbooks/show.html.erb file.  Before we start editing that file we are going to establish a "route" relationship between them.  Open up your config/routes.rb file and add this line right above "map.resources :cookbooks"</p>
+
+<pre name="code" class="ruby">
+map.resources :cookbooks, :has_many => :recipes
+</pre>
+
+<p>Now we are ready to make changes to the app/views/cookbooks/show.html.erb file.  The code above tells rails that "recipes" are a nested resource for "cookbooks" - the urls will look like this: /cookbooks/{id}/recipes/{id}.  One nice thing is that we don't need to hand code our urls - rails can do it for us.  Change your show.html.erb file so it looks like the code below.</p>  
+<notextile>
+<pre name="code" class="xml">
+&lt;h2&gt;Cookbook: &lt;%=h @cookbook.title %&gt;&lt;/h2&gt;
+&lt;p&gt;
+  &lt;b&gt;Author:&lt;/b&gt;
+  &lt;%=h @cookbook.author %&gt;
+&lt;/p&gt;
+
+&lt;h3&gt;Recipes:&lt;/h3&gt;
+&lt;ul&gt;
+&lt;% @cookbook.recipes.each do |recipe| %&gt;
+	&lt;li&gt;&lt;%= link_to recipe.name, cookbook_recipe_path(@cookbook,recipe) %&gt;&lt;/li&gt;
+&lt;% end %&gt;
+&lt;/ul&gt;
+
+&lt;br /&gt;
+&lt;%= link_to &quot;Add new recipe&quot;, new_cookbook_recipe_path(@cookbook) %&gt;
+&lt;hr style=&quot;margin-top:25px;&quot;/&gt;
+
+&lt;%= link_to &#x27;Edit&#x27;, edit_cookbook_path(@cookbook) %&gt; |
+&lt;%= link_to &#x27;Back&#x27;, cookbooks_path %&gt;
+</pre></notextile>
+<p>We've changed the look slightly and added a list of recipes.  We are linking to the recipes using the "cookbook_recipe_path" method to create a new recipe using the "new_cookbook_recipe_path" method - these are provided to us because of the change we made to the routes.rb file.  When you click on the recipe name you'll be taken to this location: /cookbooks/1/recipes/1 and the "Add New" link takes you here: /cookbook/1/recipes/new.</p>
+<p>
+Now that the recipes are showing up at the correct URL we need to make a couple changes so that the new recipes get saved with the correct cookbook ID.  First we need to make two changes to the recipes controller.  At the top under the class definition add "before_filter :load_parent" and add the private "load_parent" method at the bottom:
+</p>
+
+<pre name="code" class="ruby">
+class RecipesController < ApplicationController
+  before_filter :load_parent
+
+   ... all other actions ...
+
+#all methods defined below "private" are not accessible as actions:
+private
+
+  def load_parent
+    @cookbook = Cookbook.find(params[:cookbook_id])
+  
+  end
+
+end # end of class
+</pre>
+
+<p>
+The before_filter method tells rails not to excecute any actions until after running the methods that are passed in as parameters.  That line says "before you do anything, run the 'load_parent' method first."  The load_parent method simply retrieves the appropriate category from the database.  The "params" hash is created by rails and contains all the parameters available.  Rails added the "cookbook_id" parameter by parsing the URL.  We don't have to deal with the details of passing that ID around - rails does the work for us.
+</p>
+
+<p>
+We also need to make a small change to the view (recipes/new.html.erb).  Change the "form_for" line to the following:
+</p>
+<pre name="code" class="ruby">
+&lt;% form_for([@cookbook,@recipe]) do |f| %&gt;
+</pre>
+<p>
+Before we are able to add new recipes to our cookbook we need to make a change to the "create" action of the recipes controller.  You'll need to code the association for the cookbook (@recipe.cookbook = @cookbook) and after saving instead of redirecting to the @recipe - you'll want to redirect as a nested route (redirect_to([@cookbook,@recipe]).
+</p>
+<pre name="code" class="ruby">
+  def create
+    @recipe = Recipe.new(params[:recipe])
+    @recipe.cookbook = @cookbook
+    
+    respond_to do |format|
+      if @recipe.save
+        flash[:notice] = 'Recipe was successfully created.'
+        format.html { redirect_to([@cookbook,@recipe]) }
+        format.xml  { render :xml => @recipe, :status => :created, :location => @recipe }
+      else
+        format.html { render :action => "new" }
+        format.xml  { render :xml => @recipe.errors, :status => :unprocessable_entity }
+      end
+    end
+  end
+</pre>
+<p>
+We should be all set to add recipes to our cookbook.  Navigate to <a href="http://localhost:3000/cookbooks/1/">http://localhost:3000/cookbooks/1/</a> then click on "Add new recipe" Fill out the form and click create.  VOILA!  You have a added a recipe your cookbook.  Don't try clicking the "Edit" and "Back" links: they won't work yet.  That's it for lesson #3.  In Lesson #4 we'll do some simple AJAX to remove recipes from our cookbooks.
+
+<h4>Misc. Cleanup</h4>
+There are a few issues with our code that don't really belong as part of the lesson.  First let's fix the "Edit" and "Back" links on the recipe's show.html.erb.  
+<ul>
+<li>Replace edit_recipe_path(@recipe) with edit_cookbook_recipe_path(@cookbook,@recipe)</li>
+<li>The back link should go to the cookbook_path(@cookbook) instead of recipes_path.</li>
+<li>Copy that back link to replace the back link in recipes/new.html.erb</li>
+<li>Make these same changes in recipes/edit.html.erb</li>
+<li>We need to change the form_for tag on the recipes/edit.html.erb like we did for the "new" view above: form_for([@cookbook,@recipe])</li>
+<li>In the update action of the recipes controller we need to redirect to the cookbook/recipe:         format.html { redirect_to([@cookbook,@recipe]) }</li>
+</ul>
+
+There!  Now you should be able to click around and add cookbooks and recipes without causing any server errors.
+</p>

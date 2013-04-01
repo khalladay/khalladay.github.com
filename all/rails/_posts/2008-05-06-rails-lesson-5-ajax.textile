@@ -1,0 +1,167 @@
+---
+layout: post
+title: "Rails Lesson #5: AJAX"
+---
+
+h2. {{ page.title }}
+
+p(publish_date). 6 May 2008
+
+<p>Today we want to change our application so we can add recipes to our cookbook right from the cookbooks/show page.  First we'll do it without AJAX (asynchronous javascript and XML) then we'll add it in.
+</p>
+
+<p>Let's copy the new recipe form from app/views/recipes/new.html.erb and paste it into app/views/cookbooks/show.html.erb so that it looks like the code below.  I also passed another parameter to the f.text_area methods (:rows=>5) because those text areas were just too tall.
+</p>
+<notextile>
+<pre name="code" class="html">
+<%= error_messages_for :recipe %>
+
+&lt;h2&gt;Cookbook: &lt;%=h @cookbook.title %&gt;&lt;/h2&gt;
+&lt;p&gt;
+  &lt;b&gt;Author:&lt;/b&gt;
+  &lt;%=h @cookbook.author %&gt;
+
+&lt;/p&gt;
+
+&lt;h3&gt;Recipes:&lt;/h3&gt;
+&lt;ul&gt;
+&lt;% @cookbook.recipes.each do |recipe| %&gt;
+	&lt;li&gt;&lt;%= link_to recipe.name, cookbook_recipe_path(@cookbook,recipe) %&gt;&lt;/li&gt;
+&lt;% end %&gt;
+
+&lt;/ul&gt;
+&lt;br /&gt;
+&lt;%= link_to &quot;Add new recipe&quot;, new_cookbook_recipe_path(@cookbook) %&gt;
+
+&lt;!-- =========== BEGIN Form for new recipes =============  --&gt;
+&lt;!-- =========== BEGIN Form for new recipes =============  --&gt;
+
+&lt;%= error_messages_for :recipe %&gt;
+
+&lt;% form_for([@cookbook,@recipe]) do |f| %&gt;
+  &lt;p&gt;
+    &lt;b&gt;Name&lt;/b&gt;&lt;br /&gt;
+    &lt;%= f.text_field :name %&gt;
+  &lt;/p&gt;
+
+  &lt;p&gt;
+    &lt;b&gt;Ingredients&lt;/b&gt;&lt;br /&gt;
+    &lt;%= f.text_area :ingredients,:rows=>5 %&gt;
+  &lt;/p&gt;
+
+  &lt;p&gt;
+    &lt;b&gt;Description&lt;/b&gt;&lt;br /&gt;
+    &lt;%= f.text_area :description,:rows=>5 %&gt;
+  &lt;/p&gt;
+
+  &lt;p&gt;
+
+    &lt;b&gt;Number of servings&lt;/b&gt;&lt;br /&gt;
+    &lt;%= f.text_field :number_of_servings %&gt;
+  &lt;/p&gt;
+
+  &lt;p&gt;
+    &lt;%= f.submit &quot;Create&quot; %&gt;
+
+  &lt;/p&gt;
+&lt;% end %&gt;
+&lt;!-- =============== END Form for new recipes ==================  --&gt;
+&lt;!-- =============== END Form for new recipes ==================  --&gt;
+
+&lt;hr style=&quot;margin-top:25px;&quot;/&gt;
+
+&lt;%= link_to &#x27;Edit&#x27;, edit_cookbook_path(@cookbook) %&gt; |
+
+&lt;%= link_to &#x27;List&#x27;, cookbooks_path %&gt;
+
+<% end %>
+</pre>
+</notextile>
+<p>Notice the form_for passes an array containing @cookbook and a @recipe.  We need to instanciate @recipe.  That code belongs in the cookbooks controller:</p>
+<pre name="code" class="ruby">
+
+  def show
+    @cookbook = Cookbook.find(params[:id])
+    #instanciate @recipe for the form
+    @recipe = Recipe.new
+    
+    respond_to do |format|
+      format.html # show.html.erb
+      format.xml  { render :xml => @cookbook }
+    end
+  end
+
+</pre>
+
+<p>At this point you can go ahead and use the form to add a recipe to your cookbook.  After you create the recipe it takes you to the recipe's show action.  Let's change that to redirect us back to the cookbook page.  This code is in the create action of the recipe's controller.  Change the redirect to redirect_to([@cookbook,@recipe]) to redirect_to(@cookbook).</p>
+
+<pre name="code" class="ruby">
+       format.html { redirect_to(@cookbook) }
+</pre>
+<p>Now it basically behaves how we will want. We just need to sprinkle some Ajax magic.  Rails makes it pretty easy to do.  We'll just include some javascript libraries, change our form tag and then code in Ruby how we want our output.</p>
+
+<p>Add this line to your views/layouts/application.html.erb right under the style sheet tag:</p>
+<notextile>
+<pre name="code" class="ruby">
+	&lt;%= javascript_include_tag :defaults %&gt;
+</pre>
+</notextile>
+<p>Now to make a form submit asynchronous we call the form_remote_for method instead of the form_for.  So change views/cookbooks/show.html.erb:</p>
+<notextile>
+<pre name="code" class="html">
+&lt;!-- ============== BEGIN Form for new recipes ================  --&gt;
+
+&lt;%= error_messages_for :recipe %&gt;
+
+&lt;% form_remote_for([@cookbook,@recipe]) do |f| %&gt;
+
+  ...
+</pre></notextile>
+
+<p>If we were to fill out the form and click submit at this point it would look as though nothing happened but it would actually send a request to the server to the recipes controller's create method and create a record in the database.  That was easy, right?  Now all we have to do is send an XML response back to the client.</p>
+
+<p>Remember that “respond_to do |format|” block we saw a few lessons ago?  We can represent our models as xml  as well as html.  This time we need to respond to a javascript request.  Add “format.js {}” to your create action so that it looks like the following:</p>
+<pre name="code" class="ruby">
+respond_to do |format|
+      if @recipe.save
+        flash[:notice] = 'Recipe was successfully created.'
+        format.html { redirect_to(@cookbook) }
+        format.js   #this will use views/recipes/create.rjs
+        format.xml  { render :xml => @recipe, :status => :created, :location => @recipe }
+      else
+        format.html { render :action => "new" }
+        format.xml  { render :xml => @recipe.errors, :status => :unprocessable_entity }
+      end
+</pre>
+
+<p>As you can see from the comment when rails sees the format.js it will look for an rjs file named views/model/action.rjs.  RJS stands for Rails JavaScript (might be "Ruby" or "Remote").  In this case it will be views/recipes/create.rjs.  Go ahead and create an empty create.rjs file.</p>
+
+<p>We want the web page to do the following once we click submit:</p>
+<ol>
+	<li>Add the recipe to the list</li>
+	<li>Clear the form</li>
+
+	<li>Erase the flash message</li>
+</ol>
+<p>The RJS file will contain ruby code that will be translated into JavaScript by Rails.  In order for us to add dynamic content like an item to the list we need to give the containing HTML element an id. The ul tag in this case (cookbooks/show.html.erb):</p>
+<notextile>
+<pre name="code" class="html">
+&lt;ul id=&quot;recipe_list&quot;&gt;
+&lt;% @cookbook.recipes.each do |recipe| %&gt;
+	&lt;li&gt;&lt;%= link_to recipe.name, cookbook_recipe_path(@cookbook,recipe) %&gt;&lt;/li&gt;
+
+&lt;% end %&gt;
+&lt;/ul&gt;
+</pre>
+</notextile>
+<p>Now for the rjs file.  We'll clean this up a little bit in the next lesson but here is the contents of the create.rjs file which will take care of items 1-3 above in that order:</p>
+
+<pre name="code" class="ruby">
+page.insert_html :bottom, "recipe_list",'&lt;li&gt;' + link_to(@recipe.name,cookbook_recipe_path(@cookbook,@recipe)) + '&lt;/li&gt;'
+page["new_recipe"].reset
+flash.discard
+
+</pre>
+
+<p>First we use the insert_html method to add a list item to the "bottom" of the "recipe_list".  Then we reset the "new_recipe" form and then call flash.discard to erase the flash message.  Next time we'll get rid of that unsightly HTML in the create.rjs file by putting the list item into a partial as well as make it possible to delete recipes from cookbooks.</p>
+		

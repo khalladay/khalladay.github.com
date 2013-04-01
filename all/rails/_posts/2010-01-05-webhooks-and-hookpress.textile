@@ -1,0 +1,46 @@
+---
+layout: post
+title: "Webhooks and Hookpress"
+---
+
+h2. {{ page.title }}
+
+p(publish_date). 05 Jan 2010
+
+
+bq. Webhooks: so simple you'll think they're stupid.
+<span class="attributed">-- Jeff Lindsay</span>
+
+p. A couple weeks ago we launched blog.spokt.com and we wanted to have links to recent blog posts in the footer at spokt.com (hosted on different servers):
+
+!/images/posts-in-footer.png(recent blog posts listed in spokt.com footer)!
+
+p. To accomplish this I created a url at spokt which when accessed would download the blog's rss feed, parse it, and store it for later listing.  I then used my nearly-zero wordpress & php experience to create plugin that just curl'd the url.  Here's the plugin code:
+
+<pre name="code" class="php">
+	<?php
+
+	function notify_spokt() {
+		$ch = curl_init('http://spokt.com/blog_update');
+		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
+		curl_setopt( $ch, CURLOPT_HEADER, 0 );
+		$page = curl_exec($ch);
+		curl_close($ch);
+	}
+
+	add_filter('publish_post','notify_spokt');
+
+	?>
+</pre>
+
+
+p. I thought that this kind of functionality might be useful and considered investigating how to make the url configurable.
+
+p. Yesterday I learned about "webhooks":http://www.webhooks.org/ and thought about how I might go about creating a wordpress plugin using the "hooks" already built in and exposing them as webhooks. I figured someone probably already had and sure enough: the "hookpress plugin":http://wordpress.org/extend/plugins/hookpress/ by Michael 芳貴 Erlewine
+
+p. Once installed Click "Settings" in the wp admin then the "Webhooks" link. That will bring up an easy-to-use admin interface. Click "Add webhook" then choose your action, any fields you want to pass, and enter the url.
+
+p. See Also: "Useful hookpress screencast by Michael 芳貴 Erlewine":http://mitcho.com/code/hookpress/
+
+!/images/hookpress-screenshot.png(easy to use admin interface)!
+

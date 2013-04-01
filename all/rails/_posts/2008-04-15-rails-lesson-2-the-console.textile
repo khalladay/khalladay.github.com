@@ -1,0 +1,94 @@
+---
+layout: post
+title: "Rails Lesson #2: The Console"
+---
+
+h2. {{ page.title }}
+
+p(publish_date). 14 Apr 2008
+
+<notextile>
+<p>In <a href="/2008/04/14/yet-another-rails-tutorial.html">Lesson #1</a> We had a cookbook and a recipe but they weren't related to each other.  First we'll add a key to the recipes table then we'll use the console to relate the entities.</p>
+
+<p>When creating new objects we use the script/generate scaffold command.  Here we only want to change the existing recipes table so we generate a migration:</p>
+<pre class="terminal">
+$ script/generate migration add_cookbook_id_to_recipes
+</pre>
+<p>
+This will create a file in the db/migrate folder called 003_add_cookbook_id_to_recipes.rb
+</p>
+<p>
+Open this file using your editor of choice and add the add_column and remove_column lines so that your file looks like the code below:
+</p>
+<pre name="code" class="ruby">
+class AddCookBookIdToRecipes < ActiveRecord::Migration
+  def self.up
+    add_column :recipes, :cookbook_id, :integer
+  end
+
+  def self.down
+    remove_column :recipes, :cookbook_id
+  end
+end
+</pre>
+
+Now rake the migration:
+<pre class="terminal">$ rake db:migrate</pre>
+
+Now that we have a foreign key in the table we need to tell the CookBook model that it has many Recipes and the Recipe model that it belongs to a CookBook.  So we open the model files in the app/model directory and add the lines shown below.
+
+<pre name="code" class="ruby">
+class Cookbook < ActiveRecord::Base
+  has_many :recipes
+end
+</pre>
+
+<pre name="code" class="ruby">
+class Recipe < ActiveRecord::Base
+  belongs_to :cookbook 
+end
+</pre>
+
+Now the models are all wired up and ready for action.  Let's start by associating the recipe record we created with the cookbook record.  We could access the database and populate the field but it's a lot more fun to use the rails console.  Go back to your terminal window and type:
+
+
+<pre class="terminal">
+$ ruby script/console
+Loading development environment (Rails 2.0.2)
+>> []
+</pre>
+
+What is now staring you in the face is called the rails console which is a special version of the IRB (Interactive Ruby Prompt.)  This prompt will accept any valid ruby code.  Go ahead and write a hello world command:
+<notextile>
+<pre class="terminal">Loading development environment (Rails 2.0.2)
+>> puts "hello world"
+hello world
+=> nil
+>> []</pre>
+</notextile>
+Try typing these commands just for fun:
+
+<pre class="terminal">
+>> 50.times { |n| puts "ruby is #{n} times better!" }
+>> 6+49
+>> 5*5
+</pre>
+
+The IRB is cool but what is special about the rails console is that it loads all your code and makes your models (and everything else) accessible for you to play with.  So let's take a look at what is in the database.
+
+<pre class="terminal">
+>> CookBook.find(:all)
+=> [ an array containing any cookbooks you've created ]
+>> Recipe.find(:all)
+=> [ an array containing any recipes you've created ]
+</pre>
+
+Assuming you only have one cookbook and one recipe we can use the following commands to retrieve the recipe from the database and store it in the variable r, then fetch the cookbook into variable c, and finally tell r that it belongs to c:
+<notextile>
+<pre class="terminal">>> r = Recipe.find(1)
+>> c = CookBook.find(1)
+>> r.cookbook = c
+>> r.save</pre></notextile>
+
+The console is a very cool tool for quickly manually testing things or nudging data this way or that.
+</notextile>

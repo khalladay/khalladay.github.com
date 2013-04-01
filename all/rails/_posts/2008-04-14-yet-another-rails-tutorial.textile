@@ -1,0 +1,62 @@
+---
+layout: post
+title: YART
+---
+
+h2. {{ page.title }}
+
+p(publish_date). 15 Apr 2008
+
+<p>Yet another rails tutorial.  There are tons of these but I felt like making my own.  My rails version at time of writing is 2.0.2.  In this tutorial series we'll be creating a basic cookbook website.  The objective is to give the reader an introduction to software development in Ruby on Rails.
+
+For windows be sure to change all slashes / to backslashes \.
+</p>
+
+<p>First we start by creating the project:
+</p>
+
+<pre class="terminal">
+$ rails cookbook
+ ...
+ ... bunch of files generated ...
+ ...
+$  cd cookbook
+
+</pre>
+
+<p>Let's create the scaffold for the Cookbooks.  A "scaffold" is the bare bones you need for functionality.  A model, a migration script, a controller, 4 views and a layout.  It also creates tests and fixtures.</p>
+
+<pre class="terminal">
+$ ruby script/generate scaffold Cookbook title:string author:string
+</pre>
+
+<p>This command will use the migration script generated above and create the database table "cookbooks" - Table names are plural.</p>
+
+<pre class="terminal">
+$ rake db:migrate
+</pre>
+
+<p>Open new terminal window and navigate to cookbook directory and start the server: </p>
+
+<pre class ="terminal">
+$ ruby script/server
+</pre>
+
+<p>Point Browser to <a href="http://localhost:3000/cookbooks">http://localhost:3000/cookbooks</a>. You should see an empty list of all cookbooks.  Create a new cookbook by clicking the <a href="http://localhost:3000/cookbooks/new">New Cookbook</a> link.</p>
+
+<p>Okay, now let's create the scaffold for the Recipes and migrate the database:</p>
+
+<pre class="terminal">
+
+$ ruby script/generate scaffold Recipe name:string ingredients:text description:text number_of_servings:integer
+</pre>
+
+<p>Now update the database:</p>
+
+<pre class="terminal">
+$ rake db:migrate
+</pre>
+
+<p>Point Browser to <a href="http://localhost:3000/recipes">http://localhost:3000/recipes</a> and create a new recipe.</p>
+
+<p>Great!  Now we have a functional Cookbook and Recipe model.  But now we realize that we need to make recipes belong to cookbooks.  We'll do that in <a href="/2008/04/15/rails-lesson-2-the-console.html">Rails Lesson #2.</a>

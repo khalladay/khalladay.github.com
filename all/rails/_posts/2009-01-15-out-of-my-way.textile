@@ -1,0 +1,17 @@
+---
+layout: post
+title: "Out of My WAY!"
+---
+
+h2. {{ page.title }}
+
+p(publish_date). 15 Jan 2009
+
+p. I was just talking with a coworker today telling her about how archaic design patterns seem after working in Ruby On Rails - how you don't need to solve "coding" problems, you just write code to solve your business problem... it gets out of your way so you can do your work.
+
+
+p. How did I plan to spend my evening? in c# solving business problems.
+
+p. How did I spend my evening? pulling out my hair trying to solve code problems.
+
+2AM with nothing but half finished methods to show for it.  How much more will I take before porting spokt to Rails?

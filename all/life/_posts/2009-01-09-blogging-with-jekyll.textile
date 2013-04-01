@@ -1,0 +1,30 @@
+---
+layout: post
+title: "Blogging with Jekyll"
+---
+
+h2. {{ page.title }}
+
+p(publish_date). 09 Jan 2009
+
+The facts were these:
+<ul>
+
+<li>93 days, 4 hours, 11 minutes and 12 seconds ago young Dan started blogging on slicehost with mephisto. His readers didn't like tech posts and he didn't like paying $20/month.</li>
+
+<li>Several months later Dan decided to try heroku which is super cool but when he tried to publish new posts they never were displayed. He could see them in the admin interface but unfortunatly readers could not: <a href="http://ctopia.heroku.com">ctopia.heroku.com</a></li>
+
+<li>Meanwhile 769 miles, 356 yards, 2 feet, 8 inches north by north-east Dan's friend Ron offered to host a wordpress blog for Dan. Dan greatly appreciated this offer and began to blog but chose not to blog about technology. Dan</li>
+
+<li>Exactly 9 days ago Dan read about Jekyll and this very morning decided to try github's static site hosting.  So far he likes it very much.</li>
+</ul>
+
+If you decide to try Jekyll don't skip the readme like I did.  There is a really cool feature "auto mode" which watches for any changed files then reprocesses them locally.  This lets you to make changes and preview them locally without having to commit and push.
+<pre name="code" class="terminal">
+unibody $ jekyll ../4xflavor --auto
+Auto-regenerating enabled: . -> ../dancodes
+[2009-01-09 11:06:54] regeneration: 16 files changed
+[2009-01-09 11:10:12] regeneration: 1 files changed
+[2009-01-09 11:10:43] regeneration: 1 files changed
+[2009-01-09 11:10:57] regeneration: 1 files changed
+</pre>

@@ -1,0 +1,22 @@
+---
+layout: post
+title: "Comments in Jekyll with Disqus"
+---
+
+h2. {{ page.title }}
+
+p(publish_date). 27 Apr 2009
+
+p. I added the ability to comment with this code from disqus:
+
+
+<pre name="code" class="html">
+<div id="disqus">
+    <div id="disqus_thread"></div>
+	<script type="text/javascript" src="http://disqus.com/forums/dantech/embed.js"></script>
+	<noscript>
+		<a href="http://dantech.disqus.com/?url=ref">View the discussion thread.</a>
+	</noscript>
+	<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+</pre>

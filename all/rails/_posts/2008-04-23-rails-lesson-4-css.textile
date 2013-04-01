@@ -1,0 +1,78 @@
+---
+layout: post
+title: "Rails Lesson #4: CSS"
+---
+
+h2. {{ page.title }}
+
+p(publish_date). 22 Apr 2008
+
+<p>We aren't going to learn much Ruby On Rails here but we will prettify our cookbook application using CSS.  Cascading Style Sheets are very powerful and flexible.</p>
+
+<p>To see the power and flexibility of CSS visit: <a href="http://www.csszengarden.com/">CSS Zen Garden</a>.  The special thing about the CSS Zen Garden is that you can change the style sheets and the look and feel of the site completely changes but the underlying HTML is exactly the same.  The images are brought in with the style sheet and if you view the HTML source you'll notice there are no TABLE tags so the layout is controlled completely by the CSS.</p>
+
+<p>The first step to making our application look a little better is changing the layout.  By default Rails looks in the app/views/layouts/ directory for a layout file that has the same name as the current controller (cookbooks_controller would look for the cookbooks layout).  If it doesn't find one it looks for one for the entire application called application.html.erb.  We want our entire application to look the same so we'll delete "app/views/layouts/recipes.html.erb" and rename "cookbooks.html.erb"  to "application.html.erb".  Open up application.html.erb and change the title:</p>
+<notextile>
+<pre name="code" class="html">
+&lt;title&gt;Cookbooks&lt;/title&gt;
+</pre>
+</notextile>
+<p>And replace the body with the following:</p>
+<notextile>
+<pre name="code" class="html">
+&lt;body&gt;
+&lt;div class=&quot;main&quot;&gt;
+    &lt;% if flash[:notice] %&gt;
+            &lt;p class=&quot;flash&quot;&gt;&lt;%= flash[:notice] %&gt;&lt;/p&gt;
+    &lt;% end %&gt;
+
+    &lt;%= yield  %&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+</pre>
+</notextile>
+<p>If you refresh your page now it won't look much different.  We need to change the css file.  It is located here: public/stylesheets/scaffold.css.  If we were building a real application we would probably create a new style sheet and get rid of scaffold.css but for our purposes we can simply change scaffold.css.</p>
+
+<p>replace:</p>
+
+<pre name="code" class="css">
+
+body { background-color: #4b7399; color: #222; }
+</pre>
+
+<p>add these definitions:</p>
+
+<pre name="code" class="css">
+.flash
+{
+    padding:5px;
+    border: dashed 2px #006600;
+    background-color: #99FF99;
+}
+.main {
+    padding: 12px 12px 12px 20px;
+    border: solid 2px #000;
+    background-color: #fff;
+    width: 700px;
+    margin: 20px auto;
+}
+</pre>
+
+<p>Now when you reload your page you should see something that looks something like this:
+<img src="http://communicatopia.s3.amazonaws.com/images/rails-css.png" alt="after style" /></p>
+
+<p>Feel free to play around with it.  Change the ".main" width or the "body" <a href="http://www.w3schools.com/html/html_colors.asp">"background-color"</a>.</p>
+
+<p>Some general guidelines that have helped me with CSS and HTML:</p>
+
+<ul>
+<li>HTML should say what it is not what it looks like.</li>
+<li>Use existing tags if they exist (e.g. h1 for headings, ul for list, em for emphasis)</li>
+<li>Avoid tables - but ok for tabular data.</li>
+<li>use div tags instead of span tags.  I don't really know why.</li>
+</ul>
+
+<p>More reading: <a href="http://www.webdesignfromscratch.com/css-block-and-inline.cfm"> block elements vs. inline elements</a>.</p>
+
+<p>CSS is cool! </p>
+</notextile>

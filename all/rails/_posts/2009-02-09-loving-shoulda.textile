@@ -1,0 +1,15 @@
+---
+layout: post
+title: "Loving Shoulda"
+---
+
+h2. {{ page.title }}
+
+p(publish_date). 09 Feb 2009
+
+p. 2 hours with shoulda and I really like it.  I've never been able to figure out how to do 1 assertion per test.  I didn't really mind (why not check it all?), so far so good with shoulda:
+
+<notextile><pre class="terminal">
+48 tests, 48 assertions, 0 failures, 0 errors
+</pre>
+</notextile>

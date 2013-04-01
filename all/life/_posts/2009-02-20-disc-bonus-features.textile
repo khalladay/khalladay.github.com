@@ -1,0 +1,16 @@
+---
+layout: post
+title: "Please Stop With the Crappy Bonus Features"
+---
+
+h2. {{ page.title }}
+
+p(publish_date). 20 Feb 2009
+
+p. Dear Movie Makers,
+
+p. We don’t want to read a bunch of information, bios, histories, and stories on our movies.  We want to watch the movie and see a blooper reel.  Reading on a television screen is the ocular equivalent to fingernails on a chalkboard.
+
+p. Sincerely,
+
+p. The Public

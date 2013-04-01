@@ -1,0 +1,28 @@
+---
+layout: post
+title: "Building dm-core from source"
+---
+
+h2. {{ page.title }}
+
+p(publish_date). 13 Jan 2009
+
+p. In the current gem version of dm-types 0.9.9 the YAML uses primitive "String" with a size of 65535.  This is an issue when using mySQL and utf-8.  The issue was fixed by Tony Mann ("here":http://github.com/sam/dm-more/commit/d2925e66ad76db4231f2f79fd465aec75680bc3d).
+
+p. So until this 0.9.10 version is released my deployments will need to build dm-types from source.  dm-types 0.9.10 requires dm-core 0.9.10 so that needs to be built from source as well.
+
+p. Here is how to install from the latest source on github:
+
+<pre class="terminal">
+~/ $ gem install rspec bcrypt-ruby json hoe --no-rdoc --no-ri
+~/ $ mkdir sources
+~/ $ cd sources
+~/sources $ git clone git://github.com/sam/dm-core.git
+~/sources $ git clone git://github.com/sam/dm-more.git
+~/sources $ cd dm-core
+~/sources/dm-core $ rake package && rake install
+~/sources/dm-core $ cd ../dm-more/dm-types
+~/sources/dm-core/dm-types $ rake package && rake install
+</pre>
+
+p. I tried freezing the gems into my rails app a few weeks ago but I didn't have good success.

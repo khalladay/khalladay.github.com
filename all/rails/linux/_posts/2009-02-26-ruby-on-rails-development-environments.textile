@@ -1,0 +1,12 @@
+---
+layout: post
+title: "Comparing Rails Development Environments"
+---
+
+h2. {{ page.title }}
+
+p(publish_date). 26 Feb 2009
+
+p. I was going through some old slides and I found this gem.
+
+!/images/rails-environments.png(Comparison of Rails development environments)!

@@ -1,0 +1,23 @@
+---
+layout: post
+title: "Find large files on your linux server"
+---
+
+<h2>{{ page.title }}</h2>
+
+<p class="publish_date">10 Apr 2010</p>
+
+<p>If you want to know which directories are using up your disk space try this command:</p>
+<pre>
+  $ cd /
+  $ du -s -m *
+  6	bin
+  5	sbin
+  1	srv
+  5	tmp
+  461	usr
+  3407	var
+</pre>
+
+<p>It will list the number of megabytes reside in each directory (including all sub-directories recursively). You can run the command from anywhere. Thanks to: <a href="http://www.howtogeek.com/howto/ubuntu/check-your-disk-usage-on-ubuntu-from-the-command-line/">howtogeek.com</a>
+</p>

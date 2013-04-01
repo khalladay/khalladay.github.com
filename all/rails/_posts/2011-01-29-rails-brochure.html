@@ -1,0 +1,36 @@
+---
+layout: post
+title: "Rails Brochure: Static Pages Gem"
+---
+
+<h2>{{ page.title }}</h2>
+
+<p class="publish_date">29 Jan 2011</p>
+
+<p>I just extracted a pattern I have been repeating in all of my recent rails applications. The gem is called <a href="http://github.com/danhixon/rails-brochure">Rails Brochure</a> and it's a Rails engine for brochure pages. Similar to High Voltage but with named routes.
+</p>
+<p>
+  Brochure pages are the semi-static pages like "home", "about us", "FAQ", "pricing", "contact us", etc.
+</p>
+<p>
+  Once installed all you need to do is create template files in your app/views/home folder and it adds named routes to those views.
+</p>
+<h3>For Example</h3>
+<pre>
+file path                          accessible at     named route
+views/home/about.html.erb          /about            about_url
+views/home/faq.html.haml           /faq              faq_url
+views/home/about/company.html.erb  /about/company    about_company_url
+</pre>
+<p>
+  Most of the designers I have worked with really appreciate the power and convenience this provides. They are used to creating HTML or PHP files and having the URLs just work.  This lets them do this with .erb files.  No futzing with routes, controllers etc.
+</p>
+<p>
+  On an unrelated note I've been building a lot of sinatra apps lately. To get the functionality of the rails-brochure gem in sinatra all you need is:
+</p>
+<pre>
+# put this at the bottom of your app to make it lowest-priority catch-all route
+get '/*' do
+  erb params["splat"].to_s.to_sym
+end
+</pre>

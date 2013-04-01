@@ -1,0 +1,108 @@
+---
+layout: post
+title: "Rails Lesson #6: More AJAX"
+---
+
+h2. {{ page.title }}
+
+p(publish_date). 13 May 2008
+
+<p>In this lesson we'll see how partials work and we'll add a few more ajax niceties.</p>
+
+<p>Partials are just .html.erb files that are useful for reusing “view” (as in Model-View-Controller) elements.  They are easy to make and use - just add a ".html.erb" file to your view directory that starts with an underscore then call the render_partial method.  Let's make one for our recipe list items.</p>
+
+<p>Create a new file "_recipe_list_item.html.erb" in the "app/views/recipes" folder.  This is the contents of the new file:</p>
+<notextile>
+<pre name="code" class="html">
+&lt;% recipe = recipe_list_item[:recipe] %&gt;
+
+&lt;li id=&quot;recipe_&lt;%= recipe.id %&gt;&quot;&gt;
+    &lt;%= link_to(recipe.name, cookbook_recipe_path(@cookbook,recipe))  %&gt;
+
+&lt;/li&gt;
+</pre>
+</notextile>
+<p>This grabs a recipe out of the rails-built hash and then renders a list item with a link to the recipe.  Now we need to change our app/views/cookbooks/show.html.erb to use this partial.</p>
+
+<p>Change this:</p>
+<notextile>
+<pre name="code" class="html">
+&lt;ul id=&quot;recipe_list&quot;&gt;
+&lt;% @cookbook.recipes.each do |recipe| %&gt;
+    &lt;li&gt;
+
+        &lt;%= link_to recipe.name, cookbook_recipe_path(@cookbook,recipe) %&gt;
+    &lt;/li&gt;
+&lt;% end %&gt;
+&lt;/ul&gt;
+</pre>
+</notextile>
+<p>To this:</p>
+<notextile>
+<pre name="code" class="html">
+&lt;ul id=&quot;recipe_list&quot;&gt;
+
+&lt;% @cookbook.recipes.each do |recipe| %&gt;
+    &lt;%= render_partial &quot;/recipes/recipe_list_item&quot;,:recipe =&gt; recipe %&gt;
+&lt;% end %&gt;
+&lt;/ul&gt;
+</pre>
+</notextile>
+<p>Go ahead and bring up a cookbook in your browser to ensure that nothing looks different.  Now we need to change the create.rjs file that we made in the previous lesson to use this partial.  In the last lesson I referred to the HTML in this file as "unsightly" because HTML doesn't belong in an rjs file.  I suppose there may be reasons for putting HTML in there but avoid it.</p>
+
+<p>So, go ahead and replace this:</p>
+
+<pre name="code" class="ruby">
+page.insert_html :bottom, "recipe_list",'<li>' + link_to(@recipe.name, cookbook_recipe_path(@cookbook,@recipe)) + '</li>'
+</pre>
+
+<p>with this that calls render_partial instead:</p>
+
+<pre name="code" class="ruby">
+page.insert_html :bottom, "recipe_list",:partial=>'recipe_list_item',:object=>{:recipe=>@recipe}
+</pre>
+
+<p>While you have it open go ahead and add this line in there:</p>
+
+<pre name="code" class="ruby">
+page["recipe_" + @recipe.id.to_s].highlight
+</pre>
+
+<p>Okay - now go ahead and reload your cookbooks page, then add a recipe.  It works the same (only better because it highlights the new recipe after you add it!)</p>
+
+<p>The only thing left to do now is make it so we can delete the recipes from our list– you probably added a bunch of terrible recipes to your cookbook.  I know I did: "Strawberry Hashmelt", "Boiled Beets", "flashy flashy", and of course: "sammy davis jr."  Nobody is going to want these recipes so we need a way to delete them.</p>
+
+<p>Open up the recipe<em>list</em>item partial and add a "remote" delete link:</p>
+<notextile>
+<pre name="code" class="html">
+&lt;% recipe = recipe_list_item[:recipe] %&gt;
+
+&lt;li id=&quot;recipe_&lt;%= recipe.id %&gt;&quot;&gt;
+    &lt;%= link_to(recipe.name, cookbook_recipe_path(@cookbook,recipe))  %&gt;
+    &lt;%= link_to_remote &quot;delete&quot;, 
+            :url =&gt; cookbook_recipe_path(@cookbook,recipe), 
+            :confirm =&gt; &#x27;Are you sure?&#x27;, 
+            :method =&gt; :delete %&gt;
+
+&lt;/li&gt;
+</pre>
+</notextile>
+<p>Because we are using a partial for the main display as well as the AJAX adds we didn't have to add that code twice: hooray!</p>
+
+<p>The link<em>to_remote tag will send a javascript request to the server.  When the server receives a request via javascript we want to respond to it correctly.  Open up your recipes controller and add a js format to the respond</em>to block of the destroy action.  Now just like we did for the create action we need to create an rjs file to define the behavior.  The app/views/recipes/destroy.rjs file is very simple:</p>
+
+<pre name="code" class="ruby">
+page["recipe_" + params[:id]].hide
+flash.discard
+</pre>
+
+<p>Go ahead and delete some of your lesser recipes.</p>
+
+<h2>On your own</h2>
+
+<p>Below are some tasks you should try to do on your own.  I'll include my code for these next lesson when we get introduced to validations in rails.</p>
+
+<ul>
+<li>Wrap the delete link in a div or span in order to make some space between the recipe name and the word delete.</li>
+<li>Add an "edit" link to the list for quickly arriving to the edit screen.  You should use a "cookbook_recipe_path" method.</li>
+</ul>

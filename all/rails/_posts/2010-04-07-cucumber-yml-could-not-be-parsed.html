@@ -1,0 +1,25 @@
+---
+layout: post
+title: "Cucumber.yml was found, but could not be parsed."
+---
+
+<h2>{{ page.title }}</h2>
+
+<p class="publish_date">07 Apr 2010</p>
+
+<p>Cucumber suddenly stopped working today with this error message:</p>
+<pre>
+  cucumber.yml was found, but could not be parsed. 
+  Please refer to cucumber's documentation on correct profile usage. 
+</pre>
+<p>I hadn't changed that file and I couldn't understand what could have caused it to stop working. To troubleshoot I tried parsing the file manually:</p>
+<pre name="code" class="terminal">
+  $ script/console
+  >> e = ERB.new(File.read('config/cucumber.yml'))
+  >> pp e.result
+  "\ndefault: --format pretty features/search.feature:14\nted/features/search.feature:16\n --format rerun --out rerun.txt --strict --tags ~@wip\nwip: --tags @wip:3 --wip features\n"
+</pre>
+<p>See that extra stuff? That is in the rerun.txt - so I removed it and now I'm back in business.</p>
+<pre name="code" class="terminal">
+  $ rm rerun.txt
+</pre>

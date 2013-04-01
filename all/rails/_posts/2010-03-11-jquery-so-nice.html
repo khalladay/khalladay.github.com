@@ -1,0 +1,78 @@
+---
+layout: post
+title: "JQuery: So Nice - Hint Text for Inputs"
+---
+
+<h2>{{ page.title }}</h2>
+
+<p class="publish_date">11 Mar 2010</p>
+
+<p>I ported this code to jquery.</p>
+
+<p>Before: </p>
+<pre name="code" class="javascript">
+// Script written by Drew Noakes -- http://drewnoakes.com
+// 14 Dec 2006
+
+var HintClass = "hintTextbox";
+var HintClass2 = " searchBox";
+var HintActiveClass = "hintTextboxActive";
+
+// define a custom method on the string class to trim leading and training spaces
+String.prototype.trim = function() { return this.replace(/^\s+|\s+$/g, ''); };
+
+function initHintTextboxes() {
+  var inputs = document.getElementsByTagName('input');
+  for (i=0; i&lt;inputs.length; i++) {
+    var input = inputs[i];
+    if (input.type!="text")
+      continue;
+
+    if (input.className.indexOf(HintClass)!=-1) {
+      input.hintText = input.value;
+      input.className = HintClass + HintClass2;
+      input.onfocus = onHintTextboxFocus;
+      input.onblur = onHintTextboxBlur;
+    }
+  }
+}
+
+function onHintTextboxFocus() {
+  var input = this;
+  if (input.value.trim()==input.hintText) {
+    input.value = "";
+    input.className = HintActiveClass + HintClass2;
+  }
+}
+
+function onHintTextboxBlur() {
+  var input = this;
+  if (input.value.trim().length==0) {
+    input.value = input.hintText;
+    input.className = HintClass + HintClass2;
+  }
+}
+
+window.onload = initHintTextboxes;
+</pre>
+
+<p>After:</p>
+<pre name="code" class="javascript">
+// Hint Text ported to JS by Dan Hixon
+// 11 Mar 2010 - just give an input a value and a class of "hinter"
+$(document).ready(function(){
+	$('.hinter')
+		.each(function(){
+			$(this).attr("hintText",$(this).val());
+		})
+		.focus(function(){
+			if($(this).val()==$(this).attr("hintText"))
+				$(this).val('');
+		})
+		.blur(function(){
+		  if($(this).val()=="")
+			  $(this).val($(this).attr("hintText"));
+		});
+
+});
+</pre>

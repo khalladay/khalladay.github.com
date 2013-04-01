@@ -1,0 +1,92 @@
+---
+layout: no-code-post
+title: "Hintify: A small jQuery Plugin"
+---
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.1/jquery.min.js"></script>
+<script src="/javascripts/jquery.hintify.js" type="text/javascript"></script>
+<script type="text/javascript">
+  $(document).ready(function(){
+    $('input[data-hint-text]').addClass('hinter');
+    $('.hinter').hintify();
+    $('form').submit(function(){
+      alert('Any fields that had hint text are now empty. I will put the hints back in now.');
+      // normally you wouldn't fill the fields back in 
+      // but it seems appropriate for the demo
+      $('.hinter').blur();
+      return false
+    });
+  });
+</script>
+
+<style>
+  input.hinter { color: #666; }
+  input.hinter.filled { color:#000; }
+</style>
+
+<h2>{{ page.title }}</h2>
+
+<p class="publish_date">13 Jul 2010</p>
+
+<div>I just published a jQuery plugin to github called <a href="http://github.com/danhixon/hintify">hintify.</a>
+</div>
+<p>
+Hintify is a simple jQuery plugin that makes it easy to add helper texts inside of form inputs. When the user clicks into the field the text disappears and allows the user to type whatever he or she wants. If nothing is typed and the user leaves the field by clicking somewhere else the hint text reappears.
+</p>
+<h3>Demo</h3>
+<div>
+  <form>
+    <div>
+      <label for="city_name">City:</label> <input type="text" name="city[name]" data-hint-text="Phoenix" id="city_name" />
+      <label for="city_population">Population:</label> <input type="text" name="city[population]" data-hint-text="20 million" id="city_population" />
+      <input type="submit" value="Test Form">
+    </div>
+  </form>
+</div>
+<p>&nbsp;</p>
+<div>
+  Stuff to try:
+  <ul>
+    <li>On focus: Hint disappears and the "hint" class is removed.</li>
+    <li>Leave and it comes back.</li> 
+    <li>Type and the text is black instead of gray.</li>
+    <li>Leave the field and what you typed stays there.</li>
+    <li>Delete it all and leave then the hint text comes back.</li>
+    <li>Submit the form and the hints are cleared out first.</li>
+  </ul>
+</div>
+<p>Once you've got the scripts included and the styles to your liking it is super easy to add hints to any text inputs. The biggest limitation I've found with this approach is that it won't work on password fields.</p>
+<h3>Code for Demo</h3>
+<pre>
+  &lt;html&gt;
+  &lt;head&gt;
+  &lt;script type=&quot;text/javascript&quot; src=&quot;http://ajax.googleapis.com/ajax/libs/jquery/1.4.1/jquery.min.js&quot;&gt;&lt;/script&gt;
+  &lt;script src=&quot;/javascripts/jquery.hintify.js&quot; type=&quot;text/javascript&quot;&gt;&lt;/script&gt;
+  &lt;script type=&quot;text/javascript&quot;&gt;
+    $(document).ready(function(){
+      $(&#x27;input[data-hint-text]&#x27;).addClass(&#x27;hinter&#x27;);
+      $(&#x27;.hinter&#x27;).hintify();
+      $(&#x27;form&#x27;).submit(function(){
+        alert(&#x27;Any fields that had hint text are now empty&#x27;);
+        // normally you wouldn&#x27;t fill the fields back in 
+        // but it seems appropriate for the demo
+        $(&#x27;.hinter&#x27;).blur();
+        return false
+      });
+    });
+  &lt;/script&gt;
+  &lt;style&gt;
+    input.hinter { color: #666; }
+    input.hinter.filled { color:#000; }
+  &lt;/style&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+  &lt;form&gt;
+    &lt;div&gt;
+      City: &lt;input type=&quot;text&quot; name=&quot;city[name]&quot; data-hint-text=&quot;Phoenix&quot; /&gt;
+      Population: &lt;input type=&quot;text&quot; name=&quot;city[population]&quot; data-hint-text=&quot;20 million&quot; /&gt;
+      &lt;input type=&quot;submit&quot; value=&quot;Test Form&quot;&gt;
+    &lt;/div&gt;
+  &lt;/form&gt;
+  &lt;/body&gt;
+  &lt;/html&gt;
+</pre>

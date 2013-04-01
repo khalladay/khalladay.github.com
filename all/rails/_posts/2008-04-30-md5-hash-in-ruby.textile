@@ -1,0 +1,15 @@
+---
+layout: post
+title: "MD5 Hash in Ruby"
+---
+
+h2. {{ page.title }}
+
+p(publish_date). 30 Apr 2008
+
+<p>The top three google links I got for this seemed to require a lot of junk I didn't think I needed.  I kept searching and found that it is exactly as ridiculously simple as I have come to expect from Ruby:</p>
+
+<pre name="code" class="ruby">
+require 'md5'
+puts Digest::MD5.hexdigest("This is what I want to hash")
+</pre>

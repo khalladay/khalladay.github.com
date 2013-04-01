@@ -1,0 +1,25 @@
+---
+layout: post
+title: "Old Spice Success Explained"
+---
+
+h2. {{ page.title }}
+
+p(publish_date). 14 Jul 2010
+
+p. I, like everyone, love the new spicy Old Spice commercials and the old and new kinds of spice they commercialize into my life.
+
+p. What makes these short videos so delightful?
+
+p. To help explain the success of this successful phenomenal phenomenon I've helpfully created this helpful EXPLODED PIE CHART. 
+
+!/images/old_spice_success.jpg(Old Spice Success Explained)!
+
+p. Here is the breakdown:
+* 10% effects
+* 5% props
+* 20% script
+* 35% delivery
+* 46% abs
+
+p. That's right: 116% awesome!

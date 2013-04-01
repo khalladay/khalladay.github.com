@@ -1,0 +1,15 @@
+---
+layout: post
+title: "Bundler Exec Tip"
+---
+
+<h2>{{ page.title }}</h2>
+
+<p class="publish_date">22 Jul 2010</p>
+
+<p>Bundler is very cool. The only drawback is that for executable gems like cucumber you need to type in "bundle exec cucumber." So I added this alias to my ~/.bash_login file:
+</p>
+
+<pre class="terminal" name="code">
+  alias cuc='bundle exec cucumber -r features $1'
+</pre>

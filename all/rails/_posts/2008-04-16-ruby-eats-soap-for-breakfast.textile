@@ -1,0 +1,57 @@
+---
+layout: post
+title: Ruby eats SOAP for Breakfast
+---
+
+h2. {{ page.title }}
+
+p(publish_date). 16 Apr 2008
+
+<p>Google <i>is</i> my friend. I needed to access some SOAP web services from Ruby.  Our company allows customers to pay their bills with cash at various cash payment centers in throughout the state.  We have an ASP.Net web service that accepts a zip code and the maximum miles a person is willing to travel and returns a list of locations within that radius.</p>
+
+<p>Here is how I did it:</p>
+
+<pre name="code" class="ruby">
+require 'soap/wsdlDriver'
+require 'soap/header/simplehandler'
+
+driver = SOAP::WSDLDriverFactory.new("http://www.domain.com/webservices/PaymentCentersAPI.asmx?WSDL").create_rpc_driver
+
+class AutheticationHeaderHandler < SOAP::Header::SimpleHandler      
+    #The header is named "SecureHeader" in this web service.
+    @@HEADER_NAME = 'SecureHeader'
+    def initialize(namespace, username, password)       
+      super(XSD::QName.new(namespace, @@HEADER_NAME))
+      #the user field is called "UserName"
+      @user_element = XSD::QName.new(namespace, 'UserName')
+      @password_element = XSD::QName.new(namespace, 'Password')     
+      @username, @password = username, password
+    end
+    def on_simple_outbound
+      # Seems to result in the creation of elements with the proper namespace
+      # abbreviation, e.g. '<ns1:User>JohnDoe</ns1:User>'
+      {@user_element => @username, @password_element => @password}
+    end
+end
+
+# Add the soap header handler for authentication:
+driver.headerhandler << AutheticationHeaderHandler.new("http://com.domain/", "careSystem","s3cr37")
+
+#Call The SOAP method:
+soapResponse = driver.FindNearestCenters(:ZipCode => 90210, :MaximumMiles => 15)
+
+# Print the payment location centers:
+soapResponse.findNearestCentersResult.cashPaymentCenter.each do |center|
+  puts "store name: #{center.storeName}, Miles from 90210: #{center.milesToStore}"
+
+end
+
+driver.reset_stream
+
+</pre>
+
+<p>thanks to these articles/posts:
+<a href="http://webgambit.com/blog/calling-a-net-web-service-from-rails-original/">http://webgambit.com/blog/calling-a-net-web-service-from-rails-original/</a>
+<a href="http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-talk/222966">http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-talk/222966</a></p>
+
+		

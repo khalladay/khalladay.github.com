@@ -1,0 +1,52 @@
+---
+layout: post
+title: "jQuery Image Comparison"
+---
+
+<h2>{{ page.title }}</h2>
+
+<p class="publish_date">09 Sep 2010</p>
+
+<p>I just created a silly jQuery plugin to compare two images for my <a href="/all/os/2010/09/09/hdr-image-compare.html">HDR comparison post</a>.  All it does is toggle which image is visible in a container on mouseover/mouseout. It's not really the most useful behavior imagined - I guess I wrote it more of a showcase of how easy it is to author jQuery plugins. You can see a working demonstration <a href="/all/os/2010/09/09/hdr-image-compare.html"> here</a>.
+</p>
+<p>To use it just put two images in a container and call compare() on the selector:</p>
+<pre name="code" class="html">
+  &lt;div class=&quot;compare&quot;&gt;               
+    &lt;img src=&quot;/images/photos/IMG_0805.JPG&quot; alt=&quot;Regular&quot; /&gt;
+    &lt;img src=&quot;/images/photos/IMG_0806.JPG&quot; alt=&quot;HDR&quot; /&gt;
+  &lt;/div&gt;
+</pre>
+<pre name="code" class="JScript">
+  $(document).ready(function(){
+    $('.compare').compare();
+  });
+</pre>
+
+<p>Here is the plugin code:
+</p>
+
+<pre name="code" class="JScript">
+  (function($){ 
+  	$.fn.compare = function(options)
+  	{
+  		$(this).each(function(index, one){
+  			var first = $(one).find('img:first');
+  			var other = $(one).find('img:last');
+
+  			//Hide all but the first:
+  			$(one).find('img').hide();
+  			first.show();
+
+  			$(one).mouseover(function(){
+  				first.hide();
+  				other.show();
+  			}).mouseout(function(){
+  				other.hide();
+  				first.show();
+  			});
+  		});
+
+  	}
+  })(jQuery);
+</pre>
+<p><a href="/javascripts/jquery.compare.js">Download Code</a></p>

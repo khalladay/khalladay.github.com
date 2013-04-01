@@ -1,0 +1,54 @@
+---
+layout: post
+title: "Handsoap with ASP.Net"
+---
+
+h2. {{ page.title }}
+
+p(publish_date). 30 Sep 2009
+
+p. Soap4r wasn't unusable for me but I didn't like using it. When things lined up correctly everything was rosy but trying to debug when a problem occurred was very difficult.  "Handsoap":http://github.com/troelskn/handsoap to the rescue.
+
+p. Handsoap doesn't try to do your work for you, it just tries to get out of the way and perform the lower level http calls while providing a toolbox and pattern to help you generate xml requests and parse xml responses.  I'm not going to give a further description.  I just want to walk through how I use it with ASP.Net web services.
+
+h3. Use ASP.net Previews
+
+p. ASP.net 2.0 ".asmx" files get rendered in a browser as a human readable list of SOAP methods. When you click on a method name it renders a helpful set of SOAP 1.1 and SOAP 1.2 sample request and response.
+
+!/images/asmx_method_list.png(List of ASP.Net Methods)!
+
+!/images/asmx_samples.png(List of ASP.Net sample request and response)!
+
+h3. Tests to Parse the Response
+
+p. I don't write tests to ensure my requests are correct.  I should but for now I just test that I am parsing the response correctly.  This example just returns a simple string so I copy the sample response XML from the web service and paste it into a test like below and replace the place holder "string" with a sample value "jojojo":
+
+<notextile><pre name="code" class="ruby">
+    def test_get_user_info_result
+        response_xml = '
+        <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+          <soap:Body>
+            <GetUserInfoResponse xmlns="http://spokt.com/">
+              <GetUserInfoResult>jojojo</GetUserInfoResult>
+            </GetUserInfoResponse>
+          </soap:Body>
+        </soap:Envelope>'
+
+        api = SpoktApi.new
+        mock_response(api, response_xml)
+        
+        result = api.get_user_info("dan")
+        assert_equal('jojojo', result)
+    end
+      
+
+</pre></notextile>
+
+p. The mock_response method is in my test helper:
+
+<pre name="code" class="ruby">
+  def mock_response(api, xml)
+    response = Handsoap::Http::Response.new(200,[],xml)
+    api.expects(:send_http_request).returns(response)
+  end
+</pre>

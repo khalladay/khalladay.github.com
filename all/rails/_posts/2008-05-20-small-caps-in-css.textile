@@ -1,0 +1,22 @@
+---
+layout: post
+title: "Small Caps in CSS"
+---
+
+h2. {{ page.title }}
+
+p(publish_date). 13 May 2008
+
+<p>I created a quick webiste mock up last night... I'm not a designer :(</p>
+
+<p>I created the mock up in photoshop then copied the design to HTML + CSS.  Photoshop has a feature that makes all letters upper case with the truly capitalized ones bigger and the lower case letters smaller.  I found that CSS allows for this same behavior.</p>
+
+<p style="font-size:1.3em">Regular: The United States of America</p>
+
+<p style="font-size:1.3em">Small caps: <span style="font-variant:small-caps">The United States of America</span></p>
+
+<p>Here is a css class definition for small caps:</p>
+
+<pre name="code" class="css">
+font-variant:small-caps;
+</pre>

@@ -1,0 +1,45 @@
+---
+layout: post
+title: "Brinkster: Get A Clue!"
+---
+<style>
+  .me { color: #FBA919 ;}
+  .him { color: #23AF4C ;}
+  br { padding: 3px;}
+  .me, .him { margin-left:10px;}
+</style>
+<h2>{{ page.title }}</h2>
+
+<p class="publish_date">26 Mar 2010</p>
+
+<p>A client registered his domain with Brinkster (who resells godaddy).  I had the displeasure of trying to configure the DNS Settings.</p>
+
+<p>I tried adding in our name servers but there wasn't really any feedback so I thought I'd try a shortcut and try adding in host records for now.  I clicked the link "reset my domain to use brinkster name servers". But absolutely nothing observable happened.</p>
+
+<p>I launched live help and after several minutes "Steve" came online:</p>
+
+<span class="him">Steven:</span> Hello! Thank you for contacting Brinkster. In order to help you as quickly and efficiently as possible, please provide your Brinkster user name and the password for account verification purposes.<br />
+<span class="me">me:</span> myusername<br />
+<span class="me">me:</span> don't most companies have a policy of NOT asking for password?<br />
+<span class="me">me:</span> I don't want you to know my password<br />
+<span class="me">me:</span> I'm logged into the site already<br />
+<span class="me">me:</span> I'm unable to reset my domain to use Brinkster Name Servers, I click the link and nothing happens<br />
+<span class="him">Steven:</span> What are you trying to do?<br />
+
+<span class="me">me:</span> I'm trying to reset my domain to use brinkster name servers for domain-x.tld<br />
+
+<span class="him">Steven:</span> domain-x.tld is already pointed to brinksters name servers<br />
+
+<span class="me">me:</span> is there a way for me to see that? Can I add host records?<br />
+
+<span class="him">Steven:</span> I can add them for you.<br />
+
+-- FACE PALM!<br />
+
+<span class="me">me:</span> if i put in nameservers how would I know that they are changed?<br />
+
+<span class="him">Steven:</span> It can take at least 72 hours for updates to be seen<br />
+
+<span class="me">me:</span> ok, i'll take care of it<br />
+<p>-- end of transcript --</p>
+<p>I'm pretty sure the only way to tell which name servers are being used is by using whois. Sigh.</p>

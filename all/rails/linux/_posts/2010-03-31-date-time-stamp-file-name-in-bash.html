@@ -1,0 +1,20 @@
+---
+layout: post
+title: "Datetime Stamp for File name in Bash"
+---
+
+<h2>{{ page.title }}</h2>
+
+<p class="publish_date">31 Mar 2010</p>
+
+<p>I don't like this entry's title but I was searching for this and it took me a while to find something this simple.</p>
+
+<pre name="code" class="bash">
+#!/usr/bin/env bash
+NOW=`date '+%Y%m%d%H%M%S'`
+cp production.sqlite3 production-backup-$NOW.sqlite3
+echo "production database backed up to db/production-backup-$NOW.sqlite3"
+</pre>
+
+<p>This simple script will copy the "production.sqlite3" and create a copy named production-backup-20100331074423.sqlite3 or YYYYmmDDHHMMSS.  You can format the date anyway you like.  Read <a href="http://www.cyberciti.biz/faq/linux-unix-formatting-dates-for-display/">here for more info.</a>
+</p>

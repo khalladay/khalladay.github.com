@@ -1,0 +1,38 @@
+---
+layout: post
+title: "SOAP Console"
+---
+
+h2. {{ page.title }}
+
+p(publish_date). 05 Sep 2008
+
+<p>I think it would be cool to cross the irb with a soap webservice to familiarize one-self with the interface.  I envision something like this:</p>
+<notextile>
+<pre name="code" class="terminal">
+$> soap_console http://www.coolservices.com/CustomerAPI.wsdl
+Welcome to the Soap Console for CustomerAPI.wsdl!
+Methods available:
+getCustomer [customer_id]
+getPaymentList [customer_id]
+addPayment [customer_id, amount]
+
+?&gt; customer = getCustomer(8767862)
+Sending Request:
+HTTP HEADERS
+&lt;SOAP:Envelope&gt;
+   ... stuff here ...
+&lt;/SOAP:Envelope&gt;
+
+Response Received:
+HTTP HEADERS
+&lt;SOAP:Envelope&gt;
+   ... stuff here ...
+
+&lt;/SOAP:Envelope&gt;
+
+?&gt; customer.first_name
+=&gt; "yo"
+?&gt;
+</pre>
+</notextile>

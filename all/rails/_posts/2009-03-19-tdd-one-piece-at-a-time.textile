@@ -1,0 +1,16 @@
+---
+layout: post
+title: "TDD=One Piece at a time"
+---
+
+h2. {{ page.title }}
+
+p(publish_date). 19 Mar 2009
+
+p. <img src="/images/fish-puzzle.jpg" alt="boy putting puzzle together" style="float:right; padding:10px; margin-right:-100px;" />When I give my 20 month-old son all the pieces to his fish puzzle he just mixes them up and flings them around.  When I keep all the pieces and give them to him one at a time he will place them into the hole with the matching color. 
+
+p. I think he gets overwhelmed– can a boy that young be "overwhelmed?".  Let's say he gets distracted by all his options.  I get overwhelmed/distracted too! 
+
+p. One of the reasons test driven development has resonated so strongly with me is that I'm forced to break problems down into small pieces. Once the problems are small enough I can put the pieces in the right holes.
+
+p. p.s. - This photo reminds me of how badly I need to bust out my real camera and make some images.

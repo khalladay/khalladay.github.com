@@ -1,0 +1,52 @@
+---
+layout: post
+title: Download a list of images over https in Ruby
+---
+
+h2. {{ page.title }}
+
+p(publish_date). 15 Apr 2008
+
+<p>Long post title.<br/>
+
+Today I found myself with a text file of image names that needed to be downloaded from a site.  This is how I did it:</p>
+
+<pre name="code" class="ruby">
+require 'net/http'
+require "net/https"
+
+@http=Net::HTTP.new('www.domain.com', 443)
+@http.use_ssl = true
+
+# open file with file names for reading only - my file names were one per line
+image_list = File.new("imagenames.txt", "r")  
+
+#start our web session:
+@http.start() do |http|
+  image_list.each do |file_name|
+    # remove any extra \r or \n chars
+    file_name.chomp!
+
+    #only download if we don't already have it:
+    unless File.exists? "images/#{file_name}"
+      # status message:
+      print "downloading #{file_name}..."
+
+      # set up the request
+      req = Net::HTTP::Get.new("/images/#{file_name}")
+      response = http.request(req)
+      # write the binary data to the local file of the same name:
+      open("images/#{file_name}","wb").write( response.body )
+
+      puts "DONE!"
+    else
+      puts "skipping: #{file_name}"
+    end
+  end
+
+end
+</pre>
+
+<p>Many thanks to these articles:
+http://www.rubynoob.com/articles/2006/8/21/how-to-download-files-with-a-ruby-script
+http://railsruby.blogspot.com/2006/02/https-open-uri-basic-authentication.html</p>

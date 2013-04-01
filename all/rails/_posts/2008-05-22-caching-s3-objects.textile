@@ -1,0 +1,51 @@
+---
+layout: post
+title: "Caching S3 Objects"
+---
+
+h2. {{ page.title }}
+
+p(publish_date). 22 May 2008
+
+<p>So I just deployed a new version of Spokt.com with the static content hosted by the Amazon S3.  I underestimated the number of requests that would be generated and <a href="http://keakaj.com/wisdom/2007/07/27/cache-control-header-for-amazon-s3/">found a way to reduce it with caching</a>. I hope it works.</p>
+
+<pre name="code" class="ruby">
+require 'rubygems'
+require 'aws/s3'
+
+AWS::S3::Base.establish_connection!(
+:access_key_id => 'access id not shown',
+:secret_access_key => 'secret key not shown'
+)
+
+photos = AWS::S3::Bucket.find('media.spokt.us',:prefix=>'images/')
+
+puts "#{photos.size} files found."
+
+photos.each do |photo|
+    puts "updating #{photo.key}..."
+    photo.cache_control = 'max-age=315360000'
+    photo.save({:access => :public_read})
+end
+</pre>
+
+<p>To ensure the cache-control header was added I ran a curl command to get the headers:</p>
+
+<pre name="code" class="terminal">
+$ curl -I http://media.spokt.us/images/contentBoxHeader_04.jpg
+
+HTTP/1.1 200 OK
+x-amz-id-2: kEPTZ1ZdNo2nGsUnel5wDwsGi1pXTrkk6XGtSKKzb7zZguJjIwpaUCoUgESYbzkA
+x-amz-request-id: 5DD73A7EEB692C0D
+Date: Fri, 23 May 2008 05:09:53 GMT
+x-amz-meta-s3fox-filesize: 322
+x-amz-meta-s3fox-modifiedtime: 1183963918000
+Cache-Control: max-age=315360000
+Last-Modified: Fri, 23 May 2008 05:05:16 GMT
+ETag: "1db8a1d3cb59acda667de962516c3cef"
+Content-Type: image/jpeg
+Content-Length: 322
+Server: AmazonS3
+</pre>
+
+<p>There it is... now we'll see if we see fewer GET requests tomorrow.</p>

@@ -1,0 +1,51 @@
+---
+layout: post
+title: "Pass variable from template to view"
+---
+
+<h2>{{ page.title }}</h2>
+
+<p class="publish_date">30 Jun 2010</p>
+
+<p>Maybe I'm missing a code smell but I needed to pass a variable from my template to my view.  The template renders a very generic form and I wanted to add a field to it from my view.  I wanted the code to look something like this:</p>
+<pre name="code" class="ruby">
+  &lt;% render :layout =&gt; &#x27;/layouts/confirm&#x27;,
+            :locals =&gt; { :entity =&gt; @voucher } do |f| %&gt;
+      &lt;%= f.input :redeemed_by, :label=&gt;&quot;Voucher Used By&quot;  %&gt;
+  &lt;% end %&gt;
+</pre>
+<p>I'm using formtastic and the |f| coming down the chute is meant to be the formtastic form builder object.</p>
+
+<p>I tried adding a yield to my layout file like this:</p>
+<pre name="code" class="ruby">
+  &lt;% semantic_form_for(entity) do |f| %&gt;
+    &lt;%= yield f %&gt;
+    &lt;% f.buttons do %&gt;
+      &lt;%= submit_tag &quot;Confirm&quot; %&gt;
+      &lt;%= submit_tag &quot;Cancel&quot;, :name =&gt; &quot;cancel&quot;, :class=&gt;&quot;submit-other&quot; %&gt;
+    &lt;% end  %&gt;
+  &lt;% end %&gt;
+</pre>
+<p>That resulted in this error message:</p>
+<pre>
+  `@content_for_#&lt;Formtastic::SemanticFormBuilder:0x10ae6b490&gt;' is not allowed as an instance variable name
+</pre>
+<p>So, after about an hour of searching and reading I tried to figure out how to turn the entire layout file into a helper method.  That didn't look like something I wanted to do.  Then I started, as I said to my boss, "typing in random crap" and found something that worked:</p>
+<h3>Layout:</h3>
+<pre name="code" class="ruby">
+  &lt;% semantic_form_for(entity) do |f| %&gt;
+    &lt;%= yield :ignore, f %&gt;
+    &lt;% f.buttons do %&gt;
+      &lt;%= submit_tag &quot;Confirm&quot; %&gt;
+      &lt;%= submit_tag &quot;Cancel&quot;, :name =&gt; &quot;cancel&quot;, :class=&gt;&quot;submit-other&quot; %&gt;
+    &lt;% end  %&gt;
+  &lt;% end %&gt;
+</pre>
+<h3>View:</h3>
+<pre name="code" class="ruby">
+  &lt;% render :layout =&gt; &#x27;/layouts/confirm&#x27;,
+            :locals =&gt; { :entity =&gt; @voucher } do |ignore, f| %&gt;
+      &lt;%= f.input :redeemed_by, :label=&gt;&quot;Voucher Used By&quot;  %&gt;
+  &lt;% end %&gt;
+</pre>
+<p>TADA!</p>

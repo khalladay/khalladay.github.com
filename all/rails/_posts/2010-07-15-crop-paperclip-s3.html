@@ -1,0 +1,49 @@
+---
+layout: post
+title: "Cropping with Paperclip and the S3"
+---
+
+<h2>{{ page.title }}</h2>
+
+<p class="publish_date">15 Jul 2010</p>
+
+<p>Paperclip is good. I pulled my hair out for several hours over this issue though.  I had successfully implemented the custom cropping technique as demonstrated in <a href="http://railscasts.com/episodes/182-cropping-images">railscast #182</a> but when I tried storing my images on the s3 I ran into a couple issues.  The first was retrieving the image geometry. Instead of reading the geometry from the file I chose to read it out of the data we declare :styles option of the has_attached_file macro. This works for all but the original image - for that I use open-uri. It is probably pre-optimization but I didn't want to download every version just to find out their dimensions.  My geometry methods look like this:
+</p>
+
+<pre class="ruby" name="code">
+  require 'open-uri'
+  
+  def avatar_geometry(style=:large)
+    return file_geometry if style == :original
+    w, h = avatar.options[:styles][style].gsub("#","").split("x")
+    Paperclip::Geometry.new(w, h)
+  end
+  def file_geometry
+    @geometry ||= {}
+    @geometry[avatar.url] ||= Paperclip::Geometry.from_file(open(avatar.url))
+  end
+</pre>
+<p>
+  My next issue manifested itself by not working and this error message appearing in my logs.
+</p>
+<pre>
+  paperclip No such file or directory @ blob.c/OpenBlob
+</pre>
+<p>
+  I spent several hours searching for solutions but nothing came up. I started brute-force debugging where you start changing things just to see what makes a difference. It turns out I don't understand why the change I made that fixed the problem but for now I'm happy with a solution.
+</p>
+
+<p>
+  As I was messing with the transformation_command method of the Cropper processor I noticed that the super class implementation returns an array. The version from railscasts joins the array then substitutes the crop dimensions for our new dimensions. Returning a string works when the files are stored locally but I tried splitting it back into an array and it totally works. I don't know why!
+</p>
+
+<pre name="code" class="ruby">
+  def transformation_command
+    if crop_command
+      cmd = crop_command + super.join(" ").sub(/ -crop \S+/, '')
+      cmd.split(" ")
+    else
+      super
+    end
+  end
+</pre>

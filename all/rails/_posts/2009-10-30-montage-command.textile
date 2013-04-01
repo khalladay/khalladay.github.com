@@ -1,0 +1,22 @@
+---
+layout: post
+title: "ImageMagick Montage Command"
+---
+
+h2. {{ page.title }}
+
+p(publish_date). 30 Oct 2009
+
+p. I've been working on a video upload/encoding feature for spokt.com this past week. For photos we generate thumbnails but I wanted more for video.  I wanted some sort of a film strip so I have the video encoding process spit out a bunch of still frames. I decided I wanted a long strip of frames to run horizontally so in order to optimize for bandwidth and http requests I knew I needed to shrink the frames and combine them into one wide image. Since I learned software the easy-at-first-but-the-ease-ends-soon-after (AKA Microsoft) way I started thinking about the math that would be required - widths, and calculating and shrinking and adding... it wouldn't be a complicated algorithm but it would take some time to implement.
+
+p. Luckily for me I've been using open source tools for a while and so before I start doing something I try to find an open source solution.  I started evaluating image libraries like devIL, I'm already using imagemagick with paperclip so I poked around their documentation.  For a library made for images they have some terribly ugly example artwork. I wasn't having much luck because I was asking google to solve my little problems. I asked it to solve the entire problem all at once "combine multiple images imagemagick" and boom: the "montage" command.
+
+<pre style="width:740px">
+montage -geometry +2+0 -tile 10x1 -resize x50 -background black thumb_*.png film_strip.png
+</pre>
+
+p. This command combines all the files that match the pattern thumb_*.png into a 10x1 grid, adds a black 2 pixel border to the top and bottom. 
+
+!/images/filmstrip.png(10x2 filmstrip of video still frames)!
+
+p. All I had to do was download the images from the s3 into my tmp folder, issue this command (with proper paths) then upload the resultant file back to the s3. And then make it scroll back and forth on mouseover - but that is another story.

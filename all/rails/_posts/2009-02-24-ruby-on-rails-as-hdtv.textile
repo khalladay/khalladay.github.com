@@ -1,0 +1,14 @@
+---
+layout: post
+title: "Ruby on Rails is High Definition"
+---
+
+h2. {{ page.title }}
+
+p(publish_date). 24 Feb 2009
+
+p. Many people's first experience with high definition television is somewhat uneventful.  They admit to thinking they see more detail.  They believe they see more detail.  But what is all the fuss about? They say: "I don't think a little improvement in picture quality is worth paying $XXXX." Our brains fill in the details with standard definition and we are satisfied.
+
+p. Going back to a standard definition picture is when eyes open.  That's when the better picture quality is finally noticed.  They think "Was it really this bad before? I can't believe we watched TV like this for so long"
+
+p. Before I started with Ruby on Rails I considered myself skilled in C# and ASP.Net. I was confident that RoR wouldn't help me much.  As I learned how rails worked I would admit to thinking this or that was better.  Code could be a little cleaner here and there but for a long time I felt I could be more productive in my old tools.  I knew I liked RoR but didn't know how much better it was until I recently had to use my old toolset on old projects.  Wow!  What a difference!  I can't believe I coded like that for so long.

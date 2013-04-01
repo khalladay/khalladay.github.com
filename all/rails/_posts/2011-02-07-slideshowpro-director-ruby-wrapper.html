@@ -1,0 +1,40 @@
+---
+layout: post
+title: "SlideShowPro Director Ruby API Wrapper"
+---
+
+<h2>{{ page.title }}</h2>
+
+<p class="publish_date">07 Feb 2011</p>
+
+<p>I just released a ruby api wrapper for SlideShowPro Director. The gem is called <a href="http://github.com/danhixon/slideshowpro">SlideShowPro</a>.
+</p>
+<p>
+  Just install:
+</p>
+<pre class="terminal" name="code">
+  $ gem install slideshowpro
+</pre>
+<p>
+  And use
+</p>
+<pre class="ruby" name="code">
+  ssp = Slideshowpro::Director.new('http://yoururl.com/api/','your-api-key')
+  # Get a gallery:
+  albums = ssp.get_gallery(gallery_id, :preview=>{:size => '123x35',:crop => 1, :quality => 90})
+  albums.each do |album|
+    puts album['name'] 
+    puts album['id']
+  end
+  # Get an album:
+  album = ssp.get_album(album_id, {:large=>{:size => '225x350', :crop => 0, :quality => 95, :sharpening => 0}})
+    album.each do |image|
+      puts image["large"]["url"]
+      puts image["thumb"]["url"]
+      puts image["thumb"]["width"]
+      puts image["thumb"]["height"]
+  end
+</pre>
+<p>
+  If you are building something in ruby which uses SlideShowPro Director in the back end then this gem is for you.
+</p>

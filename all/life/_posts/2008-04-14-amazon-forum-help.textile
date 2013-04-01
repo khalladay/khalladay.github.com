@@ -1,0 +1,12 @@
+---
+layout: post
+title: Forum Help
+---
+
+h2. {{ page.title }}
+
+p(publish_date). 15 Apr 2008
+
+<p>I just saw this in <a href="http://developer.amazonwebservices.com/connect/message.jspa?messageID=79952">Amazon's web service forum</a> and it made me chuckle.</p>
+
+<p><img src="http://communicatopia.s3.amazonaws.com/amazon_tech_help.png" alt="spelling" /></p>

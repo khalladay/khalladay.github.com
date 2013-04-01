@@ -1,0 +1,18 @@
+---
+layout: post
+title: "Safari 4 beta: One Suggestion and One Tip"
+---
+
+h2. {{ page.title }}
+
+p(publish_date). 25 Feb 2009
+
+p. You can read elsewhere how fast Safari 4 is.  I just have one suggestion regarding the "Top Sites" feature: the button should toggle like the booksmark button next to it.  One click: show top sites, click again: show the page you were on before you clicked.  
+
+!/images/safari-4-top-sites-engaged.png(Safari 4 top sites engaged)!
+
+p. Note: Currently you _can_ click the back button if you need to get back.
+
+p. Tip: If you want to re-order your tabs you have to grab the tab by the little grippy part:
+
+!/images/safari-4-tab-dragger.png(Safari 4 top sites engaged)!

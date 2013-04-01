@@ -1,0 +1,19 @@
+---
+layout: post
+title: "Polymorphism to the Rescue"
+---
+
+<h2>{{ page.title }}</h2>
+
+<p class="publish_date">12 Jan 2011</p>
+
+<p>The video processing service we used at <a href="www.spokt.com">spokt</a> got acquired by another company and the API changed. I created a code branch and started hacking away.  I have a model "VideoAttachment" which handles sending the encoding request and dealing with the asynchronous completion notification.
+</p>
+
+<p>
+  It took some time to get all the ducks in a row and just as I was doing some final testing I realized that if I were to deploy my new code all the previously uploaded videos would no longer work. My head started filling with all the conditional logic I'd need to add... like to every method.  Skin crawling. I pulled the previous version of "VideoAttachment" out of the master branch to see what would need to happen... it wasn't going to be pretty. </p>
+  <p>
+    Luckily I had a crazy idea that turned out to be a very good one: use polymorphism to handle the conditional logic.  I saved the old video_attachment.rb file as legacy_video_attachment.rb, changed the class name then updated the 'type' attribute in the database to LegacyVideoAttachment. And done!
+</p>
+
+<p>Polymorphism, I think I love you! (You too STI, most of the time).</p>

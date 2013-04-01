@@ -1,0 +1,18 @@
+---
+layout: post
+title: "PGError Unable to connect on port 5432"
+---
+
+<h2>{{ page.title }}</h2>
+
+<p class="publish_date">16 Sep 2011</p>
+
+<p>
+	I've been bit by this a few times recently and I think this time I understand it.
+</p>
+<p>
+	I use <a href="https://github.com/mxcl/homebrew">homebrew</a> to install postgresql and it usually just works. I think what has happened to me is sometimes when my machine is not gracefully shut down the .pid file doesn't get removed and keeps postgres from launching on its own. My .pid is located here: /usr/local/var/postgres/postmaster.pid. Just make sure postgres is not running, remove the file, and launch it again.
+</p>
+<pre class="terminal">$ launchctl load -w ~/Library/LaunchAgents/org.postgresql.postgres.plist
+$ rm /usr/local/var/postgres/postmaster.pid
+$ launchctl load -w ~/Library/LaunchAgents/org.postgresql.postgres.plist</pre>

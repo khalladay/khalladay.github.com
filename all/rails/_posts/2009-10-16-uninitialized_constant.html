@@ -1,0 +1,32 @@
+---
+layout: post
+title: "Uninitialized Constant Foo"
+---
+
+<h2>{{ page.title }}</h2>
+
+<p class="publish_date">16 Oct 2009</p>
+
+<p>I created this issue twice this week doing the same thing so perhaps this post will keep me from doing it again.</p>
+
+<pre>
+NameError: uninitialized constant Foo
+</pre>
+
+<p>The first time I had just installed a gem.  We'll pretend the gem was called Foo. I wanted to try and couldn't seem to use it.  The strange thing was that I could use the gem in irb but not in this script file. Here's my script, lets see if you see the problem right away:</p>
+
+contents of foo.rb:
+<pre name="code" class="ruby">
+  require 'rubygems'
+  require 'foo'
+	
+  job = Foo::Job.new
+  job.do_stuff(:now)
+  puts job.result
+</pre>
+
+<p>It would error on line 4: job = Foo::Job.new Do you see the problem? </p>
+
+<p>It is requiring 'foo' which is the name of the gem library but unfortunately for me and the hairs I pulled out of my head it is also the name of the file (foo.rb). </p> 
+
+<p>Renaming the file to foo_playground.rb fixed the issue. HEAD SLAP!</p>
