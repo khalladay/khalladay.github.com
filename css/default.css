@@ -129,7 +129,10 @@ h1 a:hover { color:#fba919 ;}
 .green { color: #23af4c; }
 .blue { color: #0383c9; }
 .orange { color: #fba919; }
-
+.red {color:#f33d6e;}
+.purple{color: #7673d9;}
+.paleorange{color:#ff9500;}
+.lime{color:#87f03c;}
 
 a.pink:hover { border: solid 2px #f5a2c6;padding:1px; text-decoration:none;  }
 a.green:hover { color:#212121; background-color:#23af4c;text-decoration:none; }
