@@ -1,5 +1,5 @@
 body {
-background: #373737;
+background: #293133;
 color:#e5e5e5;
 font:86% 'lucida grande','lucida sans unicode',Verdana,Tahoma,Arial,sans-serif;
 line-height:1.2em;
@@ -16,9 +16,12 @@ text-decoration:none;
 }
 
 a:hover {
-text-decoration:underline;
-color: #f5a2c6;
+text-decoration:none;
+color: #373737;
+background-color:#0383c9;
 }
+
+
 
 a img {
 border:0;
@@ -136,6 +139,12 @@ a.red:hover{color:#373737; background-color:#f33d6e; text-decoration:none;}
 a.lime:hover {color:#373737; background-color:#87f03c; text-decoration:none;}
 a.purple:hover{color:#373737; background-color:#7673d9; text-decoration:none;}
 a.paleorange:hover{color:#373737; background-color:#ff9500; text-decoration:none;}
+
+a.footerlink:hover{
+	text-decoration:none;
+	color:#373737;
+	background-color:#e5e5e5;
+}
 
 .slogan a { padding:3px; line-height: 2.5em; }
 .commentslink { margin-bottom: 35px;display:block;border-bottom:solid 1px #dadada;padding-bottom:25px; }

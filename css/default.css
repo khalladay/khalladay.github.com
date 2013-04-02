@@ -1,5 +1,5 @@
 body {
-background: #373737;
+background: #293133;
 color:#e5e5e5;
 font:86% 'lucida grande','lucida sans unicode',Verdana,Tahoma,Arial,sans-serif;
 line-height:1.2em;
@@ -16,9 +16,12 @@ text-decoration:none;
 }
 
 a:hover {
-text-decoration:underline;
-color: #f5a2c6;
+text-decoration:none;
+color: #373737;
+background-color:#0383c9;
 }
+
+
 
 a img {
 border:0;
@@ -125,22 +128,25 @@ h1 a:hover { color:#fba919 ;}
 }
 
 
-.pink { color: #f5a2c6; }
-.green { color: #23af4c; }
-.blue { color: #0383c9; }
-.orange { color: #fba919; }
+
 .red {color:#f33d6e;}
 .purple{color: #7673d9;}
 .paleorange{color:#ff9500;}
 .lime{color:#87f03c;}
 
 
-a.pink:hover { border: solid 2px #f5a2c6;padding:1px; text-decoration:none;  }
-a.green:hover { color:#212121; background-color:#23af4c;text-decoration:none; }
-a.blue:hover { color:#212121; background-color:#0383c9;text-decoration:none; }
-a.orange:hover { color:#fba919;  padding:1px; border: solid 2px #fba919; text-decoration:none; }
-.slogan a { padding:3px; line-height: 2.5em; }
+a.red:hover{color:#373737; background-color:#f33d6e; text-decoration:none;}
+a.lime:hover {color:#373737; background-color:#87f03c; text-decoration:none;}
+a.purple:hover{color:#373737; background-color:#7673d9; text-decoration:none;}
+a.paleorange:hover{color:#373737; background-color:#ff9500; text-decoration:none;}
 
+a.footerlink:hover{
+	text-decoration:none;
+	color:#373737;
+	background-color:#e5e5e5;
+}
+
+.slogan a { padding:3px; line-height: 2.5em; }
 .commentslink { margin-bottom: 35px;display:block;border-bottom:solid 1px #dadada;padding-bottom:25px; }
 /*
 pink #f5a2c6
