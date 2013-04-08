@@ -30,19 +30,9 @@
 <div id="content">  
   <div id="home">
   <h2 class="fade">Read:</h2>
-	<div class="blogpost">
-  	<div class="blogpost-header">
-    	<a href="{{ post.url }}"><h3>{{ post.title }}</h3></a>
-    	<span class="date">{{ post.date | date: "%d %B %Y" }}</span>
-    </div>
-    	{% if post == site.posts.first %}
-      <div class="blogpost-content">
-			 {{ post.content }}
-      </div>
-			<hr />
-    	{% endif %}
-  {% endfor %}
-  </div>
+	<div id="post">
+		{{ site.posts.first.content}}
+	</div>
 	
   <ul class="posts">
     
