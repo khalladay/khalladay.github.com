@@ -28,60 +28,13 @@
 	</div>
 <div id="content">  
   <div id="post">
-<h2>Caching S3 Objects</h2>
-<p class="publish_date">22 May 2008</p>
-<p>So I just deployed a new version of Spokt.com with the static content hosted by the Amazon S3.  I underestimated the number of requests that would be generated and <a href="http://keakaj.com/wisdom/2007/07/27/cache-control-header-for-amazon-s3/">found a way to reduce it with caching</a>. I hope it works.</p>
 
-<pre name="code" class="ruby">
-require 'rubygems'
-require 'aws/s3'
-
-AWS::S3::Base.establish_connection!(
-:access_key_id =&gt; 'access id not shown',
-:secret_access_key =&gt; 'secret key not shown'
-)
-
-photos = AWS::S3::Bucket.find('media.spokt.us',:prefix=&gt;'images/')
-
-puts "#{photos.size} files found."
-
-photos.each do |photo|
-    puts "updating #{photo.key}..."
-    photo.cache_control = 'max-age=315360000'
-    photo.save({:access =&gt; :public_read})
-end
-</pre>
-<p>To ensure the cache-control header was added I ran a curl command to get the headers:</p>
-
-<pre name="code" class="terminal">
-$ curl -I http://media.spokt.us/images/contentBoxHeader_04.jpg
-
-HTTP/1.1 200 OK
-x-amz-id-2: kEPTZ1ZdNo2nGsUnel5wDwsGi1pXTrkk6XGtSKKzb7zZguJjIwpaUCoUgESYbzkA
-x-amz-request-id: 5DD73A7EEB692C0D
-Date: Fri, 23 May 2008 05:09:53 GMT
-x-amz-meta-s3fox-filesize: 322
-x-amz-meta-s3fox-modifiedtime: 1183963918000
-Cache-Control: max-age=315360000
-Last-Modified: Fri, 23 May 2008 05:05:16 GMT
-ETag: "1db8a1d3cb59acda667de962516c3cef"
-Content-Type: image/jpeg
-Content-Length: 322
-Server: AmazonS3
-</pre>
-<p>There it is&#8230; now we&#8217;ll see if we see fewer <span class="caps">GET</span> requests tomorrow.</p>
 </div>
 
 
 <div id="related">
   <h3>Possibly Related Posts</h3>
   <ul class="posts">
-    
-      <li><span>26 Mar 2012</span> &raquo; <a href="/all/life/2012/03/26/steep-learning-curve-is-a-misnomer.html">Steep Learning Curve</a></li>
-    
-      <li><span>16 Sep 2011</span> &raquo; <a href="/all/rails/2011/09/16/pgerror-unable-to-connect-on-port-5432.html">PGError Unable to connect on port 5432</a></li>
-    
-      <li><span>07 Feb 2011</span> &raquo; <a href="/all/rails/2011/02/07/slideshowpro-director-ruby-wrapper.html">SlideShowPro Director Ruby API Wrapper</a></li>
     
   </ul>
 </div>

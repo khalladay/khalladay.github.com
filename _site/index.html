@@ -7,7 +7,7 @@
 <link rel="stylesheet" type="text/css" href="/css/default.css" />
 <link rel="stylesheet" type="text/css" href="/css/pretty_code.css" />
 
-<title>kylehalladay.com - Kyle Halladay's Blog and Work</title>
+<title>Kyle Halladay - Toronto Game Developer</title>
 </head>
 
 <body>
@@ -17,7 +17,7 @@
 
 		</p>
 
-		<h1><a href="/"><div id="logo"></div><span class="fade">./kylehalladay</span></a></h1>
+		<h1><a href="/"><div id="logo"></div><span class="fade">Kyle Halladay</span></a></h1>
 		<div class="slogan"> 
 				<a href="/os.html" class="red">Life</a> ||
 				<a href="/os.html" class="lime">Game Dev</a> ||
@@ -30,6 +30,20 @@
 <div id="content">  
   <div id="home">
   <h2 class="fade">Read:</h2>
+	<div class="blogpost">
+  	<div class="blogpost-header">
+    	<a href="{{ post.url }}"><h3>{{ post.title }}</h3></a>
+    	<span class="date">{{ post.date | date: "%d %B %Y" }}</span>
+    </div>
+    	{% if post == site.posts.first %}
+      <div class="blogpost-content">
+			 {{ post.content }}
+      </div>
+			<hr />
+    	{% endif %}
+  {% endfor %}
+  </div>
+	
   <ul class="posts">
     
       <li>&laquo; <a href="/1985/10/26/Test-Post">Test Post</a><span>26 Oct 1985</span></li>
