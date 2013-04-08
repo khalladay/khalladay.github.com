@@ -33,6 +33,14 @@
 	</div>
   <div id="home">
 	
+	<div id="related">
+	  <h3>Possibly Related Posts</h3>
+	  <ul class="posts">
+	    {% for post in site.related_posts limit:3 %}
+	      <li><span>{{ post.date | date_to_string }}</span> &raquo; <a href="{{ post.url }}">{{ post.title }}</a></li>
+	    {% endfor %}
+	  </ul>
+	</div>
   <h2 class="fade">Read:</h2>
 	<div id="post">
 		{{ site.posts.first.content}}
