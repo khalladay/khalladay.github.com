@@ -247,13 +247,13 @@ margin:10px 0 8px;
 
 #footer {
 border-top:4px solid #dadada;
-width:700px;
+width:800px;
 clear:both;
 color:gray;
 font-size:0.9em;
 line-height:1.6em;
 margin:0 auto;
-padding:8px 0;
+padding:0 8px;
 text-align:right;
 }
 
