@@ -131,6 +131,8 @@ h1 a:hover { color:#fba919 ;}
 .paleorange{color:#ff9500;}
 .lime{color:#87f03c;}
 
+a.logo{color:#c5c5c5;}
+a.logo:hover{color:#ff9500;}
 
 a.red:hover{color:#373737; background-color:#f33d6e; text-decoration:none;}
 a.lime:hover {color:#373737; background-color:#87f03c; text-decoration:none;}
