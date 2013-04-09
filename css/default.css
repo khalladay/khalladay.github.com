@@ -157,13 +157,13 @@ dark-orange #e39c1f
 h2 {
 border-bottom:1px solid #e5e5e5;
 color:#373737; 
-line-height: 1.0;
+line-height: 0.9;
 background-color:#ff9500;
 font-size:1.7em;
 font-weight:100;
 letter-spacing:-1px;
-margin:0 0 0px;
-padding:0px 0px 12px 0px;
+margin:0 0 3px;
+padding:0px 0px 12px 3px;
 }
 
 .post_title {
