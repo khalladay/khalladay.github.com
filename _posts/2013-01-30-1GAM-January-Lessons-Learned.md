@@ -9,7 +9,7 @@ At first glance, the game I submitted is rather unimpressive, especially compare
 
  
 
-* *Be comfortable with drastically reducing scope (because estimating is hard)*
+* Be comfortable with drastically reducing scope (because estimating is hard)
 
 My biggest lesson learned this month is that estimating (time spent to do something) is hard. The month started with me and Johannes (kickass musician and audio designer that I worked with this month, johannesg.com) sketching what at the time seemed like very reasonable ideas. Unfortunately, life got in the way for both of us, and we very quickly found ourselves needing to reduce the scope of our game in order to get something done. As it turns out, what sounded like reasonable goals ended up being rather lofty ambitions for my first month back in the pure C++ saddle. It was lucky that we were both busier than we thought we would be, I would have felt terrible being the only person axing features.
 
