@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 1GAM January: Lessons Learned
+title: 1GAM January Lessons Learned
 ---
 
 Do you hear that? It’s the sound of a thousands of programmers crunching to finish their game before the end of the month. Uncharacteristically, I’ve already submitted my game for the month, a simple 2 button game which requires players to guide a ball down a randomly generated track (if you’re interested, and on Mac, get it here: http://dl.dropbox.com/u/6128167/HaikuRacer.zip ), but I expect that next month I’ll be joining the legion of code jockeys trying to squeeze in one last bug fix before the month is over.
