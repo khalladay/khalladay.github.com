@@ -2,7 +2,7 @@ safe:        false
 auto:        false
 
 source:      .
-destination: .
+destination: ./_site
 plugins:     ./_plugins
 
 future:      true
