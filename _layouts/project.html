@@ -1,0 +1,21 @@
+---
+layout: default
+---
+<span class = "post_title">
+<h2>{{ page.title }}</h2>
+</span>
+
+<div id="post">
+<br>
+{{ content }}
+</div>
+
+
+<div id="related">
+  <h3>Recent Posts</h3>
+  <ul class="posts">
+    {% for post in site.posts limit:10 %}
+      <li><span>{{ post.date | date_to_string }}</span> &raquo; <a href="{{ post.url }}">{{ post.title }}</a></li>
+    {% endfor %}
+  </ul>
+</div>
