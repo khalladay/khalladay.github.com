@@ -1,0 +1,168 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8"  />
+	<meta name="description" content="Kyle Halladay Game Development" />
+	<meta name="keywords" content="life,code,software,development,games,ludology,indie" />
+	<link rel="stylesheet" type="text/css" href="/css/default.css" />
+	<link rel="stylesheet" type="text/css" href="/css/pretty_code.css" />
+
+<title>Kyle Halladay - Toronto Game Developer</title>
+</head>
+
+<body>
+	<div id="wrap">
+		<div id="header">
+			<p id="toplinks">
+			</p>
+			<h1><a href="/" class="logo"><div id="logo"></div></a><a href="/" class="logo">K</a><a href="/" class="logo">y</a><a href="/" class="logo">l</a><a href="/" class="logo">e</a> <a href="/" class="logo">H</a><a href="/" class="logo">a</a><a href="/" class="logo">l</a><a href="/" class="logo">l</a><a href="/" class="logo">a</a><a href="/" class="logo">d</a><a href="/" class="logo">a</a><a href="/" class="logo">y</a></h1>
+			<div class="slogan"> 
+					<a href="/" class="paleorange">Home</a> ||
+					<a href="/archive.html" class="paleorange">Archive</a> ||
+					<a href="/portfolio.html" class="paleorange">Portfolio</a> ||
+					<a href="/aboutme.html" class="paleorange">About Me</a>
+			</div>
+	</div>
+<div id="content">  
+  <span class = "post_title">
+<h2>Taming The Ogre Part 2 Unbreaking the Xcode templates in Xcode 4.5</h2>
+</span>
+
+<div id="post">
+<br>
+<p>The Xcode templates that come with Ogre 1.81 are rather frustrating to get working, especially if you don’t know what the cryptic error messages that it spits out at you mean. So I’m here today to walk you step by step through getting a basic Ogre project up and running.</p>
+
+<p>All of this is taken from my experiences trying to get Ogre to work on my machine. Given that the templates bundled with Ogre were written by people much more knowledgeable than me, it wouldn’t surprise me if some of these issues aren’t universal problems. Hopefully my experiences are helpful, even if you only hit one of the numerous issues I described here.</p>
+
+<h3 id='what_you_will_need'>What you will need:</h3>
+
+<ul>
+<li>A built version of Ogre 1.81 (see my previous post for how to build this)</li>
+
+<li>The Ogre Xcode templates installed (found in Ogre’s SDK/OSX folder)</li>
+</ul>
+
+<p>Note: This tutorial was written based on my experience working with Xcode 4.5, and OS X Lion. YMMV if you’re following along with a different configuration.</p>
+
+<h3 id='starting_the_project'>Starting the Project</h3>
+
+<p>Let’s start at ground zero. Open Xcode and do the following:</p>
+
+<p>Start a new project, and select the “Mac OS X Application” template in the Ogre category. After naming your project, fill in the path to your Ogre SDK with the appropriate value. Welcome to linker hell.</p>
+
+<p>For some reason, xcode has the annoying tendency to omit the leading / in the include paths in the OGRE template (regardless of whether you remembered to include on in the path to your SDK). So the first thing that has to be done to make this project build-able is to navigate to your build settings, and modify all the file paths located in the Framework Search Paths, Header Search Paths, and Library Search paths so that they begin with a /</p>
+
+<p>Next, move to the “Build Phases” tab and expand the “Link Binary With Libraries” section. You should see Ogre.framework, OpenGL.framework, and QuartzCode.framework appearing in red. I think this is a problem with the template itself, but in any case, it’s easily fixed. For the second two, simply hit the + button and find them in the list of Apple frameworks, andthen delete the red list entries.</p>
+
+<p>Ogre.framework can be found in the lib/debug folder in your build directory, so add that to your project as well.</p>
+
+<p>Now hit build. If everything is identical to my set up, you should get a build error saying that OgreCamera.h can’t be found. Theres a good reason for this: the include paths are missing a few directories. Rather than describe how to fix this, I’ve attached a screenshot of what my include paths end up looking like when I’m through fixing them. “1.81″ is the folder which stores my built Ogre3D library, and “ogre_src_v1-8-1″ is the root folder of the ogre sdk.</p>
+
+<p><img alt='Include Paths' src='/images/post_images/taming-the-ogre2/include_paths.png' /></p>
+
+<p>This may not be the most optimal way to set up your include paths (I’m really, really hoping it isn’t, it’s pretty messy), but I’ve ran into strange issues marking things recursive, and so far, this set up has worked for me. Let me know if there’s a better way of doing things in the comments, and I’ll update this tutorial.</p>
+
+<p>Next move to the Library Search paths, and ensure that both paths are pointing to the correct location of the files they need. One should be pointing to the location of your ogre lib, and the other to the lib folder of your dependencies. If you hit build and see an error like this:</p>
+
+<p><img alt='Error Message' src='/images/post_images/taming-the-ogre2/lOIS_error.png' /></p>
+
+<p>it means that this step has not been done correctly.</p>
+
+<h3 id='restrict_your_architectures'>Restrict your architectures!</h3>
+
+<p>Next ensure that your project is set to build only for the 64 bit architecture. As I mentioned in the last post, currently my set up is only configured to build for 64 bit machines, because I was running into a boat load of configuration errors trying to build for i386 as well. Since I’m nowhere near releasing something with OGRE just yet, I’ve decided to put off figuring out i386 config issues until I absolutely have to.</p>
+
+<h3 id='catching_a_wild_ditto'>Catching a wild Ditto!</h3>
+
+<p>If you hit build now, you should end up with 1 error, the cryptically named “shell script invocation error,” which looks something like this:</p>
+
+<p><img alt='Ditto Error' src='/images/post_images/taming-the-ogre2/ditto_error.png' /></p>
+
+<p>It’s a shame that this isn’t more descriptive, because it took me a long time to understand exactly what was going on, but fixing it is dead simple once you know what the error means.</p>
+
+<p>Ogre’s build process involves copying files from your Media paths to the content folder of the built application. This is done at the end of your build process by a shell script, and the script used to copy these files is called ditto. All this error is saying, is that a path supplied to the ditto command is wrong.</p>
+
+<p>To fix this, go back to your project settings, and get to your “Build Phases” tab. Expand the “Run Script” item (should be at the bottom of your build phases list”), and you should immediately see the ditto commands.</p>
+
+<p>The offender is the last line,</p>
+
+<p>ditto $PROJECT_DIR/$PROJECT_NAME/<em>.cfg “$BUILT_PRODUCTS_DIR/Tutorial.app/Contents/Resources/”</em></p>
+
+<p>(Note: Tutorial.app will be replaced by whatever you called the project on your machine)</p>
+
+<p>There’s a problem with the location of quotation marks here, which is causing the source path to be misinterpreted. Simply move the punctuation around to solve:</p>
+
+<p>ditto “$PROJECT_DIR/$PROJECT_NAME/”<em>.cfg “$BUILT_PRODUCTS_DIR/OgreTest2.app/Contents/Resources/”</em></p>
+
+<p>Hit build now, you should (finally) have a successful compile.</p>
+
+<h3 id='not_there_yet'>Not there yet.</h3>
+
+<p>Unfortunately, we’re not done. Because now we get to sort through runtime errors. In your output, or your Ogre log file, you should see a message along the lines of</p>
+
+<p>OGRE EXCEPTION(7:InternalErrorException): Could not load dynamic library ./RenderSystem_GL.</p>
+
+<p>This is because we haven’t configured OGRE to know where our Plugins are yet. The quickest way to fix this is to open up the file plugins.cfg, and replace</p>
+
+<p>PluginFolder=./</p>
+
+<p>with</p>
+
+<p>PluginFolder= (path to build/lib/release)</p>
+
+<p>Now, hit build/run one more time, and you should be greeted with this screen:</p>
+
+<p><img alt='Config Screen' src='/images/post_images/taming-the-ogre2/config_screen.png' /></p>
+
+<p>Hit ok again to finally view the sum of all of our hard work:</p>
+
+<p><img alt='Config Screen' src='/images/post_images/taming-the-ogre2/ogrehead.png' /></p>
+
+<p>Finally, it’s all working! If you run into any problems not addressed here, grab me on twitter and we can work through it. I’d love to dig into this build process more through troubleshooting problems I haven’t hit yet. Additionally, if anyone has a better way of getting all of this done / setting up an Ogre project in Xcode, I’d love to hear about it, because I’m really hoping theres a less messy way of getting it all set up / configuring it for 1386. Regardless, thanks for reading!</p>
+</div>
+
+
+<div id="related">
+  <h3>Recent Posts</h3>
+  <ul class="posts">
+    
+      <li><span>11 Mar 2013</span> &raquo; <a href="/all/blog/2013/03/11/Fun-with-the-kinect.html">Fun With The Kinect</a></li>
+    
+      <li><span>01 Mar 2013</span> &raquo; <a href="/all/blog/2013/03/01/1GAM-February-Wrap-Up.html">1GAM February Wrap Up</a></li>
+    
+      <li><span>30 Jan 2013</span> &raquo; <a href="/all/blog/2013/01/30/1GAM-January-Lessons-Learned.html">1GAM January Lessons Learned</a></li>
+    
+      <li><span>02 Dec 2012</span> &raquo; <a href="/all/blog/2012/12/02/Taming-The-Ogre-Part2.html">Taming The Ogre Part 2 Unbreaking the Xcode templates in Xcode 4.5</a></li>
+    
+      <li><span>19 Nov 2012</span> &raquo; <a href="/all/blog/2012/11/19/Taming-The-Ogre-Part1.html">Taming The Ogre Part 1 Building Ogre 1.81 on Lion</a></li>
+    
+      <li><span>11 Nov 2012</span> &raquo; <a href="/all/blog/2012/11/11/Belated-Retrospective-Gamercamp.html">A Belated Retrospective on Gamercamp 2012</a></li>
+    
+      <li><span>30 Sep 2012</span> &raquo; <a href="/all/blog/2012/09/30/Surviving-My-First-Industry-Conference.html">Surviving My First Industry Conference</a></li>
+    
+      <li><span>10 Sep 2012</span> &raquo; <a href="/all/blog/2012/09/10/The-Creative-Process-Sucks.html">The Creative Process Sucks</a></li>
+    
+      <li><span>19 Aug 2012</span> &raquo; <a href="/all/blog/2012/08/19/Post-Mortem-Block-Academy.html">Post Mortem - Block Academy</a></li>
+    
+      <li><span>12 Aug 2012</span> &raquo; <a href="/all/blog/2012/08/12/Learning-Code-Practices-From-Rocket-Scientists.html">Learning Code Practices From Rocket Scientists</a></li>
+    
+  </ul>
+</div>
+
+<br>
+<br>
+</div>
+
+<div id="footer">
+
+	<a href="mailto:k.mj.halladay@gmail.com" class="footerlink">E-mail</a> |
+    <a href="http://ca.linkedin.com/pub/kyle-halladay/2b/658/a14/" class="footerlink">LinkedIn</a> |
+    <a href="http://twitter.com/khalladay" class="footerlink">Twitter</a>
+
+<p>&copy; 2013 <a href="/aboutme.html" class="footerlink">Kyle Halladay</a>
+
+</div>
+</div>
+</body>
+</html>
+

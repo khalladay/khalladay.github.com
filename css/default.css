@@ -17,6 +17,17 @@ text-decoration:none;
 
 a:hover{color:#373737; background-color:#ff9500; text-decoration:none;}
 
+a h4{
+color:#fba919; 
+line-height: 0.9;
+background-color:transparent;
+font-size:1.7em;
+font-weight:100;
+letter-spacing:-1px;
+margin:0 0 0 0px;
+padding:2px 0px 2px 5px;
+}
+
 
 
 a img {
