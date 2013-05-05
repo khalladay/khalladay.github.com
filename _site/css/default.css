@@ -137,6 +137,7 @@ h1 a:hover { color:#fba919 ;}
 
 .gist{
   margin: 15px 0 !important;
+	width: 740px;
 }
  
 .gist-file{

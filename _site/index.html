@@ -25,20 +25,28 @@
 	</div>
 <div id="content">  
   <span class = "post_title">
-<h2>Bit Flags are Pretty Cool</h2>
+<h2>Its Cool In The Shader Part 1 Distance From A Point</h2>
 </span>
 
 <div id="post">
 <br>
-<p>I&#8217;ve been working on prototype for (possibly) my next personal project, and one of the things I&#8217;ve needed to do a number of times is store a lot of boolean attributes on different objects. This led to some really terrible looking scripts with a whole host of boolean flags at the top of them, and I decided I needed to find a better way of handling things. <br /> <br /> I&#8217;ve had some fun before with packing a whole bunch of booleans into byte-sized enums using the bit field operator in C++, but I&#8217;ve never seen anything like that done in C#, and if I can help it, I try to avoid dealing directly with memory addresses in Unity scripts. Luckily, bit flags seem to do the exact same job (possibly better). To show you what I mean, let me link an example: <br /> <br /> <script class='gist' src='https://gist.github.com/khalladay/5432282.js'>&nbsp;</script> <br /> So here&#8217;s whats going on: rather than specifying a int or float value for the members of the enum, you can assign each of them a hex number. Provided each of these hex numbers match up to the values represented by each bit in a bit (powers of 2), you can use all of the regular bitwise operations with these new enum values.</p>
-<script class='gist' src='https://gist.github.com/khalladay/a5ecf560b97f746829b1.js'>&nbsp;</script>
-<p>Provided the player can only have 1 of each item, you could do an entire inventory this way (not that I think that would be the greatest idea). Nevertheless, it&#8217;s certainly handy for fast prototyping, and I&#8217;m sure that less contrived examples will find their way into production code at some point.</p>
+<p>I have a bit of a love hate relationship with shaders. On the one hand, I&#8217;m absolutely in love with the possibilities they offer. Programming visual effects is probably my favourite part of programming, and a lot of the really cool effects that I&#8217;m inspired by are made with shaders. On the other hand, as far as programming skills go, they&#8217;re the Greedo to my Han. I&#8217;ve tried to learn how to write them a few times before (most notably last December, where I spent a month trying to make good looking soft shadows in Ogre), but I&#8217;ve never really &#8220;got&#8221; them.</p>
+
+<p>But, I&#8217;m nothing if not persistent, and now that it&#8217;s warmed up enough to sit in the shade on my balcony, it was time to look at writing shaders again (wordplay-five!). I&#8217;m going to be working through Unity Cookie&#8217;s excellent Noob to Pro series (specifically focused on writing CG shaders for Unity), and each week I&#8217;m (hopefully) going to try to keep things interesting by coming up with my own spin on the lessons.</p>
+
+<p>To kick things off, this week I got started with the first lesson, a flat colour shader. For the most part, it just recovered stuff I had already managed to figure out, although it was a good intro to how shaders work with unity specifically, since all my forays have been either OpenGL or OGRE related.</p>
+
+<p>It was also pretty easy to find something cool to do with it. Since I was already just setting a flat colour of a vertex, I decided to extend it by making it set the colour of the object based on it&#8217;s distance from a set point in the world. It checks how far each vertex is from the point and passes either black or white to the fragment shader based on whether or not it&#8217;s within range. It&#8217;s still very simple in the grand scheme of things, but it&#8217;s the coolest shader I&#8217;ve built from the ground up myself.</p>
+<script class='gist' src='https://gist.github.com/khalladay/18db3cad343b5bcbc432.js'>&nbsp;</script>
+<p>Obviously I&#8217;m still pretty green at this. If you can see a way to improve the above shader, either from a functionality or stylistic point of view, grab me <a href='http://twitter.com/khalladay'>on Twitter</a>.</p>
 </div>
 
 
 <div id="related">
   <h3>Recent Posts</h3>
   <ul class="posts">
+    
+      <li><span>04 May 2013</span> &raquo; <a href="/all/blog/2013/05/04/Its-Cool-In-The-Shader-Part-1-Distance-From-A-Point.html">Its Cool In The Shader Part 1 Distance From A Point</a></li>
     
       <li><span>21 Apr 2013</span> &raquo; <a href="/all/blog/2013/04/21/Bit-Flags-Are-Pretty-Cool.html">Bit Flags are Pretty Cool</a></li>
     
@@ -57,8 +65,6 @@
       <li><span>30 Sep 2012</span> &raquo; <a href="/all/blog/2012/09/30/Surviving-My-First-Industry-Conference.html">Surviving My First Industry Conference</a></li>
     
       <li><span>10 Sep 2012</span> &raquo; <a href="/all/blog/2012/09/10/The-Creative-Process-Sucks.html">The Creative Process Sucks</a></li>
-    
-      <li><span>19 Aug 2012</span> &raquo; <a href="/all/blog/2012/08/19/Post-Mortem-Block-Academy.html">Post Mortem - Block Academy</a></li>
     
   </ul>
 </div>
