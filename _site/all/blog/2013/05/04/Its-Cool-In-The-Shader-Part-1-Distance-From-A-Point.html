@@ -1,9 +1,102 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8"  />
+	<meta name="description" content="Kyle Halladay Game Development" />
+	<meta name="keywords" content="life,code,software,development,games,ludology,indie" />
+	<link rel="stylesheet" type="text/css" href="/css/default.css" />
+	<link rel="stylesheet" type="text/css" href="/css/pretty_code.css" />
+
+<title>Kyle Halladay - Toronto Game Developer</title>
+</head>
+
+<body>
+	<div id="wrap">
+		<div id="header">
+			<p id="toplinks">
+			</p>
+			<h1><a href="/" class="logo"><div id="logo"></div></a><a href="/" class="logo">K</a><a href="/" class="logo">y</a><a href="/" class="logo">l</a><a href="/" class="logo">e</a> <a href="/" class="logo">H</a><a href="/" class="logo">a</a><a href="/" class="logo">l</a><a href="/" class="logo">l</a><a href="/" class="logo">a</a><a href="/" class="logo">d</a><a href="/" class="logo">a</a><a href="/" class="logo">y</a></h1>
+			<div class="slogan"> 
+					<a href="/" class="paleorange">Home</a> ||
+					<a href="/archive.html" class="paleorange">Archive</a> ||
+					<a href="/portfolio.html" class="paleorange">Portfolio</a> ||
+					<a href="/aboutme.html" class="paleorange">About Me</a>
+			</div>
+	</div>
+<div id="content">  
+  <span class = "post_title">
+<h2>It&apos;s Cool In The Shader Part 1&#58; Distance From a Point</h2>
+</span>
+
+<div id="post">
+<br>
 <p>I have a bit of a love hate relationship with shaders. On the one hand, I&#8217;m absolutely in love with the possibilities they offer. Programming visual effects is probably my favourite part of programming, and a lot of the really cool effects that I&#8217;m inspired by are made with shaders. On the other hand, as far as programming skills go, they&#8217;re the Greedo to my Han. I&#8217;ve tried to learn how to write them a few times before (most notably last December, where I spent a month trying to make good looking soft shadows in Ogre), but I&#8217;ve never really &#8220;got&#8221; them.</p>
 
-<p>But, I&#8217;m nothing if not persistent, and now that it&#8217;s warmed up enough to sit in the shade on my balcony, it was time to look at writing shaders again (wordplay-five!). I&#8217;m going to be working through Unity Cookie&#8217;s excellent Noob to Pro series (specifically focused on writing CG shaders for Unity), and each week I&#8217;m (hopefully) going to try to keep things interesting by coming up with my own spin on the lessons.</p>
+<p>But, I&#8217;m nothing if not persistent, and now that it&#8217;s warmed up enough to sit in the shade on my balcony, I figured it was time to look at writing shaders again (wordplay-five!). I&#8217;m going to be working through Unity Cookie&#8217;s excellent Noob to Pro series (specifically focused on writing CG shaders for Unity), and each week I&#8217;m (hopefully) going to try to keep things interesting by coming up with my own spin on the lessons.</p>
 
-<p>To kick things off, this week I got started with the first lesson, a flat colour shader. For the most part, it just recovered stuff I had already managed to figure out, although it was a good intro to how shaders work with unity specifically, since all my forays have been either OpenGL or OGRE related.</p>
+<p>To kick things off, this week I got started with the first lesson, a flat colour shader. For the most part, it just went over stuff I had already managed to figure out, although it was a good intro to how shaders work with Unity specifically, since all my forays have been either OpenGL or OGRE related.</p>
 
 <p>It was also pretty easy to find something cool to do with it. Since I was already just setting a flat colour of a vertex, I decided to extend it by making it set the colour of the object based on it&#8217;s distance from a set point in the world. It checks how far each vertex is from the point and passes either black or white to the fragment shader based on whether or not it&#8217;s within range. It&#8217;s still very simple in the grand scheme of things, but it&#8217;s the coolest shader I&#8217;ve built from the ground up myself.</p>
 <script class='gist' src='https://gist.github.com/khalladay/18db3cad343b5bcbc432.js'>&nbsp;</script>
 <p>Obviously I&#8217;m still pretty green at this. If you can see a way to improve the above shader, either from a functionality or stylistic point of view, grab me <a href='http://twitter.com/khalladay'>on Twitter</a>.</p>
+</div>
+
+
+<div id="related">
+  <h3>Recent Posts</h3>
+  <ul class="posts">
+    
+      <li><span>04 May 2013</span> &raquo; <a href="/all/blog/2013/05/04/Its-Cool-In-The-Shader-Part-1-Distance-From-A-Point.html">It&apos;s Cool In The Shader Part 1&#58; Distance From a Point</a></li>
+    
+      <li><span>21 Apr 2013</span> &raquo; <a href="/all/blog/2013/04/21/Bit-Flags-Are-Pretty-Cool.html">Bit Flags are Pretty Cool</a></li>
+    
+      <li><span>11 Mar 2013</span> &raquo; <a href="/all/blog/2013/03/11/Fun-with-the-kinect.html">Fun With The Kinect</a></li>
+    
+      <li><span>01 Mar 2013</span> &raquo; <a href="/all/blog/2013/03/01/1GAM-February-Wrap-Up.html">1GAM February Wrap Up</a></li>
+    
+      <li><span>30 Jan 2013</span> &raquo; <a href="/all/blog/2013/01/30/1GAM-January-Lessons-Learned.html">1GAM January Lessons Learned</a></li>
+    
+      <li><span>02 Dec 2012</span> &raquo; <a href="/all/blog/2012/12/02/Taming-The-Ogre-Part2.html">Taming The Ogre Part 2 Unbreaking the Xcode templates in Xcode 4.5</a></li>
+    
+      <li><span>19 Nov 2012</span> &raquo; <a href="/all/blog/2012/11/19/Taming-The-Ogre-Part1.html">Taming The Ogre Part 1 Building Ogre 1.81 on Lion</a></li>
+    
+      <li><span>11 Nov 2012</span> &raquo; <a href="/all/blog/2012/11/11/Belated-Retrospective-Gamercamp.html">A Belated Retrospective on Gamercamp 2012</a></li>
+    
+      <li><span>30 Sep 2012</span> &raquo; <a href="/all/blog/2012/09/30/Surviving-My-First-Industry-Conference.html">Surviving My First Industry Conference</a></li>
+    
+      <li><span>10 Sep 2012</span> &raquo; <a href="/all/blog/2012/09/10/The-Creative-Process-Sucks.html">The Creative Process Sucks</a></li>
+    
+  </ul>
+</div>
+
+<br>
+<br>
+</div>
+
+<div id="footer">
+
+	<a href="mailto:k.mj.halladay@gmail.com" class="footerlink">E-mail</a> |
+    <a href="http://ca.linkedin.com/pub/kyle-halladay/2b/658/a14/" class="footerlink">LinkedIn</a> |
+    <a href="http://twitter.com/khalladay" class="footerlink">Twitter</a>
+
+<p>&copy; 2013 <a href="/aboutme.html" class="footerlink">Kyle Halladay</a>
+
+</div>
+</div>
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-40292745-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+</body>
+</html>
+
