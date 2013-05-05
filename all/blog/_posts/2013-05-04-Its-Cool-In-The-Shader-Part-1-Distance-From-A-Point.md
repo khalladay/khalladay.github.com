@@ -1,6 +1,6 @@
 ---
 layout: post
-title: It's Cool In The Shader Part 1: Distance From a Point
+title: Its Cool In The Shader Part 1 Distance From a Point
 ---
 
 I have a bit of a love hate relationship with shaders. On the one hand, I'm absolutely in love with the possibilities they offer. Programming visual effects is probably my favourite part of programming, and a lot of the really cool effects that I'm inspired by are made with shaders. On the other hand, as far as programming skills go, they're the Greedo to my Han. I've tried to learn how to write them a few times before (most notably last December, where I spent a month trying to make good looking soft shadows in Ogre), but I've never really "got" them. 
