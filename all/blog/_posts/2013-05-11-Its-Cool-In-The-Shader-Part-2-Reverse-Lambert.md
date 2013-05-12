@@ -14,7 +14,7 @@ The tutorial goes a bit further. We added a max function to the dot product whic
 
 I<sub>D</sub> = ( max(0.0,L &middot; N ) * C * I<sub>L</sub>) + A
 
-The modification was much simpler than I initially expected. All that needs to be done to the above equation to reverse the lighting calculation is to calculate I<sub>D</sub> using -N, that is, as if the surface's normal vector is point in the opposite direction. 
+The modification was much simpler than I initially expected. All that needs to be done to the above equation to reverse the lighting calculation is to calculate I<sub>D</sub> using -N, that is, as if the surface's normal vector is pointing in the opposite direction. 
 
 The end result is simply I<sub>D</sub> = ( max(0.0,L &middot; -N ) * C * I<sub>L</sub>) + A
 
