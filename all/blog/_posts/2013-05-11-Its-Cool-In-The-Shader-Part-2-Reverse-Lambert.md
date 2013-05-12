@@ -10,7 +10,7 @@ I'm making it a point to understand the math behind each week's shader, so I'll 
 I<sub>D</sub> = L &middot; N * C * I<sub>L</sub> <br>
 (or: The intensity of the diffuse light (I<sub>D</sub>) on a surface is equal to the dot product of the surface's normal vector and the normalized direction of the light (L  &middot; N), multiplied by the Color (C) and intensity of the incoming light (I<sub>L</sub>))
 
-The tutorial goes a bit further. We added a max function to the dot product which clamped the values to between 0.0 and 1.0. This prevented the areas of the object's which were facing away from the light source from being darkened to a value less than having no light shining on it. The equation was also modified to add ambient light calculations, meaning that objects facing perfectly away from the light source would be coloured exactly the colour of the ambient light in the scene. The end result of this was a lighting equation that looked like this (A = ambient light colour): 
+The tutorial goes a bit further. We added a max function to the dot product which clamped the values to between 0.0 and 1.0. This prevented the areas of the objects which were facing away from the light source from being darkened to a value less than having no light shining on it. The equation was also modified to add ambient light calculations, meaning that objects facing perfectly away from the light source would be coloured exactly the colour of the ambient light in the scene. The end result of this was a lighting equation that looked like this (A = ambient light colour): 
 
 I<sub>D</sub> = ( max(0.0,L &middot; N ) * C * I<sub>L</sub>) + A
 
