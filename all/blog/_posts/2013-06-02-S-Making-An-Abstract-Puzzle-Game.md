@@ -23,7 +23,7 @@ Finally, in the grand tradition of how I end projects, here are the big things t
 <h4>1 - <strong>Proportion is a big deal in first person games. </strong></h4>
 This was the first game I've made with a first person camera. I had no idea how hard it would be to scale objects and environments in order to feel right. We certainly could have done a lot more with S in this regard given more time, and I probably will do a whole post just on this sometime in the future.
 
-<h4>2 - <strong>Abstract puzzles are all about communication</strong></h4>
+<h4>2 - <strong>Abstract puzzles are all about communication.</strong></h4>
 Creating puzzles that telegraph what the player needs to do without giving away how to do it is tricky to do right. Based on feedback that I've gotten from a few players, a few of our puzzles really didn't do this well. We needed to spend a lot more time figuring out ways to teach the player what to do in each puzzle. Again, this probably warrants its own post once I play with this idea a bit more. 
 
 <h4>3 - <strong>Blurring out distant objects is a surprisingly good way to pull players forward. </strong></h4>
