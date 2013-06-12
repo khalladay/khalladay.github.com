@@ -14,4 +14,4 @@ In a bit of an interesting twist, Stephanie Owen (who worked on Bird Flew with m
 
 I've put the gist for this shader below, since it's way more interesting than the Blinn-Phong one.
 
-<script src="https://gist.github.com/khalladay/606c1b6226cb4f24d13d" class="gist">&nbsp;</script>
+<script src="https://gist.github.com/khalladay/606c1b6226cb4f24d13d.js" class="gist">&nbsp;</script>
