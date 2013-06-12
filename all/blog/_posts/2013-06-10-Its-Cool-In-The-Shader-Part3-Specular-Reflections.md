@@ -12,6 +12,10 @@ Week 3 over at Unity Cookie's Noob-To-Pro tutorial series dealt with adding Phon
 
 In a bit of an interesting twist, Stephanie Owen (who worked on Bird Flew with me) was working on a problem this week that lent itself well to my shader learning goals, and provided a chance to see if I was really learning anything from all this or if I was just becoming very good at following tutorials. Thankfully, it was the former, and I ended up writing a solid colour shader which uses a texture as an alpha map. In the grand scheme of things, it's a remarkably simple thing to do, but being able to build something that actually fit a development need, and wasn't at all from a tutorial felt pretty good, and learning about Unity's rendering queues was a bit of an aha moment which is always a good thing.
 
+![Texture Mask Shader](/images/post_images/2013-06-12/TextureMask.png)
+
 I've put the gist for this shader below, since it's way more interesting than the Blinn-Phong one.
 
 <script src="https://gist.github.com/khalladay/606c1b6226cb4f24d13d.js" class="gist">&nbsp;</script>
+
+As always, if you want to get in touch with me, either about this post, or pretty much anything else, send me a message [on Twitter](http://twitter.com/khalladay)!
