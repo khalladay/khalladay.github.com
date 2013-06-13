@@ -10,7 +10,7 @@ Week 3 over at Unity Cookie's Noob-To-Pro tutorial series dealt with adding Phon
 ![This week's tutorial shaders](/images/post_images/2013-06-12/specularReflections.png)
 (Left To Right: Blinn-Phong, Phong, VertexLit Phong, Lambert)
 
-In a bit of an interesting twist, [Stephanie Owen](http://ca.linkedin.com/pub/stephanie-owen/32/561/4b3) (who worked on Bird Flew with me) was working on a problem this week that lent itself well to my shader learning goals, and provided a chance to see if I was really learning anything from all this or if I was just becoming very good at following tutorials. Thankfully it was the former, and I ended up writing a solid colour shader which uses a texture as an alpha map. In the grand scheme of things it's a remarkably simple thing to do, but being able to build something that actually fit a development need and wasn't at all from a tutorial felt pretty good; learning about Unity's rendering queues just the cherry on top.
+In a bit of an interesting twist, [Stephanie Owen](http://ca.linkedin.com/pub/stephanie-owen/32/561/4b3) (who worked on Bird Flew with me) was working on a problem this week that lent itself well to my shader learning goals, and provided a chance to see if I was really learning anything from all this or if I was just becoming very good at following tutorials. Thankfully it was the former, and I ended up writing a solid colour shader which uses a texture as an alpha map. In the grand scheme of things it's a remarkably simple thing to do, but being able to build something that actually fit a development need and wasn't at all from a tutorial felt pretty good; learning about Unity's rendering queues was just the cherry on top.
 
 ![Texture Mask Shader](/images/post_images/2013-06-12/TextureMask.png)
 
