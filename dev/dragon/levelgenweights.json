@@ -1,4 +1,5 @@
 <html>
+<body>
 {
 	"weights":
 	{
@@ -6,4 +7,5 @@
 		"straight2":100
 	}
 }
+</body>
 </html>
