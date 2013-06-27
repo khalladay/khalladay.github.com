@@ -60,13 +60,13 @@ To fix this, go back to your project settings, and get to your “Build Phases�
 
 The offender is the last line,
 
-ditto $PROJECT_DIR/$PROJECT_NAME/*.cfg “$BUILT_PRODUCTS_DIR/Tutorial.app/Contents/Resources/”
+ditto $PROJECT_DIR/$PROJECT_NAME/&#42;.cfg &ldquo;$BUILT_PRODUCTS_DIR/Tutorial.app/Contents/Resources/&rdquo;
 
 (Note: Tutorial.app will be replaced by whatever you called the project on your machine)
 
 There’s a problem with the location of quotation marks here, which is causing the source path to be misinterpreted. Simply move the punctuation around to solve:
 
-ditto “$PROJECT_DIR/$PROJECT_NAME/”*.cfg “$BUILT_PRODUCTS_DIR/OgreTest2.app/Contents/Resources/”
+ditto &ldquo;$PROJECT_DIR/$PROJECT_NAME/&rdquo;&#42;.cfg &ldquo;$BUILT_PRODUCTS_DIR/OgreTest2.app/Contents/Resources/&rdquo;
 
 Hit build now, you should (finally) have a successful compile.
 
