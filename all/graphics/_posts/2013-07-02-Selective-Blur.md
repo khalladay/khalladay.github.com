@@ -1,5 +1,5 @@
 ---
-layout: project
+layout: graphics
 title: Selective-Blur
 snippet: Per-Material blurring for Unity3D. Allows single objects to be blurred without the need to blur everything. <strong>[Open Source]</strong>
 
