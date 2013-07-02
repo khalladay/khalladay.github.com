@@ -1,0 +1,25 @@
+---
+layout: default
+---
+<span class = "post_title">
+<h2>Graphics :D</h2>
+<br>
+</span>
+
+<div id="projects">
+	{% for post in site.categories.graphics %}
+<span style="position: relative; left: 0px;">
+	   <a href="{{ post.url }}">
+	  <img src="/images/{{ post.title }}.png" width="100" height="100" align="right"><h4>{{ post.title }}</h4></a><br>{{ post.snippet }}
+		<br>
+		<br>
+		<br>
+</span>
+
+    {% endfor %}
+  </ul>
+</div>
+
+
+  </ul>
+</div>
