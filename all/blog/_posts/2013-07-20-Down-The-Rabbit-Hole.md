@@ -7,7 +7,7 @@ One of the main reasons why I think I click so much with graphics code is the ea
 
 Looking at graphics code as art led me to the demo scene. Two days of watching demos later I decided I needed to figure out how to do that kind of thing too, and thus began my free-fall into the world of procedural graphics. 
 
-Huge thanks to [Iñigo Quilez](www.iquilezles.org), his website is amazing, and his comments on my first procedural graphics shader on shadertoy.com [(link)](https://www.shadertoy.com/view/Xdl3zB) have been tremendously helpful. From what I can tell, the guy just really really digs this sort of stuff, and loves helping other people out. 
+Huge thanks to [Iñigo Quilez](http://www.iquilezles.org), his website is amazing, and his comments on my first procedural graphics shader on shadertoy.com [(link)](https://www.shadertoy.com/view/Xdl3zB) have been tremendously helpful. From what I can tell, the guy just really really digs this sort of stuff, and loves helping other people out. 
 
 <div align="center">
 	<a href="https://www.shadertoy.com/view/Xdl3zB">
