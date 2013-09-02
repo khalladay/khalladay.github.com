@@ -22,8 +22,6 @@ The demo uses the same flow map as the Flow plugin on the asset store. I promise
 This project is open source! Check out the repo [here](https://github.com/khalladay/FastFlowMap) 
 
 ![Screen 1](/images/project_screens/flowmap_screen.png)
-<div align="center">
 ![Screen 2](/images/post_images/2013-09-02/flow_map.png)
-</div>
 
 Pull requests are very welcome if you want to add or fix up something before I get to it :D
