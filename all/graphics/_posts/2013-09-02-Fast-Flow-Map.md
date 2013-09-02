@@ -5,7 +5,7 @@ snippet: A no frills flow map shader for river effects in mobile unity games <st
 
 ---
 
-My Fast Flow Map shader was born out of a need for an extremely fast river effect for a mobile game. Since it's designed to be as fast as possible (built for a mobile game), there are no lighting calculations, no colour multiplications, no bells or whistles. 
+My Fast Flow Map shader was born out of a need for an extremely fast river effect for a mobile game. Since it's designed to be as fast as possible, there are no lighting calculations, no colour multiplications, no bells or whistles. 
 
 <h4>Here's how it works: </h4>
 
