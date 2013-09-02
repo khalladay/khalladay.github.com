@@ -3,7 +3,7 @@ layout: post
 title: A Simple Flow Map
 ---
 
-Water effects have always seemed firmly in the realm of people who have much more graphics experience than me. When the need for a river effect presented itself in my current project at work, I was first in line to suggest that we buy a solution, rather than roll our own. However, after surveying what was out there, it became clear that all the options available required us to sacrifice more frame time than I was willing to give up for one effect. 
+Water effects have always seemed firmly in the realm of people who have much more graphics experience than me. When the need for a river effect presented itself in a project I'm working on, I was first in line to suggest that we buy a solution, rather than roll our own. However, after surveying what was out there, it became clear that all the options available required us to sacrifice more frame time than I was willing to give up for one effect. 
 
 Since I'm the only programmer on this specific project, this meant that building a river effect that satisfied our requirements fell to me. Since I'm much too stubborn to admit defeat without at least a quart of coffee drank and hours of sleep lost, it became time for water effects to become something that I did too.
 
