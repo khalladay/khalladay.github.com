@@ -31,7 +31,7 @@
 
 <div id="post">
 <br>
-<img src="/images/Fast Flow Map.png" width="100" height="100" align="right" style="padding-right:15px"><p>My Fast Flow Map shader was born out of a need for an extremely fast river effect in a project at work. Since it&#8217;s designed to be as fast as possible (built for a mobile game), there are no lighting calculations, no colour multiplications, no bells or whistles.</p>
+<img src="/images/Fast Flow Map.png" width="100" height="100" align="right" style="padding-right:15px"><p>My Fast Flow Map shader was born out of a need for an extremely fast river effect for a mobile game. Since it&#8217;s designed to be as fast as possible, there are no lighting calculations, no colour multiplications, no bells or whistles.</p>
 <h4>Here's how it works: </h4>
 <p>The system is a shader and a script. The script needs a reference to the water material set in the inspector, and it will control all the texture scrolling needed for the effect to work. Moving this out of the shader saves us a bunch of frame time, and gives you an easy way to extend the system if you have a need to sync multiple materials to the same offsets.</p>
 
