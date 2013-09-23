@@ -1,0 +1,105 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8"  />
+	<meta name="description" content="Kyle Halladay Game Development" />
+	<meta name="keywords" content="life,code,software,development,games,ludology,indie" />
+	<link rel="stylesheet" type="text/css" href="/css/default.css" />
+	<link rel="stylesheet" type="text/css" href="/css/pretty_code.css" />
+
+<title>Kyle Halladay - Toronto Game Developer</title>
+</head>
+
+<body>
+	<div id="wrap">
+		<div id="header">
+			<p id="toplinks">
+			</p>
+			<h1><a href="/" class="logo"><div id="logo"></div></a><a href="/" class="logo">K</a><a href="/" class="logo">y</a><a href="/" class="logo">l</a><a href="/" class="logo">e</a> <a href="/" class="logo">H</a><a href="/" class="logo">a</a><a href="/" class="logo">l</a><a href="/" class="logo">l</a><a href="/" class="logo">a</a><a href="/" class="logo">d</a><a href="/" class="logo">a</a><a href="/" class="logo">y</a></h1>
+			<div class="slogan"> 
+					<a href="/" class="paleorange">Home</a> ||
+					<a href="/archive.html" class="paleorange">Archive</a> ||
+					<a href="/portfolio.html" class="paleorange">Games</a> ||
+					<a href="/graphics.html" class="paleorange">Graphics</a> ||
+					<a href="/aboutme.html" class="paleorange">About Me</a>
+			</div>
+	</div>
+<div id="content">  
+  <span class = "post_title">
+<h2>Dissolve Shader Pack</h2>
+</span>
+
+<div id="post">
+<br>
+<img src="/images/Dissolve Shader Pack.png" width="100" height="100" align="right" style="padding-right:15px"><p>Apparently when I&#8217;m bored, I write shaders. These 4 shaders were inspired by the dragon skin dissolving effect in Skyrim.</p>
+<h4>Here's how it works: </h4>
+<p>The shader takes a texture as the pattern source for the dissolve effect. The shader uses the red channel in this texture to determine whether a fragment should be shaded normally, as a border colour, or transparent. The Burn property on the shaders controls the threshold for this change. As Burn approaches zero the number of fragments above the threshold increases, resulting in the effect progressing. The 4 shaders cover various levels of shader complexity. At the high end, the edges of the effect use a different normal map from the regularly shaded pixels and the shader renders 2 passes to properly light the interior of the object. At the low end, no normal maps are involved, and the shader is done in 1 pass with back-face culling on.</p>
+
+<p>A web demo of this project is available <a href='/demos/dissolve/dissolve.html'>here</a></p>
+
+<p>Download the shaders <a href='https://dl.dropboxusercontent.com/u/6128167/Dissolve%20Shaders.zip'>here</a></p>
+
+<p><img alt='Screen 1' src='/images/post_images/2013-09-22/dissolve_screen.png' /> <img alt='Screen 2' src='/images/post_images/2013-09-22/dissolve_control.png' /></p>
+
+<p>Know something that would make these shaders better? Send me a message <a href='http://twitter.com/khalladay'>on Twitter</a></p>
+</div>
+
+
+<div id="related">
+  <h3>Recent Posts</h3>
+  <ul class="posts">
+    
+      <li><span>02 Sep 2013</span> &raquo; <a href="/all/blog/2013/09/02/A-Simple-Flowmap.html">A Simple Flow Map</a></li>
+    
+      <li><span>13 Aug 2013</span> &raquo; <a href="/all/blog/2013/08/13/Coloured-Shadows.html">Multi Coloured Shadows In Unity</a></li>
+    
+      <li><span>20 Jul 2013</span> &raquo; <a href="/all/blog/2013/07/20/Down-The-Rabbit-Hole.html">Down The Rabbit Hole</a></li>
+    
+      <li><span>02 Jul 2013</span> &raquo; <a href="/all/blog/2013/07/02/Least-Resistance.html">Least Resistance</a></li>
+    
+      <li><span>16 Jun 2013</span> &raquo; <a href="/all/blog/2013/06/16/Its-Cool-In-The-Shader-Part4-Rim-Lighting.html">It&apos;s Cool In The Shader Part 4&#58; Rim Lighting</a></li>
+    
+      <li><span>10 Jun 2013</span> &raquo; <a href="/all/blog/2013/06/10/Its-Cool-In-The-Shader-Part3-Specular-Reflections.html">It&apos;s Cool In The Shader Part 3&#58; Specular Reflections</a></li>
+    
+      <li><span>02 Jun 2013</span> &raquo; <a href="/all/blog/2013/06/02/S-Making-An-Abstract-Puzzle-Game.html">S&#58; Making an Abstract Puzzle Game</a></li>
+    
+      <li><span>11 May 2013</span> &raquo; <a href="/all/blog/2013/05/11/Its-Cool-In-The-Shader-Part-2-Reverse-Lambert.html">It&apos;s Cool In The Shader Part 2&#58; Reverse Lambert Shading</a></li>
+    
+      <li><span>04 May 2013</span> &raquo; <a href="/all/blog/2013/05/04/Its-Cool-In-The-Shader-Part-1-Distance-From-A-Point.html">It&apos;s Cool In The Shader Part 1&#58; Distance From a Point</a></li>
+    
+      <li><span>21 Apr 2013</span> &raquo; <a href="/all/blog/2013/04/21/Bit-Flags-Are-Pretty-Cool.html">Bit Flags are Pretty Cool</a></li>
+    
+  </ul>
+</div>
+
+<br>
+<br>
+</div>
+
+<div id="footer">
+
+	<a href="mailto:k.mj.halladay@gmail.com" class="footerlink">E-mail</a> |
+    <a href="http://ca.linkedin.com/pub/kyle-halladay/2b/658/a14/" class="footerlink">LinkedIn</a> |
+    <a href="http://twitter.com/khalladay" class="footerlink">Twitter</a>
+
+<p>&copy; 2013 <a href="/aboutme.html" class="footerlink">Kyle Halladay</a>
+
+</div>
+</div>
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-40292745-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+</body>
+</html>
+
