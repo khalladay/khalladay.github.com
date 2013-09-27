@@ -17,7 +17,7 @@ The flow map controls what sections of the material have water vs ground (or a m
 
 A web demo of this project is available [here](/demos/fastflowmap/flowmap_demo.html)
 
-The demo uses the same flow map as the Flow plugin on the asset store. I promise the system is mine, but since I designed the system to mimic the look of Flow's basic mobile shader, if you don't believe me, I'd say I did my job :D (check the repo to be convinced)
+The demo uses the same flow map as the Flow plugin on the asset store. I promise the system is mine, but since I designed the system to mimic the look of Flow's basic mobile shader, if you don't believe me, I'd say I did my job :D (check the repo to be convinced). If you're looking for a much more full featured version of this effect, definitely go check out Flow. 
 
 This project is open source! Check out the repo [here](https://github.com/khalladay/FastFlowMap) 
 
