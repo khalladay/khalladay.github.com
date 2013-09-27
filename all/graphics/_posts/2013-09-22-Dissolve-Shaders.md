@@ -5,7 +5,7 @@ snippet: A shader pack for a dissolve effect in Unity3D <strong>[Open Source]</s
 
 ---
 
-Apparently when I'm bored, I write shaders. These 4 shaders were inspired by the dragon skin dissolving effect in Skyrim.  
+Apparently when I'm bored, I write shaders. These shaders were inspired by the dragon skin dissolving effect in Skyrim.  
 
 <h4>Here's how it works: </h4>
 
