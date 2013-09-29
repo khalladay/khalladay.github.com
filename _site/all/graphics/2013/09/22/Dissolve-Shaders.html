@@ -6,6 +6,9 @@
 	<meta name="keywords" content="life,code,software,development,games,ludology,indie" />
 	<link rel="stylesheet" type="text/css" href="/css/default.css" />
 	<link rel="stylesheet" type="text/css" href="/css/pretty_code.css" />
+	<link rel="stylesheet" href="/css/highlight_default.css">
+	<script src="/javascripts/highlight.pack.js"></script>
+	<script>hljs.initHighlightingOnLoad();</script>
 
 <title>Kyle Halladay - Toronto Game Developer</title>
 </head>
@@ -31,9 +34,11 @@
 
 <div id="post">
 <br>
-<img src="/images/Dissolve Shader Pack.png" width="100" height="100" align="right" style="padding-right:15px"><p>Apparently when I&#8217;m bored, I write shaders. These 4 shaders were inspired by the dragon skin dissolving effect in Skyrim.</p>
+<img src="/images/Dissolve Shader Pack.png" width="100" height="100" align="right" style="padding-right:15px"><p>Apparently when I&#8217;m bored, I write shaders. These shaders were inspired by the dragon skin dissolving effect in Skyrim.</p>
 <h4>Here's how it works: </h4>
-<p>The shader takes a texture as the pattern source for the dissolve effect. The shader uses the red channel in this texture to determine whether a fragment should be shaded normally, as a border colour, or transparent. The Burn property on the shaders controls the threshold for this change. As Burn approaches zero the number of fragments above the threshold increases, resulting in the effect progressing. The 4 shaders cover various levels of shader complexity. At the high end, the edges of the effect use a different normal map from the regularly shaded pixels and the shader renders 2 passes to properly light the interior of the object. At the low end, no normal maps are involved, and the shader is done in 1 pass with back-face culling on.</p>
+<p>The shader takes a texture as the pattern source for the dissolve effect. The shader uses the red channel in this texture to determine whether a fragment should be shaded normally, as a border colour, or transparent. The Burn property on the shaders controls the threshold for this change. As Burn approaches zero the number of fragments above the threshold increases, resulting in the effect progressing. The &#8220;Interior&#8221; shaders have back face culling turned off, allowing some of the interior of the mesh to show through, although it isn&#8217;t as accurate as true geometry duplication.</p>
+
+<p>At some point in the future I will return and add a working version of my geometry duplication shader, however for the moment I&#8217;ve only had luck getting it to work with the first pixel light in the scene and I&#8217;d rather not post something that doesn&#8217;t work.</p>
 
 <p>A web demo of this project is available <a href='/demos/dissolve/dissolve.html'>here</a></p>
 
@@ -48,6 +53,8 @@
 <div id="related">
   <h3>Recent Posts</h3>
   <ul class="posts">
+    
+      <li><span>28 Sep 2013</span> &raquo; <a href="/all/blog/2013/09/28/How-to-dissolve-effect.html">Making a Dissolve Effect with Surface Shaders</a></li>
     
       <li><span>02 Sep 2013</span> &raquo; <a href="/all/blog/2013/09/02/A-Simple-Flowmap.html">A Simple Flow Map</a></li>
     
@@ -66,8 +73,6 @@
       <li><span>11 May 2013</span> &raquo; <a href="/all/blog/2013/05/11/Its-Cool-In-The-Shader-Part-2-Reverse-Lambert.html">It&apos;s Cool In The Shader Part 2&#58; Reverse Lambert Shading</a></li>
     
       <li><span>04 May 2013</span> &raquo; <a href="/all/blog/2013/05/04/Its-Cool-In-The-Shader-Part-1-Distance-From-A-Point.html">It&apos;s Cool In The Shader Part 1&#58; Distance From a Point</a></li>
-    
-      <li><span>21 Apr 2013</span> &raquo; <a href="/all/blog/2013/04/21/Bit-Flags-Are-Pretty-Cool.html">Bit Flags are Pretty Cool</a></li>
     
   </ul>
 </div>
