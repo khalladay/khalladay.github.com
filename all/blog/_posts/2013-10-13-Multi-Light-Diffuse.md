@@ -5,7 +5,7 @@ title: Writing Multi-Light Pixel Shaders in Unity
 
 One of the first things that people get shown when they start learning shaders is how to write a simple, single light, diffuse shader. I have yet to see a single shader tutorial out there that ever returns to this initial exercise to demonstrate how to write shaders which can properly interact with multiple (and different kinds of) lights. So I'm going to try to fill in that gap with what I've managed to figure out on my own. 
 
-Whether you want to write geometry shaders that still are lit correctly, or want to dig into your own truly custom lighting code, this will hopefully serve as a good starting point. To be clear, the end goal of this tutorial is simply to have a pixel shader that looks as close as possible to the built in Diffuse shader. The end result of this shader looks like this: 
+This will hopefully serve as a good starting point for any truly custom lighting shaders you want to write. To be clear, the end goal of this tutorial is simply to have a pixel shader that looks as close as possible to the built in Diffuse shader. The end result of this shader looks like this: 
 
 <div align="center">
 <img src="/images/post&#95;images/2013-10-13/shader&#95;output.png" /><br>
