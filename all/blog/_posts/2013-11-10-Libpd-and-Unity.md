@@ -161,4 +161,24 @@ void OnGUI()
 OnAudioFilterRead is the callback method used by LibPd4Unity's library. It will be called whenever the internal audio buffer has been filled. I'm really not sure why we're checking that libPD.Process returns 0, although I assume that's LibPD's "all good" return value. 
 Inside that block you can see how to pass messages to the currently running patch. What tripped me up for awhile was both the need to prepend the target value's name with the int name of the loaded patch, and the need to leave off the "$0" part of the variable name, which is displayed when you open the patch in pd. 
 
-However, as long as you keep the formatting in mind, passing values to the patch really isn't all that difficult! In fact, that's all there is to it. If you've hit any difficulties or need further clarification on something I've said here, you can download a sample project [from github](https://github.com/khalladay/Unity-PD-Sample), or send me a message [on Twitter.](http://twitter.com/khalladay) Hope this tutorial helped! 
+<h2>Building a Project on Mac</h2>
+
+Everything should now work fine in the editor, but if you're on mac, your journey is not over yet!
+
+If you have tried to actually create a build, you will have noticed the big, ugly error message that pops up: 
+
+**Error building Player: IOException: Cannot create Temp/StagingArea/UnityPlayer.app/Contents/Plugins/libpdcsharp.bundle/libpdcsharp.bundle because a file with the same name already exists.**
+
+Apparently Unity really really hates people who use libpd. Thankfully, there is a solution!
+
+* Remove libpdcsharp.bundle from your plugins folder (but don't delete it, we'll need it in a second)
+* Build your project as you normally would
+* Locate the .app file that you just built, right click on it, and select "Show Package Contents," and open the "Contents" folder within
+* If there is no folder named "Plugins" inside Contents, create one now. 
+* Paste libpdcsharp.bundle into the Plugins folder
+* Go back to your Unity project, and copy the .pd file from your resources folder
+* Paste this file into the Resources folder located inside your .app's Contents folder.
+
+All of this is necessary because Unity's build process doesn't like the libpdcsharp bundle, and attempts to copy it multiple times (creating that ugly error), and completely ignores the patch file in Resources because it doesn't recognize the file extension. Thankfully, all that's needed to resolve this a mildly annoying process. 
+
+If you've made it this far, you should now have a unity project that can interact with Pure Data plugins, and can actually create builds! Congratulations! If you've hit any difficulties or need further clarification on something I've said here, you can download a sample project [from github](https://github.com/khalladay/Unity-PD-Sample), or send me a message [on Twitter.](http://twitter.com/khalladay) Hope this tutorial helped! 
