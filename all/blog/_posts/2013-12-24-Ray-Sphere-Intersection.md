@@ -3,7 +3,7 @@ layout: post
 title: Ray-Sphere Intersection with Simple Math 
 ---
 
-Lately I've been working on a ray tracer. It's been going well (or at least as well as I could hope my first renderer could go), but it has been a slow process. I don't have a formal math background - my day to day work only ever goes as far as enough linear algebra to write shaders, and enough of everything else to implement whatever gameplay I need - and none of this prepared me for the endless pages of ray tracing resources that expected much more math knowledge than I had.
+Lately I've been working on a ray tracer. It's been going well (or at least as well as I could hope my first renderer could go), but it has been a slow process. I don't have a formal math background - my day to day work only ever goes as far as enough linear algebra to write shaders, and enough of everything else to implement whatever gameplay I need - and none of this prepared me for the endless pages of ray tracing resources that expected much more math knowledge than I have.
 
 <div align="center">
 <img src="/images/post&#95;images/2013-12-24/traceoutput.png" /><br>
