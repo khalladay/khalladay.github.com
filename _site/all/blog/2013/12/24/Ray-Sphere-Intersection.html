@@ -36,11 +36,11 @@
 <br>
 <p>Lately I&#8217;ve been working on a ray tracer. It&#8217;s been going well (or at least as well as I could hope my first renderer could go), but it has been a slow process. I don&#8217;t have a formal math background - my day to day work only ever goes as far as enough linear algebra to write shaders, and enough of everything else to implement whatever gameplay I need - and none of this prepared me for the endless pages of ray tracing resources that expected much more math knowledge than I have.</p>
 <div align='center'>
-<img src='/images/post&#95;images/2013-12-24/traceoutput.png' />
+<img src='/images/post&#95;images/2013-12-24/traceoutput.png' /><br />
 <font size='2'>
 The current output of my ray tracer 
 </font>
-</div>
+</div><br />
 <p>So I thought that I&#8217;d do my part for the next person who starts writing a ray tracer, and share a bit of what I&#8217;ve figured out in as much detail as possible, as clearly as possible.</p>
 
 <p>As the title of this post suggests, the end product of this post will be a function which will take a ray and a sphere, and return both if the they intersect, and if so, the location of the intersection(s).</p>
@@ -65,20 +65,20 @@ The current output of my ray tracer
 <p>With these 2 vectors, we can represent any point on the ray like this:</p>
 <div align='center'>
 Origin + Direction * t = Point
-</div>
+</div><br />
 <p>Each point will have a specific t value, representing how far along the direction vector the point lies, but the equation remains the same otherwise. This will be important later, so make sure that you try this out on paper and really understand it before proceeding.</p>
 <div align='center'>
-<img src='/images/post&#95;images/2013-12-24/raysphere2.png' />
-</div>
+<img src='/images/post&#95;images/2013-12-24/raysphere2.png' /><br />
+</div><br />
 <p>Spheres are even simpler. Given that spheres don&#8217;t have a direction, all we need is the location of the center point, and the radius of the sphere. This means our sphere object will simply be a struct containing one vector and one float.</p>
 <pre><code>struct Sphere
 {
 	vec3 center;
 	float radius;
 };
-</code></pre><h2>Turning Vectors into Scalar Values</h2><div align='center'>
-<img src='/images/post&#95;images/2013-12-24/raysphere1.png' />
-</div>
+</code></pre><h2>Turning Vectors into Scalar Values</h2><br /><div align='center'>
+<img src='/images/post&#95;images/2013-12-24/raysphere1.png' /><br />
+</div><br />
 <p>Alright, so the image above shows the general lay of the problem. We have a ray, and a sphere, we know the ray&#8217;s origin point, and it&#8217;s direction, and we know the location of the sphere&#8217;s center point. What we want to do, is determine if the ray will ever intersect the sphere (spoiler: in this tutorial, it will), and if so, where that intersection occurs.</p>
 
 <p>There are 2 points that I haven&#8217;t mentioned yet, labelled above as P1 and P2, these are the points that we want to solve for, as both of these represent a point of intersection.</p>
@@ -89,76 +89,76 @@ Origin + Direction * t = Point
 
 <p>So, in order to get the locations of the P0 and P1, all we need to do is find the correct t value for each of them. This is going to make our lives a lot easier, provided you remember a bit of trig (don&#8217;t worry, I didn&#8217;t either, we&#8217;ll go over it as we get to it), since now all we need to do is find 1 number for each point, instead of their exact co-ordinates.</p>
 <div align='center'>
-<img src='/images/post&#95;images/2013-12-24/raysphere1-2.png' />
-</div>
+<img src='/images/post&#95;images/2013-12-24/raysphere1-2.png' /><br />
+</div><br />
 <p>While we&#8217;re identifying values to solve for, there are two more t values that are important to us, shown below in blue and green, tc is the distance from the origin to the a point on the ray halfway between the 2 intersection points, and t1c is the distance between t1 and tc. We&#8217;ll see why these are important in a minute.</p>
 
 <p>To review these t values have been labelled t1, t2, tc and t1c. t1 and t2 correspond to the points P1 and P2 on our diagram, tc represents the t value to the center and t1c is the distance between P1 and tc.</p>
 <h2>Finding tc</h2>
 <p>As the headline suggests, the first value we need to solve for is tc. As the diagram below shows, the first step to finding tc is to create a right angle triangle, using tc, the vector from the sphere&#8217;s center to the ray&#8217;s origin, and a line (d) from the center to the ray.</p>
 <div align='center'>
-<img src='/images/post&#95;images/2013-12-24/raysphere4.png' />
-</div>
+<img src='/images/post&#95;images/2013-12-24/raysphere4.png' /><br />
+</div><br />
 <p>The first thing we need to find is the length of L. This is simple enough, since we know the positions of both the center and ray origin.</p>
 <div align='center'>
 L = C - Origin
-</div>
+</div><br />
 <p>Once we have L, we can use the dot product between L and the ray&#8217;s direction in order to get the value for tc. Don&#8217;t worry if this seems unintuitive, it had been awhile since I used dot product for projections too. Luckily there are lots of good resources out there that explain this concept (like this one). Moving on though, this means that we have found the value for tc:</p>
 <div align='center'>
 tc = L &middot; Direction
-</div>
+</div><br />
 <p>This is an important calculation. If the result of this is that tc is less than 0, it means that the ray does not intersect the sphere, and we can bail out of our intersection test early. If it&#8217;s not less than 0, we move on.</p>
 
 <p>The last thing we need to do with this triangle is solve for the length of d. This isn&#8217;t important for tc, but will be in the next section, so we may as well do it now while we&#8217;re still thinking about this triangle.</p>
 
 <p>To solve for d, we need to bust out some high school math. If you&#8217;re like me, you&#8217;ll need a bit of a refresher on this, and I found that it was helpful to rotate our triangle around bit to put it in a more familiar orientation.</p>
 <div align='center'>
-<img src='/images/post&#95;images/2013-12-24/raysphere5.png' />
-</div>
+<img src='/images/post&#95;images/2013-12-24/raysphere5.png' /><br />
+</div><br />
 <p>Looking familiar yet? If you can remember Pythagoras&#8217; Theorem, you&#8217;ll already know where I&#8217;m going with this. If not, I&#8217;ll help:</p>
 <div align='center'>
 a&sup2; + b&sup2; = c&sup2;
-</div>
+</div><br />
 <p>We need to find d, which in this case is edge b, so we need to rearrange the equation a bit:</p>
 <div align='center'>
-b&sup2; = c&sup2; - a&sup2;
-b = &#x221a;(c&sup2; - a&sup2;)
-</div>
+b&sup2; = c&sup2; - a&sup2;<br />
+b = &#x221a;(c&sup2; - a&sup2;)<br />
+</div><br />
 <p>Now we just sub in our known values from earlier</p>
 <div align='center'>
 d = &#x221a;(tc&sup2; - L&sup2;)
-</div>
+</div><br />
 <p>Just like tc before it, this is an important calculation. If d is greater than the radius of our sphere, it means that t1c will give us a point outside of the sphere, and our ray doesn&#8217;t intersect at all (and we can go home early).</p>
 
 <p>If not, great! Time to move on to the next triangle.</p>
-<h2>Solving for t1c</h2><div align='center'>
-<img src='/images/post&#95;images/2013-12-24/raysphere6.png' />
-</div>
+<h2>Solving for t1c</h2><br /><div align='center'>
+<img src='/images/post&#95;images/2013-12-24/raysphere6.png' /><br />
+</div><br />
 <p>Now that we have tc and d, this is actually incredibly easy. Since a&#178; + b&#178; = c&#178;, we already know the length of the edge labelled h (it&#8217;s the radius of the sphere) and the length of d. Using Pythagoras&#8217; Theorem again gives us:</p>
 <div align='center'>
-a&sup2; = c&sup2; - b&sup2;  
-a = &#x221a;(c&sup2; - b&sup2;)  
-t1c = &#x221a;(radius&sup2; - d&sup2;) 
-</div>
+a&sup2; = c&sup2; - b&sup2;  <br />
+a = &#x221a;(c&sup2; - b&sup2;)  <br />
+t1c = &#x221a;(radius&sup2; - d&sup2;) <br />
+</div><br />
 <p>Guess that means it&#8217;s time to move on to yet another subheading eh?</p>
 <h2>Solving for t1 and t2</h2>
 <p>Let&#8217;s look at our original diagram again:</p>
 <div align='center'>
-<img src='/images/post&#95;images/2013-12-24/raysphere7.png' />
+<img src='/images/post&#95;images/2013-12-24/raysphere7.png' /><br />
 </div>
 <p>Notice anything? Now that we have values for t1c and tc, solving for the two variables we actually want is trivial!</p>
 <div align='center'>
 t1 = tc - t1c 
-
+<br />
 t2 = tc + t1c 
-
-</div>
+<br />
+</div><br />
 <p>Which means that all we need to do to get our intersection points is:</p>
 <div align='center'>
 P1 = Origin + Direction * t1 
-
+<br />
 P2 = Origin + Direction * t2
-</div><h2>An Intersect Function</h2>
+</div><br /><h2>An Intersect Function</h2><br />
 <p>Congratulations on getting this far! Now that we have all that theory out of the way, it&#8217;s time for your prize: a sphere intersection function! Let&#8217;s see what that might look like if we simply went step by step using the instructions above:</p>
 <pre><code>bool intersect(Ray* r, Sphere* s)
 {
