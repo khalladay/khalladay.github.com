@@ -47,9 +47,7 @@ With these 2 vectors, we can represent any point on the ray like this:
 Origin + Direction * t = Point
 
 </div>
-
 <br>
-
 Each point will have a specific t value, representing how far along the direction vector the point lies, but the equation remains the same otherwise. This will be important later, so make sure that you try this out on paper and really understand it before proceeding. 
 
 <div align="center">
@@ -92,6 +90,7 @@ Origin + Direction * t = Point
 
 </div>
 
+<br>
 So, in order to get the locations of the P0 and P1, all we need to do is find the correct t value for each of them. This is going to make our lives a lot easier, provided you remember a bit of trig (don't worry, I didn't either, we'll go over it as we get to it), since now all we need to do is find 1 number for each point, instead of their exact co-ordinates. 
 
 <div align="center">
