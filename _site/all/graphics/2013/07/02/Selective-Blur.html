@@ -34,15 +34,15 @@
 
 <div id="post">
 <br>
-<img src="/images/Selective-Blur.png" width="100" height="100" align="right" style="padding-right:15px"><p>Selective-Blur is my first released graphics project! It&#8217;s a shader replacement effect for Unity Pro that allows blurring of individual materials without blurring the entire scene.</p>
+<img src="/images/Selective-Blur.png" width="100" height="100" align="right" style="padding-right:15px"><p>Selective-Blur is my first released graphics project! It’s a shader replacement effect for Unity Pro that allows blurring of individual materials without blurring the entire scene.</p>
 <h4>Here's how it works: </h4>
-<p>A camera with the blur effect script is childed to the user&#8217;s camera. The blur effect script calls RenderWithShader on the camera every frame, and uses a replacement shader that looks for specific RenderType tags in the materials in view. The output is rendered to a texture, which then has a gaussian blur applied to it before being drawn as a GUI texture over top of the user&#8217;s view.</p>
+<p>A camera with the blur effect script is childed to the user’s camera. The blur effect script calls RenderWithShader on the camera every frame, and uses a replacement shader that looks for specific RenderType tags in the materials in view. The output is rendered to a texture, which then has a gaussian blur applied to it before being drawn as a GUI texture over top of the user’s view.</p>
 
-<p>A web demo of this project is available <a href='/demos/blurdemo/blurdemo.html'>here</a></p>
+<p>A web demo of this project is available <a href="/demos/blurdemo/blurdemo.html">here</a></p>
 
-<p>This project is open source! Check out the repo <a href='https://github.com/khalladay/Unity-SelectiveBlur'>here</a></p>
+<p>This project is open source! Check out the repo <a href="https://github.com/khalladay/Unity-SelectiveBlur">here</a></p>
 
-<p><img alt='blur1' src='/images/post_images/2013-07-02/blur1.png' /> <img alt='blur2' src='/images/post_images/2013-07-02/blur2.png' /></p>
+<p><img src="/images/post_images/2013-07-02/blur1.png" alt="blur1" /> <img src="/images/post_images/2013-07-02/blur2.png" alt="blur2" /></p>
 
 <p>I will be maintaining and improving this repository whenever the mood strikes me. I would like to optimize it to avoid using GUI.DrawTexture, add support for blur mask textures, and increase the number of blur shaders present. Pull requests are very welcome if you want to add or fix up something before I get to it :D</p>
 </div>

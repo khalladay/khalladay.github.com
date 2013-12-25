@@ -42,7 +42,7 @@
 
 <p>This post will ONLY cover building the engine itself. The next article will cover how to get the Xcode 4 templates to work (they’re broken in some weird spots in Xcode 4.5).</p>
 
-<h3 id='ingredients'>Ingredients</h3>
+<h3 id="ingredients">Ingredients</h3>
 
 <ul>
 <li>OGRE 1.8.1 Source for Linux/OSX</li>
@@ -56,7 +56,7 @@
 <li>This tutorial assumes you’re using Xcode 4.5, although I don’t know if that makes a difference for what we’re doing.</li>
 </ul>
 
-<h3 id='setting_up_the_source_directory'>Setting up the source directory</h3>
+<h3 id="setting_up_the_source_directory">Setting up the source directory</h3>
 
 <ul>
 <li>Extract the Ogre src zip file into wherever you want your Ogre SDK to be installed to. I just put it in my Macintosh HD directory so that it was easy to find, but I think the more correct place to put it is in ~/Library/Developer/SDKs</li>
@@ -72,23 +72,23 @@
 <li>drag the boost libraries at Dependencies/lib into this folder.</li>
 </ul>
 
-<h3 id='cooking_with_cmake'>Cooking With CMake</h3>
+<h3 id="cooking_with_cmake">Cooking With CMake</h3>
 
 <ul>
 <li>Start CMake’s GUI tool</li>
 
 <li>Hit the Browse Source button on the top right, and select the ogre sdk folder that you’ve been working with&lt;</li>
 
-<li>Copy and paste this directory into the &#8220;Where to build the binaries&#8221; field as well. Add the name of your build folder to the end of this path. For me, this was /ogre_src_v1-8-1/1.81, but the name of folder isn&#8217;t important, it&#8217;s just important that this build folder IS NOT your root sdk folder. That way, if something goes wrong, you can start the build process over again without having to do all the previous steps.</li>
+<li>Copy and paste this directory into the “Where to build the binaries” field as well. Add the name of your build folder to the end of this path. For me, this was /ogre_src_v1-8-1/1.81, but the name of folder isn’t important, it’s just important that this build folder IS NOT your root sdk folder. That way, if something goes wrong, you can start the build process over again without having to do all the previous steps.</li>
 
-<li>Hit &#8220;Configure&#8221; and make sure that &#8220;Xcode&#8221; and &#8220;Use default native compilers&#8221; is selected. Then click done</li>
+<li>Hit “Configure” and make sure that “Xcode” and “Use default native compilers” is selected. Then click done</li>
 
-<li>You should see a bunch of options highlighted in red. That&#8217;s fine. Ensure that OGRE_BUILD_CG is selected, and then press configure again. NOTE: the Cmake console will show a number of warnings in red. IGNORE THESE.</li>
+<li>You should see a bunch of options highlighted in red. That’s fine. Ensure that OGRE_BUILD_CG is selected, and then press configure again. NOTE: the Cmake console will show a number of warnings in red. IGNORE THESE.</li>
 
 <li>Once that’s done, click “Generate” and exit CMake</li>
 </ul>
 
-<h3 id='building_ogre'>Building Ogre</h3>
+<h3 id="building_ogre">Building Ogre</h3>
 
 <ul>
 <li>Navigate to your build directory now, and open the Xcode project you just generated.</li>
@@ -102,7 +102,7 @@
 <li>If you want to, once the build is complete, change your build to release mode and build again to get Ogre built in release.</li>
 </ul>
 
-<h3 id='verifying_the_build'>Verifying the Build</h3>
+<h3 id="verifying_the_build">Verifying the Build</h3>
 
 <ul>
 <li>You should now have 2 folders in your build directories bin folder. (Release and Debug), inside each folder should be a copy of SampleBrowser.app. To ensure everything is working, run one of these programs and go through each sample.</li>

@@ -34,13 +34,13 @@
 
 <div id="post">
 <br>
-<p>I recently posted a shader pack in the graphics section of the site which created a cool &#8220;dissolve&#8221; (for lack of a better descriptor) effect, similar to the skin of Skyrim&#8217;s dragons during their death animation. As requested by reddit, this post detail exactly what you need to know to write one of these shaders yourself, and hopefully, provide you with a good base with which to modify my shaders to your specific needs. I&#8217;m going to attempt to start from square one and not assume any shader experience on your part, but it will probably help if you have a general idea of how to build a basic shader before hand.</p>
+<p>I recently posted a shader pack in the graphics section of the site which created a cool “dissolve” (for lack of a better descriptor) effect, similar to the skin of Skyrim’s dragons during their death animation. As requested by reddit, this post detail exactly what you need to know to write one of these shaders yourself, and hopefully, provide you with a good base with which to modify my shaders to your specific needs. I’m going to attempt to start from square one and not assume any shader experience on your part, but it will probably help if you have a general idea of how to build a basic shader before hand.</p>
 
-<p>Let&#8217;s get started.</p>
+<p>Let’s get started.</p>
 <h2>Getting Started</h2>
 <p>The obvious first step here is to open up Unity and create a new shader. Unity is going to assume that you would like to create a surface shader, and pre-populate a lot of boiler plate code. Thanks Unity! Now, delete all of it and give yourself a nice, clean slate to work with.</p>
 
-<p>Now that that&#8217;s cleaned up, start your shader with the lines:</p>
+<p>Now that that’s cleaned up, start your shader with the lines:</p>
 <pre><code>Shader "MyDissolveShader"
 {
 	Properties
@@ -53,16 +53,18 @@
 	}
 }
 </code></pre>
-<p>This is a bit of Unity specific structure; the &#8220;Properties&#8221; section will allow us to define which variables we want to expose in the inspector, while the &#8220;SubShader&#8221; section will hold the actual code used in our shader.</p>
+<p>This is a bit of Unity specific structure; the “Properties” section will allow us to define which variables we want to expose in the inspector, while the “SubShader” section will hold the actual code used in our shader.</p>
 
-<p>Ok, now let&#8217;s figure out exactly what we will need the user to define. Take another look at what the effect looks like:</p>
+<p>Ok, now let’s figure out exactly what we will need the user to define. Take another look at what the effect looks like:</p>
 <div align='center'>
 	<img src='/images/post_images/2013-09-28/dissolve.png' /><br />
 	<font size='2'>
 	Pretty snazzy, isn't it?
 	</font>
-</div><br />
-<p>First off, we&#8217;re going to need the user to tell us what texture the put on the mesh for its normal undissolved state. The convention with Unity shaders is to call this texture &#95;MainTex. So let&#8217;s add that to our properties.</p>
+</div>
+<p><br /></p>
+
+<p>First off, we’re going to need the user to tell us what texture the put on the mesh for its normal undissolved state. The convention with Unity shaders is to call this texture _MainTex. So let’s add that to our properties.</p>
 <pre><code>Shader "MyDissolveShader"
 {
 	Properties
@@ -75,9 +77,9 @@
 	}
 }
 </code></pre>
-<p>The new line in properties shows how to define a regular texture for the inspector. We are going to call this variable &#95;MainTex in our code, so that goes first. The &#8220;Main Texture&#8221; string in the parentheses defines that we want the inspector to display as this variables name. The subsequent &#8220;2D&#8221; declares that this slot in the inspector will accept a 2D texture. The &#8220;values after the equals sign &#8220;white&#8221;{} after the equals sign just sets the default value of this field to a generic white texture.</p>
+<p>The new line in properties shows how to define a regular texture for the inspector. We are going to call this variable _MainTex in our code, so that goes first. The “Main Texture” string in the parentheses defines that we want the inspector to display as this variables name. The subsequent “2D” declares that this slot in the inspector will accept a 2D texture. The “values after the equals sign “white”{} after the equals sign just sets the default value of this field to a generic white texture.</p>
 
-<p>Ok, so now that we&#8217;ve figured out how to declare a texture, what other textures will we need? For this shader, we&#8217;re not going to use bump maps, so the only other texture we need is something to define the shape of the dissolve effect. Let&#8217;s call that &#95;DissolveMap.</p>
+<p>Ok, so now that we’ve figured out how to declare a texture, what other textures will we need? For this shader, we’re not going to use bump maps, so the only other texture we need is something to define the shape of the dissolve effect. Let’s call that _DissolveMap.</p>
 <pre><code>Shader "MyDissolveShader"
 {
 	Properties
@@ -91,9 +93,9 @@
 	}
 }
 </code></pre>
-<p>Ok, aside from our textures we also need 2 floats to control the progress of the effect and size of the edge lines. However, we want to be able to control the range of these floats, so that our users don&#8217;t set them to values that are outside of what makes sense for our shader. One way of doing this is with the Range type. Any variables marked as type Range in the properties panel will display as a slider, that moves between the low and high values we define.</p>
+<p>Ok, aside from our textures we also need 2 floats to control the progress of the effect and size of the edge lines. However, we want to be able to control the range of these floats, so that our users don’t set them to values that are outside of what makes sense for our shader. One way of doing this is with the Range type. Any variables marked as type Range in the properties panel will display as a slider, that moves between the low and high values we define.</p>
 
-<p>Finally, I&#8217;m going to add a Color variable to allow us to define what colour the edges of the effect are.</p>
+<p>Finally, I’m going to add a Color variable to allow us to define what colour the edges of the effect are.</p>
 <pre><code>Shader "MyDissolveShader"
 {
 	Properties
@@ -114,9 +116,9 @@
 </code></pre>
 <p>One thing to note is that we want the range of the dissolve effect to be functionally between 0.0 and 1.0, but in order to account for the line width, we need to expand the range in both directions by the maximum size the lines can be, otherwise lines will show up when the mesh should have no dissolve applied, and when it should be completely transparent.</p>
 
-<p>Ok perfect, so now that that&#8217;s taken care of, let&#8217;s move on the actually writing a shader!</p>
+<p>Ok perfect, so now that that’s taken care of, let’s move on the actually writing a shader!</p>
 <h2>Setting Things Up</h2>
-<p>So now we move down to the SubShader tag. We&#8217;re going to be writing a surface shader. Surface shaders are a unity specific type of shorthand that takes care of all the lighting specific shader code for you. It&#8217;s perfect for our purposes. What this also decides for us is that our shader needs to be written in CG (as opposed to glsl or hlsl).</p>
+<p>So now we move down to the SubShader tag. We’re going to be writing a surface shader. Surface shaders are a unity specific type of shorthand that takes care of all the lighting specific shader code for you. It’s perfect for our purposes. What this also decides for us is that our shader needs to be written in CG (as opposed to glsl or hlsl).</p>
 
 <p>The first things we need to do with our shader are tell Unity to expect CG code, and what variables we want our code to access from outside of the shader itself.</p>
 <pre><code>Shader "MyDissolveShader"
@@ -147,11 +149,11 @@
 	}
 }
 </code></pre>
-<p>Most of this is hopefully self explanatory, but the one line that may not be is the #pragma&#8230; line. This is a surface shader specific pragma that tells unity that we want our model to be lit according to the Lamber lighting model (diffuse lighting). Behind the scenes, Unity will add the code necessary for this lighting model to our shader when it compiles.</p>
+<p>Most of this is hopefully self explanatory, but the one line that may not be is the #pragma… line. This is a surface shader specific pragma that tells unity that we want our model to be lit according to the Lamber lighting model (diffuse lighting). Behind the scenes, Unity will add the code necessary for this lighting model to our shader when it compiles.</p>
 
-<p>The other lines added are just declarations of the data we&#8217;re getting from the inspector, so that our shader knows to use this data. It&#8217;s important that the variable names used here are exactly the same as the ones we used in the Properties section. The datatypes here are just the CG equivalents of the types we defined above (there&#8217;s no such thing as a Color type in CG, so colours are representing as a 4 element vector).</p>
+<p>The other lines added are just declarations of the data we’re getting from the inspector, so that our shader knows to use this data. It’s important that the variable names used here are exactly the same as the ones we used in the Properties section. The datatypes here are just the CG equivalents of the types we defined above (there’s no such thing as a Color type in CG, so colours are representing as a 4 element vector).</p>
 
-<p>Now, let&#8217;s add the rest of the structural code we need in order for our shader to start taking shape.</p>
+<p>Now, let’s add the rest of the structural code we need in order for our shader to start taking shape.</p>
 <pre><code>Shader "MyDissolveShader"
 {
 	Properties
@@ -190,13 +192,13 @@
 	}
 }
 </code></pre>
-<p>The Input struct defines what information we need to access about each vertex in the model being shaded. In this case, all we need are uv co-ordinates for each of the textures that we&#8217;re using. Defining these variables as &#8220;uv&#95;&#8221; and then a texture name will automatically pull the correct uv&#8217;s for that texture.</p>
+<p>The Input struct defines what information we need to access about each vertex in the model being shaded. In this case, all we need are uv co-ordinates for each of the textures that we’re using. Defining these variables as “uv_” and then a texture name will automatically pull the correct uv’s for that texture.</p>
 
-<p>The surface shader system will handle dealing with the position and normal variables as it needs to, but we don&#8217;t need to worry about that.</p>
+<p>The surface shader system will handle dealing with the position and normal variables as it needs to, but we don’t need to worry about that.</p>
 
 <p>The surf function that I defined is just a boiler plate surface function. It takes the input we defined, and modifies a SurfaceOutput struct for Unity. This SurfaceOutput data will control what the fragment actually gets shaded as.</p>
 
-<p>The o.Albedo line shows how to set the colour of a fragment. In this case, all we&#8217;re doing is assigning each fragment the color white. We&#8217;re going to modify this now. The next example will show how to set a fragment to the colour it should be to display &#95;MainTex properly.</p>
+<p>The o.Albedo line shows how to set the colour of a fragment. In this case, all we’re doing is assigning each fragment the color white. We’re going to modify this now. The next example will show how to set a fragment to the colour it should be to display _MainTex properly.</p>
 <pre><code>Shader "MyDissolveShader"
 {
 	Properties
@@ -239,17 +241,17 @@
 	}
 }
 </code></pre>
-<p>If you&#8217;ve worked at all with shaders before this should make sense, we&#8217;re looking for what colour is at the position in the texture defined by the uv for this position on the mesh. o.Albedo doesn&#8217;t set the alpha of our fragment, so we use .rgb to trim the alpha from this function.</p>
+<p>If you’ve worked at all with shaders before this should make sense, we’re looking for what colour is at the position in the texture defined by the uv for this position on the mesh. o.Albedo doesn’t set the alpha of our fragment, so we use .rgb to trim the alpha from this function.</p>
 
-<p>I&#8217;ve gone ahead and defined a clear variable (this is a 4 element vector with r g b and a set to 0.0) and grabbed the color of this position in the dissolve map texture as well.</p>
+<p>I’ve gone ahead and defined a clear variable (this is a 4 element vector with r g b and a set to 0.0) and grabbed the color of this position in the dissolve map texture as well.</p>
 
 <p>Now we need to get to the good stuff, how to decide whether a given fragment should be shaded with the main texture, the line color, or the clear color.</p>
 <h2>The Good Stuff</h2>
-<p>We&#8217;re going to decide how to shade each fragment based on the red channel of the dissolve map. If the red value of that texture is above the value of &#95;DissolveVal, we are going to shade that fragment with the line colour. If it is above the value of &#95;DissolveVal + &#95;LineWidth, the fragment will be transparent.</p>
+<p>We’re going to decide how to shade each fragment based on the red channel of the dissolve map. If the red value of that texture is above the value of _DissolveVal, we are going to shade that fragment with the line colour. If it is above the value of _DissolveVal + _LineWidth, the fragment will be transparent.</p>
 
-<p>In a regular script, this would usually be done with an if/else statement, but unfortunately shaders don&#8217;t do if/else flows that well. You&#8217;ll get the correct value, but the shader will end up executing the code for every possible outcome before choosing the correct value. It&#8217;s much faster (and more shader-y) to use lerp for this. Lerp will mix two values together based on a third float value (if this value is 0, we end up with 100% of value A, if this is 1, we get 100% of value B). Hopefully this sounds like an if statement to you as well.</p>
+<p>In a regular script, this would usually be done with an if/else statement, but unfortunately shaders don’t do if/else flows that well. You’ll get the correct value, but the shader will end up executing the code for every possible outcome before choosing the correct value. It’s much faster (and more shader-y) to use lerp for this. Lerp will mix two values together based on a third float value (if this value is 0, we end up with 100% of value A, if this is 1, we get 100% of value B). Hopefully this sounds like an if statement to you as well.</p>
 
-<p>We&#8217;re going to define an integer that will serve as our conditional. The first choice we need to make is whether or not we are transparent. As stated before, we are only transparent if the red value of dissolve is greater than DissolveValue + LineWidth.</p>
+<p>We’re going to define an integer that will serve as our conditional. The first choice we need to make is whether or not we are transparent. As stated before, we are only transparent if the red value of dissolve is greater than DissolveValue + LineWidth.</p>
 <pre><code>
 void surf (Input IN, inout SurfaceOutput o) 
 {
@@ -263,7 +265,7 @@ void surf (Input IN, inout SurfaceOutput o)
 	int isAtLeastLine = int(dissolve.r - (_DissolveVal) + 0.99);
 }
 </code></pre>
-<p>The two ints do what their name implies. isClear resolve to 0 if dissolve.r isn&#8217;t greater than &#95;DissolvVal + &#95;LineWidth and isAtLeastLine will be 0 if we should use the regular texture instead of using the line color or transparency.</p>
+<p>The two ints do what their name implies. isClear resolve to 0 if dissolve.r isn’t greater than _DissolvVal + _LineWidth and isAtLeastLine will be 0 if we should use the regular texture instead of using the line color or transparency.</p>
 
 <p>Once we have those two values, the rest is pretty straight forward.</p>
 <pre><code>
@@ -284,9 +286,9 @@ void surf (Input IN, inout SurfaceOutput o)
 }
 
 </code></pre>
-<p>In case it isn&#8217;t clear, the 2 lines we just added choose whether or not the alt color is clear or the line color, and then choose whether or not we should use the main texture, or the alt color.</p>
+<p>In case it isn’t clear, the 2 lines we just added choose whether or not the alt color is clear or the line color, and then choose whether or not we should use the main texture, or the alt color.</p>
 
-<p>We&#8217;re almost done! If you switch over to Unity now you might notice that nothing is really going transparent, it&#8217;s just going black. This is because we haven&#8217;t yet told Unity that this will be a transparent shader. Because of the order things are rendered, you need to explicitly tell Unity when a shader will draw transparent fragments. Luckily this is a pretty simple addition to the top of the shader.</p>
+<p>We’re almost done! If you switch over to Unity now you might notice that nothing is really going transparent, it’s just going black. This is because we haven’t yet told Unity that this will be a transparent shader. Because of the order things are rendered, you need to explicitly tell Unity when a shader will draw transparent fragments. Luckily this is a pretty simple addition to the top of the shader.</p>
 <pre><code>Shader "MyDissolveShader"
 {
 	Properties
@@ -342,9 +344,9 @@ void surf (Input IN, inout SurfaceOutput o)
 	}
 }
 </code></pre>
-<p>It takes 3 lines to make the shader transparent. The Tags.. line tells Unity to render objects using this shader when it renders transparent geometry and the Blend line defines how our transparency behaves. The one above tells our shader to use alpha blending (as opposed to being additive, or multiplicative transparency). Finally the o.Alpha&#8230; line defines the transparency of the fragment being shaded.</p>
+<p>It takes 3 lines to make the shader transparent. The Tags.. line tells Unity to render objects using this shader when it renders transparent geometry and the Blend line defines how our transparency behaves. The one above tells our shader to use alpha blending (as opposed to being additive, or multiplicative transparency). Finally the o.Alpha… line defines the transparency of the fragment being shaded.</p>
 
-<p>Put all together, you have the Dissolve Diffuse shader from my Dissolve Shader pack! Hopefully this tutorial was helpful. Shoot any feedback you have to me <a href='http://twitter.com/khalladay'>on Twitter</a>. Happy shading!</p>
+<p>Put all together, you have the Dissolve Diffuse shader from my Dissolve Shader pack! Hopefully this tutorial was helpful. Shoot any feedback you have to me <a href="http://twitter.com/khalladay">on Twitter</a>. Happy shading!</p>
 </div>
 
 

@@ -34,38 +34,40 @@
 
 <div id="post">
 <br>
-<p>About 6 months ago, for 1GAM, Johannes and I spent a month tinkering with LibPD (the end result was Synapse). LibPD, for those of you who don&#8217;t know, is a library for working with <a href='http://puredata.info/'>Pure-Data</a>, a visual programming tool for procedural audio. Out of the box, it doesn&#8217;t work nicely with Unity, but there&#8217;s a repository called libpd4unity that simplifies the process.</p>
+<p>About 6 months ago, for 1GAM, Johannes and I spent a month tinkering with LibPD (the end result was Synapse). LibPD, for those of you who don’t know, is a library for working with <a href="http://puredata.info/">Pure-Data</a>, a visual programming tool for procedural audio. Out of the box, it doesn’t work nicely with Unity, but there’s a repository called libpd4unity that simplifies the process.</p>
 <div align='center'>
 <img src='/images/post&#95;images/2013-11-10/pd.png' /><br />
 <font size='2'>
 The sample pd program used in this tutorial
 </font>
-</div><br />
-<p>Libpd4unity isn&#8217;t suited to really in depth PD development in Unity (at the moment it seems to only support loading one patch at a time), but you can still do some interesting things with it. So today, I&#8217;m going to go over the process of setting up libpd4unity with Unity.</p>
+</div>
+<p><br /></p>
 
-<p>If you&#8217;re on mac, you may be a bit disappointed to see that there isn&#8217;t a mac compatible pd library in the libpd4unity class, so the first step for us is to compile a .bundle for mac. If you&#8217;re on windows, skip down to the actual programming.</p>
+<p>Libpd4unity isn’t suited to really in depth PD development in Unity (at the moment it seems to only support loading one patch at a time), but you can still do some interesting things with it. So today, I’m going to go over the process of setting up libpd4unity with Unity.</p>
+
+<p>If you’re on mac, you may be a bit disappointed to see that there isn’t a mac compatible pd library in the libpd4unity class, so the first step for us is to compile a .bundle for mac. If you’re on windows, skip down to the actual programming.</p>
 <h2>Building libpdcsharp.bundle</h2>
 <p>Thankfully this is pretty straightfoward, if a bit weird:</p>
 
 <ul>
-<li>Download the <a href='https://github.com/libpd/libpd'>LibPD Project</a> from github</li>
+<li>Download the <a href="https://github.com/libpd/libpd">LibPD Project</a> from github</li>
 
-<li>In terminal, cd into the downloaded project folder and type the command <a href='https://github.com/libpd/libpd/wiki/Building-the-C%23-Api'>make csharplib</a></li>
+<li>In terminal, cd into the downloaded project folder and type the command <a href="https://github.com/libpd/libpd/wiki/Building-the-C%23-Api">make csharplib</a></li>
 
 <li>libcsharp.dylib should now be created inside the libs folder. Copy that to the Assets/Plugins folder in Unity</li>
 
 <li>Rename this file to libcsharp.bundle. Unity has a problem locating dylibs.</li>
 
-<li>You&#8217;re good to go!</li>
+<li>You’re good to go!</li>
 </ul>
 <h2>LibPD and Unity</h2>
-<p>Note: You will need to download <a href='https://github.com/patricksebastien/libpd4unity'>Libpd4Unity</a></p>
+<p>Note: You will need to download <a href="https://github.com/patricksebastien/libpd4unity">Libpd4Unity</a></p>
 
-<p>Ok now that that&#8217;s out of the way, it&#8217;s time for some fun stuff. First off, copy the LibPD folder from libpd4unity/Assets, and paste it into the assets folder of your project.</p>
+<p>Ok now that that’s out of the way, it’s time for some fun stuff. First off, copy the LibPD folder from libpd4unity/Assets, and paste it into the assets folder of your project.</p>
 
-<p>Next, make an Assets/Resources folder. This is a special folder that allows you to specify resources that you want to have available to Unity at runtime. Put your patches in this folder (or a subfolder of it). If you don&#8217;t have a patch to work with, or want to follow along exactly with this demo, you can grab the <a href='https://github.com/khalladay/Unity-PD-Sample/blob/master/Assets/Resources/example.pd'>simple sine patch</a> from the repo for this post&#8217;s example project (patch courtesy of <a href='johannesg.com'>johannesg.com</a> ).</p>
+<p>Next, make an Assets/Resources folder. This is a special folder that allows you to specify resources that you want to have available to Unity at runtime. Put your patches in this folder (or a subfolder of it). If you don’t have a patch to work with, or want to follow along exactly with this demo, you can grab the <a href="https://github.com/khalladay/Unity-PD-Sample/blob/master/Assets/Resources/example.pd">simple sine patch</a> from the repo for this post’s example project (patch courtesy of <a href="johannesg.com">johannesg.com</a> ).</p>
 
-<p>Now that all the housekeeping is taken care of, it&#8217;s time to actually interact with a patch program from Unity. LibPd4Unity comes with an example script called LibPdFilterRead.cs that will serve as the basic outline for our class, but we&#8217;re going to tailor ours to suit our needs a bit better.</p>
+<p>Now that all the housekeeping is taken care of, it’s time to actually interact with a patch program from Unity. LibPd4Unity comes with an example script called LibPdFilterRead.cs that will serve as the basic outline for our class, but we’re going to tailor ours to suit our needs a bit better.</p>
 <pre><code>
 using UnityEngine;
 using System.Collections;
@@ -87,7 +89,7 @@ public class OSCControl : MonoBehaviour
 	private float freq = 500;
 		
 </code></pre>
-<p>The script I&#8217;m going to build here interacts with the sample patch linked above.</p>
+<p>The script I’m going to build here interacts with the sample patch linked above.</p>
 
 <p>Lets go through these variables:</p>
 
@@ -96,7 +98,7 @@ public class OSCControl : MonoBehaviour
 
 <li>playOnAwake: what it says on the tin</li>
 
-<li>patchIsStereo: only check this if you are SURE your patch is stereo, otherwise you&#8217;ll hear garbled crap</li>
+<li>patchIsStereo: only check this if you are SURE your patch is stereo, otherwise you’ll hear garbled crap</li>
 
 <li>patchName: the integer patch name generated by LibPD</li>
 
@@ -106,12 +108,12 @@ public class OSCControl : MonoBehaviour
 
 <li>dataHandle: this will eventually be used to let us have access to the audio stream from pd without worrying about the garbage collector</li>
 
-<li>dataPtr: this will hold the address of the patch we&#8217;re interacting with</li>
+<li>dataPtr: this will hold the address of the patch we’re interacting with</li>
 
 <li>freq: the frequency we want to pass to our program</li>
 </ul>
 
-<p>Now let&#8217;s get to some functionality</p>
+<p>Now let’s get to some functionality</p>
 <pre><code>
 void Awake ()
 {
@@ -132,11 +134,11 @@ public void loadPatch ()
 	islibpdready = true;
 }
 </code></pre>
-<p>Awake isn&#8217;t all that interesting, except to show off how to get the actual file path to the patch. Also note that loadPath() needs to be called before we can start working with pd.</p>
+<p>Awake isn’t all that interesting, except to show off how to get the actual file path to the patch. Also note that loadPath() needs to be called before we can start working with pd.</p>
 
 <p>loadPatch is the standard initialization sequence for working with libPd.</p>
 
-<p>I&#8217;m going to hold off on the good stuff until the end, so we&#8217;re going to skip from the initialization process down to the cleanup process. This is a little more involved than the usual in C# because we are explicitly telling the garbage collector to not interact with the data stream, so we need to do a bit of manual memory management. This is taken directly from the example project in LibPd4Unity.</p>
+<p>I’m going to hold off on the good stuff until the end, so we’re going to skip from the initialization process down to the cleanup process. This is a little more involved than the usual in C# because we are explicitly telling the garbage collector to not interact with the data stream, so we need to do a bit of manual memory management. This is taken directly from the example project in LibPd4Unity.</p>
 <pre><code>
 public void closePatch ()
 {
@@ -155,7 +157,7 @@ public void OnDestroy()
 	dataPtr = IntPtr.Zero;
 }
 </code></pre>
-<p>I don&#8217;t have a good explanation for why we don&#8217;t need to free the dataHandle on close patch, so if anyone has an idea, shoot me a message on twitter and I can update the post. Otherwise, this is boilerplate code that will need to be added to every class that you write that will handle loading a Pd program.</p>
+<p>I don’t have a good explanation for why we don’t need to free the dataHandle on close patch, so if anyone has an idea, shoot me a message on twitter and I can update the post. Otherwise, this is boilerplate code that will need to be added to every class that you write that will handle loading a Pd program.</p>
 
 <p>And now finally, the good stuff!</p>
 <pre><code>
@@ -191,9 +193,9 @@ void OnGUI()
 	GUI.Box(r2, ""+freq+" hz");
 }
 </code></pre>
-<p>OnAudioFilterRead is the callback method used by LibPd4Unity&#8217;s library. It will be called whenever the internal audio buffer has been filled. I&#8217;m really not sure why we&#8217;re checking that libPD.Process returns 0, although I assume that&#8217;s LibPD&#8217;s &#8220;all good&#8221; return value. Inside that block you can see how to pass messages to the currently running patch. What tripped me up for awhile was both the need to prepend the target value&#8217;s name with the int name of the loaded patch, and the need to leave off the &#8220;$0&#8221; part of the variable name, which is displayed when you open the patch in pd.</p>
+<p>OnAudioFilterRead is the callback method used by LibPd4Unity’s library. It will be called whenever the internal audio buffer has been filled. I’m really not sure why we’re checking that libPD.Process returns 0, although I assume that’s LibPD’s “all good” return value. Inside that block you can see how to pass messages to the currently running patch. What tripped me up for awhile was both the need to prepend the target value’s name with the int name of the loaded patch, and the need to leave off the “$0” part of the variable name, which is displayed when you open the patch in pd.</p>
 <h2>Building a Project on Mac</h2>
-<p>Everything should now work fine in the editor, but if you&#8217;re on mac, your journey is not over yet!</p>
+<p>Everything should now work fine in the editor, but if you’re on mac, your journey is not over yet!</p>
 
 <p>If you have tried to actually create a build, you will have noticed the big, ugly error message that pops up:</p>
 
@@ -202,24 +204,24 @@ void OnGUI()
 <p>Apparently Unity really really hates people who use libpd. Thankfully, there is a solution!</p>
 
 <ul>
-<li>Remove libpdcsharp.bundle from your plugins folder (but don&#8217;t delete it, we&#8217;ll need it in a second)</li>
+<li>Remove libpdcsharp.bundle from your plugins folder (but don’t delete it, we’ll need it in a second)</li>
 
 <li>Build your project as you normally would</li>
 
-<li>Locate the .app file that you just built, right click on it, and select &#8220;Show Package Contents,&#8221; and open the &#8220;Contents&#8221; folder within</li>
+<li>Locate the .app file that you just built, right click on it, and select “Show Package Contents,” and open the “Contents” folder within</li>
 
-<li>If there is no folder named &#8220;Plugins&#8221; inside Contents, create one now.</li>
+<li>If there is no folder named “Plugins” inside Contents, create one now.</li>
 
 <li>Paste libpdcsharp.bundle into the Plugins folder</li>
 
 <li>Go back to your Unity project, and copy the .pd file from your resources folder</li>
 
-<li>Paste this file into the Resources folder located inside your .app&#8217;s Contents folder.</li>
+<li>Paste this file into the Resources folder located inside your .app’s Contents folder.</li>
 </ul>
 
-<p>All of this is necessary because Unity&#8217;s build process doesn&#8217;t like the libpdcsharp bundle, and attempts to copy it multiple times (creating that ugly error), and completely ignores the patch file in Resources because it doesn&#8217;t recognize the file extension. Thankfully, all that&#8217;s needed to resolve this a mildly annoying process.</p>
+<p>All of this is necessary because Unity’s build process doesn’t like the libpdcsharp bundle, and attempts to copy it multiple times (creating that ugly error), and completely ignores the patch file in Resources because it doesn’t recognize the file extension. Thankfully, all that’s needed to resolve this a mildly annoying process.</p>
 
-<p>If you&#8217;ve made it this far, you should now have a unity project that can interact with Pure Data plugins, and can actually create builds! Congratulations! If you&#8217;ve hit any difficulties or need further clarification on something I&#8217;ve said here, you can download a sample project <a href='https://github.com/khalladay/Unity-PD-Sample'>from github</a>, or send me a message <a href='http://twitter.com/khalladay'>on Twitter.</a> Hope this tutorial helped!</p>
+<p>If you’ve made it this far, you should now have a unity project that can interact with Pure Data plugins, and can actually create builds! Congratulations! If you’ve hit any difficulties or need further clarification on something I’ve said here, you can download a sample project <a href="https://github.com/khalladay/Unity-PD-Sample">from github</a>, or send me a message <a href="http://twitter.com/khalladay">on Twitter.</a> Hope this tutorial helped!</p>
 </div>
 
 

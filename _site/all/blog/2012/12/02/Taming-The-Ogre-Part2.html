@@ -38,7 +38,7 @@
 
 <p>All of this is taken from my experiences trying to get Ogre to work on my machine. Given that the templates bundled with Ogre were written by people much more knowledgeable than me, it wouldn’t surprise me if some of these issues aren’t universal problems. Hopefully my experiences are helpful, even if you only hit one of the numerous issues I described here.</p>
 
-<h3 id='what_you_will_need'>What you will need:</h3>
+<h3 id="what_you_will_need">What you will need:</h3>
 
 <ul>
 <li>A built version of Ogre 1.81 (see my previous post for how to build this)</li>
@@ -48,7 +48,7 @@
 
 <p>Note: This tutorial was written based on my experience working with Xcode 4.5, and OS X Lion. YMMV if you’re following along with a different configuration.</p>
 
-<h3 id='starting_the_project'>Starting the Project</h3>
+<h3 id="starting_the_project">Starting the Project</h3>
 
 <p>Let’s start at ground zero. Open Xcode and do the following:</p>
 
@@ -62,25 +62,25 @@
 
 <p>Now hit build. If everything is identical to my set up, you should get a build error saying that OgreCamera.h can’t be found. Theres a good reason for this: the include paths are missing a few directories. Rather than describe how to fix this, I’ve attached a screenshot of what my include paths end up looking like when I’m through fixing them. “1.81″ is the folder which stores my built Ogre3D library, and “ogre_src_v1-8-1″ is the root folder of the ogre sdk.</p>
 
-<p><img alt='Include Paths' src='/images/post_images/taming-the-ogre2/include_paths.png' /></p>
+<p><img src="/images/post_images/taming-the-ogre2/include_paths.png" alt="Include Paths" /></p>
 
 <p>This may not be the most optimal way to set up your include paths (I’m really, really hoping it isn’t, it’s pretty messy), but I’ve ran into strange issues marking things recursive, and so far, this set up has worked for me. Let me know if there’s a better way of doing things in the comments, and I’ll update this tutorial.</p>
 
 <p>Next move to the Library Search paths, and ensure that both paths are pointing to the correct location of the files they need. One should be pointing to the location of your ogre lib, and the other to the lib folder of your dependencies. If you hit build and see an error like this:</p>
 
-<p><img alt='Error Message' src='/images/post_images/taming-the-ogre2/lOIS_error.png' /></p>
+<p><img src="/images/post_images/taming-the-ogre2/lOIS_error.png" alt="Error Message" /></p>
 
 <p>it means that this step has not been done correctly.</p>
 
-<h3 id='restrict_your_architectures'>Restrict your architectures!</h3>
+<h3 id="restrict_your_architectures">Restrict your architectures!</h3>
 
 <p>Next ensure that your project is set to build only for the 64 bit architecture. As I mentioned in the last post, currently my set up is only configured to build for 64 bit machines, because I was running into a boat load of configuration errors trying to build for i386 as well. Since I’m nowhere near releasing something with OGRE just yet, I’ve decided to put off figuring out i386 config issues until I absolutely have to.</p>
 
-<h3 id='catching_a_wild_ditto'>Catching a wild Ditto!</h3>
+<h3 id="catching_a_wild_ditto">Catching a wild Ditto!</h3>
 
 <p>If you hit build now, you should end up with 1 error, the cryptically named “shell script invocation error,” which looks something like this:</p>
 
-<p><img alt='Ditto Error' src='/images/post_images/taming-the-ogre2/ditto_error.png' /></p>
+<p><img src="/images/post_images/taming-the-ogre2/ditto_error.png" alt="Ditto Error" /></p>
 
 <p>It’s a shame that this isn’t more descriptive, because it took me a long time to understand exactly what was going on, but fixing it is dead simple once you know what the error means.</p>
 
@@ -90,17 +90,17 @@
 
 <p>The offender is the last line,</p>
 
-<p>ditto $PROJECT_DIR/$PROJECT_NAME/&#42;.cfg &#8220;$BUILT_PRODUCTS_DIR/Tutorial.app/Contents/Resources/&#8221;</p>
+<p>ditto $PROJECT_DIR/$PROJECT_NAME/*.cfg “$BUILT_PRODUCTS_DIR/Tutorial.app/Contents/Resources/”</p>
 
 <p>(Note: Tutorial.app will be replaced by whatever you called the project on your machine)</p>
 
 <p>There’s a problem with the location of quotation marks here, which is causing the source path to be misinterpreted. Simply move the punctuation around to solve:</p>
 
-<p>ditto &#8220;$PROJECT_DIR/$PROJECT_NAME/&#8221;&#42;.cfg &#8220;$BUILT_PRODUCTS_DIR/OgreTest2.app/Contents/Resources/&#8221;</p>
+<p>ditto “$PROJECT_DIR/$PROJECT_NAME/”*.cfg “$BUILT_PRODUCTS_DIR/OgreTest2.app/Contents/Resources/”</p>
 
 <p>Hit build now, you should (finally) have a successful compile.</p>
 
-<h3 id='not_there_yet'>Not there yet.</h3>
+<h3 id="not_there_yet">Not there yet.</h3>
 
 <p>Unfortunately, we’re not done. Because now we get to sort through runtime errors. In your output, or your Ogre log file, you should see a message along the lines of</p>
 
@@ -116,11 +116,11 @@
 
 <p>Now, hit build/run one more time, and you should be greeted with this screen:</p>
 
-<p><img alt='Config Screen' src='/images/post_images/taming-the-ogre2/config_screen.png' /></p>
+<p><img src="/images/post_images/taming-the-ogre2/config_screen.png" alt="Config Screen" /></p>
 
 <p>Hit ok again to finally view the sum of all of our hard work:</p>
 
-<p><img alt='Config Screen' src='/images/post_images/taming-the-ogre2/ogrehead.png' /></p>
+<p><img src="/images/post_images/taming-the-ogre2/ogrehead.png" alt="Config Screen" /></p>
 
 <p>Finally, it’s all working! If you run into any problems not addressed here, grab me on twitter and we can work through it. I’d love to dig into this build process more through troubleshooting problems I haven’t hit yet. Additionally, if anyone has a better way of getting all of this done / setting up an Ogre project in Xcode, I’d love to hear about it, because I’m really hoping theres a less messy way of getting it all set up / configuring it for 1386. Regardless, thanks for reading!</p>
 </div>

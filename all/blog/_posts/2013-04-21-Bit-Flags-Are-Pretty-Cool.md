@@ -9,7 +9,9 @@ I've been working on prototype for (possibly) my next personal project, and one 
 I've had some fun before with packing a whole bunch of booleans into byte-sized structs using the bit field operator in C++, but I've never seen anything like that done in C#, and if I can help it, I try to avoid dealing directly with memory addresses in Unity scripts. Luckily, bit flags seem to do the exact same job (possibly better). To show you what I mean, let me link an example:
 <br>
 <br>
+
 <script src="https://gist.github.com/khalladay/5432282.js" class="gist">&nbsp;</script>
+
 <br>
 So here's whats going on: rather than specifying a int or float value for the members of the enum, you can assign each of them a hex number. Provided each of these hex numbers match up to the values represented by each bit in a byte (powers of 2), you can use all of the regular bitwise operations with these new enum values. 
 
