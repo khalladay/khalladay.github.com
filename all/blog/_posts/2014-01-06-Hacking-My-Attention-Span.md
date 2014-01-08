@@ -47,7 +47,7 @@ on run argv
 				repeat
 					set tryAgain to false
 					try
-						set value of text field 2 of scroll area 1 of group 1 to PASSWORD"
+						set value of text field 2 of scroll area 1 of group 1 to PASSWORD
 					on error
 						delay 1
 						set tryAgain to true
