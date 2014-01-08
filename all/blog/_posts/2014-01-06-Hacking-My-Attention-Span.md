@@ -19,12 +19,52 @@ The only issue I have with SelfControl is that I need to start it manually, and 
 Luckily, there is a way (that is less involved than forking the project and adding scheduling myself)! So if any of you are in the same boat, check out the following steps:
 
 * Download [SelfControl](http://selfcontrolapp.com/)<br>
-* Download [Usable-Keychain-Scripting](http://www.red-sweater.com/blog/446/usable-keychain-update) - this is an app that makes it easy to write applescript that needs authenticate with the keychain<br>
-* Open up Keychain Access, and go to File->New Password<br>
-* Create a new password named "SelfControl", with any account name you want, and a password.<br>
-* Open up Automator and create a new calendar alarm. <br>
-* In this calendar alarm, drag the action "Run Applescript" from utilities into your Automator Task. <br>
-* Paste the script from [here](http://hints.macworld.com/article.php?story=20100801214648362) into your Run Applescript task. The page with the code has instructions on how to set a duration to your liking. Make sure to use a multiple of 15.<br>
+* Open up Automator and create a new application. <br>
+* In this application, drag the action "Run Applescript" from utilities into your Automator Task. <br>
+* Paste the script below into the Run Applescript text area: 
+
+
+<pre style="background-color:white; color:black">
+on run argv
+	set defaultTime to YOUR-DURATION
+	
+	try
+		set myTime to item 1 of argv as number
+	on error
+		set myTime to defaultTime
+	end try
+	
+	tell application "SelfControl" to activate
+	
+	tell application "System Events"
+		tell process "SelfControl"
+			tell slider of window "SelfControl" to set value to myTime
+			click button "Start" of window "SelfControl"
+		end tell
+		
+		tell window 1 of process "SecurityAgent"
+			with timeout of 15 seconds
+				repeat
+					set tryAgain to false
+					try
+						set value of text field 2 of scroll area 1 of group 1 to PASSWORD"
+					on error
+						delay 1
+						set tryAgain to true
+					end try
+					if not tryAgain then exit repeat
+				end repeat
+				click button 2 of group 2
+			end timeout
+		end tell
+	end tell
+end run	
+</pre>
+
+Replace the YOUR-DURATION with a multiple of 15. This is how long SelfControl will run for. 
+
+Replace PASSWORD with your user password (with a quotation mark on each side). It's probably terrible to script something to do this, but the previous method (using) [Usable-Keychain-Scripting](http://www.red-sweater.com/blog/446/usable-keychain-update) seems to be broken in Mavericks; the above is the only way I could get this to work. 
+
 * Save your workflow (workflows are saved in ~/Library/Workflows)<br>
 * Create a repeating task in Calendar, and set its color to "Automator"<br>
 
