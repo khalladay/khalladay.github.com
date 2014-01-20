@@ -7,7 +7,7 @@ I tend to underestimate the complexity of projects (as I think most programmers 
 
 The concept involves users being able to write shaders while the program is running, and compiling them at runtime onto objects in the scene. Normally this wouldn't be an unreasonable task, however this project is being built in Unity, which complicates things immensely. 
 
-I had seen an example of shaderlab code being passed to the Material constructor at runtime before, but I hadn't ever seen anyone play around with any other shader language in the same way. It turns out that's because you can't. The [Material constructor](LINK) that I was hoping to use only accepts Shaderlab; Unity doesn't support runtime compilation of GLSL, Cg, or HLSL, end of story. 
+I had seen an example of shaderlab code being passed to the Material constructor at runtime before, but I hadn't ever seen anyone play around with any other shader language in the same way. It turns out that's because you can't. The [Material constructor](http://docs.unity3d.com/Documentation/ScriptReference/Material-ctor.html) that I was hoping to use only accepts Shaderlab; Unity doesn't support runtime compilation of GLSL, Cg, or HLSL, end of story. 
 
 Except that isn't the whole story. If it was, this would be a very short post. It turns out that with some elbow grease, you can actually get other languages (or at least GLSL) to compile. The rest of this post is going to show you how. 
 
