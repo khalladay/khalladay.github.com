@@ -38,7 +38,7 @@
 
 <p>The concept involves users being able to write shaders while the program is running, and compiling them at runtime onto objects in the scene. Normally this wouldn’t be an unreasonable task, however this project is being built in Unity, which complicates things immensely.</p>
 
-<p>I had seen an example of shaderlab code being passed to the Material constructor at runtime before, but I hadn’t ever seen anyone play around with any other shader language in the same way. It turns out that’s because you can’t. The <a href="LINK">Material constructor</a> that I was hoping to use only accepts Shaderlab; Unity doesn’t support runtime compilation of GLSL, Cg, or HLSL, end of story.</p>
+<p>I had seen an example of shaderlab code being passed to the Material constructor at runtime before, but I hadn’t ever seen anyone play around with any other shader language in the same way. It turns out that’s because you can’t. The <a href="http://docs.unity3d.com/Documentation/ScriptReference/Material-ctor.html">Material constructor</a> that I was hoping to use only accepts Shaderlab; Unity doesn’t support runtime compilation of GLSL, Cg, or HLSL, end of story.</p>
 
 <p>Except that isn’t the whole story. If it was, this would be a very short post. It turns out that with some elbow grease, you can actually get other languages (or at least GLSL) to compile. The rest of this post is going to show you how.</p>
 <div align='center'>
@@ -227,6 +227,7 @@ UnityEngine.Debug.Log(output);
 
 	<a href="mailto:k.mj.halladay@gmail.com" class="footerlink">E-mail</a> |
     <a href="http://ca.linkedin.com/pub/kyle-halladay/2b/658/a14/" class="footerlink">LinkedIn</a> |
+	<a href="https://www.shadertoy.com/user/khalladay" class="footerlink">ShaderToy</a> |
     <a href="http://twitter.com/khalladay" class="footerlink">Twitter</a>
 
 <p>&copy; 2013 <a href="/aboutme.html" class="footerlink">Kyle Halladay</a>
