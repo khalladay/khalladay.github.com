@@ -3,7 +3,7 @@ layout: post
 title: Creating GLSL Shaders at Runtime in Unity3D 
 ---
 
-I tend to underestimate the complexity of projects (as I think most programmers are notorious for doing), and my latest project in Unity is no exception.   
+The feeling of solving a problem that seems potentially impossible is awesome. My latest project is no exception.
 
 The concept involves users being able to write shaders while the program is running, and compiling them at runtime onto objects in the scene. Normally this wouldn't be an unreasonable task, however this project is being built in Unity, which complicates things immensely. 
 
