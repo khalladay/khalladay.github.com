@@ -3,11 +3,11 @@ layout: post
 title: Unit Testing Shaders with UUnit-SL
 ---
 
-tldr: Check out UUnit-SL [on github](https://github.com/khalladay/uunit-sl). 
+tldr? Check out UUnit-SL [on github](https://github.com/khalladay/uunit-sl). 
 
 A lot of my posts end up being about things that I've figured out and want to make easier for the next person who googles how to do. This is not one of those times, in fact I'm pretty sure that what I'm about to show off is either completely unhelpful or actually a bad idea, but I think it's an interesting experiment nonetheless. 
 
-I've recently been looking more seriously at unit testing my code. However, one concern I have with unit tests is that there doesn't seem to be an accepted way to test shaders. A common argument against this is that shaders are usually small enough to not need tests. I disagree, especially when it comes to implementing complex math within a shader. Also, if shaders can't be tested properly, that means a good portion of the work I do can't be tested, which is a shame. 
+A major concern I have with unit tests is that there doesn't seem to be an accepted way to test shaders. A common argument against this is that shaders are usually small enough to not need tests. I disagree, especially when it comes to implementing complex math within a shader. Also, if shaders can't be tested properly, that means a good portion of the work I do can't be tested, which is a shame. 
 
 So I've decided to try my hand at building a way to test shaders. I'm still on the fence about this whole thing, but if you're interested, all the details are here!
 
