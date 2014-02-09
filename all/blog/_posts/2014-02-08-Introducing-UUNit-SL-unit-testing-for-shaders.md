@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Introducing UUnit-SL, Unit tests for Shaders
+title: On Unit Testing Shaders
 ---
 
 tldr: Check out UUnit-SL [on github](https://github.com/khalladay/uunit-sl). 
