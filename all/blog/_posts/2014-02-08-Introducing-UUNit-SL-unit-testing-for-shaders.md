@@ -1,6 +1,6 @@
 ---
 layout: post
-title: On Unit Testing Shaders
+title: Unit Testing Shaders with UUnit-SL
 ---
 
 tldr: Check out UUnit-SL [on github](https://github.com/khalladay/uunit-sl). 
@@ -11,7 +11,7 @@ I've recently been looking more seriously at unit testing my code. However, one 
 
 So I've decided to try my hand at building a way to test shaders. I'm still on the fence about this whole thing, but if you're interested, all the details are here!
 
-<h2>Introducing UUnit-SL</h2>
+<h2>Introducing My Frankenstein: UUnit-SL</h2>
 
 [UUnit](http://wiki.unity3d.com/index.php?title=UUnit) is a common recommendation given on the forums as a place to start when trying to add testing to Unity projects. It doesn't have a lot of bells and whistles, but so far it seems to get the job done pretty well. So for this experiment, I've decided to extend UUnit to work with shaders. 
 
