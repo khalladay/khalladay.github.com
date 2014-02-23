@@ -13,7 +13,7 @@ So I've decided to try my hand at building a way to test shaders. I'm still on t
 
 <h2>Introducing My Frankenstein: UUnit-SL</h2>
 
-[UUnit](http://wiki.unity3d.com/index.php?title=UUnit) is a common recommendation given on the forums as a place to start when trying to add testing to Unity projects. It doesn't have a lot of bells and whistles, but so far it seems to get the job done pretty well. So for this experiment, I've decided to extend UUnit to work with shaders. 
+[UUnit](http://wiki.unity3d.com/index.php?title=UUnit) is a common recommendation given on the forums as a place to start when trying to add testing to Unity projects. It doesn't have a lot of bells and whistles, but so far it seems to get the job done pretty well. So for this experiment, I've decided to nextend UUnit to work with shaders. 
 
 To test a shader with UUnit-SL, your test case must derive from the new class UUnitShaderTestCase. If you check out the code you'll notice a few new methods being defined. The first two are:
 
@@ -86,4 +86,4 @@ As shown above, the colour of the shader otuput is stored in a variable called s
 
 In any case, UUnit-SL can be grabbed [from github](https://github.com/khalladay/uunit-sl). 
 
-Think this is a terrible idea? Think it's the best thing since sliced bread? Send me a message send me a message [on twitter](http://twitter.com/khalladay). 
+Think this is a terrible idea? Think it's the best thing since sliced bread? Send me a message [on twitter](http://twitter.com/khalladay). 

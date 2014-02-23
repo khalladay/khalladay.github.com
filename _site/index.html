@@ -29,87 +29,107 @@
 	</div>
 <div id="content">  
   <span class = "post_title">
-<h2>Introducing UUnit-SL, Unit tests for Shaders</h2>
+<h2>The Basics of Fresnel Shading</h2>
 </span>
 
 <div id="post">
 <br>
-<p>A lot of my posts end up being about things that I’ve figured out and want to make easier for the next person who googles how to do. This is not one of those times, in fact I’m pretty sure that what I’m about to show off is either completely unhelpful or actually a bad idea, but I think it’s an interesting experiment nonetheless.</p>
+<p>I recently stumbled on the awesome article: <a href="http://filmicgames.com/archives/557">Everything Has Fresnel</a> (if you haven’t read it, go read it now). The main premise of the article is that real world materials are not actually as neat and tidy as programmers would like to believe, and more specifically, that virtually everything in real life has some degree of fresnel reflectivity.</p>
 
-<p>I’ve recently been looking more seriously at unit testing my code. However, one concern I have with unit tests is that there doesn’t seem to be an accepted way to test shaders. A common argument against this is that shaders are usually small enough to not need tests. I disagree, especially when it comes to implementing complex math within a shader. Also, if shaders can’t be tested properly, that means a good portion of the work I do can’t be tested, which is a shame.</p>
+<p>Fresnel isn’t an effect that I’ve seen often in Unity projects and in fact wasn’t an effect that I was familiar with building, so I decided to kill two birds with one project and put together my latest shader pack: <a href="/all/graphics/2014/02/23/Fresnel-Shaders.html">Fresnel Shaders</a>. It’s all free to use, MIT license, all that jazz, so enjoy :D</p>
 
-<p>So I’ve decided to try my hand at building a way to test shaders. I’m still on the fence about this whole thing, but if you’re interested, all the details are here!</p>
-<h2>Introducing UUnit-SL</h2>
-<p>UUnit is a common recommendation given on the forums as a place to start when trying to add testing to Unity projects. It doesn’t have a lot of bells and whistles, but so far it seems to get the job done pretty well. So for this experiment, I’ve decided to extend UUnit to work with shaders.</p>
+<p>But, as usual, I’d also like to make things a bit easier for the next googler looking for an intro to Fresnel reflection. So if writing Fresnel shaders (or adding Fresnel to existing ones) sounds as much fun to you as it was for me, read on!</p>
+<div align='center'>
+	 	
+<img src='/images/post&#95;images/2014-02-23/FresnelRim.png' /><br />
+<font size='2'>An unlit Fresnel shader</font>
 
-<p>To test a shader with UUnit-SL, your test case must derive from the new class UUnitShaderTestCase. If you check out the code you’ll notice a few new methods being defined. The first two are:</p>
-<pre><code>
-protected virtual void SLSceneSetup()
+</div>
+<p><br /></p>
+<h2>What is the Fresnel Effect</h2>
+<p>In essence, the fresnel effect describes the relationship between the angle that you look at a surface and the amount of reflectivity you see. This is very easy to demonstrate if you have a window nearby. If you look at the window straight on you can see through the window as intended, however, if you move so that you try to look through the window at a glancing angle (ie: your view direction is approaching parallel to the window’s surface) the window becomes much closer to a mirror.</p>
+
+<p>But this effect isn’t limited to windows, or even particularly shiny objects. As John Hable points out in <a href="http://filmicgames.com/archives/557">Everything Has Fresnel</a>, pretty much everything (including towels and bricks!) exhibit the fresnel effect to some degree. I’ve made a game out of trying to spot instances of it as I walk to work (without looking I’ve lost my mind).</p>
+
+<p>So what does this look like when added to an object in Unity? Here’s a few more examples from my shader pack:</p>
+<div align='center'>
+	 	
+ <img src='/images/post&#95;images/2014-02-23/AllFresnel.png' /><br />
+ <font size='2'>The Shaders in the Fresnel Shader Pack</font>
+
+ </div>
+<p><br /></p>
+<h2>How is it implemented?</h2>
+<p>As it turns out, Fresnel equations are complicated, way more so than can be adequately covered by a blog post, and way more than is feasible to execute in real time for most applications. In practice, it’s far more realistic to use an approximation of these equations. In searching, I’ve ended up finding two such approximations have so far seemed appropriate to use in real time shaders.</p>
+
+<p>The first is the Schlick Approximation. This is easy enough to google for, but I’ll put here just for reference as well:</p>
+<div align='center'>
+ R(&theta;) = R<sub>0</sub> + (1 - R<sub>0</sub>)(1 - cos&theta;)<sup>5</sup>
+</div>
+<p><br /></p>
+
+<p>In the above equation, R<sub>0</sub> refers to the reflection coefficient for light moving between 2 interfaces with different refractivity (most commonly, air and whatever type of material the surface is). If you’re really interested, definitely check out more detailed sources online. In practice, I’ve found that while this method gives decent looking results, the next option gives us much greater control over the appearance of our materials at the cost of physical correctness. Given that real time graphics are anything but physically correct, I’m ok with this tradeoff.</p>
+
+<p>The second approximation comes from chapter 7 of the <a href="http://http.developer.nvidia.com/CgTutorial/cg&#95;tutorial&#95;chapter07.html">Cg Tutorial</a> from NVidia, which refers to it as the “Empricial Approximation.”<br /> <br /></p>
+<div align='center'> 
+ R = max(0, min(1, bias + scale * (1.0 + I &#8226; N)<sup>power</sup>))
+</div>
+<p><br /></p>
+<ul>
+<li>R is a Fresnel term describing how strong the Fresnel effect is at a specific point</li>
+<li>I is the vector from the eye to a point on the surface</li>
+<li>N is the world space normal of the current point</li>
+<li>bias, scale and power are values exposed to allow control over the appearance of the Fresnel effect</li>
+</ul>
+<p>This equation is a bit of a double edged sword. It’s very easy to make hideous looking Fresnel by tweaking the values of bias, scale and power, but it also gives you the ability to fine tune your materials to exactly how you want them to look.</p>
+<div align='center'>
+	 	
+<img src='/images/post&#95;images/2014-02-23/UglyFresnel.png' /><br />
+<font size='2'>Fresnel gone wrong</font>
+
+</div>
+<p><br /></p>
+<h2>A Fresnel Shader</h2>
+<p>So what does this look like in a shader? It’s actually very simple. First, you need to calculate the value of R. For this example, we’ll do that in the vertex shader:</p>
+<pre>
+	<code>
+vOUT vert(vIN v)
 {
-	_oldSceneName = EditorApplication.currentScene;
-	EditorApplication.NewScene();
+	vOUT o;
+	o.pos = mul(UNITY&#95;MATRIX&#95;MVP, v.vertex);
+	o.uv = v.texcoord;
 
-	cameraOutput = new RenderTexture(512,512,0,RenderTextureFormat.ARGB32);
+	float3 posWorld = mul(&#95;Object2World, v.vertex).xyz;
+	float3 normWorld = normalize(mul(float3x3(&#95;Object2World), v.normal));
 
-	Camera.main.transform.position = new Vector3(0.0f, 0.0f, -10.0f);
-	Camera.main.transform.LookAt(Vector3.zero);
-	Camera.main.fieldOfView = 10;
-	Camera.main.targetTexture = cameraOutput;
-	testCamera = Camera.main.gameObject;
-	Camera.main.enabled = false;
+	float3 I = normalize(posWorld - &#95;WorldSpaceCameraPos.xyz);
+	o.R = &#95;Bias + &#95;Scale * pow(1.0 + dot(I, normWorld), &#95;Power);
 
-	testLight = new GameObject();
-	testLight.name = "TestLight";
-	testLight.AddComponent&lt;Light&rt;();
-	testLight.GetComponent&lt;Light>&rt;.type = LightType.Directional;
-	testLight.transform.position = new Vector3(5.0f, 10.0f, -10.0f);
-	testLight.transform.LookAt(Vector3.zero);
-
-	testQuad = GameObject.CreatePrimitive(PrimitiveType.Quad);
-	testQuad.name = "TestQuad";
-	testQuad.transform.position = Vector3.zero;
+	return o;
 }
-	
-private void SLSceneTearDown()
-{
-	RenderTexture.active = null;
-	GameObject.DestroyImmediate(testCamera);
-	GameObject.DestroyImmediate(testLight);
-	GameObject.DestroyImmediate(testQuad);
-	EditorApplication.OpenScene(_oldSceneName);
-}
+
 </code>
 </pre>
-<p>As you may have gathered, these methods create and tear down a simple scene with a single quad in front of the camera. This quad will eventually hold a material using the shader to be tested. The camera then renders its view to texture and gets the colour of the center pixels in this texture. This output can then be tested against the expected output of the shader given these inputs.</p>
+<p>There isn’t too much to say about this, since it’s pretty much the equation above verbatim. One handy tip though: I’ve found that I’ve been perfectly happy with the results I get if I omit the bias parameter entirely, and doing so makes it more difficult to produce wonky results.</p>
 
-<p>This isn’t useful for testing things like incorrect inputs, or zfighting issues, but it is useful for ensuring that your math is producing the output you expect, which is something. A simple test case using UUnit-SL looks like this:</p>
-<pre><code>
-public class TestCaseBlue : UUnitShaderTestCase 
-{
-protected override void SetUp ()
-{
-	LoadShader("Assets/UUnit-SL/UUnit-SL-SelfTest/UUSLTestBlue.shader");
+<p>Once you have the R value calculated, the rest of the implementation is just a lerp in the fragment shader:</p>
+<pre>
+<code>
+float4 frag(vOUT i) :  COLOR
+{  
+	float4 col = tex2D(&#95;MainTex, i.uv.xy * &#95;MainTex&#95;ST.xy + &#95;MainTex&#95;ST.zw);
+	return lerp(col,&#95;Color, i.R);
 }
 
-[UUnitTest]
-public void TestDiffuse()
-{
-	UUnitAssert.True(shaderOutput == Color.blue, 
-					"Test Blue Output is Blue");
-}
+</code>
+</pre>
+<p>If you’re not a Unity programmer, ignore all the _MainTex_ST stuff, that’s just a unity specific bit of code to handle tiling textures across an object.</p>
 
-protected override void TearDown ()
-{
-}
-}
-</code></pre>
-<p>If you’ve used UUnit before, you’ll recognize this. The only real difference is the call to LoadShader, which specifies the file path of the shader you want to test. All of the elements in the scene are also exposed as protected variables, so if you want to change their location or settings (a different light type for instance) you can do it inside of SetUp as well. The camera will render to texture after SetUp is called.</p>
+<p>Otherwise, all that’s new here is the lerp function. In this example, rather than reflecting anything, our Fresnel Rim is just a single color (_Color), but the principle is the same. If you wanted to turn the rim into a reflection, you’d simply replace the _Color variable with a color sampled from a cube map, or taken from a camera, or however else you want to pass in a reflection.</p>
 
-<p>As shown above, the colour of the shader otuput is stored in a variable called shaderOutput. At the moment, the tests only store a single pixel’s data, although I’m sure that I will find a reason to add other options here pretty quickly if any of this actually proves useful; I’ve yet to decide whether this is actually worth the time to do at all, or if this approach will be too limited for more complex cases.</p>
+<p>Otherwise though, this is all there is to it to write a simple Fresnel shader, so go forth and make all of your objects more believable! And feel free to download the Fresnel Shader Pack that I’ve posted in the graphics section of this site to see some examples of more complicated Fresnel effects.</p>
 
-<p>In any case, UUnit-SL can be grabbed <a href="https://github.com/khalladay/uunit-sl">from github</a>.</p>
-
-<p>Think this is a terrible idea? Think it’s the best thing since sliced bread? Send me a message send me a message <a href="http://twitter.com/khalladay">on twitter</a>.</p>
+<p>If you’ve spotted an error on here, or have anything to add, feel free to send me a message <a href="http://twitter.com/khalladay">on twitter</a>. Happy shading!</p>
 </div>
 
 
@@ -117,7 +137,9 @@ protected override void TearDown ()
   <h3>Recent Posts</h3>
   <ul class="posts">
     
-      <li><span>08 Feb 2014</span> &raquo; <a href="/all/blog/2014/02/08/Introducing-UUNit-SL-unit-testing-for-shaders.html">Introducing UUnit-SL, Unit tests for Shaders</a></li>
+      <li><span>18 Feb 2014</span> &raquo; <a href="/all/blog/2014/02/18/Fresnel-Shaders-From-The-Ground-Up.html">The Basics of Fresnel Shading</a></li>
+    
+      <li><span>08 Feb 2014</span> &raquo; <a href="/all/blog/2014/02/08/Introducing-UUNit-SL-unit-testing-for-shaders.html">Unit Testing Shaders with UUnit-SL</a></li>
     
       <li><span>12 Jan 2014</span> &raquo; <a href="/all/blog/2014/01/12/Runtime-Shader-Compilation-Unity.html">Creating GLSL Shaders at Runtime in Unity3D</a></li>
     
@@ -134,8 +156,6 @@ protected override void TearDown ()
       <li><span>02 Sep 2013</span> &raquo; <a href="/all/blog/2013/09/02/A-Simple-Flowmap.html">A Simple Flow Map</a></li>
     
       <li><span>13 Aug 2013</span> &raquo; <a href="/all/blog/2013/08/13/Coloured-Shadows.html">Multi Coloured Shadows In Unity</a></li>
-    
-      <li><span>20 Jul 2013</span> &raquo; <a href="/all/blog/2013/07/20/Down-The-Rabbit-Hole.html">Down The Rabbit Hole</a></li>
     
   </ul>
 </div>

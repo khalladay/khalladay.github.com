@@ -1,0 +1,195 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8"  />
+	<meta name="description" content="Kyle Halladay Game Development" />
+	<meta name="keywords" content="life,code,software,development,games,ludology,indie" />
+	<link rel="stylesheet" type="text/css" href="/css/default.css" />
+	<link rel="stylesheet" type="text/css" href="/css/pretty_code.css" />
+	<link rel="stylesheet" href="/css/highlight_default.css">
+	<script src="/javascripts/highlight.pack.js"></script>
+	<script>hljs.initHighlightingOnLoad();</script>
+
+<title>Kyle Halladay - Toronto Game Developer</title>
+</head>
+
+<body>
+	<div id="wrap">
+		<div id="header">
+			<p id="toplinks">
+			</p>
+			<h1><a href="/" class="logo"><div id="logo"></div></a><a href="/" class="logo">K</a><a href="/" class="logo">y</a><a href="/" class="logo">l</a><a href="/" class="logo">e</a> <a href="/" class="logo">H</a><a href="/" class="logo">a</a><a href="/" class="logo">l</a><a href="/" class="logo">l</a><a href="/" class="logo">a</a><a href="/" class="logo">d</a><a href="/" class="logo">a</a><a href="/" class="logo">y</a></h1>
+			<div class="slogan"> 
+					<a href="/" class="paleorange">Home</a> ||
+					<a href="/archive.html" class="paleorange">Archive</a> ||
+					<a href="/portfolio.html" class="paleorange">Games</a> ||
+					<a href="/graphics.html" class="paleorange">Graphics</a> ||
+					<a href="/aboutme.html" class="paleorange">About Me</a>
+			</div>
+	</div>
+<div id="content">  
+  <span class = "post_title">
+<h2>The Basics of Fresnel Shading</h2>
+</span>
+
+<div id="post">
+<br>
+<p>I recently stumbled on the awesome article: <a href="http://filmicgames.com/archives/557">Everything Has Fresnel</a> (if you haven’t read it, go read it now). The main premise of the article is that real world materials are not actually as neat and tidy as programmers would like to believe, and more specifically, that virtually everything in real life has some degree of fresnel reflectivity.</p>
+
+<p>Fresnel isn’t an effect that I’ve seen often in Unity projects and in fact wasn’t an effect that I was familiar with building, so I decided to kill two birds with one project and put together my latest shader pack: <a href="/all/graphics/2014/02/23/Fresnel-Shaders.html">Fresnel Shaders</a>. It’s all free to use, MIT license, all that jazz, so enjoy :D</p>
+
+<p>But, as usual, I’d also like to make things a bit easier for the next googler looking for an intro to Fresnel reflection. So if writing Fresnel shaders (or adding Fresnel to existing ones) sounds as much fun to you as it was for me, read on!</p>
+<div align='center'>
+	 	
+<img src='/images/post&#95;images/2014-02-23/FresnelRim.png' /><br />
+<font size='2'>An unlit Fresnel shader</font>
+
+</div>
+<p><br /></p>
+<h2>What is the Fresnel Effect</h2>
+<p>In essence, the fresnel effect describes the relationship between the angle that you look at a surface and the amount of reflectivity you see. This is very easy to demonstrate if you have a window nearby. If you look at the window straight on you can see through the window as intended, however, if you move so that you try to look through the window at a glancing angle (ie: your view direction is approaching parallel to the window’s surface) the window becomes much closer to a mirror.</p>
+
+<p>But this effect isn’t limited to windows, or even particularly shiny objects. As John Hable points out in <a href="http://filmicgames.com/archives/557">Everything Has Fresnel</a>, pretty much everything (including towels and bricks!) exhibit the fresnel effect to some degree. I’ve made a game out of trying to spot instances of it as I walk to work (without looking I’ve lost my mind).</p>
+
+<p>So what does this look like when added to an object in Unity? Here’s a few more examples from my shader pack:</p>
+<div align='center'>
+	 	
+ <img src='/images/post&#95;images/2014-02-23/AllFresnel.png' /><br />
+ <font size='2'>The Shaders in the Fresnel Shader Pack</font>
+
+ </div>
+<p><br /></p>
+<h2>How is it implemented?</h2>
+<p>As it turns out, Fresnel equations are complicated, way more so than can be adequately covered by a blog post, and way more than is feasible to execute in real time for most applications. In practice, it’s far more realistic to use an approximation of these equations. In searching, I’ve ended up finding two such approximations have so far seemed appropriate to use in real time shaders.</p>
+
+<p>The first is the Schlick Approximation. This is easy enough to google for, but I’ll put here just for reference as well:</p>
+<div align='center'>
+ R(&theta;) = R<sub>0</sub> + (1 - R<sub>0</sub>)(1 - cos&theta;)<sup>5</sup>
+</div>
+<p><br /></p>
+
+<p>In the above equation, R<sub>0</sub> refers to the reflection coefficient for light moving between 2 interfaces with different refractivity (most commonly, air and whatever type of material the surface is). If you’re really interested, definitely check out more detailed sources online. In practice, I’ve found that while this method gives decent looking results, the next option gives us much greater control over the appearance of our materials at the cost of physical correctness. Given that real time graphics are anything but physically correct, I’m ok with this tradeoff.</p>
+
+<p>The second approximation comes from chapter 7 of the <a href="http://http.developer.nvidia.com/CgTutorial/cg&#95;tutorial&#95;chapter07.html">Cg Tutorial</a> from NVidia, which refers to it as the “Empricial Approximation.”<br /> <br /></p>
+<div align='center'> 
+ R = max(0, min(1, bias + scale * (1.0 + I &#8226; N)<sup>power</sup>))
+</div>
+<p><br /></p>
+<ul>
+<li>R is a Fresnel term describing how strong the Fresnel effect is at a specific point</li>
+<li>I is the vector from the eye to a point on the surface</li>
+<li>N is the world space normal of the current point</li>
+<li>bias, scale and power are values exposed to allow control over the appearance of the Fresnel effect</li>
+</ul>
+<p>This equation is a bit of a double edged sword. It’s very easy to make hideous looking Fresnel by tweaking the values of bias, scale and power, but it also gives you the ability to fine tune your materials to exactly how you want them to look.</p>
+<div align='center'>
+	 	
+<img src='/images/post&#95;images/2014-02-23/UglyFresnel.png' /><br />
+<font size='2'>Fresnel gone wrong</font>
+
+</div>
+<p><br /></p>
+<h2>A Fresnel Shader</h2>
+<p>So what does this look like in a shader? It’s actually very simple. First, you need to calculate the value of R. For this example, we’ll do that in the vertex shader:</p>
+<pre>
+	<code>
+vOUT vert(vIN v)
+{
+	vOUT o;
+	o.pos = mul(UNITY&#95;MATRIX&#95;MVP, v.vertex);
+	o.uv = v.texcoord;
+
+	float3 posWorld = mul(&#95;Object2World, v.vertex).xyz;
+	float3 normWorld = normalize(mul(float3x3(&#95;Object2World), v.normal));
+
+	float3 I = normalize(posWorld - &#95;WorldSpaceCameraPos.xyz);
+	o.R = &#95;Bias + &#95;Scale * pow(1.0 + dot(I, normWorld), &#95;Power);
+
+	return o;
+}
+
+</code>
+</pre>
+<p>There isn’t too much to say about this, since it’s pretty much the equation above verbatim. One handy tip though: I’ve found that I’ve been perfectly happy with the results I get if I omit the bias parameter entirely, and doing so makes it more difficult to produce wonky results.</p>
+
+<p>Once you have the R value calculated, the rest of the implementation is just a lerp in the fragment shader:</p>
+<pre>
+<code>
+float4 frag(vOUT i) :  COLOR
+{  
+	float4 col = tex2D(&#95;MainTex, i.uv.xy * &#95;MainTex&#95;ST.xy + &#95;MainTex&#95;ST.zw);
+	return lerp(col,&#95;Color, i.R);
+}
+
+</code>
+</pre>
+<p>If you’re not a Unity programmer, ignore all the _MainTex_ST stuff, that’s just a unity specific bit of code to handle tiling textures across an object.</p>
+
+<p>Otherwise, all that’s new here is the lerp function. In this example, rather than reflecting anything, our Fresnel Rim is just a single color (_Color), but the principle is the same. If you wanted to turn the rim into a reflection, you’d simply replace the _Color variable with a color sampled from a cube map, or taken from a camera, or however else you want to pass in a reflection.</p>
+
+<p>Otherwise though, this is all there is to it to write a simple Fresnel shader, so go forth and make all of your objects more believable! And feel free to download the Fresnel Shader Pack that I’ve posted in the graphics section of this site to see some examples of more complicated Fresnel effects.</p>
+
+<p>If you’ve spotted an error on here, or have anything to add, feel free to send me a message <a href="http://twitter.com/khalladay">on twitter</a>. Happy shading!</p>
+</div>
+
+
+<div id="related">
+  <h3>Recent Posts</h3>
+  <ul class="posts">
+    
+      <li><span>18 Feb 2014</span> &raquo; <a href="/all/blog/2014/02/18/Fresnel-Shaders-From-The-Ground-Up.html">The Basics of Fresnel Shading</a></li>
+    
+      <li><span>08 Feb 2014</span> &raquo; <a href="/all/blog/2014/02/08/Introducing-UUNit-SL-unit-testing-for-shaders.html">Unit Testing Shaders with UUnit-SL</a></li>
+    
+      <li><span>12 Jan 2014</span> &raquo; <a href="/all/blog/2014/01/12/Runtime-Shader-Compilation-Unity.html">Creating GLSL Shaders at Runtime in Unity3D</a></li>
+    
+      <li><span>06 Jan 2014</span> &raquo; <a href="/all/blog/2014/01/06/Hacking-My-Attention-Span.html">Automating SelfControl in OS X Mavericks</a></li>
+    
+      <li><span>24 Dec 2013</span> &raquo; <a href="/all/blog/2013/12/24/Ray-Sphere-Intersection.html">Ray-Sphere Intersection with Simple Math</a></li>
+    
+      <li><span>10 Nov 2013</span> &raquo; <a href="/all/blog/2013/11/10/Libpd-and-Unity.html">Combining Pure Data and Unity</a></li>
+    
+      <li><span>13 Oct 2013</span> &raquo; <a href="/all/blog/2013/10/13/Multi-Light-Diffuse.html">Writing Multi-Light Pixel Shaders in Unity</a></li>
+    
+      <li><span>28 Sep 2013</span> &raquo; <a href="/all/blog/2013/09/28/How-to-dissolve-effect.html">Making a Dissolve Effect with Surface Shaders</a></li>
+    
+      <li><span>02 Sep 2013</span> &raquo; <a href="/all/blog/2013/09/02/A-Simple-Flowmap.html">A Simple Flow Map</a></li>
+    
+      <li><span>13 Aug 2013</span> &raquo; <a href="/all/blog/2013/08/13/Coloured-Shadows.html">Multi Coloured Shadows In Unity</a></li>
+    
+  </ul>
+</div>
+
+<br>
+<br>
+</div>
+
+<div id="footer">
+
+	<a href="mailto:k.mj.halladay@gmail.com" class="footerlink">E-mail</a> |
+	<a href="https://github.com/khalladay" class="footerlink">Github</a> |
+    <a href="http://ca.linkedin.com/pub/kyle-halladay/2b/658/a14/" class="footerlink">LinkedIn</a> |
+	<a href="https://www.shadertoy.com/user/khalladay" class="footerlink">ShaderToy</a> |
+    <a href="http://twitter.com/khalladay" class="footerlink">Twitter</a>
+
+<p>&copy; 2013 <a href="/aboutme.html" class="footerlink">Kyle Halladay</a>
+
+</div>
+</div>
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-40292745-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+</body>
+</html>
+

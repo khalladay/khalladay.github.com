@@ -29,18 +29,20 @@
 	</div>
 <div id="content">  
   <span class = "post_title">
-<h2>Introducing UUnit-SL, Unit tests for Shaders</h2>
+<h2>Unit Testing Shaders with UUnit-SL</h2>
 </span>
 
 <div id="post">
 <br>
-<p>A lot of my posts end up being about things that I’ve figured out and want to make easier for the next person who googles how to do. This is not one of those times, in fact I’m pretty sure that what I’m about to show off is either completely unhelpful or actually a bad idea, but I think it’s an interesting experiment nonetheless.</p>
+<p>tldr? Check out UUnit-SL <a href="https://github.com/khalladay/uunit-sl">on github</a>.</p>
 
-<p>I’ve recently been looking more seriously at unit testing my code. However, one concern I have with unit tests is that there doesn’t seem to be an accepted way to test shaders. A common argument against this is that shaders are usually small enough to not need tests. I disagree, especially when it comes to implementing complex math within a shader. Also, if shaders can’t be tested properly, that means a good portion of the work I do can’t be tested, which is a shame.</p>
+<p>Note: I’m not sure any of the following is useful or a good idea at all, but I think it’s interesting enough to share anyways.</p>
+
+<p>A major concern I have with unit tests is that there doesn’t seem to be an accepted way to test shaders. A common argument against this is that shaders are usually small enough to not need tests. I disagree, especially when it comes to implementing complex math within a shader. Also, if shaders can’t be tested properly, that means a good portion of the work I do can’t be tested, which is a shame.</p>
 
 <p>So I’ve decided to try my hand at building a way to test shaders. I’m still on the fence about this whole thing, but if you’re interested, all the details are here!</p>
-<h2>Introducing UUnit-SL</h2>
-<p>UUnit is a common recommendation given on the forums as a place to start when trying to add testing to Unity projects. It doesn’t have a lot of bells and whistles, but so far it seems to get the job done pretty well. So for this experiment, I’ve decided to extend UUnit to work with shaders.</p>
+<h2>Introducing My Frankenstein: UUnit-SL</h2>
+<p><a href="http://wiki.unity3d.com/index.php?title=UUnit">UUnit</a> is a common recommendation given on the forums as a place to start when trying to add testing to Unity projects. It doesn’t have a lot of bells and whistles, but so far it seems to get the job done pretty well. So for this experiment, I’ve decided to nextend UUnit to work with shaders.</p>
 
 <p>To test a shader with UUnit-SL, your test case must derive from the new class UUnitShaderTestCase. If you check out the code you’ll notice a few new methods being defined. The first two are:</p>
 <pre><code>
@@ -70,7 +72,7 @@ protected virtual void SLSceneSetup()
 	testQuad.transform.position = Vector3.zero;
 }
 	
-private void SLSceneTearDown()
+protected void SLSceneTearDown()
 {
 	RenderTexture.active = null;
 	GameObject.DestroyImmediate(testCamera);
@@ -105,11 +107,11 @@ protected override void TearDown ()
 </code></pre>
 <p>If you’ve used UUnit before, you’ll recognize this. The only real difference is the call to LoadShader, which specifies the file path of the shader you want to test. All of the elements in the scene are also exposed as protected variables, so if you want to change their location or settings (a different light type for instance) you can do it inside of SetUp as well. The camera will render to texture after SetUp is called.</p>
 
-<p>As shown above, the colour of the shader otuput is stored in a variable called shaderOutput. At the moment, the tests only store a single pixel’s data, although I’m sure that I will find a reason to add other options here pretty quickly if any of this actually proves useful; I’ve yet to decide whether this is actually worth the time to do at all, or if this approach will be too limited for more complex cases.</p>
+<p>As shown above, the colour of the shader otuput is stored in a variable called shaderOutput. At the moment, the tests only store a single pixel of data, although I’m sure that I will find a reason to add other options here pretty quickly if any of this actually proves useful; I’ve yet to decide whether this is actually worth the time to do at all, or if this approach will be too limited for more complex cases.</p>
 
 <p>In any case, UUnit-SL can be grabbed <a href="https://github.com/khalladay/uunit-sl">from github</a>.</p>
 
-<p>Think this is a terrible idea? Think it’s the best thing since sliced bread? Send me a message send me a message <a href="http://twitter.com/khalladay">on twitter</a>.</p>
+<p>Think this is a terrible idea? Think it’s the best thing since sliced bread? Send me a message <a href="http://twitter.com/khalladay">on twitter</a>.</p>
 </div>
 
 
@@ -117,7 +119,9 @@ protected override void TearDown ()
   <h3>Recent Posts</h3>
   <ul class="posts">
     
-      <li><span>08 Feb 2014</span> &raquo; <a href="/all/blog/2014/02/08/Introducing-UUNit-SL-unit-testing-for-shaders.html">Introducing UUnit-SL, Unit tests for Shaders</a></li>
+      <li><span>18 Feb 2014</span> &raquo; <a href="/all/blog/2014/02/18/Fresnel-Shaders-From-The-Ground-Up.html">The Basics of Fresnel Shading</a></li>
+    
+      <li><span>08 Feb 2014</span> &raquo; <a href="/all/blog/2014/02/08/Introducing-UUNit-SL-unit-testing-for-shaders.html">Unit Testing Shaders with UUnit-SL</a></li>
     
       <li><span>12 Jan 2014</span> &raquo; <a href="/all/blog/2014/01/12/Runtime-Shader-Compilation-Unity.html">Creating GLSL Shaders at Runtime in Unity3D</a></li>
     
@@ -134,8 +138,6 @@ protected override void TearDown ()
       <li><span>02 Sep 2013</span> &raquo; <a href="/all/blog/2013/09/02/A-Simple-Flowmap.html">A Simple Flow Map</a></li>
     
       <li><span>13 Aug 2013</span> &raquo; <a href="/all/blog/2013/08/13/Coloured-Shadows.html">Multi Coloured Shadows In Unity</a></li>
-    
-      <li><span>20 Jul 2013</span> &raquo; <a href="/all/blog/2013/07/20/Down-The-Rabbit-Hole.html">Down The Rabbit Hole</a></li>
     
   </ul>
 </div>
