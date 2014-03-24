@@ -11,7 +11,7 @@ The theme of the jam was "Hungry," and I decided to make a game about grilling m
 <div align="center">
 	 	
 <img src="/images/post&#95;images/2014-03-24/baconjamgameplay.png" /><br>
-<font size="2">By entry for Bacon Jam 7</font>
+<font size="2">My entry for Bacon Jam 7</font>
 
 </div>
 <br>
