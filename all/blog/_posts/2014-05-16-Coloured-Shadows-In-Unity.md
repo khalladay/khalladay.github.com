@@ -3,7 +3,7 @@ layout: post
 title: Don't Pay $50 for Coloured Shadows.
 ---
 
-See the title? At the time of writing this, there is a package on the asset store that colours shadows in Unity. It costs $50. Don't pay that, that's dumb. 
+See the title? At the time of writing this, there is a package on the asset store that colours shadows in Unity. It costs $50. Don't pay that, colouring shadows isn't that hard.
 
 I'm going to save you $50. Let's learn how to colour some shadows, shall we?
 
