@@ -3,7 +3,7 @@ layout: post
 title: Don't Pay $50 for Coloured Shadows.
 ---
 
-See the title? At the time of writing this, there is a package on the asset store that colours shadows in Unity. It costs $50. Don't pay that, colouring shadows isn't that hard.
+See the title? At the time of writing this, there is a package on the asset store that colours shadows in Unity. It costs $50. Colouring shadows isn't that hard.
 
 This post is going to show you a really simple way to get some really groovy shadows in Unity.
 
