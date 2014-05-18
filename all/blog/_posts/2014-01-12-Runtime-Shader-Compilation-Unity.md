@@ -26,7 +26,7 @@ There are at least a few people who have tried to make this work before. A quick
 
 Their post talks about a tool called CgBatch, which is included with Unity, and according to [this SIGGRAPH presentation](http://www.realtimerendering.com/downloads/MobileCrossPlatformChallenges_siggraph.pdf), is either the entire shader compilation pipeline for Unity, or is at least one step in it. The siggraph link only describes it as a tool to generate HLSL, but in practice it seems to fully translate shaders into a format accepted by that material constructor from above. Since CgBatch isn't meant for public use, there isn't anything in the way of documentation to know for sure. 
 
-Ok, so we know we need to use CgBatch, but where do we get it. On Mac, you can find it inside of Unity.app (right click and select "Show Package Contents"), inside the Tools folder. I'm not sure where windows would keep this (if you know, send me a messsage [on twitter](http://twitter.com/khalladay) and I will update this post). Create a folder inside your project's StreamingAssets directory and paste CgBatch into it (it must be inside subdirectory of StreamingAssets).
+Ok, so we know we need to use CgBatch, but where do we get it. On Mac, you can find it inside of Unity.app (right click and select "Show Package Contents"), inside the Tools folder. On Windows, you're looking for CgBatch.exe, located in Unity/Editor/Data/Tools. Thanks to [@izaleu](https://twitter.com/izaleu) for this :D ). Create a folder inside your project's StreamingAssets directory and paste CgBatch into it (it must be inside subdirectory of StreamingAssets).
 
 CgBatch also relies on Cg.framework, which you can find in the Unity.app/Contents/Frameworks folder. If you try to run CgBatch however, you'll notice that it actually relies on Cg.framework being located in  "../Frameworks/Cg.framework", so copy and paste the entire folder into your project's StreamingAssets folder.
 
@@ -49,11 +49,9 @@ So how do you use CgBatch. If you've attempted to run it from the command line y
 So CgBatch needs at least 4 parameters. Based on the forum post linked previously, these arguments are as follows:
 
 * **input** : The path to your uncompiled shader file
-* **path** : Unknown right now
+* **path** : The path to the directory that contains your shader
 * **includepath** : The path to the CGInclude files for Unity
 * **output** : Where to put the output shader file. 
-
-As shown above, I'm not quite sure what path is supposed to point to. For now, I'm also setting that argument to the path to the CGIncludes, and it seems to be working (although at the moment, input shaders cannot make use of any Unity specific constants, so perhaps that's what path is for).
 
 If you run this with the appropriate parameters, you should be able to get output that can be accepted by the Material shader string constructor, which is great! So now we need to be able to do this inside a running program. 
 
@@ -78,6 +76,8 @@ process.StartInfo.UseShellExecute = false;
 process.Start();
 
 </code></pre>
+
+(the above is mac specific, I don't have a windows machine to work try this stuff out on right now)
 
 As shown above, the name of the command that you need to execute is actually bash, and not CgBatch. In order to execute a command from batch, you need to pass that as an argument to bash using the -c flag, and enclosing the command and all its arguments inside single quotes. 
 
