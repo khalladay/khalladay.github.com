@@ -3,7 +3,7 @@ layout: post
 title: Multi Coloured Shadows In Unity
 ---
 
-Update: I've posted a tutorial on how to get coloured shadows working in your project. Check it out [here](http://kylehalladay.com/all/blog/2014/05/16/Coloured-Shadows-In-Unity.html)
+**UPDATE&#58; I've posted a tutorial on how to get coloured shadows working in your project. Check it out [here](http://kylehalladay.com/all/blog/2014/05/16/Coloured-Shadows-In-Unity.html)**
 
 Lately, in my (precious little) free time, I've been working on a custom shadow receiver system which will give me greater control over the appearance of soft shadows in Unity. On the surface, it sounds like a fun project. It gets slightly more insane when you take into account that i had never so much as written my own shadow map system before starting this. Crawling is boring, I tend to jump (metaphorical) cliffs and hope that I figure out flying, running, landing, and crawling by the time I hit ground. 
 
