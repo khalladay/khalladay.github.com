@@ -53,7 +53,7 @@
 
 <p>Their post talks about a tool called CgBatch, which is included with Unity, and according to <a href="http://www.realtimerendering.com/downloads/MobileCrossPlatformChallenges_siggraph.pdf">this SIGGRAPH presentation</a>, is either the entire shader compilation pipeline for Unity, or is at least one step in it. The siggraph link only describes it as a tool to generate HLSL, but in practice it seems to fully translate shaders into a format accepted by that material constructor from above. Since CgBatch isn’t meant for public use, there isn’t anything in the way of documentation to know for sure.</p>
 
-<p>Ok, so we know we need to use CgBatch, but where do we get it. On Mac, you can find it inside of Unity.app (right click and select “Show Package Contents”), inside the Tools folder. I’m not sure where windows would keep this (if you know, send me a messsage <a href="http://twitter.com/khalladay">on twitter</a> and I will update this post). Create a folder inside your project’s StreamingAssets directory and paste CgBatch into it (it must be inside subdirectory of StreamingAssets).</p>
+<p>Ok, so we know we need to use CgBatch, but where do we get it. On Mac, you can find it inside of Unity.app (right click and select “Show Package Contents”), inside the Tools folder. On Windows, you’re looking for CgBatch.exe, located in Unity/Editor/Data/Tools. Thanks to <a href="https://twitter.com/izaleu">@izaleu</a> for finding this on Windows :D ). Create a folder inside your project’s StreamingAssets directory and paste CgBatch into it (it must be inside subdirectory of StreamingAssets).</p>
 
 <p>CgBatch also relies on Cg.framework, which you can find in the Unity.app/Contents/Frameworks folder. If you try to run CgBatch however, you’ll notice that it actually relies on Cg.framework being located in “../Frameworks/Cg.framework”, so copy and paste the entire folder into your project’s StreamingAssets folder.</p>
 
@@ -74,14 +74,12 @@
 <ul>
 <li><strong>input</strong> : The path to your uncompiled shader file</li>
 
-<li><strong>path</strong> : Unknown right now</li>
+<li><strong>path</strong> : The path to the directory that contains your shader</li>
 
 <li><strong>includepath</strong> : The path to the CGInclude files for Unity</li>
 
 <li><strong>output</strong> : Where to put the output shader file.</li>
 </ul>
-
-<p>As shown above, I’m not quite sure what path is supposed to point to. For now, I’m also setting that argument to the path to the CGIncludes, and it seems to be working (although at the moment, input shaders cannot make use of any Unity specific constants, so perhaps that’s what path is for).</p>
 
 <p>If you run this with the appropriate parameters, you should be able to get output that can be accepted by the Material shader string constructor, which is great! So now we need to be able to do this inside a running program.</p>
 <h3>Introducing System.Diagnostics</h3>
@@ -103,6 +101,8 @@ process.StartInfo.UseShellExecute = false;
 process.Start();
 
 </code></pre>
+<p>(the above is mac specific, I don’t have a windows machine to work try this stuff out on right now)</p>
+
 <p>As shown above, the name of the command that you need to execute is actually bash, and not CgBatch. In order to execute a command from batch, you need to pass that as an argument to bash using the -c flag, and enclosing the command and all its arguments inside single quotes.</p>
 
 <p>Setting RedirectStandardOutput to true allows us to read the output of the command into the Unity console (really handy for debugging), but in order for that to work, UseShellExecute needs to be set to false, which means that we will not be using the operating system shell to launch the program (in this case bash), we will launch bash directly.</p>
@@ -196,6 +196,8 @@ UnityEngine.Debug.Log(output);
   <h3>Recent Posts</h3>
   <ul class="posts">
     
+      <li><span>27 Jun 2014</span> &raquo; <a href="/all/blog/2014/06/27/Compute-Shaders-Are-Nifty.html">Getting Started With Compute Shaders In Unity</a></li>
+    
       <li><span>16 May 2014</span> &raquo; <a href="/all/blog/2014/05/16/Coloured-Shadows-In-Unity.html">Colouring Shadows in Unity</a></li>
     
       <li><span>05 Apr 2014</span> &raquo; <a href="/all/blog/2014/04/05/Writing-Shaders-For-Deferred-Lighting-Unity.html">Writing Shaders for Deferred Lighting in Unity3D</a></li>
@@ -213,8 +215,6 @@ UnityEngine.Debug.Log(output);
       <li><span>06 Jan 2014</span> &raquo; <a href="/all/blog/2014/01/06/Hacking-My-Attention-Span.html">Automating SelfControl in OS X Mavericks</a></li>
     
       <li><span>24 Dec 2013</span> &raquo; <a href="/all/blog/2013/12/24/Ray-Sphere-Intersection.html">Ray-Sphere Intersection with Simple Math</a></li>
-    
-      <li><span>10 Nov 2013</span> &raquo; <a href="/all/blog/2013/11/10/Libpd-and-Unity.html">Combining Pure Data and Unity</a></li>
     
   </ul>
 </div>
