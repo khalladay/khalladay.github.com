@@ -1,7 +1,7 @@
 ---
 layout: graphics
 title: Dissolve Shader Pack
-snippet: A shader pack for a dissolve effect in Unity3D <strong>[Open Source]</strong>
+snippet: A shader pack for a dissolve effect in Unity3D
 
 ---
 

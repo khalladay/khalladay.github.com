@@ -1,7 +1,7 @@
 ---
 layout: graphics
 title: Fast Flow Map
-snippet: A no frills flow map shader for river effects in mobile unity games <strong>[Open Source]</strong>
+snippet: A no frills flow map shader for river effects in mobile unity games
 
 ---
 

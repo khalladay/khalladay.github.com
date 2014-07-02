@@ -1,7 +1,7 @@
 ---
 layout: graphics
 title: Fresnel Shader Pack
-snippet: A collection of Fresnel shader effects for Unity3D <strong>[Open Source]</strong>
+snippet: A collection of Fresnel shader effects for Unity3D
 
 ---
 
