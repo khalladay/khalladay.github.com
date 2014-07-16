@@ -34,7 +34,8 @@
 
 <div id="post">
 <br>
-<img src="/images/Selective-Blur.png" width="100" height="100" align="right" style="padding-right:15px"><p>Selective-Blur is my first released graphics project! It’s a shader replacement effect for Unity Pro that allows blurring of individual materials without blurring the entire scene.</p>
+<img src="/images/Selective-Blur.png" width="100" height="100" align="right" style="padding-right:15px">
+<p>Selective-Blur is my first released graphics project! It’s a shader replacement effect for Unity Pro that allows blurring of individual materials without blurring the entire scene.</p>
 <h4>Here's how it works: </h4>
 <p>A camera with the blur effect script is childed to the user’s camera. The blur effect script calls RenderWithShader on the camera every frame, and uses a replacement shader that looks for specific RenderType tags in the materials in view. The output is rendered to a texture, which then has a gaussian blur applied to it before being drawn as a GUI texture over top of the user’s view.</p>
 
@@ -45,12 +46,15 @@
 <p><img src="/images/post_images/2013-07-02/blur1.png" alt="blur1" /> <img src="/images/post_images/2013-07-02/blur2.png" alt="blur2" /></p>
 
 <p>I will be maintaining and improving this repository whenever the mood strikes me. I would like to optimize it to avoid using GUI.DrawTexture, add support for blur mask textures, and increase the number of blur shaders present. Pull requests are very welcome if you want to add or fix up something before I get to it :D</p>
+
 </div>
 
 
 <div id="related">
   <h3>Recent Posts</h3>
   <ul class="posts">
+    
+      <li><span>15 Jul 2014</span> &raquo; <a href="/all/blog/2014/07/15/Setting-Up-OpenMP-Mavericks.html">Setting Up OpenMP on Mavericks</a></li>
     
       <li><span>27 Jun 2014</span> &raquo; <a href="/all/blog/2014/06/27/Compute-Shaders-Are-Nifty.html">Getting Started With Compute Shaders In Unity</a></li>
     
@@ -69,8 +73,6 @@
       <li><span>12 Jan 2014</span> &raquo; <a href="/all/blog/2014/01/12/Runtime-Shader-Compilation-Unity.html">Creating GLSL Shaders at Runtime in Unity3D</a></li>
     
       <li><span>06 Jan 2014</span> &raquo; <a href="/all/blog/2014/01/06/Hacking-My-Attention-Span.html">Automating SelfControl in OS X Mavericks</a></li>
-    
-      <li><span>24 Dec 2013</span> &raquo; <a href="/all/blog/2013/12/24/Ray-Sphere-Intersection.html">Ray-Sphere Intersection with Simple Math</a></li>
     
   </ul>
 </div>

@@ -34,6 +34,7 @@
 
 <div id="post">
 <br>
+
 <p>Awhile ago, I wrote a post called <a href="http://kylehalladay.com/all/blog/2013/10/13/Multi-Light-Diffuse.html">Writing Multi Light Pixel Shaders in Unity</a>, and covered the basics of how to write shaders that use a whole bunch of lights in forward rendering. This post is the (8 months late) sequel to that post, in which I’m going to talk about the basics of writing shaders for deferred lighting in Unity.</p>
 
 <p>Unlike last time though, we’re going to be writing surface shaders today; I’ll explain why that is below. If you’re unfamiliar with surface shaders, now would probably be a good time to head over to the <a href="https://docs.unity3d.com/Documentation/Components/SL-SurfaceShaders.html">Unity docs</a> and read up a little bit. Don’t worry about grokking all of it though, we aren’t doing anything fancy today.</p>
@@ -188,12 +189,15 @@ SubShader
 <p>So there you have it, a custom diffuse shader for deferred lighting! Surface shaders really aren’t as much fun as regular pixel shaders (imo), but they definitely fit the bill in this case.</p>
 
 <p>If you notice any errors, have a good system worked out for writing non surface shaders with Unity’s deferred path, or just want to say hi, send me a message <a href="http://twitter.com/khalladay">on twitter</a>. Happy coding!</p>
+
 </div>
 
 
 <div id="related">
   <h3>Recent Posts</h3>
   <ul class="posts">
+    
+      <li><span>15 Jul 2014</span> &raquo; <a href="/all/blog/2014/07/15/Setting-Up-OpenMP-Mavericks.html">Setting Up OpenMP on Mavericks</a></li>
     
       <li><span>27 Jun 2014</span> &raquo; <a href="/all/blog/2014/06/27/Compute-Shaders-Are-Nifty.html">Getting Started With Compute Shaders In Unity</a></li>
     
@@ -212,8 +216,6 @@ SubShader
       <li><span>12 Jan 2014</span> &raquo; <a href="/all/blog/2014/01/12/Runtime-Shader-Compilation-Unity.html">Creating GLSL Shaders at Runtime in Unity3D</a></li>
     
       <li><span>06 Jan 2014</span> &raquo; <a href="/all/blog/2014/01/06/Hacking-My-Attention-Span.html">Automating SelfControl in OS X Mavericks</a></li>
-    
-      <li><span>24 Dec 2013</span> &raquo; <a href="/all/blog/2013/12/24/Ray-Sphere-Intersection.html">Ray-Sphere Intersection with Simple Math</a></li>
     
   </ul>
 </div>

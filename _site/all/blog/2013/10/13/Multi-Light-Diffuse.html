@@ -34,6 +34,7 @@
 
 <div id="post">
 <br>
+
 <p>One of the first things that people get shown when they start learning shaders is how to write a simple, single light, diffuse shader. I have yet to see a single shader tutorial out there that ever returns to this initial exercise to demonstrate how to write shaders which can properly interact with multiple (and different kinds of) lights. So I’m going to try to fill in that gap with what I’ve managed to figure out on my own.</p>
 
 <p>This will hopefully serve as a good starting point for any truly custom lighting shaders you want to write. To be clear, the end goal of this tutorial is simply to have a pixel shader that looks as close as possible to the built in Diffuse shader. The end result of this shader looks like this:</p>
@@ -233,12 +234,15 @@ fixed4 frag(vertex&#95;output i) : COLOR
 <p><a href="http://www.kylehalladay.com/dev/code/BetterDiffuse.shader">The source for for the entire shader can be found here.</a></p>
 
 <p>If you made it this far, congratulations! You now have a diffuse shader that takes into account all the lights unity has to offer! As always, feedback is very welcome (especially if you’ve spotted errors, or things that i’ve gotten wrong). You can find me <a href="http://twitter.com/khalladay">on Twitter.</a> Hope this tutorial helped!</p>
+
 </div>
 
 
 <div id="related">
   <h3>Recent Posts</h3>
   <ul class="posts">
+    
+      <li><span>15 Jul 2014</span> &raquo; <a href="/all/blog/2014/07/15/Setting-Up-OpenMP-Mavericks.html">Setting Up OpenMP on Mavericks</a></li>
     
       <li><span>27 Jun 2014</span> &raquo; <a href="/all/blog/2014/06/27/Compute-Shaders-Are-Nifty.html">Getting Started With Compute Shaders In Unity</a></li>
     
@@ -257,8 +261,6 @@ fixed4 frag(vertex&#95;output i) : COLOR
       <li><span>12 Jan 2014</span> &raquo; <a href="/all/blog/2014/01/12/Runtime-Shader-Compilation-Unity.html">Creating GLSL Shaders at Runtime in Unity3D</a></li>
     
       <li><span>06 Jan 2014</span> &raquo; <a href="/all/blog/2014/01/06/Hacking-My-Attention-Span.html">Automating SelfControl in OS X Mavericks</a></li>
-    
-      <li><span>24 Dec 2013</span> &raquo; <a href="/all/blog/2013/12/24/Ray-Sphere-Intersection.html">Ray-Sphere Intersection with Simple Math</a></li>
     
   </ul>
 </div>

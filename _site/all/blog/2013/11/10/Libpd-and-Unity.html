@@ -34,6 +34,7 @@
 
 <div id="post">
 <br>
+
 <p>About 6 months ago, for 1GAM, Johannes and I spent a month tinkering with LibPD (the end result was Synapse). LibPD, for those of you who don’t know, is a library for working with <a href="http://puredata.info/">Pure-Data</a>, a visual programming tool for procedural audio. Out of the box, it doesn’t work nicely with Unity, but there’s a repository called libpd4unity that simplifies the process.</p>
 <div align='center'>
 <img src='/images/post&#95;images/2013-11-10/pd.png' /><br />
@@ -222,12 +223,15 @@ void OnGUI()
 <p>All of this is necessary because Unity’s build process doesn’t like the libpdcsharp bundle, and attempts to copy it multiple times (creating that ugly error), and completely ignores the patch file in Resources because it doesn’t recognize the file extension. Thankfully, all that’s needed to resolve this a mildly annoying process.</p>
 
 <p>If you’ve made it this far, you should now have a unity project that can interact with Pure Data plugins, and can actually create builds! Congratulations! If you’ve hit any difficulties or need further clarification on something I’ve said here, you can download a sample project <a href="https://dl.dropboxusercontent.com/u/6128167/Unity-PD-Sample.zip">from my dropbox</a>, or send me a message <a href="http://twitter.com/khalladay">on Twitter.</a> Hope this tutorial helped!</p>
+
 </div>
 
 
 <div id="related">
   <h3>Recent Posts</h3>
   <ul class="posts">
+    
+      <li><span>15 Jul 2014</span> &raquo; <a href="/all/blog/2014/07/15/Setting-Up-OpenMP-Mavericks.html">Setting Up OpenMP on Mavericks</a></li>
     
       <li><span>27 Jun 2014</span> &raquo; <a href="/all/blog/2014/06/27/Compute-Shaders-Are-Nifty.html">Getting Started With Compute Shaders In Unity</a></li>
     
@@ -246,8 +250,6 @@ void OnGUI()
       <li><span>12 Jan 2014</span> &raquo; <a href="/all/blog/2014/01/12/Runtime-Shader-Compilation-Unity.html">Creating GLSL Shaders at Runtime in Unity3D</a></li>
     
       <li><span>06 Jan 2014</span> &raquo; <a href="/all/blog/2014/01/06/Hacking-My-Attention-Span.html">Automating SelfControl in OS X Mavericks</a></li>
-    
-      <li><span>24 Dec 2013</span> &raquo; <a href="/all/blog/2013/12/24/Ray-Sphere-Intersection.html">Ray-Sphere Intersection with Simple Math</a></li>
     
   </ul>
 </div>
