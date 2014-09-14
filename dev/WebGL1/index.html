@@ -1,0 +1,32 @@
+<html>
+<head>
+
+<script id="vs_passthrough" type="shader-vs">
+attribute vec3 position;
+uniform mat4 local2World;
+uniform mat4 MVP;
+
+void main(void)
+{
+	gl_Position = MVP * vec4(position, 1.0);
+}
+</script>
+
+<script id="fs_unlit" type="shader-fs">
+precision mediump float;
+
+void main(void)
+{
+	gl_FragColor = vec4(1.0,1.0,1.0,1.0);
+}
+</script>
+
+<script type="text/javascript" src="obj.js"></script>
+<script type="text/javascript" src="gl-matrix-min.js"></script>
+<script type="text/javascript" src="script.js"></script>
+</head>
+<body onload="webGLStart();">
+	<canvas id="glCanvas" style="border: none;" width="500" height="500">
+	</canvas>
+</body>
+</html>
