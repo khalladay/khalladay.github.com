@@ -142,6 +142,7 @@ nav h1, nav h2 {
   background-color: #f0f3f3;
   font-size: 90%;
   padding: 0 .2em;
+  overflow:auto;
 }
 
 #post pre code {
