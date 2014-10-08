@@ -121,6 +121,10 @@ nav h1, nav h2 {
   font-size: 13px;
 }
 
+#post div img{
+  max-width:100%;
+}
+
 #post pre {
   border: 1px solid #555;
   background-color: #f0f3f3;
