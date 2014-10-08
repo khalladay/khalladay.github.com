@@ -10,7 +10,7 @@ If you've ever worked with me (or talked with me for more than a half hour) it's
 
 <div align="center">
 	 	
-<img src="/images/post_images/2014-07-15/xray_output_monkey.png" />
+<img src="/images/post_images/2014-07-15/xray_output_monkey.png" style="max-width:100%;"/>
 <br>
 <font size="2">The Blender monkey rendered in my first ray tracer</font>
 <br>
