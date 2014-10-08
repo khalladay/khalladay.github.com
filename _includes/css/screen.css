@@ -147,6 +147,7 @@ nav h1, nav h2 {
 
 #post pre code {
   border: none;
+  overflow:auto;
 }
 
 .sidebar {
