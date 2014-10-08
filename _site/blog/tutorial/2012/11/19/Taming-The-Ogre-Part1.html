@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kyle Halladay - Building Ogre 1.81 on Lion</title>
+  <meta name="author" content="Kyle Halladay" />
+  <meta name="description" content="The blog of Kyle Halladay" />
+  <link rel="canonical" href="http://kylehalladay.com/blog/tutorial/2012/11/19/Taming-The-Ogre-Part1.html" />
+  <meta name="keywords" content="life,code,software,development,games,graphics,shaders,indie" />
+
+  <link href="//fonts.googleapis.com/css?family=Open+Sans:600,800" rel="stylesheet" type="text/css">
+  <link rel="shortcut icon" href="/favicon.png">
+  <link rel="alternate" type="application/rss+xml" title="Kyle Halladay" href="http://kylehalladay.com/atom.xml" />
+
+  <link rel="stylesheet" href="/assets/css/all.css">
+  <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <div class="four columns sidebar">
+      <nav>
+  <h1>Hi.</h1>
+  <a href="/">
+    <img src="/logo.png" id="logo" alt="Blog logo"/>
+  </a>
+  <h2>I'm <a href="/">Kyle Halladay</a>.</h2>
+  <div id="bio">
+    <p>I build games, renderers, shaders, and other stuff thats fun to stare at.</p>
+    <p>Check out <a href="/portfolio.html">some of the stuff I've built</a><br><br> Grab some <a href="/graphics.html">free shaders</a><br><br> Or <a href="/archive.html">browse my past blog posts</a></p>
+  </div>
+  <div id="social">
+    Want to say hi?
+<div id="stalker">
+  
+  <a title="khalladay on Github" href="https://github.com/khalladay">
+    <i class="fa fa-github-square"></i>
+  </a>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  <a title="khalladay on Twitter" href="https://twitter.com/khalladay">
+    <i class="fa fa-twitter-square"></i>
+  </a>
+  
+
+  
+
+  
+
+  
+  <a title="Kyle Halladay on LinkedIn" href="https://www.linkedin.com/in/kylehalladay">
+    <i class="fa fa-linkedin-square"></i>
+  </a>
+  
+
+  
+
+  
+  <a title="Kyle Halladay via Email" href="mailto:k.mj.halladay@gmail.com">
+    <i class="fa fa-envelope-square"></i>
+  </a>
+  
+
+  <a title="RSS feed" id="rss" href="/atom.xml">
+    <i class="fa fa-rss-square"></i>
+  </a>
+</div>
+
+  </div>
+</nav>
+
+    </div>
+
+    <div class="eleven columns content">
+      <p class="meta">
+ 
+</p>
+
+<h1 class="title">Building Ogre 1.81 on Lion</h1>
+
+<div id="post">
+  <p>I’ve recently decided that I need to go open source for my hobby projects, namely because I’ve reached a point where Unity Free is becoming too restrictive for my tastes, yet I’m still too poor to buy Unity Pro (one day I’ll make a game that pays for more than a night at a bar, but that day hasn’t happened yet).</p>
+
+<p>After spending a long week trying to make JMonkey suit my needs (namely: an asset pipeline that doesn’t make me want to shoot myself), I abandoned it and meekly returned to the engine of my third year at Humber: Ogre3D. I had only worked with the precompiled windows binaries until now, but how hard could building it from source (because if I’m going open source, I may as well embrace the whole deal) on my mac be?</p>
+
+<p>Three days of pulling my hair out later, I finally have not only Ogre 1.81 built on my mac, but I also have the Xcode 4 template project compiling, and because theres absolutely no reason that ANYONE should have to spend three days trying to weed through outdated tutorials, I’m posting the whole process here in exhaustive detail, with the hopes that it helps at least one other poor soul trying to do this.</p>
+
+<p>This post will ONLY cover building the engine itself. The next article will cover how to get the Xcode 4 templates to work (they’re broken in some weird spots in Xcode 4.5).</p>
+
+<h3 id="ingredients">Ingredients</h3>
+
+<ul>
+  <li>OGRE 1.8.1 Source for Linux/OSX </li>
+  <li>Mac OS X Ogre Dependencies – (this tutorial assumes you’re grabbing the precompiled ones, just to limit the number of things that can go wrong)</li>
+  <li>CG Framework</li>
+  <li>CMake 2.8.10.1</li>
+  <li>This tutorial assumes you’re using Xcode 4.5, although I don’t know if that makes a difference for what we’re doing.</li>
+</ul>
+
+<h3 id="setting-up-the-source-directory">Setting up the source directory</h3>
+
+<ul>
+  <li>Extract the Ogre src zip file into wherever you want your Ogre SDK to be installed to. I just put it in my Macintosh HD directory so that it was easy to find, but I think the more correct place to put it is in ~/Library/Developer/SDKs</li>
+  <li>Extract  the precompiled dependencies into the top level folder in the ogre sdk directoy (in my case /ogre_src_v1-8-1/)</li>
+  <li>Create a directory in your root folder called “boost”</li>
+  <li>Drag the folder called boost out of Dependencies/include into the boost folder you just made</li>
+  <li>Create a folder called lib in the boost folder (ie/ /ogre_src_v1-8-1/boost/lib)</li>
+  <li>drag the boost libraries at Dependencies/lib into this folder.</li>
+</ul>
+
+<h3 id="cooking-with-cmake">Cooking With CMake</h3>
+
+<ul>
+  <li>Start CMake’s GUI tool</li>
+  <li>Hit the Browse Source button on the top right, and select the ogre sdk folder that you’ve been working with&lt;</li>
+  <li>Copy and paste this directory into the “Where to build the binaries” field as well. Add the name of your build folder to the end of this path. For me, this was /ogre_src_v1-8-1/1.81, but the name of folder isn’t important, it’s just important that this build folder IS NOT your root sdk folder. That way, if something goes wrong, you can start the build process over again without having to do all the previous steps.</li>
+  <li>Hit “Configure” and make sure that “Xcode” and “Use default native compilers” is selected. Then click done</li>
+  <li>You should see a bunch of options highlighted in red. That’s fine. Ensure that OGRE_BUILD_CG is selected, and then press configure again. NOTE: the Cmake console will show a number of warnings in red. IGNORE THESE.</li>
+  <li>Once that’s done, click “Generate” and exit CMake</li>
+</ul>
+
+<h3 id="building-ogre">Building Ogre</h3>
+
+<ul>
+  <li>Navigate to your build directory now, and open the Xcode project you just generated.</li>
+  <li>Delete i386 from your project’s valid architectures (otherwise boost complains. Long term, I think only building for 64 bit is going to cause some problems, but in the interest of getting things running quickly, I ignored these worries for now)</li>
+  <li>Set your project to build for “My Mac 64-bit,” and your Architectures to “64-bit-intel”</li>
+  <li>Hit build, watch the magic happen.</li>
+  <li>If you want to, once the build is complete, change your build to release mode and build again to get Ogre built in release.</li>
+</ul>
+
+<h3 id="verifying-the-build">Verifying the Build</h3>
+
+<ul>
+  <li>You should now have 2 folders in your build directories bin folder. (Release and Debug), inside each folder should be a copy of SampleBrowser.app. To ensure everything is working, run one of these programs and go through each sample.</li>
+  <li>Hopefully all the samples should be in working order. Congratulations, you now have a built copy of Ogre sitting on your computer!</li>
+</ul>
+
+<p>If you run into any problems, message me on twitter and I’ll do my best to figure out what’s going on with your build. I’m definitely not an expert, or even demonstrably good at using Ogre, but I’d like to think that all the troubleshooting I’ve done this week makes me a decent resource when it comes to just building the engine on mac. Good luck!</p>
+
+
+</div>
+
+<div id="related">
+  <h3>More Posts</h3>
+  <ul class="posts">
+    
+    <li>
+      <span>16 May 2014 &raquo;</span> <a href="/blog/tutorial/bestof/2014/05/16/Coloured-Shadows-In-Unity.html">Colouring Shadows in Unity</a>
+    </li>
+    
+    <li>
+      <span>12 Jan 2014 &raquo;</span> <a href="/blog/tutorial/bestof/2014/01/12/Runtime-Shader-Compilation-Unity.html">Creating GLSL Shaders at Runtime in Unity3D</a>
+    </li>
+    
+    <li>
+      <span>06 Jan 2014 &raquo;</span> <a href="/blog/tutorial/bestof/2014/01/06/Hacking-My-Attention-Span.html">Automating SelfControl in OS X Mavericks</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      <div class="footer">
+        <div class="disclaimer">
+  
+  <p>
+    The postings on this site are my own and don't necessarily represent my 
+    employer’s positions, strategies or opinions.
+  </p>
+  
+
+  <p>
+    © Kyle Halladay, 2014 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
+  </p>
+</div>
+      </div>
+    </div>
+  </div>
+
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-40292745-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+</body>
+</html>

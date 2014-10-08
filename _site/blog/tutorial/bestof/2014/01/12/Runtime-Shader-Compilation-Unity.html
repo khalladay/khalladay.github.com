@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kyle Halladay - Creating GLSL Shaders at Runtime in Unity3D</title>
+  <meta name="author" content="Kyle Halladay" />
+  <meta name="description" content="The blog of Kyle Halladay" />
+  <link rel="canonical" href="http://kylehalladay.com/blog/tutorial/bestof/2014/01/12/Runtime-Shader-Compilation-Unity.html" />
+  <meta name="keywords" content="life,code,software,development,games,graphics,shaders,indie" />
+
+  <link href="//fonts.googleapis.com/css?family=Open+Sans:600,800" rel="stylesheet" type="text/css">
+  <link rel="shortcut icon" href="/favicon.png">
+  <link rel="alternate" type="application/rss+xml" title="Kyle Halladay" href="http://kylehalladay.com/atom.xml" />
+
+  <link rel="stylesheet" href="/assets/css/all.css">
+  <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <div class="four columns sidebar">
+      <nav>
+  <h1>Hi.</h1>
+  <a href="/">
+    <img src="/logo.png" id="logo" alt="Blog logo"/>
+  </a>
+  <h2>I'm <a href="/">Kyle Halladay</a>.</h2>
+  <div id="bio">
+    <p>I build games, renderers, shaders, and other stuff thats fun to stare at.</p>
+    <p>Check out <a href="/portfolio.html">some of the stuff I've built</a><br><br> Grab some <a href="/graphics.html">free shaders</a><br><br> Or <a href="/archive.html">browse my past blog posts</a></p>
+  </div>
+  <div id="social">
+    Want to say hi?
+<div id="stalker">
+  
+  <a title="khalladay on Github" href="https://github.com/khalladay">
+    <i class="fa fa-github-square"></i>
+  </a>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  <a title="khalladay on Twitter" href="https://twitter.com/khalladay">
+    <i class="fa fa-twitter-square"></i>
+  </a>
+  
+
+  
+
+  
+
+  
+  <a title="Kyle Halladay on LinkedIn" href="https://www.linkedin.com/in/kylehalladay">
+    <i class="fa fa-linkedin-square"></i>
+  </a>
+  
+
+  
+
+  
+  <a title="Kyle Halladay via Email" href="mailto:k.mj.halladay@gmail.com">
+    <i class="fa fa-envelope-square"></i>
+  </a>
+  
+
+  <a title="RSS feed" id="rss" href="/atom.xml">
+    <i class="fa fa-rss-square"></i>
+  </a>
+</div>
+
+  </div>
+</nav>
+
+    </div>
+
+    <div class="eleven columns content">
+      <p class="meta">
+ 
+</p>
+
+<h1 class="title">Creating GLSL Shaders at Runtime in Unity3D</h1>
+
+<div id="post">
+  <p>The feeling of solving a problem that seems potentially impossible is awesome. My latest project is no exception.</p>
+
+<p>The concept involves users being able to write shaders while the program is running, and compiling them at runtime onto objects in the scene. Normally this wouldn’t be an unreasonable task, however this project is being built in Unity, which complicates things immensely. </p>
+
+<p>I had seen an example of shaderlab code being passed to the Material constructor at runtime before, but I hadn’t ever seen anyone play around with any other shader language in the same way. It turns out that’s because you can’t. The <a href="http://docs.unity3d.com/Documentation/ScriptReference/Material-ctor.html">Material constructor</a> that I was hoping to use only accepts Shaderlab; Unity doesn’t support runtime compilation of GLSL, Cg, or HLSL, end of story. </p>
+
+<p>Except that isn’t the whole story. If it was, this would be a very short post. It turns out that with some elbow grease, you can actually get other languages (or at least GLSL) to compile. The rest of this post is going to show you how. </p>
+
+<div align="center">
+	
+<img src="/images/post&#95;images/2014-01-20/shadercompilation.png" /><br />
+<font size="2">Type the fragment shader into the box, hit the button, watch the magic happen</font>
+
+</div>
+
+<p><br /></p>
+
+<h3>Setting Up Your Project</h3>
+
+<p>There are at least a few people who have tried to make this work before. A quick google search for “runtime shader compilation unity” will bring you to <a href="http://forum.unity3d.com/threads/87085-Runtime-shader-compilation">this Unity forum post</a>. If you scroll down you’ll find a post from a user named Sirithang, who is the real unsung hero of this post. </p>
+
+<p>Their post talks about a tool called CgBatch, which is included with Unity, and according to <a href="http://www.realtimerendering.com/downloads/MobileCrossPlatformChallenges_siggraph.pdf">this SIGGRAPH presentation</a>, is either the entire shader compilation pipeline for Unity, or is at least one step in it. The siggraph link only describes it as a tool to generate HLSL, but in practice it seems to fully translate shaders into a format accepted by that material constructor from above. Since CgBatch isn’t meant for public use, there isn’t anything in the way of documentation to know for sure. </p>
+
+<p>Ok, so we know we need to use CgBatch, but where do we get it. On Mac, you can find it inside of Unity.app (right click and select “Show Package Contents”), inside the Tools folder. On Windows, you’re looking for CgBatch.exe, located in Unity/Editor/Data/Tools. Thanks to <a href="https://twitter.com/izaleu">@izaleu</a> for finding this on Windows :D ). Create a folder inside your project’s StreamingAssets directory and paste CgBatch into it (it must be inside subdirectory of StreamingAssets).</p>
+
+<p>CgBatch also relies on Cg.framework, which you can find in the Unity.app/Contents/Frameworks folder. If you try to run CgBatch however, you’ll notice that it actually relies on Cg.framework being located in  “../Frameworks/Cg.framework”, so copy and paste the entire folder into your project’s StreamingAssets folder.</p>
+
+<p>Finally, you will need to provide a path to the CGInclude files as part of using CgBatch, and since we don’t want our users to have to have Unity installed to use our program, you will also need to copy the CGIncludes folder to your StreamingAssets directory.</p>
+
+<p><strong>Aside:</strong> If you’ve never used the StreamingAssets folder before, it is simply a folder that you place in your project’s assets folder, name “StreamingAssets,” everything in this folder will be included exactly as is in your built project’s Application.streamingAssetsPath.</p>
+
+<h3>Deciphering CgBatch</h3>
+
+<p>So how do you use CgBatch. If you’ve attempted to run it from the command line you’ve probably seen the following message:
+<br /></p>
+
+<div align="center">
+	
+	<i>E -1: Failed to launch CgBatch (incorrect parameters). Usage: CgBatch input path includepath output [-xbox360] [-ps3]</i>
+	
+</div>
+
+<p><br />
+So CgBatch needs at least 4 parameters. Based on the forum post linked previously, these arguments are as follows:</p>
+
+<ul>
+  <li><strong>input</strong> : The path to your uncompiled shader file</li>
+  <li><strong>path</strong> : The path to the directory that contains your shader</li>
+  <li><strong>includepath</strong> : The path to the CGInclude files for Unity</li>
+  <li><strong>output</strong> : Where to put the output shader file. </li>
+</ul>
+
+<p>If you run this with the appropriate parameters, you should be able to get output that can be accepted by the Material shader string constructor, which is great! So now we need to be able to do this inside a running program. </p>
+
+<h3>Introducing System.Diagnostics</h3>
+
+<p>Thankfully, Mono has us covered (even on Mac!). The Process class (inside System.Diagnostics) is specifically designed to run command line applications, and can be configured to execute programs in bash as well as the windows command line. </p>
+
+<p>The way to do this is to create a new Process object, and use that object’s StartInfo property to specify exactly what command and arguments you wish to execute, and then call Process.Start();</p>
+
+<p>In practice, this looks like the following: </p>
+
+<div class="highlight"><pre><code class="language-c#" data-lang="c#"><span class="k">using</span> <span class="nn">System.Diagnostics</span><span class="p">;</span>
+	
+<span class="n">Process</span> <span class="n">process</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Process</span><span class="p">();</span>
+<span class="n">process</span><span class="p">.</span><span class="n">StartInfo</span><span class="p">.</span><span class="n">FileName</span> <span class="p">=</span> <span class="s">&quot;bash&quot;</span><span class="p">;</span>
+<span class="n">process</span><span class="p">.</span><span class="n">StartInfo</span><span class="p">.</span><span class="n">Arguments</span> <span class="p">=</span> <span class="s">&quot;-c &#39;&quot;</span> <span class="p">+</span> <span class="p">[</span><span class="n">Command</span><span class="p">]</span> <span class="p">[</span><span class="n">arg1</span><span class="p">]</span> <span class="p">[</span><span class="n">arg2</span><span class="p">]</span> <span class="p">...</span> <span class="p">+</span><span class="s">&quot;&#39;&quot;</span><span class="p">;</span>
+<span class="n">process</span><span class="p">.</span><span class="n">StartInfo</span><span class="p">.</span><span class="n">RedirectStandardOutput</span> <span class="p">=</span> <span class="k">true</span><span class="p">;</span>
+<span class="n">process</span><span class="p">.</span><span class="n">StartInfo</span><span class="p">.</span><span class="n">UseShellExecute</span> <span class="p">=</span> <span class="k">false</span><span class="p">;</span>
+
+<span class="n">process</span><span class="p">.</span><span class="n">Start</span><span class="p">();</span></code></pre></div>
+
+<p>(the above is mac specific, I don’t have a windows machine to work try this stuff out on right now)</p>
+
+<p>As shown above, the name of the command that you need to execute is actually bash, and not CgBatch. In order to execute a command from batch, you need to pass that as an argument to bash using the -c flag, and enclosing the command and all its arguments inside single quotes. </p>
+
+<p>Setting RedirectStandardOutput to true allows us to read the output of the command into the Unity console (really handy for debugging), but in order for that to work, UseShellExecute needs to be set to false, which means that we will not be using the operating system shell to launch the program (in this case bash), we will launch bash directly.</p>
+
+<h3>Actually Making This Work</h3>
+
+<p>Now we have our tools set up, we now how to execute CgBatch, it’s time to put it all together. </p>
+
+<p>For the proof of concept, I only wanted users to write fragment shaders, so I needed to provide a vertex shader for them:</p>
+
+<div class="highlight"><pre><code class="language-c#" data-lang="c#"><span class="kt">string</span> <span class="n">prefix</span> <span class="p">=</span> <span class="s">&quot;Shader \&quot;Temp\&quot;{\nProperties{\n}\nSubShader {&quot;</span> <span class="p">+</span>
+	<span class="s">&quot;\nTags { \&quot;Queue\&quot; = \&quot;Geometry\&quot; }\nPass {\nGLSLPROGRAM\n#ifdef VERTEX\n&quot;</span> <span class="p">+</span>
+	<span class="s">&quot;void main(){\n&quot;</span> <span class="p">+</span>
+	<span class="s">&quot;gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;\n&quot;</span> <span class="p">+</span>
+	<span class="s">&quot;}\n&quot;</span> <span class="p">+</span>
+	<span class="s">&quot;#endif\n&quot;</span> <span class="p">+</span>
+	<span class="s">&quot;#ifdef FRAGMENT\n&quot;</span> <span class="p">+</span>
+	<span class="s">&quot;uniform float _time;\n&quot;</span><span class="p">;</span></code></pre></div>
+
+<p>The above example is for writing a glsl shader at runtime. I haven’t yet been able to get Cg compiling using the method presented in this post, but I’m sure it can be done with the right arguments to CgBatch.</p>
+
+<p>You’ll notice I’m also including a uniform for Time. This is because I have yet to figure out how to get Unity’s specific constants to be recognized in the User written shader, and Time is useful enough that I’m passing it in myself (just call the Shader.SetGlobalFloat argument in Update to do the same).</p>
+
+<p>Next up, we need to write the code that will come after the user’s fragment shader to finish off the shader file:</p>
+
+<div class="highlight"><pre><code class="language-c#" data-lang="c#"><span class="kt">string</span> <span class="n">suffix</span> <span class="p">=</span> <span class="s">&quot;\n#endif\nENDGLSL}}}&quot;</span><span class="p">;</span></code></pre></div>
+
+<p>As the variable names suggest, the user’s fragment shader will be positioned in between these two strings when building our input file. </p>
+
+<p>Get the user input however you see fit (I as the picture earlier showed, I’m using Unity.GUI for now), and then assemble the full file string with prefix+USERINPUT+suffix. </p>
+
+<p>Once you’ve assembled the full shader string, you need to write it to a file, since CgBatch expects the input parameter to be a file path. Since we don’t want this file to persist between runs, I’m writing the input file to Application.temporaryCachePath. </p>
+
+<div class="highlight"><pre><code class="language-c#" data-lang="c#"><span class="kt">byte</span><span class="p">[]</span> <span class="n">byteShader</span> <span class="p">=</span> <span class="n">System</span><span class="p">.</span><span class="n">Text</span><span class="p">.</span><span class="n">Encoding</span><span class="p">.</span><span class="n">UTF8</span><span class="p">.</span><span class="n">GetBytes</span><span class="p">(</span><span class="n">prefix</span><span class="p">+</span><span class="n">shader</span><span class="p">+</span><span class="n">suffix</span><span class="p">);</span>
+
+<span class="kt">var</span> <span class="n">tempShader</span> <span class="p">=</span> <span class="n">File</span><span class="p">.</span><span class="n">Create</span><span class="p">(</span><span class="n">Application</span><span class="p">.</span><span class="n">temporaryCachePath</span><span class="p">+</span><span class="s">&quot;/tempshader.shader&quot;</span><span class="p">);</span>
+<span class="n">tempShader</span><span class="p">.</span><span class="n">Write</span><span class="p">(</span><span class="n">byteShader</span><span class="p">,</span><span class="m">0</span><span class="p">,(</span><span class="n">prefix</span><span class="p">+</span><span class="n">suffix</span><span class="p">+</span><span class="n">shader</span><span class="p">).</span><span class="n">Length</span><span class="p">);</span>
+<span class="n">tempShader</span><span class="p">.</span><span class="n">Close</span><span class="p">();</span></code></pre></div>
+
+<p>Finally, we need to read in the output and actually build a material out of it. All together, the shader compilation process looks like the following: </p>
+
+<div class="highlight"><pre><code class="language-c#" data-lang="c#"><span class="kt">byte</span><span class="p">[]</span> <span class="n">byteShader</span> <span class="p">=</span> <span class="n">System</span><span class="p">.</span><span class="n">Text</span><span class="p">.</span><span class="n">Encoding</span><span class="p">.</span><span class="n">UTF8</span><span class="p">.</span><span class="n">GetBytes</span><span class="p">(</span><span class="n">prefix</span><span class="p">+</span><span class="n">shader</span><span class="p">+</span><span class="n">suffix</span><span class="p">);</span>
+
+<span class="kt">var</span> <span class="n">tempShader</span> <span class="p">=</span> <span class="n">File</span><span class="p">.</span><span class="n">Create</span><span class="p">(</span><span class="n">Application</span><span class="p">.</span><span class="n">temporaryCachePath</span><span class="p">+</span><span class="s">&quot;/tempshader.shader&quot;</span><span class="p">);</span>
+<span class="n">tempShader</span><span class="p">.</span><span class="n">Write</span><span class="p">(</span><span class="n">byteShader</span><span class="p">,</span><span class="m">0</span><span class="p">,(</span><span class="n">prefix</span><span class="p">+</span><span class="n">suffix</span><span class="p">+</span><span class="n">shader</span><span class="p">).</span><span class="n">Length</span><span class="p">);</span>
+<span class="n">tempShader</span><span class="p">.</span><span class="n">Close</span><span class="p">();</span>
+
+<span class="n">Process</span> <span class="n">compileProcess</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Process</span><span class="p">();</span>
+<span class="n">compileProcess</span><span class="p">.</span><span class="n">StartInfo</span><span class="p">.</span><span class="n">FileName</span> <span class="p">=</span> <span class="s">&quot;bash&quot;</span><span class="p">;</span>
+
+<span class="n">compileProcess</span><span class="p">.</span><span class="n">StartInfo</span><span class="p">.</span><span class="n">Arguments</span> <span class="p">=</span> <span class="s">&quot;-c &#39;&quot;</span>
+	<span class="p">+</span><span class="n">Application</span><span class="p">.</span><span class="n">streamingAssetsPath</span>
+	<span class="p">+</span><span class="s">&quot;/Tools/CGBatch &quot;</span>
+	<span class="p">+</span><span class="n">Application</span><span class="p">.</span><span class="n">temporaryCachePath</span>
+	<span class="p">+</span><span class="s">&quot;/tempshader.shader ../CGIncludes/ ../CGIncludes/&quot;</span>
+	<span class="p">+</span><span class="n">Application</span><span class="p">.</span><span class="n">temporaryCachePath</span>
+	<span class="p">+</span><span class="s">&quot;/testOutput.shader&#39;&quot;</span><span class="p">;</span>
+	
+<span class="n">compileProcess</span><span class="p">.</span><span class="n">StartInfo</span><span class="p">.</span><span class="n">RedirectStandardOutput</span> <span class="p">=</span> <span class="k">true</span><span class="p">;</span>
+<span class="n">compileProcess</span><span class="p">.</span><span class="n">StartInfo</span><span class="p">.</span><span class="n">UseShellExecute</span> <span class="p">=</span> <span class="k">false</span><span class="p">;</span>
+
+<span class="n">compileProcess</span><span class="p">.</span><span class="n">Start</span><span class="p">();</span>
+<span class="kt">var</span> <span class="n">output</span> <span class="p">=</span> <span class="n">compileProcess</span><span class="p">.</span><span class="n">StandardOutput</span><span class="p">.</span><span class="n">ReadToEnd</span><span class="p">();</span>
+<span class="n">compileProcess</span><span class="p">.</span><span class="n">WaitForExit</span><span class="p">();</span>
+
+<span class="kt">string</span> <span class="n">compiled</span> <span class="p">=</span> <span class="n">File</span><span class="p">.</span><span class="n">ReadAllText</span><span class="p">(</span><span class="n">Application</span><span class="p">.</span><span class="n">temporaryCachePath</span>
+		<span class="p">+</span><span class="s">&quot;/testOutput.shader&quot;</span><span class="p">);</span>
+									
+<span class="n">Material</span> <span class="n">m</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Material</span><span class="p">(</span><span class="n">compiled</span><span class="p">);</span>
+<span class="n">cube</span><span class="p">.</span><span class="n">renderer</span><span class="p">.</span><span class="n">material</span> <span class="p">=</span> <span class="n">m</span><span class="p">;</span>
+
+<span class="n">UnityEngine</span><span class="p">.</span><span class="n">Debug</span><span class="p">.</span><span class="n">Log</span><span class="p">(</span><span class="n">output</span><span class="p">);</span></code></pre></div>
+
+<p>The above has only been tested on mac. On Windows, you will need to replace “bash” with “cmd” and the arguments with whatever is appropriate for your system. I unfortunately don’t have a Windows machine to test it out (again, send me a message <a href="http://twitter.com/khalladay">on twitter</a> and I’ll update this).</p>
+
+<p>But, provided you’re on Mac, or have figured out the Windows changes, you should now be able to compile GLSL at runtime! You laugh in the face of Unity not supporting this feature!</p>
+
+<p>You may also notice that your build product is 50MB larger than you expect. This is because we’re including all of Cg.framework with our project so that CgBatch can use it during compilation. I expect that this extra file size is one of a number of reasons that Unity has opted to leave this feature out by default.</p>
+
+<p>That’s all for now! Hopefully this wall of text has opened up a whole world of experimental gameplay to you! I’d love to hear about any improvements to the above, any further knowledge about CgBatch, and especially any other tricks like this that allow weird stuff to be done in my favourite engine, so as I’ve said twice already, <a href="http://twitter.com/khalladay">TWITTER!</a></p>
+
+</div>
+
+<div id="related">
+  <h3>More Posts</h3>
+  <ul class="posts">
+    
+    <li>
+      <span>16 May 2014 &raquo;</span> <a href="/blog/tutorial/bestof/2014/05/16/Coloured-Shadows-In-Unity.html">Colouring Shadows in Unity</a>
+    </li>
+    
+    <li>
+      <span>12 Jan 2014 &raquo;</span> <a href="/blog/tutorial/bestof/2014/01/12/Runtime-Shader-Compilation-Unity.html">Creating GLSL Shaders at Runtime in Unity3D</a>
+    </li>
+    
+    <li>
+      <span>06 Jan 2014 &raquo;</span> <a href="/blog/tutorial/bestof/2014/01/06/Hacking-My-Attention-Span.html">Automating SelfControl in OS X Mavericks</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      <div class="footer">
+        <div class="disclaimer">
+  
+  <p>
+    The postings on this site are my own and don't necessarily represent my 
+    employer’s positions, strategies or opinions.
+  </p>
+  
+
+  <p>
+    © Kyle Halladay, 2014 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
+  </p>
+</div>
+      </div>
+    </div>
+  </div>
+
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-40292745-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+</body>
+</html>

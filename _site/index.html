@@ -1,174 +1,223 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<!DOCTYPE html>
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
 <head>
-	<meta http-equiv="content-type" content="text/html; charset=UTF-8"  />
-	<meta name="description" content="Kyle Halladay Game Development" />
-	<meta name="keywords" content="life,code,software,development,games,ludology,indie" />
-	<link rel="stylesheet" type="text/css" href="/css/default.css" />
-	<link rel="stylesheet" type="text/css" href="/css/pretty_code.css" />
-	<link rel="stylesheet" href="/css/highlight_default.css">
-	<script src="/javascripts/highlight.pack.js"></script>
-	<script>hljs.initHighlightingOnLoad();</script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kyle Halladay - Home Page</title>
+  <meta name="author" content="Kyle Halladay" />
+  <meta name="description" content="The blog of Kyle Halladay" />
+  <link rel="canonical" href="http://kylehalladay.com/" />
+  <meta name="keywords" content="life,code,software,development,games,graphics,shaders,indie" />
 
-<title>Kyle Halladay - Toronto Game Developer</title>
+  <link href="//fonts.googleapis.com/css?family=Open+Sans:600,800" rel="stylesheet" type="text/css">
+  <link rel="shortcut icon" href="/favicon.png">
+  <link rel="alternate" type="application/rss+xml" title="Kyle Halladay" href="http://kylehalladay.com/atom.xml" />
+
+  <link rel="stylesheet" href="/assets/css/all.css">
+  <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
 </head>
-
 <body>
-	<div id="wrap">
-		<div id="header">
-			<p id="toplinks">
-			</p>
-			<h1><a href="/" class="logo"><div id="logo"></div></a><a href="/" class="logo">K</a><a href="/" class="logo">y</a><a href="/" class="logo">l</a><a href="/" class="logo">e</a> <a href="/" class="logo">H</a><a href="/" class="logo">a</a><a href="/" class="logo">l</a><a href="/" class="logo">l</a><a href="/" class="logo">a</a><a href="/" class="logo">d</a><a href="/" class="logo">a</a><a href="/" class="logo">y</a></h1>
-			<div class="slogan"> 
-					<a href="/" class="paleorange">Home</a> ||
-					<a href="/archive.html" class="paleorange">Archive</a> ||
-					<a href="/portfolio.html" class="paleorange">Games</a> ||
-					<a href="/graphics.html" class="paleorange">Graphics</a> ||
-					<a href="/aboutme.html" class="paleorange">About Me</a>
-			</div>
-	</div>
-<div id="content">  
-  <span class = "post_title">
-<h2>Setting Up OpenMP on Mavericks</h2>
-</span>
+  <div class="container">
+    <div class="four columns sidebar">
+      <nav>
+  <h1>Hi.</h1>
+  <a href="/">
+    <img src="/logo.png" id="logo" alt="Blog logo"/>
+  </a>
+  <h2>I'm <a href="/">Kyle Halladay</a>.</h2>
+  <div id="bio">
+    <p>I build games, renderers, shaders, and other stuff thats fun to stare at.</p>
+    <p>Check out <a href="/portfolio.html">some of the stuff I've built</a><br><br> Grab some <a href="/graphics.html">free shaders</a><br><br> Or <a href="/archive.html">browse my past blog posts</a></p>
+  </div>
+  <div id="social">
+    Want to say hi?
+<div id="stalker">
+  
+  <a title="khalladay on Github" href="https://github.com/khalladay">
+    <i class="fa fa-github-square"></i>
+  </a>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  <a title="khalladay on Twitter" href="https://twitter.com/khalladay">
+    <i class="fa fa-twitter-square"></i>
+  </a>
+  
+
+  
+
+  
+
+  
+  <a title="Kyle Halladay on LinkedIn" href="https://www.linkedin.com/in/kylehalladay">
+    <i class="fa fa-linkedin-square"></i>
+  </a>
+  
+
+  
+
+  
+  <a title="Kyle Halladay via Email" href="mailto:k.mj.halladay@gmail.com">
+    <i class="fa fa-envelope-square"></i>
+  </a>
+  
+
+  <a title="RSS feed" id="rss" href="/atom.xml">
+    <i class="fa fa-rss-square"></i>
+  </a>
+</div>
+
+  </div>
+</nav>
+
+    </div>
+
+    <div class="eleven columns content">
+      <p class="meta">
+   
+
+</p>
+
+<h1 class="title">Setting Up OpenMP on Mavericks</h1>
 
 <div id="post">
-<br>
+ <p>If you’ve ever worked with me (or talked with me for more than a half hour) it’s not a secret that I’m completely fascinated with ray and path tracers. My last project was building a <a href="https://github.com/khalladay/xRay">relatively simple ray tracer</a>, so I think it’s time to build a path tracer.</p>
 
-<p>If you’ve ever worked with me (or talked with me for more than a half hour) it’s not a secret that I’m completely fascinated with ray and path tracers. My last project was building a <a href="https://github.com/khalladay/xRay">relatively simple ray tracer</a>, so I think it’s time to build a path tracer.</p>
-<div align='center'>
+<div align="center">
 	 	
-<img src='/images/post_images/2014-07-15/xray_output_monkey.png' />
+<img src="/images/post_images/2014-07-15/xray_output_monkey.png" />
 <br />
-<font size='2'>The Blender monkey rendered in my first ray tracer</font>
+<font size="2">The Blender monkey rendered in my first ray tracer</font>
 <br />
 <br />
 
 </div>
-<p>I’ve tinkered with a few open source path tracers out there, but the one that caught my eye originally was <a href="http://www.kevinbeason.com/smallpt/">SmallPT</a>, which uses OpenMP. OpenMP is an API built by Intel that makes it dead simple to write parallel code. Want to have a for loop distribute itself over multiple cores? That looks like this:</p>
-<pre><code>
-#pragma omp parallel for
-for (int i = 0; i &lt; 100; i++)
-{
-	printf("Loop executed on thread %d",  omp_get_thread_num());
-}
-</code></pre>
-<p>After working with Boost’s Thread library on the ray tracer, which ended up dictating a lot of the structure of the renderer, OpenMP seems like a great way to let the compiler/runtime handle the implementation of the threading code and let me focus on actually building something cool.</p>
+
+<p>I’ve tinkered with a few open source path tracers out there, but the one that caught my eye originally was <a href="http://www.kevinbeason.com/smallpt/">SmallPT</a>, which uses OpenMP. OpenMP is an API built by Intel that makes it dead simple to write parallel code. Want to have a for loop distribute itself over multiple cores? That looks like this: </p>
+
+<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="cp">#pragma omp parallel for</span>
+<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="n">printf</span><span class="p">(</span><span class="s">&quot;Loop executed on thread %d&quot;</span><span class="p">,</span>  <span class="n">omp_get_thread_num</span><span class="p">());</span>
+<span class="p">}</span></code></pre></div>
+
+<p>After working with Boost’s Thread library on the ray tracer, which ended up dictating a lot of the structure of the renderer, OpenMP seems like a great way to let the compiler/runtime handle the implementation of the threading code and let me focus on actually building something cool. </p>
 
 <p>So with that in mind, today’s article is all about how to set up OpenMP on Mavericks and get it working with a Makefile in Xcode 5; it’s a heck of a lot more involved than I originally anticipated. I suppose one caveat of this post is that most of the information here is taken from other places (which I’ve linked to), I’m just collecting it all in one place for the next person who wants to do this.</p>
+
 <h2>Extreme Yak Shaving</h2>
-<p>The first step to getting OpenMP up and running on Mavericks is to install a new compiler. No joke. The version of Clang installed on your system doesn’t support OpenMP, and Apple very quietly replaced gcc with a symlink to Clang with XCode 5, so we’re starting this process up a bit of a creek.</p>
+
+<p>The first step to getting OpenMP up and running on Mavericks is to install a new compiler. No joke. The version of Clang installed on your system doesn’t support OpenMP, and Apple very quietly replaced gcc with a symlink to Clang with XCode 5, so we’re starting this process up a bit of a creek. </p>
 
 <p>There are 2 commonly recommended options at this point. Probably the most logical solution is to simply install GCC 4.9 using Homebrew or Macports (or build it yourself if that turns your crank), but the Homebrew recipe for GCC 4.9 was broken at the time of writing this, and while I was looking for how to grab it from MacPorts I came across <a href="clang-opm.github.io">OpenMP®/Clang</a>.</p>
 
-<p>OpenMP®/Clang, unsurprisingly, is a modified version of Clang which supports OpenMP. Given that I’m already used to using Clang this seemed like a great idea, especially since the website is active, and indicates that the plan is to eventually contribute to the Clang trunk. May as well jump on the bandwagon early.</p>
+<p>OpenMP®/Clang, unsurprisingly, is a modified version of Clang which supports OpenMP. Given that I’m already used to using Clang this seemed like a great idea, especially since the website is active, and indicates that the plan is to eventually contribute to the Clang trunk. May as well jump on the bandwagon early. </p>
+
 <h2>Installing OpenMP®/Clang</h2>
+
 <p>This part is tricky, but luckily StackOverflow has our back. If you check out <a href="http://stackoverflow.com/a/21789869">this post</a> you can find a script that user Jason Parham wrote for automating the process of installing / configuring the tools we need (namely OpenMP®/Clang, and the OpenMP® runtime itself). I modified the paths that everything got built to, but otherwise the steps I took mimic that script almost exactly.</p>
 
 <p>One thing to pay attention to is that the script above will bind the new version of clang to the commands “clang2” and “clang2++,” which is great because it means we don’t have to screw with the moderately important command currently bound to “clang.”</p>
 
-<p>Aside from that though, that script should take care of a lot of the heavy lifting needed to get us going.</p>
-<h2>Clang2 and XCode</h2>
-<p>If you’re happy just using Makefiles by themselves you can stop here and use them to build you projects (remembering to use the -fopenmp flag), but I still wanted to use XCode as a front end for the debugger so my odyssey continued for a bit. If that sounds like something you want too, the rest of this article will outline how to get that working.</p>
+<p>Aside from that though, that script should take care of a lot of the heavy lifting needed to get us going. </p>
 
-<p>Setting up a makefile based project in XCode is (relatively) straightforward:</p>
+<h2>Clang2 and XCode</h2>
+
+<p>If you’re happy just using Makefiles by themselves you can actually just stop here and use them to build you projects (remembering to use the -fopenmp flag), but I still wanted to use XCode as a front end for the llvm debugger so my odyssey continued for a bit. If that sounds like something you want too, the rest of this article will outline how to get that working.</p>
+
+<p>Setting up a makefile based project in XCode is (relatively) straightforward: </p>
 
 <ul>
-<li>
-<p>Create a new project like normal, choosing whatever template makes sense.</p>
-</li>
-
-<li>
-<p>Go to your project settings and delete the pre-generated target(s) for your application</p>
-</li>
-
-<li>
-<p>Create a new target of type “External Build System”</p>
-</li>
-
-<li>
-<p>Create a makefile for your project and put it somewhere in your project directory</p>
-</li>
-
-<li>
-<p>In your Build Tool Configuration page, set the directory to wherever you’ve chosen to store your makefile, and set the arguments to “-f NAME_OF_YOUR_MAKEFILE”</p>
-</li>
+  <li>Create a new project like normal, choosing whatever template makes sense.</li>
+  <li>
+    <p>Go to your project settings and delete the pre-generated target(s) for your application</p>
+  </li>
+  <li>Create a new target of type “External Build System”</li>
+  <li>Create a makefile for your project and put it somewhere in your project directory</li>
+  <li>In your Build Tool Configuration page, set the directory to wherever you’ve chosen to store your makefile, and set the arguments to “-f NAME_OF_YOUR_MAKEFILE”</li>
 </ul>
 
-<p>If you’ve followed those steps, your Build Tool Configuration page should look something like the following:</p>
-<div align='center'>
+<p>If you’ve followed those steps, your Build Tool Configuration page should look something like the following: </p>
+
+<div align="center">
 	 	
-<img src='/images/post_images/2014-07-15/build_tool_settings.png' />
+<img src="/images/post_images/2014-07-15/build_tool_settings.png" />
 <br />
 </div>
 <p><br /></p>
 
-<p>Great. Next up is to actually write the makefile. For the most part this is the same as any other makefile, except that you need to specify “clang2” as the compiler, and include the -fopenmp flag when you compile files that include OpenMP. A really simple makefile that does this might look like the following:</p>
-<div align='center'>
+<p>Great. Next up is to actually write the makefile. For the most part this is the same as any other makefile, except that you need to specify “clang2” as the compiler, and include the -fopenmp flag when you compile files that include OpenMP. A really simple makefile that does this might look like the following: </p>
+
+<div align="center">
 	 	
-<img src='/images/post_images/2014-07-15/makefile.png' />
+<img src="/images/post_images/2014-07-15/makefile.png" />
 <br />
 </div>
 <p><br /></p>
 
-<p>We’re almost there, but XCode isn’t through with us yet. If you try to build now, you’ll notice that it fails spectacularly and spits out a cryptic error that boils down to not knowing what the heck “clang2” is. This is because for some reason XCode doesn’t read the PATH variables that we set up earlier, so we need to tell it where to find our compiler.</p>
+<p>We’re almost there, but XCode isn’t through with us yet. If you try to build now, you’ll notice that it fails spectacularly and spits out a cryptic error that boils down to not knowing what the heck “clang2” is. This is because for some reason XCode doesn’t read the PATH variables that we set up in that script ealier, so we need to tell it where to find our compiler. </p>
 
-<p>I’m sure theres a better way of doing this, but after a couple of hours of banging my head against a wall, I’ve resigned to launching XCode from the command line like so:</p>
+<p>I’m sure theres a better way of doing this, but after a couple of hours of banging my head against a wall, I’ve resigned to launching XCode from the command line like so: </p>
+
 <pre><code>$ source ~/.profile
 $ open -a "Xcode"
 </code></pre>
-<p>This will open XCode with the path variables we need set up properly. If you like Spotlight as much as I do, I recommend wrapping these in an Automator application so you can run these commands from Spotlight like any other application.</p>
 
-<p>Whew. If you build from the XCode that was opened from the command line, you should finally we able to run your program. If you’re looking for a good test, I recommend the example found on <a href="clang-opm.github.io">clang-opm.github.io</a>. If OpenMP is running correctly, you should be able to see the printf statement get executed from multiple threads when that file is run.</p>
+<p>This will open XCode with the path variables we need set up properly. If you like Spotlight as much as I do, I recommend wrapping these in an Automator application so you can run these commands from there. </p>
 
-<p>Normally this is where I tell you to contact me with any questions, but I fear that I’m as in the dark about this as you are right now. Although hopefully that changes over the next few weeks. In any case, you can get a hold of me <a href="http://twitter.com/khalladay">on twitter</a> if you want to say hi. Happy Coding!</p>
+<p>If you build from the XCode that was opened from the command line, you should finally we able to run your program. If you’re looking for a good test, I recommend the example found on <a href="clang-opm.github.io">clang-opm.github.io</a>. If OpenMP is running correctly, you should be able to see the printf statement get executed from multiple threads when that file is run. </p>
+
+<p>Normally this is where I tell you to contact me with any questions, but I fear that I’m as in the dark about this as you are right now, although hopefully that changes over the next few weeks. In any case, you can get a hold of me <a href="http://twitter.com/khalladay">on twitter</a> if you want to say hi. Happy Coding!</p>
 
 </div>
 
-
 <div id="related">
-  <h3>Recent Posts</h3>
+  <h3>More Posts</h3>
   <ul class="posts">
     
-      <li><span>15 Jul 2014</span> &raquo; <a href="/all/blog/2014/07/15/Setting-Up-OpenMP-Mavericks.html">Setting Up OpenMP on Mavericks</a></li>
+    <li>
+      <span>16 May 2014 &raquo;</span> <a href="/blog/tutorial/bestof/2014/05/16/Coloured-Shadows-In-Unity.html">Colouring Shadows in Unity</a>
+    </li>
     
-      <li><span>27 Jun 2014</span> &raquo; <a href="/all/blog/2014/06/27/Compute-Shaders-Are-Nifty.html">Getting Started With Compute Shaders In Unity</a></li>
+    <li>
+      <span>12 Jan 2014 &raquo;</span> <a href="/blog/tutorial/bestof/2014/01/12/Runtime-Shader-Compilation-Unity.html">Creating GLSL Shaders at Runtime in Unity3D</a>
+    </li>
     
-      <li><span>16 May 2014</span> &raquo; <a href="/all/blog/2014/05/16/Coloured-Shadows-In-Unity.html">Colouring Shadows in Unity</a></li>
-    
-      <li><span>05 Apr 2014</span> &raquo; <a href="/all/blog/2014/04/05/Writing-Shaders-For-Deferred-Lighting-Unity.html">Writing Shaders for Deferred Lighting in Unity3D</a></li>
-    
-      <li><span>30 Mar 2014</span> &raquo; <a href="/all/blog/2014/03/30/Placing-Objects-On-A-Spline.html">A Spline Based Object Placement Tool</a></li>
-    
-      <li><span>24 Mar 2014</span> &raquo; <a href="/all/blog/2014/03/24/Bacon-Jam-And-Vertex-Colours.html">On Bacon Jam and Grilling Virtual Meat</a></li>
-    
-      <li><span>18 Feb 2014</span> &raquo; <a href="/all/blog/2014/02/18/Fresnel-Shaders-From-The-Ground-Up.html">The Basics of Fresnel Shading</a></li>
-    
-      <li><span>08 Feb 2014</span> &raquo; <a href="/all/blog/2014/02/08/Introducing-UUNit-SL-unit-testing-for-shaders.html">Unit Testing Shaders with UUnit-SL</a></li>
-    
-      <li><span>12 Jan 2014</span> &raquo; <a href="/all/blog/2014/01/12/Runtime-Shader-Compilation-Unity.html">Creating GLSL Shaders at Runtime in Unity3D</a></li>
-    
-      <li><span>06 Jan 2014</span> &raquo; <a href="/all/blog/2014/01/06/Hacking-My-Attention-Span.html">Automating SelfControl in OS X Mavericks</a></li>
+    <li>
+      <span>06 Jan 2014 &raquo;</span> <a href="/blog/tutorial/bestof/2014/01/06/Hacking-My-Attention-Span.html">Automating SelfControl in OS X Mavericks</a>
+    </li>
     
   </ul>
 </div>
 
-<br>
-<br>
+      <div class="footer">
+        <div class="disclaimer">
+  
+  <p>
+    The postings on this site are my own and don't necessarily represent my 
+    employer’s positions, strategies or opinions.
+  </p>
+  
+
+  <p>
+    © Kyle Halladay, 2014 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
+  </p>
 </div>
+      </div>
+    </div>
+  </div>
 
-<div id="footer">
-
-	<a href="mailto:k.mj.halladay@gmail.com" class="footerlink">E-mail</a> |
-	<a href="https://github.com/khalladay" class="footerlink">Github</a> |
-    <a href="http://ca.linkedin.com/pub/kyle-halladay/2b/658/a14/" class="footerlink">LinkedIn</a> |
-	<a href="https://www.shadertoy.com/user/khalladay" class="footerlink">ShaderToy</a> |
-    <a href="http://twitter.com/khalladay" class="footerlink">Twitter</a>
-
-<p>&copy; 2013 <a href="/aboutme.html" class="footerlink">Kyle Halladay</a>
-
-</div>
-</div>
 
 <script type="text/javascript">
 
@@ -183,6 +232,6 @@ $ open -a "Xcode"
   })();
 
 </script>
+
 </body>
 </html>
-

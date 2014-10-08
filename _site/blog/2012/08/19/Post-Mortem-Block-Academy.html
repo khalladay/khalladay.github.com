@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kyle Halladay - Post Mortem - Block Academy</title>
+  <meta name="author" content="Kyle Halladay" />
+  <meta name="description" content="The blog of Kyle Halladay" />
+  <link rel="canonical" href="http://kylehalladay.com/blog/2012/08/19/Post-Mortem-Block-Academy.html" />
+  <meta name="keywords" content="life,code,software,development,games,graphics,shaders,indie" />
+
+  <link href="//fonts.googleapis.com/css?family=Open+Sans:600,800" rel="stylesheet" type="text/css">
+  <link rel="shortcut icon" href="/favicon.png">
+  <link rel="alternate" type="application/rss+xml" title="Kyle Halladay" href="http://kylehalladay.com/atom.xml" />
+
+  <link rel="stylesheet" href="/assets/css/all.css">
+  <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <div class="four columns sidebar">
+      <nav>
+  <h1>Hi.</h1>
+  <a href="/">
+    <img src="/logo.png" id="logo" alt="Blog logo"/>
+  </a>
+  <h2>I'm <a href="/">Kyle Halladay</a>.</h2>
+  <div id="bio">
+    <p>I build games, renderers, shaders, and other stuff thats fun to stare at.</p>
+    <p>Check out <a href="/portfolio.html">some of the stuff I've built</a><br><br> Grab some <a href="/graphics.html">free shaders</a><br><br> Or <a href="/archive.html">browse my past blog posts</a></p>
+  </div>
+  <div id="social">
+    Want to say hi?
+<div id="stalker">
+  
+  <a title="khalladay on Github" href="https://github.com/khalladay">
+    <i class="fa fa-github-square"></i>
+  </a>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  <a title="khalladay on Twitter" href="https://twitter.com/khalladay">
+    <i class="fa fa-twitter-square"></i>
+  </a>
+  
+
+  
+
+  
+
+  
+  <a title="Kyle Halladay on LinkedIn" href="https://www.linkedin.com/in/kylehalladay">
+    <i class="fa fa-linkedin-square"></i>
+  </a>
+  
+
+  
+
+  
+  <a title="Kyle Halladay via Email" href="mailto:k.mj.halladay@gmail.com">
+    <i class="fa fa-envelope-square"></i>
+  </a>
+  
+
+  <a title="RSS feed" id="rss" href="/atom.xml">
+    <i class="fa fa-rss-square"></i>
+  </a>
+</div>
+
+  </div>
+</nav>
+
+    </div>
+
+    <div class="eleven columns content">
+      <p class="meta">
+ 
+</p>
+
+<h1 class="title">Post Mortem - Block Academy</h1>
+
+<div id="post">
+  <p>n their final year in Humber College’s Game Programming course, students are tasked with creation of a “Capstone Project,” almost like a journeyman’s piece, which serves to demonstrate the skills that they have developed over the course of the program, and to hopefully get them noticed by industry professionals. Block Academy was my capstone project, and it launched last week.</p>
+
+<h3 id="what-went-right">What Went Right:</h3>
+
+<ul>
+  <li>The Frame Rate.</li>
+</ul>
+
+<p>Getting a game up to 24+ fps sounds like a basic thing; it was anything but for Block Academy. An empty scene with Unity and Vuforia (the engine and framework used to build the game) running clipped along at 28 fps, meaning I had ~4 frames to cram the rest of the game logic into (although this isn’t exact, because it’s hard to know what amount of the empty scene’s fps was camera limited, and what was cpu limited). It took a LOT of work to get the game optimized enough to run smoothly. The end result is hard to argue with though, even on the iPhone 4, the game is fluid, and the augmented reality is as responsive as you can get on a mobile device.</p>
+
+<ul>
+  <li>The Puzzle Design.</li>
+</ul>
+
+<p>Block Academy was the first game I worked on that didn’t procedurally generate the levels, and was one of the first times I had to design levels for a game. It was nerve wracking. My biggest fear throughout development was that the levels would be too easy, and that people would accuse the game of lacking content. Thankfully, the few people who tested the game before launch assuaged my fears of that. If anything, I needed to have a much gentler difficulty curve.</p>
+
+<h3 id="what-went-wrong">What Went Wrong</h3>
+
+<ul>
+  <li>The Tutorial (or lack thereof)</li>
+</ul>
+
+<p>I struggled a lot with trying to create a decent tutorial for Block Academy, and in the end opted to go with a simple series of text/image dialog boxes presented to the user. I’m not entirely happy with it, but I wanted to avoid forcing new users to go through an overly long or boring tutorial before they got to really play. This was a bit of a cop out on my part, and for my next project I’m going to have to experiment with different ways to get an interactive tutorial to feel fun and not like a boring prelude to fun. Expect a few posts in the future about this, as it’s something not a lot of games get right and I don’t expect to find many easy answers.</p>
+
+<ul>
+  <li>My Marketing Strategy</li>
+</ul>
+
+<p>Put simply: I built it, didn’t tell anyone about it, and no one came. As said above, I’m REALLY bad at marketing. Although I’m sure the 20 odd people who bought Block Academy are having a great time, I’d really like to grab a wider audience for my next project. I think my biggest problem in marketing the game was that the first time anyone heard about the game was when I was asking them to buy it. Marketing is something I’m really going to have to work, because building games that no one plays is really disheartening</p>
+
+<ul>
+  <li>The Marker Card</li>
+</ul>
+
+<p>Expecting users to download a marker card to play the game was a mistake. AR Defender, one of the games that inspired me to build Block Academy in the first place, got around this by allowing users to draw their own marker card, and included instructions to do so. While I’m not sure if this approach would work for the technology used for Block Academy, something needed to be different. Expecting users to put in more work than simply downloading the app in order to enjoy the game’s content isn’t something I should have expected mobile gamers to flock to, and the sales suffered for it.</p>
+
+<h3 id="conclusion">Conclusion</h3>
+
+<p>Ultimately, Block Academy accomplished everything I needed it to (a great job offer, and a diploma), but fell short when it came to raw sales. It was a great learning experience, but working on something for so long and having so little to show for it at the end of the day isn’t an experience i’m keen on having again. You can be sure that my next project (whenever I decide what it’s going to be) isn’t going to repeat any of these mistakes, and hopefully will be better for it.</p>
+
+</div>
+
+<div id="related">
+  <h3>More Posts</h3>
+  <ul class="posts">
+    
+    <li>
+      <span>16 May 2014 &raquo;</span> <a href="/blog/tutorial/bestof/2014/05/16/Coloured-Shadows-In-Unity.html">Colouring Shadows in Unity</a>
+    </li>
+    
+    <li>
+      <span>12 Jan 2014 &raquo;</span> <a href="/blog/tutorial/bestof/2014/01/12/Runtime-Shader-Compilation-Unity.html">Creating GLSL Shaders at Runtime in Unity3D</a>
+    </li>
+    
+    <li>
+      <span>06 Jan 2014 &raquo;</span> <a href="/blog/tutorial/bestof/2014/01/06/Hacking-My-Attention-Span.html">Automating SelfControl in OS X Mavericks</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      <div class="footer">
+        <div class="disclaimer">
+  
+  <p>
+    The postings on this site are my own and don't necessarily represent my 
+    employer’s positions, strategies or opinions.
+  </p>
+  
+
+  <p>
+    © Kyle Halladay, 2014 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
+  </p>
+</div>
+      </div>
+    </div>
+  </div>
+
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-40292745-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+</body>
+</html>

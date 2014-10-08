@@ -1,10 +1,5 @@
-safe:        false
-auto:        false
-
-source:      .
-destination: ./_site
-plugins:     ./_plugins
-
-future:      true
-lsi:         false
-pygments:    false
+# General Jekyll Config
+highlighter: pygments
+url: http://kylehalladay.com
+lsi: false
+exclude: [LICENSE, CNAME, README.md, .gitignore, Gemfile, Gemfile.lock]

@@ -1,43 +1,40 @@
 ---
 layout: default
+title: Blog Posts
 ---
-<span class = "post_title">
-<h2>Published Games</h2>
-<br>
+
+<div id="home">
+  <ul id="blog-posts" class="posts">
+<div align="center"><h2>Professional Work</h2></div>
+{% for post in site.categories.pro-portfolio %}
+<span style="position: relative; left: 0px;">
+	   <a href="{{ post.target }}">
+	   	<h3 style="margin:0em 0">{{ post.title }}</h3><hr style="border-color:#AFAFAF;">
+	  <img src="/images/{{ post.title }}.png" width="350" height="156" align="right" style="margin:0 0 0 1em;"></img></a><span style="color:#444444">{{ post.snippet }}</span>
+		<br>
+		<br>
+		<br>
 </span>
+</ul>
+    {% endfor %}
+    <br><br>
 
+<div align="center"><h2>Personal Projects</h2></div>
+  <ul id="blog-posts" class="posts">
 
-<div id="related">
-	{% for post in site.categories.published %}
-<span style="position: relative; left: 15px;">
-	   <a href="{{ post.url }}">
-	   <img src="/images/{{ post.title }}.png" width="100" height="100" align="left"><h4><div align="left">{{ post.title }}</div></h4></a><br>{{ post.snippet }}
-		</a>
+{% for post in site.categories.portfolio %}
+<span style="position: relative; left: 0px;">
+	   <a href="{{ post.target }}">
+	   	<h3 style="margin:0em 0">{{ post.title }}</h3><hr style="border-color:#AFAFAF;">
+	  <img src="/images/{{ post.title }}.png" width="350" height="156" align="right" style="margin:0 0 0 1em;"></img></a><span style="color:#444444">{{ post.snippet }}</span>
+		<br>
+		<br>
 		<br>
 		<br>
 		<br>
 </span>
 
     {% endfor %}
-  </ul>
-</div>
-
-<br><br>
-<span class = "post_title">
-<h2>Other Projects</h2>
-</span>
-<br>
-<div id="related">
-	{% for post in site.categories.projects %}
-<span style="position: relative; left: 15px;">
-	   <a href="{{ post.url }}">
-	   <img src="/images/{{ post.title }}.png" width="100" height="100" align="left"><h4><div align="left">{{ post.title }}</div></h4></a><br>{{ post.snippet }}
-		</a>
-		<br>
-		<br>
-		<br>
-</span>
-
-    {% endfor %}
+  
   </ul>
 </div>

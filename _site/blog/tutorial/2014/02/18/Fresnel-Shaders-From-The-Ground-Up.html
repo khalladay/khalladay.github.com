@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kyle Halladay - The Basics of Fresnel Shading</title>
+  <meta name="author" content="Kyle Halladay" />
+  <meta name="description" content="The blog of Kyle Halladay" />
+  <link rel="canonical" href="http://kylehalladay.com/blog/tutorial/2014/02/18/Fresnel-Shaders-From-The-Ground-Up.html" />
+  <meta name="keywords" content="life,code,software,development,games,graphics,shaders,indie" />
+
+  <link href="//fonts.googleapis.com/css?family=Open+Sans:600,800" rel="stylesheet" type="text/css">
+  <link rel="shortcut icon" href="/favicon.png">
+  <link rel="alternate" type="application/rss+xml" title="Kyle Halladay" href="http://kylehalladay.com/atom.xml" />
+
+  <link rel="stylesheet" href="/assets/css/all.css">
+  <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <div class="four columns sidebar">
+      <nav>
+  <h1>Hi.</h1>
+  <a href="/">
+    <img src="/logo.png" id="logo" alt="Blog logo"/>
+  </a>
+  <h2>I'm <a href="/">Kyle Halladay</a>.</h2>
+  <div id="bio">
+    <p>I build games, renderers, shaders, and other stuff thats fun to stare at.</p>
+    <p>Check out <a href="/portfolio.html">some of the stuff I've built</a><br><br> Grab some <a href="/graphics.html">free shaders</a><br><br> Or <a href="/archive.html">browse my past blog posts</a></p>
+  </div>
+  <div id="social">
+    Want to say hi?
+<div id="stalker">
+  
+  <a title="khalladay on Github" href="https://github.com/khalladay">
+    <i class="fa fa-github-square"></i>
+  </a>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  <a title="khalladay on Twitter" href="https://twitter.com/khalladay">
+    <i class="fa fa-twitter-square"></i>
+  </a>
+  
+
+  
+
+  
+
+  
+  <a title="Kyle Halladay on LinkedIn" href="https://www.linkedin.com/in/kylehalladay">
+    <i class="fa fa-linkedin-square"></i>
+  </a>
+  
+
+  
+
+  
+  <a title="Kyle Halladay via Email" href="mailto:k.mj.halladay@gmail.com">
+    <i class="fa fa-envelope-square"></i>
+  </a>
+  
+
+  <a title="RSS feed" id="rss" href="/atom.xml">
+    <i class="fa fa-rss-square"></i>
+  </a>
+</div>
+
+  </div>
+</nav>
+
+    </div>
+
+    <div class="eleven columns content">
+      <p class="meta">
+ 
+</p>
+
+<h1 class="title">The Basics of Fresnel Shading</h1>
+
+<div id="post">
+  <p>I recently stumbled on the awesome article: <a href="http://filmicgames.com/archives/557">Everything Has Fresnel</a> (if you haven’t read it, go read it now). The main premise of the article is that real world materials are not actually as neat and tidy as programmers would like to believe, and more specifically, that virtually everything in real life has some degree of fresnel reflectivity. </p>
+
+<p>Fresnel isn’t an effect that I’ve seen often in Unity projects and in fact wasn’t an effect that I was familiar with building, so I decided to kill two birds with one project and put together my latest shader pack: <a href="/all/graphics/2014/02/23/Fresnel-Shaders.html">Fresnel Shaders</a>. It’s all free to use, MIT license, all that jazz, so enjoy :D</p>
+
+<p>But, as usual, I’d also like to make things a bit easier for the next googler looking for an intro to Fresnel reflection. So if writing Fresnel shaders (or adding Fresnel to existing ones) sounds as much fun to you as it was for me, read on!</p>
+
+<div align="center">
+	 	
+<img src="/images/post&#95;images/2014-02-23/FresnelRim.png" /><br />
+<font size="2">An unlit Fresnel shader</font>
+
+</div>
+<p><br /></p>
+
+<h2>What is the Fresnel Effect</h2>
+
+<p>In essence, the fresnel effect describes the relationship between the angle that you look at a surface and the amount of reflectivity you see. This is very easy to demonstrate if you have a window nearby. If you look at the window straight on you can see through the window as intended, however, if you move so that you try to look through the window at a glancing angle (ie: your view direction is approaching parallel to the window’s surface) the window becomes much closer to a mirror.</p>
+
+<p>But this effect isn’t limited to windows, or even particularly shiny objects. As John Hable points out in <a href="http://filmicgames.com/archives/557">Everything Has Fresnel</a>, pretty much everything (including towels and bricks!) exhibit the fresnel effect to some degree. I’ve made a game out of trying to spot instances of it as I walk to work (without looking I’ve lost my mind). </p>
+
+<p>So what does this look like when added to an object in Unity? Here’s a few more examples from my shader pack: </p>
+
+<div align="center">
+	 	
+ <img src="/images/post&#95;images/2014-02-23/AllFresnel.png" /><br />
+ <font size="2">The Shaders in the Fresnel Shader Pack</font>
+
+ </div>
+<p><br /></p>
+
+<h2>How is it implemented?</h2>
+
+<p>As it turns out, Fresnel equations are complicated, way more so than can be adequately covered by a blog post, and way more than is feasible to execute in real time for most applications. In practice, it’s far more realistic to use an approximation of these equations. In searching, I’ve ended up finding two such approximations have so far seemed appropriate to use in real time shaders. </p>
+
+<p>The first is the Schlick Approximation. This is easy enough to google for, but I’ll put here just for reference as well: </p>
+
+<div align="center">
+ R(&theta;) = R<sub>0</sub> + (1 - R<sub>0</sub>)(1 - cos&theta;)<sup>5</sup>
+</div>
+<p><br />
+ In the above equation, R<sub>0</sub> refers to the reflection coefficient for light moving between 2 interfaces with different refractivity (most commonly, air and whatever type of material the surface is). If you’re really interested, definitely check out more detailed sources online. In practice, I’ve found that while this method gives decent looking results, the next option gives us much greater control over the appearance of our materials at the cost of physical correctness. Given that real time graphics are anything but physically correct, I’m ok with this tradeoff. </p>
+
+<p>The second approximation comes from chapter 7 of the <a href="http://http.developer.nvidia.com/CgTutorial/cg&#95;tutorial&#95;chapter07.html">Cg Tutorial</a> from NVidia, which refers to it as the “Empricial Approximation.”<br />
+ <br /></p>
+
+<div align="center"> 
+ R = max(0, min(1, bias + scale * (1.0 + I &#8226; N)<sup>power</sup>))
+</div>
+<p><br /></p>
+<ul>
+<li>R is a Fresnel term describing how strong the Fresnel effect is at a specific point</li>
+<li>I is the vector from the eye to a point on the surface</li>
+<li>N is the world space normal of the current point</li>
+<li>bias, scale and power are values exposed to allow control over the appearance of the Fresnel effect</li>
+</ul>
+
+<p>This equation is a bit of a double edged sword. It’s very easy to make hideous looking Fresnel by tweaking the values of bias, scale and power, but it also gives you the ability to fine tune your materials to exactly how you want them to look. </p>
+
+<div align="center">
+	 	
+<img src="/images/post&#95;images/2014-02-23/UglyFresnel.png" /><br />
+<font size="2">Fresnel gone wrong</font>
+
+</div>
+<p><br /></p>
+
+<h2>A Fresnel Shader</h2>
+
+<p>So what does this look like in a shader? It’s actually very simple. First, you need to calculate the value of R. For this example, we’ll do that in the vertex shader:</p>
+
+<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">vOUT</span> <span class="nf">vert</span><span class="p">(</span><span class="n">vIN</span> <span class="n">v</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="n">vOUT</span> <span class="n">o</span><span class="p">;</span>
+	<span class="n">o</span><span class="p">.</span><span class="n">pos</span> <span class="o">=</span> <span class="n">mul</span><span class="p">(</span><span class="n">UNITY_MATRIX_MVP</span><span class="p">,</span> <span class="n">v</span><span class="p">.</span><span class="n">vertex</span><span class="p">);</span>
+	<span class="n">o</span><span class="p">.</span><span class="n">uv</span> <span class="o">=</span> <span class="n">v</span><span class="p">.</span><span class="n">texcoord</span><span class="p">;</span>
+
+	<span class="n">float3</span> <span class="n">posWorld</span> <span class="o">=</span> <span class="n">mul</span><span class="p">(</span><span class="n">_Object2World</span><span class="p">,</span> <span class="n">v</span><span class="p">.</span><span class="n">vertex</span><span class="p">).</span><span class="n">xyz</span><span class="p">;</span>
+	<span class="n">float3</span> <span class="n">normWorld</span> <span class="o">=</span> <span class="n">normalize</span><span class="p">(</span><span class="n">mul</span><span class="p">(</span><span class="n">float3x3</span><span class="p">(</span><span class="n">_Object2World</span><span class="p">),</span> <span class="n">v</span><span class="p">.</span><span class="n">normal</span><span class="p">));</span>
+
+	<span class="n">float3</span> <span class="n">I</span> <span class="o">=</span> <span class="n">normalize</span><span class="p">(</span><span class="n">posWorld</span> <span class="o">-</span> <span class="n">_WorldSpaceCameraPos</span><span class="p">.</span><span class="n">xyz</span><span class="p">);</span>
+	<span class="n">o</span><span class="p">.</span><span class="n">R</span> <span class="o">=</span> <span class="n">_Bias</span> <span class="o">+</span> <span class="n">_Scale</span> <span class="o">*</span> <span class="n">pow</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">dot</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">normWorld</span><span class="p">),</span> <span class="n">_Power</span><span class="p">);</span>
+
+	<span class="k">return</span> <span class="n">o</span><span class="p">;</span>
+<span class="p">}</span></code></pre></div>
+
+<p>There isn’t too much to say about this, since it’s pretty much the equation above verbatim. One handy tip though: I’ve found that I’ve been perfectly happy with the results I get if I omit the bias parameter entirely, and doing so makes it more difficult to produce wonky results. </p>
+
+<p>Once you have the R value calculated, the rest of the implementation is just a lerp in the fragment shader: </p>
+
+<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">float4</span> <span class="nf">frag</span><span class="p">(</span><span class="n">vOUT</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span>  <span class="n">COLOR</span>
+<span class="p">{</span>  
+	<span class="n">float4</span> <span class="n">col</span> <span class="o">=</span> <span class="n">tex2D</span><span class="p">(</span><span class="n">_MainTex</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">uv</span><span class="p">.</span><span class="n">xy</span> <span class="o">*</span> <span class="n">_MainTex_ST</span><span class="p">.</span><span class="n">xy</span> <span class="o">+</span> <span class="n">_MainTex_ST</span><span class="p">.</span><span class="n">zw</span><span class="p">);</span>
+	<span class="k">return</span> <span class="nf">lerp</span><span class="p">(</span><span class="n">col</span><span class="p">,</span><span class="n">_Color</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">R</span><span class="p">);</span>
+<span class="p">}</span></code></pre></div>
+
+<p>If you’re not a Unity programmer, ignore all the _MainTex_ST stuff, that’s just a unity specific bit of code to handle tiling textures across an object. </p>
+
+<p>Otherwise, all that’s new here is the lerp function. In this example, rather than reflecting anything, our Fresnel Rim is just a single color (_Color), but the principle is the same. If you wanted to turn the rim into a reflection, you’d simply replace the _Color variable with a color sampled from a cube map, or taken from a camera, or however else you want to pass in a reflection. </p>
+
+<p>Otherwise though, this is all there is to it to write a simple Fresnel shader, so go forth and make all of your objects more believable! And feel free to download the Fresnel Shader Pack that I’ve posted in the graphics section of this site to see some examples of more complicated Fresnel effects.</p>
+
+<p>If you’ve spotted an error on here, or have anything to add, feel free to send me a message <a href="http://twitter.com/khalladay">on twitter</a>. Happy shading!</p>
+
+</div>
+
+<div id="related">
+  <h3>More Posts</h3>
+  <ul class="posts">
+    
+    <li>
+      <span>16 May 2014 &raquo;</span> <a href="/blog/tutorial/bestof/2014/05/16/Coloured-Shadows-In-Unity.html">Colouring Shadows in Unity</a>
+    </li>
+    
+    <li>
+      <span>12 Jan 2014 &raquo;</span> <a href="/blog/tutorial/bestof/2014/01/12/Runtime-Shader-Compilation-Unity.html">Creating GLSL Shaders at Runtime in Unity3D</a>
+    </li>
+    
+    <li>
+      <span>06 Jan 2014 &raquo;</span> <a href="/blog/tutorial/bestof/2014/01/06/Hacking-My-Attention-Span.html">Automating SelfControl in OS X Mavericks</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      <div class="footer">
+        <div class="disclaimer">
+  
+  <p>
+    The postings on this site are my own and don't necessarily represent my 
+    employer’s positions, strategies or opinions.
+  </p>
+  
+
+  <p>
+    © Kyle Halladay, 2014 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
+  </p>
+</div>
+      </div>
+    </div>
+  </div>
+
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-40292745-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+</body>
+</html>

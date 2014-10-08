@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kyle Halladay - Unbreaking the Xcode templates in Xcode 4.5</title>
+  <meta name="author" content="Kyle Halladay" />
+  <meta name="description" content="The blog of Kyle Halladay" />
+  <link rel="canonical" href="http://kylehalladay.com/blog/tutorial/2012/12/02/Taming-The-Ogre-Part2.html" />
+  <meta name="keywords" content="life,code,software,development,games,graphics,shaders,indie" />
+
+  <link href="//fonts.googleapis.com/css?family=Open+Sans:600,800" rel="stylesheet" type="text/css">
+  <link rel="shortcut icon" href="/favicon.png">
+  <link rel="alternate" type="application/rss+xml" title="Kyle Halladay" href="http://kylehalladay.com/atom.xml" />
+
+  <link rel="stylesheet" href="/assets/css/all.css">
+  <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <div class="four columns sidebar">
+      <nav>
+  <h1>Hi.</h1>
+  <a href="/">
+    <img src="/logo.png" id="logo" alt="Blog logo"/>
+  </a>
+  <h2>I'm <a href="/">Kyle Halladay</a>.</h2>
+  <div id="bio">
+    <p>I build games, renderers, shaders, and other stuff thats fun to stare at.</p>
+    <p>Check out <a href="/portfolio.html">some of the stuff I've built</a><br><br> Grab some <a href="/graphics.html">free shaders</a><br><br> Or <a href="/archive.html">browse my past blog posts</a></p>
+  </div>
+  <div id="social">
+    Want to say hi?
+<div id="stalker">
+  
+  <a title="khalladay on Github" href="https://github.com/khalladay">
+    <i class="fa fa-github-square"></i>
+  </a>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  <a title="khalladay on Twitter" href="https://twitter.com/khalladay">
+    <i class="fa fa-twitter-square"></i>
+  </a>
+  
+
+  
+
+  
+
+  
+  <a title="Kyle Halladay on LinkedIn" href="https://www.linkedin.com/in/kylehalladay">
+    <i class="fa fa-linkedin-square"></i>
+  </a>
+  
+
+  
+
+  
+  <a title="Kyle Halladay via Email" href="mailto:k.mj.halladay@gmail.com">
+    <i class="fa fa-envelope-square"></i>
+  </a>
+  
+
+  <a title="RSS feed" id="rss" href="/atom.xml">
+    <i class="fa fa-rss-square"></i>
+  </a>
+</div>
+
+  </div>
+</nav>
+
+    </div>
+
+    <div class="eleven columns content">
+      <p class="meta">
+ 
+</p>
+
+<h1 class="title">Unbreaking the Xcode templates in Xcode 4.5</h1>
+
+<div id="post">
+  <p>The Xcode templates that come with Ogre 1.81 are rather frustrating to get working, especially if you don’t know what the cryptic error messages that it spits out at you mean. So I’m here today to walk you step by step through getting a basic Ogre project up and running.</p>
+
+<p>All of this is taken from my experiences trying to get Ogre to work on my machine. Given that the templates bundled with Ogre were written by people much more knowledgeable than me, it wouldn’t surprise me if some of these issues aren’t universal problems. Hopefully my experiences are helpful, even if you only hit one of the numerous issues I described here.</p>
+
+<h3 id="what-you-will-need">What you will need:</h3>
+
+<ul>
+  <li>A built version of Ogre 1.81 (see my previous post for how to build this)</li>
+  <li>The Ogre Xcode templates installed (found in Ogre’s SDK/OSX folder)</li>
+</ul>
+
+<p>Note: This tutorial was written based on my experience working with Xcode 4.5, and OS X Lion. YMMV if you’re following along with a different configuration.</p>
+
+<h3 id="starting-the-project">Starting the Project</h3>
+
+<p>Let’s start at ground zero. Open Xcode and do the following:</p>
+
+<p>Start a new project, and select the “Mac OS X Application” template in the Ogre category.
+After naming your project, fill in the path to your Ogre SDK with the appropriate value.
+Welcome to linker hell. </p>
+
+<p>For some reason, xcode has the annoying tendency to omit the leading / in the include paths in the OGRE template (regardless of whether you remembered to include on in the path to your SDK). So the first thing that has to be done to make this project build-able is to navigate to your build settings, and modify all the file paths located in the Framework Search Paths, Header Search Paths, and Library Search paths so that they begin with a /</p>
+
+<p>Next, move to the “Build Phases” tab and expand the “Link Binary With Libraries” section. You should see Ogre.framework, OpenGL.framework, and QuartzCode.framework appearing in red. I think this is a problem with the template itself, but in any case, it’s easily fixed. For the second two, simply hit the + button and find them in the list of Apple frameworks, andthen delete the red list entries.</p>
+
+<p>Ogre.framework can be found in the lib/debug folder in your build directory, so add that to your project as well.</p>
+
+<p>Now hit build. If everything is identical to my set up, you should get a build error saying that OgreCamera.h can’t be found. Theres a good reason for this: the include paths are missing a few directories. Rather than describe how to fix this, I’ve attached a screenshot of what my include paths end up looking like when I’m through fixing them. “1.81″ is the folder which stores my built Ogre3D library, and “ogre_src_v1-8-1″ is the root folder of the ogre sdk.</p>
+
+<p><img src="/images/post_images/taming-the-ogre2/include_paths.png" alt="Include Paths" /></p>
+
+<p>This may not be the most optimal way to set up your include paths (I’m really, really hoping it isn’t, it’s pretty messy), but I’ve ran into strange issues marking things recursive, and so far, this set up has worked for me. Let me know if there’s a better way of doing things in the comments, and I’ll update this tutorial.</p>
+
+<p>Next move to the Library Search paths, and ensure that both paths are pointing to the correct location of the files they need. One should be pointing to the location of your ogre lib, and the other to the lib folder of your dependencies. If you hit build and see an error like this:</p>
+
+<p><img src="/images/post_images/taming-the-ogre2/lOIS_error.png" alt="Error Message" /></p>
+
+<p>it means that this step has not been done correctly.</p>
+
+<h3 id="restrict-your-architectures">Restrict your architectures!</h3>
+
+<p>Next ensure that your project is set to build only for the 64 bit architecture. As I mentioned in the last post, currently my set up is only configured to build for 64 bit machines, because I was running into a boat load of configuration errors trying to build for i386 as well. Since I’m nowhere near releasing something with OGRE just yet, I’ve decided to put off figuring out i386 config issues until I absolutely have to.</p>
+
+<h3 id="catching-a-wild-ditto">Catching a wild Ditto!</h3>
+
+<p>If you hit build now, you should end up with 1 error, the cryptically named “shell script invocation error,” which looks something like this:</p>
+
+<p><img src="/images/post_images/taming-the-ogre2/ditto_error.png" alt="Ditto Error" /></p>
+
+<p>It’s a shame that this isn’t more descriptive, because it took me a long time to understand exactly what was going on, but fixing it is dead simple once you know what the error means.</p>
+
+<p>Ogre’s build process involves copying files from your Media paths to the content folder of the built application. This is done at the end of your build process by a shell script, and the script used to copy these files is called ditto. All this error is saying, is that a path supplied to the ditto command is wrong.</p>
+
+<p>To fix this, go back to your project settings, and get to your “Build Phases” tab. Expand the “Run Script” item (should be at the bottom of your build phases list”), and you should immediately see the ditto commands.</p>
+
+<p>The offender is the last line,</p>
+
+<p>ditto $PROJECT_DIR/$PROJECT_NAME/*.cfg “$BUILT_PRODUCTS_DIR/Tutorial.app/Contents/Resources/”</p>
+
+<p>(Note: Tutorial.app will be replaced by whatever you called the project on your machine)</p>
+
+<p>There’s a problem with the location of quotation marks here, which is causing the source path to be misinterpreted. Simply move the punctuation around to solve:</p>
+
+<p>ditto “$PROJECT_DIR/$PROJECT_NAME/”*.cfg “$BUILT_PRODUCTS_DIR/OgreTest2.app/Contents/Resources/”</p>
+
+<p>Hit build now, you should (finally) have a successful compile.</p>
+
+<h3 id="not-there-yet">Not there yet.</h3>
+
+<p>Unfortunately, we’re not done. Because now we get to sort through runtime errors. In your output, or your Ogre log file, you should see a message along the lines of</p>
+
+<p>OGRE EXCEPTION(7:InternalErrorException): Could not load dynamic library ./RenderSystem_GL.</p>
+
+<p>This is because we haven’t configured OGRE to know where our Plugins are yet. The quickest way to fix this is to open up the file plugins.cfg, and replace</p>
+
+<p>PluginFolder=./</p>
+
+<p>with</p>
+
+<p>PluginFolder= (path to build/lib/release)</p>
+
+<p>Now, hit build/run one more time, and you should be greeted with this screen:</p>
+
+<p><img src="/images/post_images/taming-the-ogre2/config_screen.png" alt="Config Screen" /></p>
+
+<p>Hit ok again to finally view the sum of all of our hard work:</p>
+
+<p><img src="/images/post_images/taming-the-ogre2/ogrehead.png" alt="Config Screen" /></p>
+
+<p>Finally, it’s all working! If you run into any problems not addressed here, grab me on twitter and we can work through it. I’d love to dig into this build process more through troubleshooting problems I haven’t hit yet. Additionally, if anyone has a better way of getting all of this done / setting up an Ogre project in Xcode, I’d love to hear about it, because I’m really hoping theres a less messy way of getting it all set up / configuring it for 1386. Regardless, thanks for reading!</p>
+
+</div>
+
+<div id="related">
+  <h3>More Posts</h3>
+  <ul class="posts">
+    
+    <li>
+      <span>16 May 2014 &raquo;</span> <a href="/blog/tutorial/bestof/2014/05/16/Coloured-Shadows-In-Unity.html">Colouring Shadows in Unity</a>
+    </li>
+    
+    <li>
+      <span>12 Jan 2014 &raquo;</span> <a href="/blog/tutorial/bestof/2014/01/12/Runtime-Shader-Compilation-Unity.html">Creating GLSL Shaders at Runtime in Unity3D</a>
+    </li>
+    
+    <li>
+      <span>06 Jan 2014 &raquo;</span> <a href="/blog/tutorial/bestof/2014/01/06/Hacking-My-Attention-Span.html">Automating SelfControl in OS X Mavericks</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      <div class="footer">
+        <div class="disclaimer">
+  
+  <p>
+    The postings on this site are my own and don't necessarily represent my 
+    employer’s positions, strategies or opinions.
+  </p>
+  
+
+  <p>
+    © Kyle Halladay, 2014 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
+  </p>
+</div>
+      </div>
+    </div>
+  </div>
+
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-40292745-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+</body>
+</html>

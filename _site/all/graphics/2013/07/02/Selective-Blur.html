@@ -1,98 +1,149 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<!DOCTYPE html>
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
 <head>
-	<meta http-equiv="content-type" content="text/html; charset=UTF-8"  />
-	<meta name="description" content="Kyle Halladay Game Development" />
-	<meta name="keywords" content="life,code,software,development,games,ludology,indie" />
-	<link rel="stylesheet" type="text/css" href="/css/default.css" />
-	<link rel="stylesheet" type="text/css" href="/css/pretty_code.css" />
-	<link rel="stylesheet" href="/css/highlight_default.css">
-	<script src="/javascripts/highlight.pack.js"></script>
-	<script>hljs.initHighlightingOnLoad();</script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kyle Halladay - Selective-Blur</title>
+  <meta name="author" content="Kyle Halladay" />
+  <meta name="description" content="The blog of Kyle Halladay" />
+  <link rel="canonical" href="http://kylehalladay.com/all/graphics/2013/07/02/Selective-Blur.html" />
+  <meta name="keywords" content="life,code,software,development,games,graphics,shaders,indie" />
 
-<title>Kyle Halladay - Toronto Game Developer</title>
+  <link href="//fonts.googleapis.com/css?family=Open+Sans:600,800" rel="stylesheet" type="text/css">
+  <link rel="shortcut icon" href="/favicon.png">
+  <link rel="alternate" type="application/rss+xml" title="Kyle Halladay" href="http://kylehalladay.com/atom.xml" />
+
+  <link rel="stylesheet" href="/assets/css/all.css">
+  <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
 </head>
-
 <body>
-	<div id="wrap">
-		<div id="header">
-			<p id="toplinks">
-			</p>
-			<h1><a href="/" class="logo"><div id="logo"></div></a><a href="/" class="logo">K</a><a href="/" class="logo">y</a><a href="/" class="logo">l</a><a href="/" class="logo">e</a> <a href="/" class="logo">H</a><a href="/" class="logo">a</a><a href="/" class="logo">l</a><a href="/" class="logo">l</a><a href="/" class="logo">a</a><a href="/" class="logo">d</a><a href="/" class="logo">a</a><a href="/" class="logo">y</a></h1>
-			<div class="slogan"> 
-					<a href="/" class="paleorange">Home</a> ||
-					<a href="/archive.html" class="paleorange">Archive</a> ||
-					<a href="/portfolio.html" class="paleorange">Games</a> ||
-					<a href="/graphics.html" class="paleorange">Graphics</a> ||
-					<a href="/aboutme.html" class="paleorange">About Me</a>
-			</div>
-	</div>
-<div id="content">  
-  <span class = "post_title">
-<h2>Selective-Blur</h2>
-</span>
+  <div class="container">
+    <div class="four columns sidebar">
+      <nav>
+  <h1>Hi.</h1>
+  <a href="/">
+    <img src="/logo.png" id="logo" alt="Blog logo"/>
+  </a>
+  <h2>I'm <a href="/">Kyle Halladay</a>.</h2>
+  <div id="bio">
+    <p>I build games, renderers, shaders, and other stuff thats fun to stare at.</p>
+    <p>Check out <a href="/portfolio.html">some of the stuff I've built</a><br><br> Grab some <a href="/graphics.html">free shaders</a><br><br> Or <a href="/archive.html">browse my past blog posts</a></p>
+  </div>
+  <div id="social">
+    Want to say hi?
+<div id="stalker">
+  
+  <a title="khalladay on Github" href="https://github.com/khalladay">
+    <i class="fa fa-github-square"></i>
+  </a>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  <a title="khalladay on Twitter" href="https://twitter.com/khalladay">
+    <i class="fa fa-twitter-square"></i>
+  </a>
+  
+
+  
+
+  
+
+  
+  <a title="Kyle Halladay on LinkedIn" href="https://www.linkedin.com/in/kylehalladay">
+    <i class="fa fa-linkedin-square"></i>
+  </a>
+  
+
+  
+
+  
+  <a title="Kyle Halladay via Email" href="mailto:k.mj.halladay@gmail.com">
+    <i class="fa fa-envelope-square"></i>
+  </a>
+  
+
+  <a title="RSS feed" id="rss" href="/atom.xml">
+    <i class="fa fa-rss-square"></i>
+  </a>
+</div>
+
+  </div>
+</nav>
+
+    </div>
+
+    <div class="eleven columns content">
+      <p class="meta">
+ 
+</p>
+
+<h1 class="title">Selective-Blur</h1>
 
 <div id="post">
-<br>
-<img src="/images/Selective-Blur.png" width="100" height="100" align="right" style="padding-right:15px">
-<p>Selective-Blur is my first released graphics project! It’s a shader replacement effect for Unity Pro that allows blurring of individual materials without blurring the entire scene.</p>
+  <p>Selective-Blur is a shader replacement effect for Unity Pro that allows blurring of individual materials without blurring the entire scene. </p>
+
 <h4>Here's how it works: </h4>
-<p>A camera with the blur effect script is childed to the user’s camera. The blur effect script calls RenderWithShader on the camera every frame, and uses a replacement shader that looks for specific RenderType tags in the materials in view. The output is rendered to a texture, which then has a gaussian blur applied to it before being drawn as a GUI texture over top of the user’s view.</p>
+
+<p>A camera with the blur effect script is childed to the user’s camera. The blur effect script calls RenderWithShader on the camera every frame, and uses a replacement shader that looks for specific RenderType tags in the materials in view. The output is rendered to a texture, which then has a gaussian blur applied to it before being drawn as a GUI texture over top of the user’s view. </p>
 
 <p>A web demo of this project is available <a href="/demos/blurdemo/blurdemo.html">here</a></p>
 
-<p>This project is open source! Check out the repo <a href="https://github.com/khalladay/Unity-SelectiveBlur">here</a></p>
+<p>This project is open source! Check out the repo <a href="https://github.com/khalladay/Unity-SelectiveBlur">here</a> </p>
 
-<p><img src="/images/post_images/2013-07-02/blur1.png" alt="blur1" /> <img src="/images/post_images/2013-07-02/blur2.png" alt="blur2" /></p>
+<p><img src="/images/post_images/2013-07-02/blur1.png" alt="blur1" />
+<img src="/images/post_images/2013-07-02/blur2.png" alt="blur2" /></p>
 
-<p>I will be maintaining and improving this repository whenever the mood strikes me. I would like to optimize it to avoid using GUI.DrawTexture, add support for blur mask textures, and increase the number of blur shaders present. Pull requests are very welcome if you want to add or fix up something before I get to it :D</p>
 
 </div>
 
-
 <div id="related">
-  <h3>Recent Posts</h3>
+  <h3>More Posts</h3>
   <ul class="posts">
     
-      <li><span>15 Jul 2014</span> &raquo; <a href="/all/blog/2014/07/15/Setting-Up-OpenMP-Mavericks.html">Setting Up OpenMP on Mavericks</a></li>
+    <li>
+      <span>16 May 2014 &raquo;</span> <a href="/blog/tutorial/bestof/2014/05/16/Coloured-Shadows-In-Unity.html">Colouring Shadows in Unity</a>
+    </li>
     
-      <li><span>27 Jun 2014</span> &raquo; <a href="/all/blog/2014/06/27/Compute-Shaders-Are-Nifty.html">Getting Started With Compute Shaders In Unity</a></li>
+    <li>
+      <span>12 Jan 2014 &raquo;</span> <a href="/blog/tutorial/bestof/2014/01/12/Runtime-Shader-Compilation-Unity.html">Creating GLSL Shaders at Runtime in Unity3D</a>
+    </li>
     
-      <li><span>16 May 2014</span> &raquo; <a href="/all/blog/2014/05/16/Coloured-Shadows-In-Unity.html">Colouring Shadows in Unity</a></li>
-    
-      <li><span>05 Apr 2014</span> &raquo; <a href="/all/blog/2014/04/05/Writing-Shaders-For-Deferred-Lighting-Unity.html">Writing Shaders for Deferred Lighting in Unity3D</a></li>
-    
-      <li><span>30 Mar 2014</span> &raquo; <a href="/all/blog/2014/03/30/Placing-Objects-On-A-Spline.html">A Spline Based Object Placement Tool</a></li>
-    
-      <li><span>24 Mar 2014</span> &raquo; <a href="/all/blog/2014/03/24/Bacon-Jam-And-Vertex-Colours.html">On Bacon Jam and Grilling Virtual Meat</a></li>
-    
-      <li><span>18 Feb 2014</span> &raquo; <a href="/all/blog/2014/02/18/Fresnel-Shaders-From-The-Ground-Up.html">The Basics of Fresnel Shading</a></li>
-    
-      <li><span>08 Feb 2014</span> &raquo; <a href="/all/blog/2014/02/08/Introducing-UUNit-SL-unit-testing-for-shaders.html">Unit Testing Shaders with UUnit-SL</a></li>
-    
-      <li><span>12 Jan 2014</span> &raquo; <a href="/all/blog/2014/01/12/Runtime-Shader-Compilation-Unity.html">Creating GLSL Shaders at Runtime in Unity3D</a></li>
-    
-      <li><span>06 Jan 2014</span> &raquo; <a href="/all/blog/2014/01/06/Hacking-My-Attention-Span.html">Automating SelfControl in OS X Mavericks</a></li>
+    <li>
+      <span>06 Jan 2014 &raquo;</span> <a href="/blog/tutorial/bestof/2014/01/06/Hacking-My-Attention-Span.html">Automating SelfControl in OS X Mavericks</a>
+    </li>
     
   </ul>
 </div>
 
-<br>
-<br>
+
+      <div class="footer">
+        <div class="disclaimer">
+  
+  <p>
+    The postings on this site are my own and don't necessarily represent my 
+    employer’s positions, strategies or opinions.
+  </p>
+  
+
+  <p>
+    © Kyle Halladay, 2014 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
+  </p>
 </div>
+      </div>
+    </div>
+  </div>
 
-<div id="footer">
-
-	<a href="mailto:k.mj.halladay@gmail.com" class="footerlink">E-mail</a> |
-	<a href="https://github.com/khalladay" class="footerlink">Github</a> |
-    <a href="http://ca.linkedin.com/pub/kyle-halladay/2b/658/a14/" class="footerlink">LinkedIn</a> |
-	<a href="https://www.shadertoy.com/user/khalladay" class="footerlink">ShaderToy</a> |
-    <a href="http://twitter.com/khalladay" class="footerlink">Twitter</a>
-
-<p>&copy; 2013 <a href="/aboutme.html" class="footerlink">Kyle Halladay</a>
-
-</div>
-</div>
 
 <script type="text/javascript">
 
@@ -107,6 +158,6 @@
   })();
 
 </script>
+
 </body>
 </html>
-

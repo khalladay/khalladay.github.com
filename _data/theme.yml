@@ -1,0 +1,29 @@
+# Theme customization - please change from the defaults!
+
+# Color for top bar, links, etc
+highlight_color: '#CC5523'
+
+# Profile links on the left sidebar, leave blank to ignore
+social:
+  github: khalladay
+  #bitbucket: philipj
+  #hacker_news: swanson
+  #stackexchange: 348619
+  #stackoverflow: 348619
+  twitter: khalladay
+  #facebook: zuck
+  #tumblr: animalygifs
+  linkedin: kylehalladay
+  #gplus: 110552447039675960964
+  email: k.mj.halladay@gmail.com
+
+# "Hi, I'm _______"
+name: Kyle Halladay
+email: k.mj.halladay@gmail.com
+tagline: "The only thing we have to fear is GPU Panic!"
+
+# Google Analytics key, leave blank to ignore
+google_analytics_key: UA-40292745-1
+
+# Toggle "Postings are my own" disclaimer in footer
+show_disclaimer: true
