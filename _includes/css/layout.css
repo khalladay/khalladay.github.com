@@ -7,6 +7,8 @@
 * 8/17/2011
 */
 
+
+
 /* Smaller than standard 960 (devices and browsers) */
 @media only screen and (max-width: 959px) {
 	#logo {
@@ -23,7 +25,9 @@
 	.sidebar h2 {
 		font-size: 18px;
 	}
-
+	topbar {
+		display: none;
+	}
 	#bio {
 		font-size: 14px;
 	}
@@ -53,6 +57,13 @@
 	h1 {
 		font-size: 28px;
 		line-height: 36px;
+	}
+}
+
+@media only screen and (min-width:960px)
+{
+topbar {
+		display: none;
 	}
 }
 

@@ -694,11 +694,16 @@ nav h1, nav h2 {
   font-size: 13px;
 }
 
+#post div img{
+  max-width:100%;
+}
+
 #post pre {
   border: 1px solid #555;
   background-color: #f0f3f3;
   padding: 0 .4em;
   margin-bottom: 20px !important;
+  overflow:auto;
 }
 
 #post ul,
@@ -711,10 +716,12 @@ nav h1, nav h2 {
   background-color: #f0f3f3;
   font-size: 90%;
   padding: 0 .2em;
+  overflow:auto;
 }
 
 #post pre code {
   border: none;
+  overflow:auto;
 }
 
 .sidebar {
@@ -837,6 +844,8 @@ i.fa-hn {
 * 8/17/2011
 */
 
+
+
 /* Smaller than standard 960 (devices and browsers) */
 @media only screen and (max-width: 959px) {
 	#logo {
@@ -853,7 +862,9 @@ i.fa-hn {
 	.sidebar h2 {
 		font-size: 18px;
 	}
-
+	topbar {
+		display: none;
+	}
 	#bio {
 		font-size: 14px;
 	}
@@ -883,6 +894,13 @@ i.fa-hn {
 	h1 {
 		font-size: 28px;
 		line-height: 36px;
+	}
+}
+
+@media only screen and (min-width:960px)
+{
+topbar {
+		display: none;
 	}
 }
 

@@ -4,7 +4,7 @@
  <title>The blog of Kyle Halladay</title>
  <link href="http://kylehalladay.com/atom.xml" rel="self"/>
  <link href="http://kylehalladay.com"/>
- <updated>2014-10-08T07:47:25-04:00</updated>
+ <updated>2014-10-08T22:22:19-04:00</updated>
  <id>http://kylehalladay.com</id>
  <author>
    <name>Kyle Halladay</name>
@@ -75,7 +75,7 @@
 
 &lt;div align=&quot;center&quot;&gt;
 	 	
-&lt;img src=&quot;/images/post_images/2014-07-15/xray_output_monkey.png&quot; /&gt;
+&lt;img src=&quot;/images/post_images/2014-07-15/xray_output_monkey.png&quot; style=&quot;max-width:100%;&quot; /&gt;
 &lt;br /&gt;
 &lt;font size=&quot;2&quot;&gt;The Blender monkey rendered in my first ray tracer&lt;/font&gt;
 &lt;br /&gt;
