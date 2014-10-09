@@ -865,6 +865,7 @@ i.fa-hn {
 	topbar {
 		display: none;
 	}
+	
 	#bio {
 		font-size: 14px;
 	}
@@ -890,7 +891,14 @@ i.fa-hn {
 	.sidebar {
 		display: none;
 	}
-
+ul.posts li
+	{
+		font-size:14px;
+	}
+	ul.posts span
+	{
+		font-size:14px;
+	}
 	h1 {
 		font-size: 28px;
 		line-height: 36px;
@@ -909,7 +917,14 @@ topbar {
 	.sidebar {
 		display: none;
 	}
-
+	ul.posts li
+	{
+		font-size:12px;
+	}
+	ul.posts span
+	{
+		font-size:12px;
+	}
 	h1 {
 		font-size: 24px;
 		line-height: 32px;
