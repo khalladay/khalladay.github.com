@@ -35,3 +35,5 @@ It's hard to see on the graph, but the OpenCL renderer only barely cracked a min
 
 
 If you're interested, the code for both path tracers can be found on github: [OpenMP](https://github.com/khalladay/CaribouPT) or [OpenCL](https://github.com/khalladay/CaffeinePT). If you can see anything in the OpenMP source that could be changed to make it 20x faster (which would *almost* catch up to OpenCL), please let me know! Until then, it looks like I'm abandoning OpenMP for this project. 
+
+As always, I'm [on twitter](http://twitter.com/khalladay) if you want to say hi :D Happy Coding!
