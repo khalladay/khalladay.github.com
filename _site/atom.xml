@@ -4,7 +4,7 @@
  <title>The blog of Kyle Halladay</title>
  <link href="http://kylehalladay.com/atom.xml" rel="self"/>
  <link href="http://kylehalladay.com"/>
- <updated>2014-10-21T13:30:46-04:00</updated>
+ <updated>2014-10-26T15:08:43-07:00</updated>
  <id>http://kylehalladay.com</id>
  <author>
    <name>Kyle Halladay</name>
@@ -15,7 +15,7 @@
  <entry>
    <title>S</title>
    <link href="http://kylehalladay.com/portfolio/2015/10/20/S.html"/>
-   <updated>2015-10-20T00:00:00-04:00</updated>
+   <updated>2015-10-20T00:00:00-07:00</updated>
    <id>http://kylehalladay.com/portfolio/2015/10/20/S</id>
    <content type="html">
 </content>
@@ -24,7 +24,7 @@
  <entry>
    <title>Zen Burnt</title>
    <link href="http://kylehalladay.com/portfolio/2015/10/15/ZenBurnt.html"/>
-   <updated>2015-10-15T00:00:00-04:00</updated>
+   <updated>2015-10-15T00:00:00-07:00</updated>
    <id>http://kylehalladay.com/portfolio/2015/10/15/ZenBurnt</id>
    <content type="html">
 </content>
@@ -33,7 +33,7 @@
  <entry>
    <title>Block Academy</title>
    <link href="http://kylehalladay.com/portfolio/2015/09/20/Block-Academy.html"/>
-   <updated>2015-09-20T00:00:00-04:00</updated>
+   <updated>2015-09-20T00:00:00-07:00</updated>
    <id>http://kylehalladay.com/portfolio/2015/09/20/Block-Academy</id>
    <content type="html">
 </content>
@@ -42,16 +42,52 @@
  <entry>
    <title>Bird Flew</title>
    <link href="http://kylehalladay.com/portfolio/2015/09/10/Bird%20Flew.html"/>
-   <updated>2015-09-10T00:00:00-04:00</updated>
+   <updated>2015-09-10T00:00:00-07:00</updated>
    <id>http://kylehalladay.com/portfolio/2015/09/10/Bird Flew</id>
    <content type="html">
 </content>
  </entry>
  
  <entry>
+   <title>OpenMP vs OpenCL - An Unfair Comparison</title>
+   <link href="http://kylehalladay.com/all/blog/2014/10/25/OpenMP%20vs%20OpenCL.html"/>
+   <updated>2014-10-25T00:00:00-07:00</updated>
+   <id>http://kylehalladay.com/all/blog/2014/10/25/OpenMP vs OpenCL</id>
+   <content type="html">&lt;p&gt;In the wake of my last post, I decided to get started with my path tracing project by building a small proof of concept renderer to get my feet wet both with the path tracing algorithm and with OpenMP. I was pretty happy with the output of the path tracer (shown below), but I wasn’t happy with the speed I was getting. Since this project’s entire goal is to entertain me, having to wait minutes to see how a code change impacts the output image is a major buzzkill.&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+	 	
+&lt;img src=&quot;/images/post_images/2014-10-26/caffeine-4096.png&quot; style=&quot;max-width:100%;&quot; /&gt;
+&lt;br /&gt;
+&lt;br /&gt;
+&lt;br /&gt;
+
+&lt;/div&gt;
+
+&lt;p&gt;So I decided to ask (myself) a really stupid question: would this be faster on the GPU? &lt;/p&gt;
+
+&lt;p&gt;And because the answer for that was pretty obvious (yes!), I then asked a slightly less stupid question: how much faster? &lt;/p&gt;
+
+&lt;p&gt;To answer that, I wrote a second version of the path tracer using OpenCL and ran both of them with the time command. It goes without saying that the code bases were so different that this comparison isn’t exactly fair, but I’ve always wanted to put a graph in a blog post, so here one is!&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+	 	
+&lt;img src=&quot;/images/post_images/2014-10-26/clvsmp.png&quot; style=&quot;max-width:100%;&quot; /&gt;
+&lt;br /&gt;
+&lt;br /&gt;
+&lt;br /&gt;
+
+&lt;/div&gt;
+&lt;p&gt;It’s hard to see on the graph, but the OpenCL renderer only barely cracked a minute in running time on the 1024 samples per pixel run. OpenMP started at a minute and a half for the 64 samples per pixel case. There are obviously other things that impact which API will be the best for your use case, but iteration speed is pretty important to me, and it’s how I’m deciding which API I’m using for this project. Waiting makes you a waiter. &lt;/p&gt;
+
+&lt;p&gt;If you’re interested, the code for both path tracers can be found on github: &lt;a href=&quot;https://github.com/khalladay/CaribouPT&quot;&gt;OpenMP&lt;/a&gt; or &lt;a href=&quot;https://github.com/khalladay/CaffeinePT&quot;&gt;OpenCL&lt;/a&gt;. If you can see anything in the OpenMP source that could be changed to make it 20x faster (which would &lt;em&gt;almost&lt;/em&gt; catch up to OpenCL), please let me know! Until then, it looks like I’m abandoning OpenMP for this project. &lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
    <title>WordGhoul</title>
    <link href="http://kylehalladay.com/portfolio/2014/09/20/WordGhoul.html"/>
-   <updated>2014-09-20T00:00:00-04:00</updated>
+   <updated>2014-09-20T00:00:00-07:00</updated>
    <id>http://kylehalladay.com/portfolio/2014/09/20/WordGhoul</id>
    <content type="html">
 </content>
@@ -60,7 +96,7 @@
  <entry>
    <title>SkyBound</title>
    <link href="http://kylehalladay.com/pro-portfolio/2014/09/20/SkyBound.html"/>
-   <updated>2014-09-20T00:00:00-04:00</updated>
+   <updated>2014-09-20T00:00:00-07:00</updated>
    <id>http://kylehalladay.com/pro-portfolio/2014/09/20/SkyBound</id>
    <content type="html">
 </content>
@@ -69,7 +105,7 @@
  <entry>
    <title>Setting Up OpenMP on Mavericks</title>
    <link href="http://kylehalladay.com/all/blog/2014/07/15/Setting-Up-OpenMP-Mavericks.html"/>
-   <updated>2014-07-15T00:00:00-04:00</updated>
+   <updated>2014-07-15T00:00:00-07:00</updated>
    <id>http://kylehalladay.com/all/blog/2014/07/15/Setting-Up-OpenMP-Mavericks</id>
    <content type="html">&lt;p&gt;If you’ve ever worked with me (or talked with me for more than a half hour) it’s not a secret that I’m completely fascinated with ray and path tracers. My last project was building a &lt;a href=&quot;https://github.com/khalladay/xRay&quot;&gt;relatively simple ray tracer&lt;/a&gt;, so I think it’s time to build a path tracer.&lt;/p&gt;
 
@@ -164,7 +200,7 @@ $ open -a &quot;Xcode&quot;
  <entry>
    <title>Getting Started With Compute Shaders In Unity</title>
    <link href="http://kylehalladay.com/blog/tutorial/2014/06/27/Compute-Shaders-Are-Nifty.html"/>
-   <updated>2014-06-27T00:00:00-04:00</updated>
+   <updated>2014-06-27T00:00:00-07:00</updated>
    <id>http://kylehalladay.com/blog/tutorial/2014/06/27/Compute-Shaders-Are-Nifty</id>
    <content type="html">&lt;p&gt;I love the simplicity of vert/frag shaders; they only do one thing (push verts and colors to the screen), and they do it exceptionally well, but sometimes, that simplicity feels limiting and you find yourself staring at a loop of matrix calculations happening on your CPU trying desperately to figure out how you could store them in a texture…&lt;/p&gt;
 
@@ -355,7 +391,7 @@ $ open -a &quot;Xcode&quot;
  <entry>
    <title>Colouring Shadows in Unity</title>
    <link href="http://kylehalladay.com/blog/tutorial/bestof/2014/05/16/Coloured-Shadows-In-Unity.html"/>
-   <updated>2014-05-16T00:00:00-04:00</updated>
+   <updated>2014-05-16T00:00:00-07:00</updated>
    <id>http://kylehalladay.com/blog/tutorial/bestof/2014/05/16/Coloured-Shadows-In-Unity</id>
    <content type="html">&lt;p&gt;If you’ve ever looked for help getting different coloured shadows in your Unity game, you were probably surprised by how little there is on the forums in the way of help. In fact, at the time of writing this, the most help that google turned up was a $50 package on the asset store. Colouring shadows is not that hard, in fact, it’s only a few lines of shader code. &lt;/p&gt;
 
@@ -503,7 +539,7 @@ This happens because although the atten value tell us if we’re being shadowed 
  <entry>
    <title>Writing Shaders for Deferred Lighting in Unity3D</title>
    <link href="http://kylehalladay.com/blog/tutorial/2014/04/05/Writing-Shaders-For-Deferred-Lighting-Unity.html"/>
-   <updated>2014-04-05T00:00:00-04:00</updated>
+   <updated>2014-04-05T00:00:00-07:00</updated>
    <id>http://kylehalladay.com/blog/tutorial/2014/04/05/Writing-Shaders-For-Deferred-Lighting-Unity</id>
    <content type="html">&lt;p&gt;Awhile ago, I wrote a post called &lt;a href=&quot;http://kylehalladay.com/all/blog/2013/10/13/Multi-Light-Diffuse.html&quot;&gt;Writing Multi Light Pixel Shaders in Unity&lt;/a&gt;, and covered the basics of how to write shaders that use a whole bunch of lights in forward rendering. This post is the (8 months late) sequel to that post, in which I’m going to talk about the basics of writing shaders for deferred lighting in Unity.&lt;/p&gt;
 
@@ -686,7 +722,7 @@ This happens because although the atten value tell us if we’re being shadowed 
  <entry>
    <title>A Spline Based Object Placement Tool</title>
    <link href="http://kylehalladay.com/blog/tutorial/2014/03/30/Placing-Objects-On-A-Spline.html"/>
-   <updated>2014-03-30T00:00:00-04:00</updated>
+   <updated>2014-03-30T00:00:00-07:00</updated>
    <id>http://kylehalladay.com/blog/tutorial/2014/03/30/Placing-Objects-On-A-Spline</id>
    <content type="html">&lt;p&gt;I’m convinced that one of the secrets to levelling up your Unity skills is to become very comfortable writing custom editor tools. Every project I’ve worked on in the past year has been made significantly better by building tools to automate repetitive or time consuming tasks.&lt;/p&gt;
 
@@ -921,7 +957,7 @@ YAY! :D
  <entry>
    <title>On Bacon Jam and Grilling Virtual Meat</title>
    <link href="http://kylehalladay.com/blog/2014/03/24/Bacon-Jam-And-Vertex-Colours.html"/>
-   <updated>2014-03-24T00:00:00-04:00</updated>
+   <updated>2014-03-24T00:00:00-07:00</updated>
    <id>http://kylehalladay.com/blog/2014/03/24/Bacon-Jam-And-Vertex-Colours</id>
    <content type="html">&lt;p&gt;Weekend game jams aren’t usually my thing. Generally speaking, I like having the weekend to recharge, and spending all of one getting little sleep and feverishly working to finish a (usually) throwaway project is not usually tempting. However, last weekend Reddit hosted the Bacon Jam, and I decided to partake since it had been awhile since I had actually finished a game and I felt like getting some momentum back.&lt;/p&gt;
 
@@ -950,7 +986,7 @@ YAY! :D
  <entry>
    <title>Fresnel Shader Pack</title>
    <link href="http://kylehalladay.com/all/graphics/2014/02/23/Fresnel-Shaders.html"/>
-   <updated>2014-02-23T00:00:00-05:00</updated>
+   <updated>2014-02-23T00:00:00-08:00</updated>
    <id>http://kylehalladay.com/all/graphics/2014/02/23/Fresnel-Shaders</id>
    <content type="html">&lt;p&gt;As described in my post &lt;a href=&quot;/all/blog/2014/02/18/Fresnel-Shaders-From-The-Ground-Up.html&quot;&gt;The Basics of Fresnel Shading&lt;/a&gt;, here is a pack of shaders which all use the Fresnel effect (except for the pure reflection shader, included for contrast between Fresnel and regular reflections). &lt;/p&gt;
 
@@ -974,7 +1010,7 @@ YAY! :D
  <entry>
    <title>The Basics of Fresnel Shading</title>
    <link href="http://kylehalladay.com/blog/tutorial/2014/02/18/Fresnel-Shaders-From-The-Ground-Up.html"/>
-   <updated>2014-02-18T00:00:00-05:00</updated>
+   <updated>2014-02-18T00:00:00-08:00</updated>
    <id>http://kylehalladay.com/blog/tutorial/2014/02/18/Fresnel-Shaders-From-The-Ground-Up</id>
    <content type="html">&lt;p&gt;I recently stumbled on the awesome article: &lt;a href=&quot;http://filmicgames.com/archives/557&quot;&gt;Everything Has Fresnel&lt;/a&gt; (if you haven’t read it, go read it now). The main premise of the article is that real world materials are not actually as neat and tidy as programmers would like to believe, and more specifically, that virtually everything in real life has some degree of fresnel reflectivity. &lt;/p&gt;
 
@@ -1084,7 +1120,7 @@ YAY! :D
  <entry>
    <title>Creating GLSL Shaders at Runtime in Unity3D</title>
    <link href="http://kylehalladay.com/blog/tutorial/bestof/2014/01/12/Runtime-Shader-Compilation-Unity.html"/>
-   <updated>2014-01-12T00:00:00-05:00</updated>
+   <updated>2014-01-12T00:00:00-08:00</updated>
    <id>http://kylehalladay.com/blog/tutorial/bestof/2014/01/12/Runtime-Shader-Compilation-Unity</id>
    <content type="html">&lt;p&gt;The feeling of solving a problem that seems potentially impossible is awesome. My latest project is no exception.&lt;/p&gt;
 
@@ -1246,7 +1282,7 @@ So CgBatch needs at least 4 parameters. Based on the forum post linked previousl
  <entry>
    <title>Automating SelfControl in OS X Mavericks</title>
    <link href="http://kylehalladay.com/blog/tutorial/bestof/2014/01/06/Hacking-My-Attention-Span.html"/>
-   <updated>2014-01-06T00:00:00-05:00</updated>
+   <updated>2014-01-06T00:00:00-08:00</updated>
    <id>http://kylehalladay.com/blog/tutorial/bestof/2014/01/06/Hacking-My-Attention-Span</id>
    <content type="html">&lt;p&gt;I’m an internet junkie, but I can change, if I have to, I guess. &lt;/p&gt;
 
@@ -1353,7 +1389,7 @@ end run
  <entry>
    <title>Ray-Sphere Intersection with Simple Math</title>
    <link href="http://kylehalladay.com/blog/tutorial/math/2013/12/24/Ray-Sphere-Intersection.html"/>
-   <updated>2013-12-24T00:00:00-05:00</updated>
+   <updated>2013-12-24T00:00:00-08:00</updated>
    <id>http://kylehalladay.com/blog/tutorial/math/2013/12/24/Ray-Sphere-Intersection</id>
    <content type="html">&lt;p&gt;Lately I’ve been working on a ray tracer. It’s been going well (or at least as well as I could hope my first renderer could go), but it has been a slow process. I don’t have a formal math background - my day to day work only ever goes as far as enough linear algebra to write shaders, and enough of everything else to implement whatever gameplay I need - and none of this prepared me for the endless pages of ray tracing resources that expected much more math knowledge than I have.&lt;/p&gt;
 
@@ -1660,7 +1696,7 @@ Congratulations on getting this far! Now that we have all that theory out of the
  <entry>
    <title>Combining Pure Data and Unity</title>
    <link href="http://kylehalladay.com/blog/tutorial/bestof/2013/11/10/Libpd-and-Unity.html"/>
-   <updated>2013-11-10T00:00:00-05:00</updated>
+   <updated>2013-11-10T00:00:00-08:00</updated>
    <id>http://kylehalladay.com/blog/tutorial/bestof/2013/11/10/Libpd-and-Unity</id>
    <content type="html">&lt;p&gt;About 6 months ago, for 1GAM, Johannes and I spent a month tinkering with LibPD (the end result was Synapse). LibPD, for those of you who don’t know, is a library for working with &lt;a href=&quot;http://puredata.info/&quot;&gt;Pure-Data&lt;/a&gt;, a visual programming tool for procedural audio. Out of the box, it doesn’t work nicely with Unity, but there’s a repository called libpd4unity that simplifies the process.&lt;/p&gt;
 
@@ -1838,7 +1874,7 @@ Inside that block you can see how to pass messages to the currently running patc
  <entry>
    <title>Writing Multi-Light Pixel Shaders in Unity</title>
    <link href="http://kylehalladay.com/blog/tutorial/bestof/2013/10/13/Multi-Light-Diffuse.html"/>
-   <updated>2013-10-13T00:00:00-04:00</updated>
+   <updated>2013-10-13T00:00:00-07:00</updated>
    <id>http://kylehalladay.com/blog/tutorial/bestof/2013/10/13/Multi-Light-Diffuse</id>
    <content type="html">&lt;p&gt;One of the first things that people get shown when they start learning shaders is how to write a simple, single light, diffuse shader. I have yet to see a single shader tutorial out there that ever returns to this initial exercise to demonstrate how to write shaders which can properly interact with multiple (and different kinds of) lights. So I’m going to try to fill in that gap with what I’ve managed to figure out on my own. &lt;/p&gt;
 
@@ -2053,7 +2089,7 @@ Our shader is on the left, compared to the built in diffuse on the right
  <entry>
    <title>Making a Dissolve Effect with Surface Shaders</title>
    <link href="http://kylehalladay.com/blog/tutorial/bestof/2013/09/28/How-to-dissolve-effect.html"/>
-   <updated>2013-09-28T00:00:00-04:00</updated>
+   <updated>2013-09-28T00:00:00-07:00</updated>
    <id>http://kylehalladay.com/blog/tutorial/bestof/2013/09/28/How-to-dissolve-effect</id>
    <content type="html">&lt;p&gt;I recently posted a shader pack which creates a cool “dissolve” (for lack of a better descriptor) effect, similar to the skin of Skyrim’s dragons during their death animation. As requested by reddit, this post detail exactly what you need to know to write one of these shaders yourself, and hopefully, provide you with a good base with which to modify my shaders to your specific needs. I’m going to attempt to start from square one and not assume any shader experience on your part, but it will probably help if you have a general idea of how to build a basic shader before hand. &lt;/p&gt;
 
@@ -2388,7 +2424,7 @@ Our shader is on the left, compared to the built in diffuse on the right
  <entry>
    <title>Dissolve Shader Pack</title>
    <link href="http://kylehalladay.com/all/graphics/2013/09/22/Dissolve-Shaders.html"/>
-   <updated>2013-09-22T00:00:00-04:00</updated>
+   <updated>2013-09-22T00:00:00-07:00</updated>
    <id>http://kylehalladay.com/all/graphics/2013/09/22/Dissolve-Shaders</id>
    <content type="html">&lt;p&gt;Apparently when I’m bored, I write shaders. These shaders were inspired by the dragon skin dissolving effect in Skyrim.  &lt;/p&gt;
 
@@ -2412,7 +2448,7 @@ Our shader is on the left, compared to the built in diffuse on the right
  <entry>
    <title>A Simple Flow Map</title>
    <link href="http://kylehalladay.com/blog/2013/09/02/A-Simple-Flowmap.html"/>
-   <updated>2013-09-02T00:00:00-04:00</updated>
+   <updated>2013-09-02T00:00:00-07:00</updated>
    <id>http://kylehalladay.com/blog/2013/09/02/A-Simple-Flowmap</id>
    <content type="html">&lt;p&gt;Water effects have always seemed firmly in the realm of people who have much more graphics experience than me. When the need for a river effect presented itself in a project I’m working on, I was first in line to suggest that we buy a solution, rather than roll our own. However, after surveying what was out there, it became clear that all the options available required us to sacrifice more frame time than I was willing to give up for one effect. &lt;/p&gt;
 
@@ -2453,7 +2489,7 @@ Our shader is on the left, compared to the built in diffuse on the right
  <entry>
    <title>Multi Coloured Shadows In Unity</title>
    <link href="http://kylehalladay.com/blog/2013/08/13/Coloured-Shadows.html"/>
-   <updated>2013-08-13T00:00:00-04:00</updated>
+   <updated>2013-08-13T00:00:00-07:00</updated>
    <id>http://kylehalladay.com/blog/2013/08/13/Coloured-Shadows</id>
    <content type="html">&lt;p&gt;&lt;strong&gt;UPDATE: I’ve posted a tutorial on how to get coloured shadows working in your project. Check it out &lt;a href=&quot;http://kylehalladay.com/all/blog/2014/05/16/Coloured-Shadows-In-Unity.html&quot;&gt;here&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
 
@@ -2492,7 +2528,7 @@ Our shader is on the left, compared to the built in diffuse on the right
  <entry>
    <title>Down The Rabbit Hole With Shadertoy</title>
    <link href="http://kylehalladay.com/blog/2013/07/20/Down-The-Rabbit-Hole.html"/>
-   <updated>2013-07-20T00:00:00-04:00</updated>
+   <updated>2013-07-20T00:00:00-07:00</updated>
    <id>http://kylehalladay.com/blog/2013/07/20/Down-The-Rabbit-Hole</id>
    <content type="html">&lt;p&gt;One of the main reasons why I think I click so much with graphics code is the easy parallel from writing a cool shader or graphics demo and more traditional artistic mediums. I’m a big proponent of video games being art, but they’re definitely (usually) a much more collaborative medium. Making games is a lot of work, and to do it as one person is a herculean feat. Graphics code, because it is more focused, is much more easily compared to painting or composing music.&lt;/p&gt;
 
@@ -2523,7 +2559,7 @@ Our shader is on the left, compared to the built in diffuse on the right
  <entry>
    <title>Selective-Blur</title>
    <link href="http://kylehalladay.com/all/graphics/2013/07/02/Selective-Blur.html"/>
-   <updated>2013-07-02T00:00:00-04:00</updated>
+   <updated>2013-07-02T00:00:00-07:00</updated>
    <id>http://kylehalladay.com/all/graphics/2013/07/02/Selective-Blur</id>
    <content type="html">&lt;p&gt;Selective-Blur is a shader replacement effect for Unity Pro that allows blurring of individual materials without blurring the entire scene. &lt;/p&gt;
 
@@ -2544,7 +2580,7 @@ Our shader is on the left, compared to the built in diffuse on the right
  <entry>
    <title>S&#58; Making an Abstract Puzzle Game</title>
    <link href="http://kylehalladay.com/blog/2013/06/02/S-Making-An-Abstract-Puzzle-Game.html"/>
-   <updated>2013-06-02T00:00:00-04:00</updated>
+   <updated>2013-06-02T00:00:00-07:00</updated>
    <id>http://kylehalladay.com/blog/2013/06/02/S-Making-An-Abstract-Puzzle-Game</id>
    <content type="html">&lt;p&gt;After February, &lt;a href=&quot;http://johannesg.com/index.html&quot;&gt;Johannes&lt;/a&gt; and I both agreed that we weren’t having as much fun with 1 Game a Month as we had hoped. Largely, this was due to both of our schedules being too hectic to really work with such a short deadline. So we decided to drop out of 1GAM and work on stuff at a pace that made sense to us. &lt;/p&gt;
 
@@ -2585,7 +2621,7 @@ Our shader is on the left, compared to the built in diffuse on the right
  <entry>
    <title>Bit Flags are Pretty Cool</title>
    <link href="http://kylehalladay.com/blog/2013/04/21/Bit-Flags-Are-Pretty-Cool.html"/>
-   <updated>2013-04-21T00:00:00-04:00</updated>
+   <updated>2013-04-21T00:00:00-07:00</updated>
    <id>http://kylehalladay.com/blog/2013/04/21/Bit-Flags-Are-Pretty-Cool</id>
    <content type="html">&lt;p&gt;I’ve been working on prototype for (possibly) my next personal project, and one of the things I’ve needed to do a number of times is store a lot of boolean attributes on different objects. This led to some really terrible looking scripts with a whole host of boolean flags at the top of them, and I decided I needed to find a better way of handling things. 
 &lt;br /&gt;
@@ -2608,7 +2644,7 @@ So here’s whats going on: rather than specifying a int or float value for the 
  <entry>
    <title>Fun With The Kinect</title>
    <link href="http://kylehalladay.com/blog/2013/03/11/Fun-with-the-kinect.html"/>
-   <updated>2013-03-11T00:00:00-04:00</updated>
+   <updated>2013-03-11T00:00:00-07:00</updated>
    <id>http://kylehalladay.com/blog/2013/03/11/Fun-with-the-kinect</id>
    <content type="html">&lt;p&gt;I’ve been playing around with the Kinect this month (I love that thing). I’ve used it in the past with some gesture control and image processing at work, but I hadn’t really considered it as an option for gamedev, mostly because I don’t have an xbox sdk. I’ve been trying to think of cool ways to use it though, lest it become the coolest dust collector I have in my apartment, and I think I’m on to something this month &lt;/p&gt;
 
@@ -2621,7 +2657,7 @@ So here’s whats going on: rather than specifying a int or float value for the 
  <entry>
    <title>1GAM February Wrap Up</title>
    <link href="http://kylehalladay.com/blog/2013/03/01/1GAM-February-Wrap-Up.html"/>
-   <updated>2013-03-01T00:00:00-05:00</updated>
+   <updated>2013-03-01T00:00:00-08:00</updated>
    <id>http://kylehalladay.com/blog/2013/03/01/1GAM-February-Wrap-Up</id>
    <content type="html">&lt;p&gt;I can’t help but feel a little relieved that February is over, because it means that I can stop working on the month’s 1GAM project and take stock of where I’m at, and what happened this month. It’s been a rough month, with lots of disappointment and soul searching, but probably also a lot of hard earned lessons that are good to have gotten into my system now.&lt;/p&gt;
 
@@ -2658,7 +2694,7 @@ So here’s whats going on: rather than specifying a int or float value for the 
  <entry>
    <title>1GAM January Lessons Learned</title>
    <link href="http://kylehalladay.com/blog/2013/01/30/1GAM-January-Lessons-Learned.html"/>
-   <updated>2013-01-30T00:00:00-05:00</updated>
+   <updated>2013-01-30T00:00:00-08:00</updated>
    <id>http://kylehalladay.com/blog/2013/01/30/1GAM-January-Lessons-Learned</id>
    <content type="html">&lt;p&gt;Do you hear that? It’s the sound of a thousands of programmers crunching to finish their game before the end of the month. Uncharacteristically, I’ve already submitted my game for the month, a simple 2 button game which requires players to guide a ball down a randomly generated track (if you’re interested, and on Mac, get it here: http://dl.dropbox.com/u/6128167/HaikuRacer.zip ), but I expect that next month I’ll be joining the legion of code jockeys trying to squeeze in one last bug fix before the month is over.&lt;/p&gt;
 
@@ -2689,7 +2725,7 @@ So here’s whats going on: rather than specifying a int or float value for the 
  <entry>
    <title>Unbreaking the Xcode templates in Xcode 4.5</title>
    <link href="http://kylehalladay.com/blog/tutorial/2012/12/02/Taming-The-Ogre-Part2.html"/>
-   <updated>2012-12-02T00:00:00-05:00</updated>
+   <updated>2012-12-02T00:00:00-08:00</updated>
    <id>http://kylehalladay.com/blog/tutorial/2012/12/02/Taming-The-Ogre-Part2</id>
    <content type="html">&lt;p&gt;The Xcode templates that come with Ogre 1.81 are rather frustrating to get working, especially if you don’t know what the cryptic error messages that it spits out at you mean. So I’m here today to walk you step by step through getting a basic Ogre project up and running.&lt;/p&gt;
 
@@ -2787,7 +2823,7 @@ Welcome to linker hell. &lt;/p&gt;
  <entry>
    <title>Building Ogre 1.81 on Lion</title>
    <link href="http://kylehalladay.com/blog/tutorial/2012/11/19/Taming-The-Ogre-Part1.html"/>
-   <updated>2012-11-19T00:00:00-05:00</updated>
+   <updated>2012-11-19T00:00:00-08:00</updated>
    <id>http://kylehalladay.com/blog/tutorial/2012/11/19/Taming-The-Ogre-Part1</id>
    <content type="html">&lt;p&gt;I’ve recently decided that I need to go open source for my hobby projects, namely because I’ve reached a point where Unity Free is becoming too restrictive for my tastes, yet I’m still too poor to buy Unity Pro (one day I’ll make a game that pays for more than a night at a bar, but that day hasn’t happened yet).&lt;/p&gt;
 
@@ -2854,7 +2890,7 @@ Welcome to linker hell. &lt;/p&gt;
  <entry>
    <title>A Belated Retrospective on Gamercamp 2012</title>
    <link href="http://kylehalladay.com/blog/2012/11/11/Belated-Retrospective-Gamercamp.html"/>
-   <updated>2012-11-11T00:00:00-05:00</updated>
+   <updated>2012-11-11T00:00:00-08:00</updated>
    <id>http://kylehalladay.com/blog/2012/11/11/Belated-Retrospective-Gamercamp</id>
    <content type="html">&lt;p&gt;So I know I’m a little late writing about it, but 2 weeks ago I spent my weekend speaking at, and attending, Gamercamp 2012. I spoke as part of the emerging artists’ showcase, which means that I had the oddly difficult task of talking about myself for 10 minutes in front of a theater full of people waiting for Vander Caballero’s talk on the design philosophy of Papo &amp;amp; Yo (Vander is an amazing speaker, and you need to go play Papo &amp;amp; Yo right now).&lt;/p&gt;
 
@@ -2875,7 +2911,7 @@ Welcome to linker hell. &lt;/p&gt;
  <entry>
    <title>Surviving My First Industry Conference</title>
    <link href="http://kylehalladay.com/blog/2012/09/30/Surviving-My-First-Industry-Conference.html"/>
-   <updated>2012-09-30T00:00:00-04:00</updated>
+   <updated>2012-09-30T00:00:00-07:00</updated>
    <id>http://kylehalladay.com/blog/2012/09/30/Surviving-My-First-Industry-Conference</id>
    <content type="html">&lt;p&gt;You know the feeling you get about an hour after you realize that you’re way outside of your depth? That sinking feeling in your stomach? That was me about 10 seconds after agreeing to fill in at the last minute for a speaker at the most recent FITC Screens conference.&lt;/p&gt;
 
@@ -2913,7 +2949,7 @@ Despite the jokes at my bowel’s expense above, this was a real issue that made
  <entry>
    <title>Post Mortem - Block Academy</title>
    <link href="http://kylehalladay.com/blog/2012/08/19/Post-Mortem-Block-Academy.html"/>
-   <updated>2012-08-19T00:00:00-04:00</updated>
+   <updated>2012-08-19T00:00:00-07:00</updated>
    <id>http://kylehalladay.com/blog/2012/08/19/Post-Mortem-Block-Academy</id>
    <content type="html">&lt;p&gt;n their final year in Humber College’s Game Programming course, students are tasked with creation of a “Capstone Project,” almost like a journeyman’s piece, which serves to demonstrate the skills that they have developed over the course of the program, and to hopefully get them noticed by industry professionals. Block Academy was my capstone project, and it launched last week.&lt;/p&gt;
 
@@ -2960,7 +2996,7 @@ Despite the jokes at my bowel’s expense above, this was a real issue that made
  <entry>
    <title>Learning Code Practices From Rocket Scientists</title>
    <link href="http://kylehalladay.com/blog/2012/08/12/Learning-Code-Practices-From-Rocket-Scientists.html"/>
-   <updated>2012-08-12T00:00:00-04:00</updated>
+   <updated>2012-08-12T00:00:00-07:00</updated>
    <id>http://kylehalladay.com/blog/2012/08/12/Learning-Code-Practices-From-Rocket-Scientists</id>
    <content type="html">&lt;p&gt;Watching Curiosity land on Mars was amazing, but it also pointed out how much I have yet to learn about programming. NASA programmers managed to program Curiosity so well that they could land a robot on a specific point on the surface of Mars, Block Academy was submitted to the app store with a messy code base that I’m not looking forward to maintaining. Obviously I have a long way to go (not that this is a bad thing).&lt;/p&gt;
 
