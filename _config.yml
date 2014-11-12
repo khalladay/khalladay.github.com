@@ -3,3 +3,5 @@ highlighter: pygments
 url: http://kylehalladay.com
 lsi: false
 exclude: [LICENSE, CNAME, README.md, .gitignore, Gemfile, Gemfile.lock]
+gems:
+  - jekyll-redirect-from

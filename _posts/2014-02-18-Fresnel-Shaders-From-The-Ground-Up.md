@@ -1,4 +1,5 @@
 ---
+redirect_from: "/all/blog/2014/02/18/Fresnel-Shaders-From-The-Ground-Up.html"
 layout: post
 title: The Basics of Fresnel Shading
 categories: 

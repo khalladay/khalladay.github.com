@@ -4,7 +4,7 @@
  <title>The blog of Kyle Halladay</title>
  <link href="http://kylehalladay.com/atom.xml" rel="self"/>
  <link href="http://kylehalladay.com"/>
- <updated>2014-10-26T15:08:43-07:00</updated>
+ <updated>2014-11-12T07:08:30-08:00</updated>
  <id>http://kylehalladay.com</id>
  <author>
    <name>Kyle Halladay</name>
@@ -81,6 +81,8 @@
 &lt;p&gt;It’s hard to see on the graph, but the OpenCL renderer only barely cracked a minute in running time on the 1024 samples per pixel run. OpenMP started at a minute and a half for the 64 samples per pixel case. There are obviously other things that impact which API will be the best for your use case, but iteration speed is pretty important to me, and it’s how I’m deciding which API I’m using for this project. Waiting makes you a waiter. &lt;/p&gt;
 
 &lt;p&gt;If you’re interested, the code for both path tracers can be found on github: &lt;a href=&quot;https://github.com/khalladay/CaribouPT&quot;&gt;OpenMP&lt;/a&gt; or &lt;a href=&quot;https://github.com/khalladay/CaffeinePT&quot;&gt;OpenCL&lt;/a&gt;. If you can see anything in the OpenMP source that could be changed to make it 20x faster (which would &lt;em&gt;almost&lt;/em&gt; catch up to OpenCL), please let me know! Until then, it looks like I’m abandoning OpenMP for this project. &lt;/p&gt;
+
+&lt;p&gt;As always, I’m &lt;a href=&quot;http://twitter.com/khalladay&quot;&gt;on twitter&lt;/a&gt; if you want to say hi :D Happy Coding!&lt;/p&gt;
 </content>
  </entry>
  
