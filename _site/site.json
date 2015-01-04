@@ -24,6 +24,12 @@
 "title": "Bird Flew",
 "url": "/portfolio/2015/09/10/Bird%20Flew.html"},
 
+{"date": "2015-01-03 00:00:00 -0800",
+"categories": ["blog","tutorial"],
+"tags": [],
+"title": "Using Pixel Shaders with Deferred Lighting in Unity 4",
+"url": "/blog/tutorial/2015/01/03/Deferred-Pixel-Shaders.html"},
+
 {"date": "2014-10-25 00:00:00 -0700",
 "categories": ["all","blog"],
 "tags": [],

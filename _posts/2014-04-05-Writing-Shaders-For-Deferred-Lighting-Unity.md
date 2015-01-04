@@ -10,6 +10,8 @@ Awhile ago, I wrote a post called [Writing Multi Light Pixel Shaders in Unity](h
 
 Unlike last time though, we're going to be writing surface shaders today; I'll explain why that is below. If you're unfamiliar with surface shaders, now would probably be a good time to head over to the [Unity docs](https://docs.unity3d.com/Documentation/Components/SL-SurfaceShaders.html) and read up a little bit. Don't worry about grokking all of it though, we aren't doing anything fancy today.
 
+If you're dead set on writing pixel shaders that work with deferred lighting, check out my post on that [here](http://kylehalladay.com/blog/tutorial/2015/01/03/Deferred-Pixel-Shaders.html)
+
 <div align="center">
 	 	
 <img src="/images/post&#95;images/2014-04-05/Deferred_intro.png" />
