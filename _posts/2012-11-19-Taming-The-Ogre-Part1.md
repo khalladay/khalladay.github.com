@@ -4,7 +4,14 @@ title: Building Ogre 1.81 on Lion
 categories:
 - blog
 - tutorial
+tags:
+- <span style="background-color:green;"><font color="white">&nbsp;Ogre&nbsp;&nbsp;</font></span>
 ---
+
+<div style="background-color:#EEAAAA;">NOTE: This article is OLD! (From 2012!). Information in it may be out of date or outright useless, and I have no plans to update it. Beware!
+</div>
+
+<br>
 I’ve recently decided that I need to go open source for my hobby projects, namely because I’ve reached a point where Unity Free is becoming too restrictive for my tastes, yet I’m still too poor to buy Unity Pro (one day I’ll make a game that pays for more than a night at a bar, but that day hasn’t happened yet).
 
 After spending a long week trying to make JMonkey suit my needs (namely: an asset pipeline that doesn’t make me want to shoot myself), I abandoned it and meekly returned to the engine of my third year at Humber: Ogre3D. I had only worked with the precompiled windows binaries until now, but how hard could building it from source (because if I’m going open source, I may as well embrace the whole deal) on my mac be?

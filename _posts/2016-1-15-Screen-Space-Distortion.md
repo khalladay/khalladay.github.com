@@ -4,6 +4,9 @@ title: Screen Space Distortion and a Sci-fi Shield Effect
 categories:
 - blog
 - tutorial
+tags:
+- <span style="background-color:grey;"><font color="white">&nbsp;Unity&nbsp;</font></span>
+
 ---
 
 Sometimes inspiration comes from the weirdest places. I was idly browsing reddit after work awhile ago and stumbled onto this post by user [Guillaume_Langis](http://reddit.com/u/Guillaume_Langis). It was a gif of a shield effect that they had created for their game [Warfleet](http://projectwarfleet.blogspot.ca/). The comments section on that site was filled (predictably) with users asking how they effect was done, and Guillame ended up actually posting the c# and shader source online for people to play with, which is awesome (thanks!)

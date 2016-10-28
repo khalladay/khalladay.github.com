@@ -4,7 +4,13 @@ title: Getting Started With Compute Shaders In Unity
 categories:
 - blog
 - tutorial
+tags:
+- <span style="background-color:grey;"><font color="white">&nbsp;Unity&nbsp;</font></span>
+
 ---
+<div style="background-color:#EEAAAA;">NOTE: This article is for an old version of Unity (Unity 4...sometime in 2014) and probably won't run anymore, but the basic idea is still valid. I just don't want to spend time updating old posts every time Unity increments a version number
+</div>
+
 
 I love the simplicity of vert/frag shaders; they only do one thing (push verts and colors to the screen), and they do it exceptionally well, but sometimes, that simplicity feels limiting and you find yourself staring at a loop of matrix calculations happening on your CPU trying desperately to figure out how you could store them in a texture...
 

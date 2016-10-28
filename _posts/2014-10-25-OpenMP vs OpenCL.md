@@ -4,6 +4,9 @@ title: OpenMP vs OpenCL - An Unfair Comparison
 categories: 
 - all
 - blog
+tags:
+- <span style="background-color:#5555AA;"><font color="white">&nbsp;&nbsp;C++&nbsp;&nbsp;</font></span>
+
 ---
 
 In the wake of my last post, I decided to get started with my path tracing project by building a small proof of concept renderer to get my feet wet both with the path tracing algorithm and with OpenMP. I was pretty happy with the output of the path tracer (shown below), but I wasn't happy with the speed I was getting. Since this project's entire goal is to entertain me, having to wait minutes to see how a code change impacts the output image is a major buzzkill.

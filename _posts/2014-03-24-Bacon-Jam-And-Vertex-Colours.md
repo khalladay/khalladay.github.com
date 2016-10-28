@@ -3,7 +3,14 @@ layout: post
 title: On Bacon Jam and Grilling Virtual Meat
 categories: 
 - blog
+tags:
+- <span style="background-color:#111111;"><font color="#00FF00">&nbsp;Blog&nbsp;&nbsp;</font></span>
+
 ---
+
+<div style="background-color:#EEAAAA;">NOTE: This article is OLD! Information in it may be out of date or outright useless, and I have no plans to update it. Beware!
+</div>
+
 
 Weekend game jams aren't usually my thing. Generally speaking, I like having the weekend to recharge, and spending all of one getting little sleep and feverishly working to finish a (usually) throwaway project is not usually tempting. However, last weekend Reddit hosted the Bacon Jam, and I decided to partake since it had been awhile since I had actually finished a game and I felt like getting some momentum back.
 

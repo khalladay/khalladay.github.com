@@ -5,7 +5,15 @@ categories:
 - blog
 - tutorial
 - bestof
+tags:
+- <span style="background-color:grey;"><font color="white">&nbsp;Unity&nbsp;</font></span>
+
 ---
+
+<div style="background-color:#EEAAAA;">NOTE: This article is OLD! (From 2013!). Information in it may be out of date or outright useless, and I have no plans to update it. Beware!
+</div>
+
+<br>
 
 I recently posted a shader pack which creates a cool "dissolve" (for lack of a better descriptor) effect, similar to the skin of Skyrim's dragons during their death animation. As requested by reddit, this post detail exactly what you need to know to write one of these shaders yourself, and hopefully, provide you with a good base with which to modify my shaders to your specific needs. I'm going to attempt to start from square one and not assume any shader experience on your part, but it will probably help if you have a general idea of how to build a basic shader before hand. 
 

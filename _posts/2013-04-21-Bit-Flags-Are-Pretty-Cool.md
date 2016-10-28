@@ -3,7 +3,20 @@ layout: post
 title: Bit Flags are Pretty Cool
 categories:
 - blog
+tags:
+- <span style="background-color:grey;"><font color="white">&nbsp;Unity&nbsp;</font></span>
+
 ---
+
+<div style="background-color:#EEAAAA;">NOTE: This article is OLD! (From 2013!). Information in it may be out of date or outright useless, and I have no plans to update it. Beware!
+</div>
+
+<br>
+
+<div style="background-color:#EEAAAA;">NOTE: This article is OLD! (From 2013!). Information in it may be out of date or outright useless, and I have no plans on updating it. Beware!
+</div>
+
+<br>
 
 I've been working on prototype for (possibly) my next personal project, and one of the things I've needed to do a number of times is store a lot of boolean attributes on different objects. This led to some really terrible looking scripts with a whole host of boolean flags at the top of them, and I decided I needed to find a better way of handling things. 
 <br>

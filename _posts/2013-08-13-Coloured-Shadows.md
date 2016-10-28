@@ -3,7 +3,15 @@ layout: post
 title: Multi Coloured Shadows In Unity
 categories:
 - blog
+tags:
+- <span style="background-color:grey;"><font color="white">&nbsp;Unity&nbsp;</font></span>
+
 ---
+
+<div style="background-color:#EEAAAA;">NOTE: This article is OLD! (From 2013!). Information in it may be out of date or outright useless, and I have no plansto update it. Beware!
+</div>
+
+<br>
 
 **UPDATE&#58; I've posted a tutorial on how to get coloured shadows working in your project. Check it out [here](http://kylehalladay.com/all/blog/2014/05/16/Coloured-Shadows-In-Unity.html)**
 

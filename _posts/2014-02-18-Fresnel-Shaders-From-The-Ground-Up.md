@@ -5,7 +5,15 @@ title: The Basics of Fresnel Shading
 categories: 
 - blog
 - tutorial
+tags:
+- <span style="background-color:grey;"><font color="white">&nbsp;Unity&nbsp;</font></span>
+
 ---
+
+<div style="background-color:#EEAAAA;">NOTE: This article is for an old version of Unity (Unity 4...sometime in 2014) and probably won't run anymore. Beware!
+</div>
+
+<br>
 
  I recently stumbled on the awesome article: [Everything Has Fresnel](http://filmicgames.com/archives/557) (if you haven't read it, go read it now). The main premise of the article is that real world materials are not actually as neat and tidy as programmers would like to believe, and more specifically, that virtually everything in real life has some degree of fresnel reflectivity. 
 

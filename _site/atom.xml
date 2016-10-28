@@ -4,7 +4,7 @@
  <title>The blog of Kyle Halladay</title>
  <link href="http://kylehalladay.com/atom.xml" rel="self"/>
  <link href="http://kylehalladay.com"/>
- <updated>2016-01-14T23:32:32-08:00</updated>
+ <updated>2016-10-28T07:13:34-05:00</updated>
  <id>http://kylehalladay.com</id>
  <author>
    <name>Kyle Halladay</name>
@@ -15,7 +15,7 @@
  <entry>
    <title>Screen Space Distortion and a Sci-fi Shield Effect</title>
    <link href="http://kylehalladay.com/blog/tutorial/2016/01/15/Screen-Space-Distortion.html"/>
-   <updated>2016-01-15T00:00:00-08:00</updated>
+   <updated>2016-01-15T00:00:00-06:00</updated>
    <id>http://kylehalladay.com/blog/tutorial/2016/01/15/Screen-Space-Distortion</id>
    <content type="html">&lt;p&gt;Sometimes inspiration comes from the weirdest places. I was idly browsing reddit after work awhile ago and stumbled onto this post by user &lt;a href=&quot;http://reddit.com/u/Guillaume_Langis&quot;&gt;Guillaume_Langis&lt;/a&gt;. It was a gif of a shield effect that they had created for their game &lt;a href=&quot;http://projectwarfleet.blogspot.ca/&quot;&gt;Warfleet&lt;/a&gt;. The comments section on that site was filled (predictably) with users asking how they effect was done, and Guillame ended up actually posting the c# and shader source online for people to play with, which is awesome (thanks!)&lt;/p&gt;
 
@@ -515,7 +515,7 @@
  <entry>
    <title>A Burning Paper Shader</title>
    <link href="http://kylehalladay.com/blog/tutorial/2015/11/10/Dissolve-Shader-Redux.html"/>
-   <updated>2015-11-10T00:00:00-08:00</updated>
+   <updated>2015-11-10T00:00:00-06:00</updated>
    <id>http://kylehalladay.com/blog/tutorial/2015/11/10/Dissolve-Shader-Redux</id>
    <content type="html">&lt;p&gt;After a long hiatus, I’ve decided to start posting again! And I can think of no better way to kick that off than with revisiting a &lt;a href=&quot;http://kylehalladay.com/blog/tutorial/bestof/2013/09/28/How-to-dissolve-effect.html&quot;&gt;cheesy old shader&lt;/a&gt; that I posted 2 years ago. &lt;/p&gt;
 
@@ -768,47 +768,15 @@
  </entry>
  
  <entry>
-   <title>S</title>
-   <link href="http://kylehalladay.com/portfolio/2015/10/20/S.html"/>
-   <updated>2015-10-20T00:00:00-07:00</updated>
-   <id>http://kylehalladay.com/portfolio/2015/10/20/S</id>
-   <content type="html">
-</content>
- </entry>
- 
- <entry>
-   <title>Zen Burnt</title>
-   <link href="http://kylehalladay.com/portfolio/2015/10/15/ZenBurnt.html"/>
-   <updated>2015-10-15T00:00:00-07:00</updated>
-   <id>http://kylehalladay.com/portfolio/2015/10/15/ZenBurnt</id>
-   <content type="html">
-</content>
- </entry>
- 
- <entry>
-   <title>Block Academy</title>
-   <link href="http://kylehalladay.com/portfolio/2015/09/20/Block-Academy.html"/>
-   <updated>2015-09-20T00:00:00-07:00</updated>
-   <id>http://kylehalladay.com/portfolio/2015/09/20/Block-Academy</id>
-   <content type="html">
-</content>
- </entry>
- 
- <entry>
-   <title>Bird Flew</title>
-   <link href="http://kylehalladay.com/portfolio/2015/09/10/Bird%20Flew.html"/>
-   <updated>2015-09-10T00:00:00-07:00</updated>
-   <id>http://kylehalladay.com/portfolio/2015/09/10/Bird Flew</id>
-   <content type="html">
-</content>
- </entry>
- 
- <entry>
    <title>Using Pixel Shaders with Deferred Lighting in Unity 4</title>
    <link href="http://kylehalladay.com/blog/tutorial/2015/01/03/Deferred-Pixel-Shaders.html"/>
-   <updated>2015-01-03T00:00:00-08:00</updated>
+   <updated>2015-01-03T00:00:00-06:00</updated>
    <id>http://kylehalladay.com/blog/tutorial/2015/01/03/Deferred-Pixel-Shaders</id>
-   <content type="html">&lt;p&gt;In a previous post (&lt;a href=&quot;http://kylehalladay.com/blog/tutorial/2014/04/05/Writing-Shaders-For-Deferred-Lighting-Unity.html&quot;&gt;link&lt;/a&gt;), I talked about why surface shaders are a great way to write shaders for Unity’s Deferred Lighting rendering path, and they are.&lt;/p&gt;
+   <content type="html">&lt;div style=&quot;background-color:#EEAAAA;&quot;&gt;NOTE: This article is for an old version of Unity (Unity 4...sometime in 2015) and may not run / be useful for the latest version of unity
+&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;In a previous post (&lt;a href=&quot;http://kylehalladay.com/blog/tutorial/2014/04/05/Writing-Shaders-For-Deferred-Lighting-Unity.html&quot;&gt;link&lt;/a&gt;), I talked about why surface shaders are a great way to write shaders for Unity’s Deferred Lighting rendering path, and they are.&lt;/p&gt;
 
 &lt;p&gt;But given the choice, I’d rather write pixel shaders. Surface shaders always felt a little too much like magic for me, and I’ll trade writing more lines of code for more control over what my gpu is doing any day of the week.&lt;/p&gt;
 
@@ -1053,7 +1021,7 @@ Luckily, this pass is the same as any other shadow caster pass in Unity. In theo
  <entry>
    <title>OpenMP vs OpenCL - An Unfair Comparison</title>
    <link href="http://kylehalladay.com/all/blog/2014/10/25/OpenMP%20vs%20OpenCL.html"/>
-   <updated>2014-10-25T00:00:00-07:00</updated>
+   <updated>2014-10-25T00:00:00-05:00</updated>
    <id>http://kylehalladay.com/all/blog/2014/10/25/OpenMP vs OpenCL</id>
    <content type="html">&lt;p&gt;In the wake of my last post, I decided to get started with my path tracing project by building a small proof of concept renderer to get my feet wet both with the path tracing algorithm and with OpenMP. I was pretty happy with the output of the path tracer (shown below), but I wasn’t happy with the speed I was getting. Since this project’s entire goal is to entertain me, having to wait minutes to see how a code change impacts the output image is a major buzzkill.&lt;/p&gt;
 
@@ -1089,29 +1057,14 @@ Luckily, this pass is the same as any other shadow caster pass in Unity. In theo
  </entry>
  
  <entry>
-   <title>WordGhoul</title>
-   <link href="http://kylehalladay.com/portfolio/2014/09/20/WordGhoul.html"/>
-   <updated>2014-09-20T00:00:00-07:00</updated>
-   <id>http://kylehalladay.com/portfolio/2014/09/20/WordGhoul</id>
-   <content type="html">
-</content>
- </entry>
- 
- <entry>
-   <title>SkyBound</title>
-   <link href="http://kylehalladay.com/pro-portfolio/2014/09/20/SkyBound.html"/>
-   <updated>2014-09-20T00:00:00-07:00</updated>
-   <id>http://kylehalladay.com/pro-portfolio/2014/09/20/SkyBound</id>
-   <content type="html">
-</content>
- </entry>
- 
- <entry>
    <title>Setting Up OpenMP on Mavericks</title>
    <link href="http://kylehalladay.com/all/blog/2014/07/15/Setting-Up-OpenMP-Mavericks.html"/>
-   <updated>2014-07-15T00:00:00-07:00</updated>
+   <updated>2014-07-15T00:00:00-05:00</updated>
    <id>http://kylehalladay.com/all/blog/2014/07/15/Setting-Up-OpenMP-Mavericks</id>
-   <content type="html">&lt;p&gt;If you’ve ever worked with me (or talked with me for more than a half hour) it’s not a secret that I’m completely fascinated with ray and path tracers. My last project was building a &lt;a href=&quot;https://github.com/khalladay/xRay&quot;&gt;relatively simple ray tracer&lt;/a&gt;, so I think it’s time to build a path tracer.&lt;/p&gt;
+   <content type="html">&lt;div style=&quot;background-color:#EEAAAA;&quot;&gt;NOTE: This article is from 2014 and will not be updated. It may or may not still be valid
+&lt;/div&gt;
+
+&lt;p&gt;If you’ve ever worked with me (or talked with me for more than a half hour) it’s not a secret that I’m completely fascinated with ray and path tracers. My last project was building a &lt;a href=&quot;https://github.com/khalladay/xRay&quot;&gt;relatively simple ray tracer&lt;/a&gt;, so I think it’s time to build a path tracer.&lt;/p&gt;
 
 &lt;div align=&quot;center&quot;&gt;
 	 	
@@ -1204,9 +1157,12 @@ $ open -a &quot;Xcode&quot;
  <entry>
    <title>Getting Started With Compute Shaders In Unity</title>
    <link href="http://kylehalladay.com/blog/tutorial/2014/06/27/Compute-Shaders-Are-Nifty.html"/>
-   <updated>2014-06-27T00:00:00-07:00</updated>
+   <updated>2014-06-27T00:00:00-05:00</updated>
    <id>http://kylehalladay.com/blog/tutorial/2014/06/27/Compute-Shaders-Are-Nifty</id>
-   <content type="html">&lt;p&gt;I love the simplicity of vert/frag shaders; they only do one thing (push verts and colors to the screen), and they do it exceptionally well, but sometimes, that simplicity feels limiting and you find yourself staring at a loop of matrix calculations happening on your CPU trying desperately to figure out how you could store them in a texture…&lt;/p&gt;
+   <content type="html">&lt;div style=&quot;background-color:#EEAAAA;&quot;&gt;NOTE: This article is for an old version of Unity (Unity 4...sometime in 2014) and probably won&#39;t run anymore, but the basic idea is still valid. I just don&#39;t want to spend time updating old posts every time Unity increments a version number
+&lt;/div&gt;
+
+&lt;p&gt;I love the simplicity of vert/frag shaders; they only do one thing (push verts and colors to the screen), and they do it exceptionally well, but sometimes, that simplicity feels limiting and you find yourself staring at a loop of matrix calculations happening on your CPU trying desperately to figure out how you could store them in a texture…&lt;/p&gt;
 
 &lt;p&gt;…Or maybe that’s just me, but regardless, compute shaders solve that problem, and it turns out that they’re dead simple to use, so I’m going to explain the basics of them today. First I’ll go through the example compute shader that unity auto creates for you, and then I’ll finish off with an example of a compute shader working with a structured buffer of data. &lt;/p&gt;
 
@@ -1395,9 +1351,12 @@ $ open -a &quot;Xcode&quot;
  <entry>
    <title>Colouring Shadows in Unity</title>
    <link href="http://kylehalladay.com/blog/tutorial/bestof/2014/05/16/Coloured-Shadows-In-Unity.html"/>
-   <updated>2014-05-16T00:00:00-07:00</updated>
+   <updated>2014-05-16T00:00:00-05:00</updated>
    <id>http://kylehalladay.com/blog/tutorial/bestof/2014/05/16/Coloured-Shadows-In-Unity</id>
-   <content type="html">&lt;p&gt;If you’ve ever looked for help getting different coloured shadows in your Unity game, you were probably surprised by how little there is on the forums in the way of help. In fact, at the time of writing this, the most help that google turned up was a $50 package on the asset store. Colouring shadows is not that hard, in fact, it’s only a few lines of shader code. &lt;/p&gt;
+   <content type="html">&lt;div style=&quot;background-color:#EEAAAA;&quot;&gt;NOTE: This article is for an old version of Unity (Unity 4...sometime in 2014) and probably won&#39;t run anymore, but the basic idea is still valid. I just don&#39;t want to spend time updating old posts every time Unity increments a version number
+&lt;/div&gt;
+
+&lt;p&gt;If you’ve ever looked for help getting different coloured shadows in your Unity game, you were probably surprised by how little there is on the forums in the way of help. In fact, at the time of writing this, the most help that google turned up was a $50 package on the asset store. Colouring shadows is not that hard, in fact, it’s only a few lines of shader code. &lt;/p&gt;
 
 &lt;p&gt;This post is going to show you a really simple way to get some really groovy shadows in Unity.&lt;/p&gt;
 
@@ -1543,9 +1502,12 @@ This happens because although the atten value tell us if we’re being shadowed 
  <entry>
    <title>Writing Shaders for Deferred Lighting in Unity3D</title>
    <link href="http://kylehalladay.com/blog/tutorial/2014/04/05/Writing-Shaders-For-Deferred-Lighting-Unity.html"/>
-   <updated>2014-04-05T00:00:00-07:00</updated>
+   <updated>2014-04-05T00:00:00-05:00</updated>
    <id>http://kylehalladay.com/blog/tutorial/2014/04/05/Writing-Shaders-For-Deferred-Lighting-Unity</id>
-   <content type="html">&lt;p&gt;Awhile ago, I wrote a post called &lt;a href=&quot;http://kylehalladay.com/all/blog/2013/10/13/Multi-Light-Diffuse.html&quot;&gt;Writing Multi Light Pixel Shaders in Unity&lt;/a&gt;, and covered the basics of how to write shaders that use a whole bunch of lights in forward rendering. This post is the (8 months late) sequel to that post, in which I’m going to talk about the basics of writing shaders for deferred lighting in Unity.&lt;/p&gt;
+   <content type="html">&lt;div style=&quot;background-color:#EEAAAA;&quot;&gt;NOTE: This article is for an old version of Unity (Unity 4...sometime in 2014) and probably won&#39;t run anymore, but the basic idea is still valid. I just don&#39;t want to spend time updating old posts every time Unity increments a version number
+&lt;/div&gt;
+
+&lt;p&gt;Awhile ago, I wrote a post called &lt;a href=&quot;http://kylehalladay.com/all/blog/2013/10/13/Multi-Light-Diffuse.html&quot;&gt;Writing Multi Light Pixel Shaders in Unity&lt;/a&gt;, and covered the basics of how to write shaders that use a whole bunch of lights in forward rendering. This post is the (8 months late) sequel to that post, in which I’m going to talk about the basics of writing shaders for deferred lighting in Unity.&lt;/p&gt;
 
 &lt;p&gt;Unlike last time though, we’re going to be writing surface shaders today; I’ll explain why that is below. If you’re unfamiliar with surface shaders, now would probably be a good time to head over to the &lt;a href=&quot;https://docs.unity3d.com/Documentation/Components/SL-SurfaceShaders.html&quot;&gt;Unity docs&lt;/a&gt; and read up a little bit. Don’t worry about grokking all of it though, we aren’t doing anything fancy today.&lt;/p&gt;
 
@@ -1728,9 +1690,12 @@ This happens because although the atten value tell us if we’re being shadowed 
  <entry>
    <title>A Spline Based Object Placement Tool</title>
    <link href="http://kylehalladay.com/blog/tutorial/2014/03/30/Placing-Objects-On-A-Spline.html"/>
-   <updated>2014-03-30T00:00:00-07:00</updated>
+   <updated>2014-03-30T00:00:00-05:00</updated>
    <id>http://kylehalladay.com/blog/tutorial/2014/03/30/Placing-Objects-On-A-Spline</id>
-   <content type="html">&lt;p&gt;I’m convinced that one of the secrets to levelling up your Unity skills is to become very comfortable writing custom editor tools. Every project I’ve worked on in the past year has been made significantly better by building tools to automate repetitive or time consuming tasks.&lt;/p&gt;
+   <content type="html">&lt;div style=&quot;background-color:#EEAAAA;&quot;&gt;NOTE: This article is for an old version of Unity (Unity 4...sometime in 2014) and probably won&#39;t run anymore, but the basic idea is still valid. I just don&#39;t want to spend time updating old posts every time Unity increments a version number
+&lt;/div&gt;
+
+&lt;p&gt;I’m convinced that one of the secrets to levelling up your Unity skills is to become very comfortable writing custom editor tools. Every project I’ve worked on in the past year has been made significantly better by building tools to automate repetitive or time consuming tasks.&lt;/p&gt;
 
 &lt;p&gt;For example, imagine you are working on a project which requires placing gems at even distances (like coins in Temple Run, or rings in Sonic). Placing all of these by hand isn’t a good use of anyone’s time, and making changes to these layouts sucks because moving a gem in the middle of a row means that everything after it needs to be adjusted as well. &lt;/p&gt;
 
@@ -1963,9 +1928,12 @@ YAY! :D
  <entry>
    <title>On Bacon Jam and Grilling Virtual Meat</title>
    <link href="http://kylehalladay.com/blog/2014/03/24/Bacon-Jam-And-Vertex-Colours.html"/>
-   <updated>2014-03-24T00:00:00-07:00</updated>
+   <updated>2014-03-24T00:00:00-05:00</updated>
    <id>http://kylehalladay.com/blog/2014/03/24/Bacon-Jam-And-Vertex-Colours</id>
-   <content type="html">&lt;p&gt;Weekend game jams aren’t usually my thing. Generally speaking, I like having the weekend to recharge, and spending all of one getting little sleep and feverishly working to finish a (usually) throwaway project is not usually tempting. However, last weekend Reddit hosted the Bacon Jam, and I decided to partake since it had been awhile since I had actually finished a game and I felt like getting some momentum back.&lt;/p&gt;
+   <content type="html">&lt;div style=&quot;background-color:#EEAAAA;&quot;&gt;NOTE: This article is OLD! Information in it may be out of date or outright useless, and I have no plans to update it. Beware!
+&lt;/div&gt;
+
+&lt;p&gt;Weekend game jams aren’t usually my thing. Generally speaking, I like having the weekend to recharge, and spending all of one getting little sleep and feverishly working to finish a (usually) throwaway project is not usually tempting. However, last weekend Reddit hosted the Bacon Jam, and I decided to partake since it had been awhile since I had actually finished a game and I felt like getting some momentum back.&lt;/p&gt;
 
 &lt;p&gt;The theme of the jam was “Hungry,” and I decided to make a game about grilling meat, because winter has been way too long and cold here in Ontario, and barbeque weather can’t get here fast enough. Although the jam technically ended on Sunday night, I knew that I had other things I needed to get done, and as such would be finishing on Saturday. I also knew I liked sleep, and had no intention of pulling a crazy caffeine fuelled coding binge (like I’ve done at most game jams). The end result was a very small game, that I finished leisurely well before the end of Saturday, and I ended up having a ton of fun doing things this way. &lt;/p&gt;
 
@@ -1990,35 +1958,16 @@ YAY! :D
  </entry>
  
  <entry>
-   <title>Fresnel Shader Pack</title>
-   <link href="http://kylehalladay.com/all/graphics/2014/02/23/Fresnel-Shaders.html"/>
-   <updated>2014-02-23T00:00:00-08:00</updated>
-   <id>http://kylehalladay.com/all/graphics/2014/02/23/Fresnel-Shaders</id>
-   <content type="html">&lt;p&gt;As described in my post &lt;a href=&quot;/all/blog/2014/02/18/Fresnel-Shaders-From-The-Ground-Up.html&quot;&gt;The Basics of Fresnel Shading&lt;/a&gt;, here is a pack of shaders which all use the Fresnel effect (except for the pure reflection shader, included for contrast between Fresnel and regular reflections). &lt;/p&gt;
-
-&lt;h4&gt;Here&#39;s how it works: &lt;/h4&gt;
-
-&lt;p&gt;The shaders all use the “Empirical Approximation” of Fresnel presented in the CG Tutorial from NVidia. The results are very easy to customize, but are not physically correct. Each material gives you a slider that controls how strong the Fresnel effect is, and any reflections come from Cube maps, which you can render from static scenes, or render on the fly for real time reflections. &lt;/p&gt;
-
-&lt;p&gt;All the code is MIT Licensed (included in the shader files themselves). &lt;/p&gt;
-
-&lt;p&gt;A web demo of this project is available &lt;a href=&quot;/demos/fresnel/fresnel.html&quot;&gt;here&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;Download the unitypackage &lt;a href=&quot;https://dl.dropboxusercontent.com/u/6128167/fresnel-pack.unitypackage&quot;&gt;here&lt;/a&gt; &lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/post&amp;#95;images/2014-02-23/AllFresnel.png&quot; alt=&quot;Screen 1&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Know something that would make these shaders better? Send me a message &lt;a href=&quot;http://twitter.com/khalladay&quot;&gt;on Twitter&lt;/a&gt;&lt;/p&gt;
-
-</content>
- </entry>
- 
- <entry>
    <title>The Basics of Fresnel Shading</title>
    <link href="http://kylehalladay.com/blog/tutorial/2014/02/18/Fresnel-Shaders-From-The-Ground-Up.html"/>
-   <updated>2014-02-18T00:00:00-08:00</updated>
+   <updated>2014-02-18T00:00:00-06:00</updated>
    <id>http://kylehalladay.com/blog/tutorial/2014/02/18/Fresnel-Shaders-From-The-Ground-Up</id>
-   <content type="html">&lt;p&gt;I recently stumbled on the awesome article: &lt;a href=&quot;http://filmicgames.com/archives/557&quot;&gt;Everything Has Fresnel&lt;/a&gt; (if you haven’t read it, go read it now). The main premise of the article is that real world materials are not actually as neat and tidy as programmers would like to believe, and more specifically, that virtually everything in real life has some degree of fresnel reflectivity. &lt;/p&gt;
+   <content type="html">&lt;div style=&quot;background-color:#EEAAAA;&quot;&gt;NOTE: This article is for an old version of Unity (Unity 4...sometime in 2014) and probably won&#39;t run anymore. Beware!
+&lt;/div&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;I recently stumbled on the awesome article: &lt;a href=&quot;http://filmicgames.com/archives/557&quot;&gt;Everything Has Fresnel&lt;/a&gt; (if you haven’t read it, go read it now). The main premise of the article is that real world materials are not actually as neat and tidy as programmers would like to believe, and more specifically, that virtually everything in real life has some degree of fresnel reflectivity. &lt;/p&gt;
 
 &lt;p&gt;Fresnel isn’t an effect that I’ve seen often in Unity projects and in fact wasn’t an effect that I was familiar with building, so I decided to kill two birds with one project and put together my latest shader pack: &lt;a href=&quot;/all/graphics/2014/02/23/Fresnel-Shaders.html&quot;&gt;Fresnel Shaders&lt;/a&gt;. It’s all free to use, MIT license, all that jazz, so enjoy :D&lt;/p&gt;
 
@@ -2126,9 +2075,14 @@ YAY! :D
  <entry>
    <title>Creating GLSL Shaders at Runtime in Unity3D</title>
    <link href="http://kylehalladay.com/blog/tutorial/bestof/2014/01/12/Runtime-Shader-Compilation-Unity.html"/>
-   <updated>2014-01-12T00:00:00-08:00</updated>
+   <updated>2014-01-12T00:00:00-06:00</updated>
    <id>http://kylehalladay.com/blog/tutorial/bestof/2014/01/12/Runtime-Shader-Compilation-Unity</id>
-   <content type="html">&lt;p&gt;The feeling of solving a problem that seems potentially impossible is awesome. My latest project is no exception.&lt;/p&gt;
+   <content type="html">&lt;div style=&quot;background-color:#EEAAAA;&quot;&gt;NOTE: This article is for an old version of Unity (Unity 4...sometime in 2014) and probably won&#39;t run anymore. Beware!
+&lt;/div&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;The feeling of solving a problem that seems potentially impossible is awesome. My latest project is no exception.&lt;/p&gt;
 
 &lt;p&gt;The concept involves users being able to write shaders while the program is running, and compiling them at runtime onto objects in the scene. Normally this wouldn’t be an unreasonable task, however this project is being built in Unity, which complicates things immensely. &lt;/p&gt;
 
@@ -2286,118 +2240,16 @@ So CgBatch needs at least 4 parameters. Based on the forum post linked previousl
  </entry>
  
  <entry>
-   <title>Automating SelfControl in OS X Mavericks</title>
-   <link href="http://kylehalladay.com/blog/tutorial/bestof/2014/01/06/Hacking-My-Attention-Span.html"/>
-   <updated>2014-01-06T00:00:00-08:00</updated>
-   <id>http://kylehalladay.com/blog/tutorial/bestof/2014/01/06/Hacking-My-Attention-Span</id>
-   <content type="html">&lt;p&gt;I’m an internet junkie, but I can change, if I have to, I guess. &lt;/p&gt;
-
-&lt;p&gt;Like everyone else, I have goals and laundry that need attention in the new year and in order for that to happen, I need to curb my internet habit. Since I apparently lack a lot of it on my own, I’ve been using the excellent site blocking app: &lt;a href=&quot;http://selfcontrolapp.com/&quot;&gt;SelfControl&lt;/a&gt;.&lt;/p&gt;
-
-&lt;div align=&quot;center&quot;&gt;
-	
-&lt;img src=&quot;/images/post&amp;#95;images/2014-01-06/sc_logo.jpg&quot; /&gt;&lt;br /&gt;
-
-&lt;/div&gt;
-
-&lt;p&gt;&lt;br /&gt;
-The only issue I have with SelfControl is that I need to start it manually, and it’s too easy to get into the trap of “just a few minutes” before deciding to start it each morning. What I need is to schedule it to have already started in the mornings before I wake up, and only unlock for an hour or so before bed. &lt;/p&gt;
-
-&lt;p&gt;Luckily, there is a way (that is less involved than forking the project and adding scheduling myself)! So if any of you are in the same boat, check out the following steps:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Download &lt;a href=&quot;http://selfcontrolapp.com/&quot;&gt;SelfControl&lt;/a&gt;&lt;br /&gt;&lt;/li&gt;
-  &lt;li&gt;Open up Automator and create a new application. &lt;br /&gt;&lt;/li&gt;
-  &lt;li&gt;In this application, drag the action “Run Applescript” from utilities into your Automator Task. &lt;br /&gt;&lt;/li&gt;
-  &lt;li&gt;Paste the script below into the Run Applescript text area: &lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;pre style=&quot;background-color:white; color:black&quot;&gt;
-on run argv
-	set defaultTime to YOUR-DURATION
-	
-	try
-		set myTime to item 1 of argv as number
-	on error
-		set myTime to defaultTime
-	end try
-	
-	tell application &quot;SelfControl&quot; to activate
-	
-	tell application &quot;System Events&quot;
-		tell process &quot;SelfControl&quot;
-			tell slider of window &quot;SelfControl&quot; to set value to myTime
-			click button &quot;Start&quot; of window &quot;SelfControl&quot;
-		end tell
-		
-		tell window 1 of process &quot;SecurityAgent&quot;
-			with timeout of 15 seconds
-				repeat
-					set tryAgain to false
-					try
-						set value of text field 2 of scroll area 1 of group 1 to PASSWORD
-					on error
-						delay 1
-						set tryAgain to true
-					end try
-					if not tryAgain then exit repeat
-				end repeat
-				click button 2 of group 2
-			end timeout
-		end tell
-	end tell
-end run	
-&lt;/pre&gt;
-
-&lt;p&gt;Replace the YOUR-DURATION with a multiple of 15. This is how long SelfControl will run for. &lt;/p&gt;
-
-&lt;p&gt;Replace PASSWORD with your user password (with a quotation mark on each side). It’s probably terrible to script something to do this, but the previous method (using) &lt;a href=&quot;http://www.red-sweater.com/blog/446/usable-keychain-update&quot;&gt;Usable-Keychain-Scripting&lt;/a&gt; seems to be broken in Mavericks; the above is the only way I could get this to work. &lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Save your workflow (workflows are saved in ~/Library/Workflows)&lt;br /&gt;&lt;/li&gt;
-  &lt;li&gt;Create a repeating task in Calendar, and set its color to “Automator”&lt;br /&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;div align=&quot;center&quot;&gt;
-	
-&lt;img src=&quot;/images/post&amp;#95;images/2014-01-06/calendar.png&quot; /&gt;&lt;br /&gt;
-
-&lt;/div&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Create an alarm for this calendar task, set its type to custom-&amp;gt;open file.&lt;br /&gt;&lt;/li&gt;
-  &lt;li&gt;Select the workflow file you created earlier. &lt;br /&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Now, whenever the calendar plays the alarm for that event, your self control script will run! &lt;/p&gt;
-
-&lt;p&gt;There’s just one more problem though, I want the script to run before I wake up in the morning, which means that my laptop will be asleep, so I need it to wake up before the calendar task. &lt;/p&gt;
-
-&lt;div align=&quot;center&quot;&gt;
-	
-&lt;img src=&quot;/images/post&amp;#95;images/2014-01-06/schedule.png&quot; /&gt;&lt;br /&gt;
-
-&lt;/div&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Open System Preferences and select “Energy Saver”&lt;/li&gt;
-  &lt;li&gt;Click “Schedule” and check “Start on Wake”&lt;/li&gt;
-  &lt;li&gt;Enter a wake up time before your calendar event and have it recur each day that your self control script will run. &lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;And that’s all there is to it! &lt;/p&gt;
-
-&lt;p&gt;Have any other tricks for staying on task and away from reddit? Send me a message &lt;a href=&quot;http://twitter.com/khalladay&quot;&gt;on Twitter.&lt;/a&gt; &lt;/p&gt;
-
-</content>
- </entry>
- 
- <entry>
    <title>Ray-Sphere Intersection with Simple Math</title>
    <link href="http://kylehalladay.com/blog/tutorial/math/2013/12/24/Ray-Sphere-Intersection.html"/>
-   <updated>2013-12-24T00:00:00-08:00</updated>
+   <updated>2013-12-24T00:00:00-06:00</updated>
    <id>http://kylehalladay.com/blog/tutorial/math/2013/12/24/Ray-Sphere-Intersection</id>
-   <content type="html">&lt;p&gt;Lately I’ve been working on a ray tracer. It’s been going well (or at least as well as I could hope my first renderer could go), but it has been a slow process. I don’t have a formal math background - my day to day work only ever goes as far as enough linear algebra to write shaders, and enough of everything else to implement whatever gameplay I need - and none of this prepared me for the endless pages of ray tracing resources that expected much more math knowledge than I have.&lt;/p&gt;
+   <content type="html">&lt;div style=&quot;background-color:#EEAAAA;&quot;&gt;NOTE: This article is OLD! (From 2013!). Information in it may be out of date or outright useless, and I have no plans to update it. Beware!
+&lt;/div&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;Lately I’ve been working on a ray tracer. It’s been going well (or at least as well as I could hope my first renderer could go), but it has been a slow process. I don’t have a formal math background - my day to day work only ever goes as far as enough linear algebra to write shaders, and enough of everything else to implement whatever gameplay I need - and none of this prepared me for the endless pages of ray tracing resources that expected much more math knowledge than I have.&lt;/p&gt;
 
 &lt;div align=&quot;center&quot;&gt;
 	
@@ -2702,9 +2554,14 @@ Congratulations on getting this far! Now that we have all that theory out of the
  <entry>
    <title>Combining Pure Data and Unity</title>
    <link href="http://kylehalladay.com/blog/tutorial/bestof/2013/11/10/Libpd-and-Unity.html"/>
-   <updated>2013-11-10T00:00:00-08:00</updated>
+   <updated>2013-11-10T00:00:00-06:00</updated>
    <id>http://kylehalladay.com/blog/tutorial/bestof/2013/11/10/Libpd-and-Unity</id>
-   <content type="html">&lt;p&gt;About 6 months ago, for 1GAM, Johannes and I spent a month tinkering with LibPD (the end result was Synapse). LibPD, for those of you who don’t know, is a library for working with &lt;a href=&quot;http://puredata.info/&quot;&gt;Pure-Data&lt;/a&gt;, a visual programming tool for procedural audio. Out of the box, it doesn’t work nicely with Unity, but there’s a repository called libpd4unity that simplifies the process.&lt;/p&gt;
+   <content type="html">&lt;div style=&quot;background-color:#EEAAAA;&quot;&gt;NOTE: This article is OLD! (From 2013!). Information in it may be out of date or outright useless, and I have no plans to update it. Beware!
+&lt;/div&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;About 6 months ago, for 1GAM, Johannes and I spent a month tinkering with LibPD (the end result was Synapse). LibPD, for those of you who don’t know, is a library for working with &lt;a href=&quot;http://puredata.info/&quot;&gt;Pure-Data&lt;/a&gt;, a visual programming tool for procedural audio. Out of the box, it doesn’t work nicely with Unity, but there’s a repository called libpd4unity that simplifies the process.&lt;/p&gt;
 
 &lt;div align=&quot;center&quot;&gt;
 &lt;img src=&quot;/images/post&amp;#95;images/2013-11-10/pd.png&quot; /&gt;&lt;br /&gt;
@@ -2880,9 +2737,14 @@ Inside that block you can see how to pass messages to the currently running patc
  <entry>
    <title>Writing Multi-Light Pixel Shaders in Unity</title>
    <link href="http://kylehalladay.com/blog/tutorial/bestof/2013/10/13/Multi-Light-Diffuse.html"/>
-   <updated>2013-10-13T00:00:00-07:00</updated>
+   <updated>2013-10-13T00:00:00-05:00</updated>
    <id>http://kylehalladay.com/blog/tutorial/bestof/2013/10/13/Multi-Light-Diffuse</id>
-   <content type="html">&lt;p&gt;One of the first things that people get shown when they start learning shaders is how to write a simple, single light, diffuse shader. I have yet to see a single shader tutorial out there that ever returns to this initial exercise to demonstrate how to write shaders which can properly interact with multiple (and different kinds of) lights. So I’m going to try to fill in that gap with what I’ve managed to figure out on my own. &lt;/p&gt;
+   <content type="html">&lt;div style=&quot;background-color:#EEAAAA;&quot;&gt;NOTE: This article is OLD! (From 2013!). Information in it may be out of date or outright useless, and I have no plans to update it. Beware!
+&lt;/div&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;One of the first things that people get shown when they start learning shaders is how to write a simple, single light, diffuse shader. I have yet to see a single shader tutorial out there that ever returns to this initial exercise to demonstrate how to write shaders which can properly interact with multiple (and different kinds of) lights. So I’m going to try to fill in that gap with what I’ve managed to figure out on my own. &lt;/p&gt;
 
 &lt;p&gt;This will hopefully serve as a good starting point for any truly custom lighting shaders you want to write. To be clear, the end goal of this tutorial is simply to have a pixel shader that looks as close as possible to the built in Diffuse shader. The end result of this shader looks like this: &lt;/p&gt;
 
@@ -3095,9 +2957,14 @@ Our shader is on the left, compared to the built in diffuse on the right
  <entry>
    <title>Making a Dissolve Effect with Surface Shaders</title>
    <link href="http://kylehalladay.com/blog/tutorial/bestof/2013/09/28/How-to-dissolve-effect.html"/>
-   <updated>2013-09-28T00:00:00-07:00</updated>
+   <updated>2013-09-28T00:00:00-05:00</updated>
    <id>http://kylehalladay.com/blog/tutorial/bestof/2013/09/28/How-to-dissolve-effect</id>
-   <content type="html">&lt;p&gt;I recently posted a shader pack which creates a cool “dissolve” (for lack of a better descriptor) effect, similar to the skin of Skyrim’s dragons during their death animation. As requested by reddit, this post detail exactly what you need to know to write one of these shaders yourself, and hopefully, provide you with a good base with which to modify my shaders to your specific needs. I’m going to attempt to start from square one and not assume any shader experience on your part, but it will probably help if you have a general idea of how to build a basic shader before hand. &lt;/p&gt;
+   <content type="html">&lt;div style=&quot;background-color:#EEAAAA;&quot;&gt;NOTE: This article is OLD! (From 2013!). Information in it may be out of date or outright useless, and I have no plans to update it. Beware!
+&lt;/div&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;I recently posted a shader pack which creates a cool “dissolve” (for lack of a better descriptor) effect, similar to the skin of Skyrim’s dragons during their death animation. As requested by reddit, this post detail exactly what you need to know to write one of these shaders yourself, and hopefully, provide you with a good base with which to modify my shaders to your specific needs. I’m going to attempt to start from square one and not assume any shader experience on your part, but it will probably help if you have a general idea of how to build a basic shader before hand. &lt;/p&gt;
 
 &lt;p&gt;Let’s get started.&lt;/p&gt;
 
@@ -3428,76 +3295,16 @@ Our shader is on the left, compared to the built in diffuse on the right
  </entry>
  
  <entry>
-   <title>Dissolve Shader Pack</title>
-   <link href="http://kylehalladay.com/all/graphics/2013/09/22/Dissolve-Shaders.html"/>
-   <updated>2013-09-22T00:00:00-07:00</updated>
-   <id>http://kylehalladay.com/all/graphics/2013/09/22/Dissolve-Shaders</id>
-   <content type="html">&lt;p&gt;Apparently when I’m bored, I write shaders. These shaders were inspired by the dragon skin dissolving effect in Skyrim.  &lt;/p&gt;
-
-&lt;h4&gt;Here&#39;s how it works: &lt;/h4&gt;
-
-&lt;p&gt;The shader takes a texture as the pattern source for the dissolve effect. The shader uses the red channel in this texture to determine whether a fragment should be shaded normally, as a border colour, or transparent. The Burn property on the shaders controls the threshold for this change. As Burn approaches zero the number of fragments above the threshold increases, resulting in the effect progressing. The “Interior” shaders have back face culling turned off, allowing some of the interior of the mesh to show through, although it isn’t as accurate as true geometry duplication. &lt;/p&gt;
-
-&lt;p&gt;At some point in the future I will return and add a working version of my geometry duplication shader, however for the moment I’ve only had luck getting it to work with the first pixel light in the scene and I’d rather not post something that doesn’t work.&lt;/p&gt;
-
-&lt;p&gt;A web demo of this project is available &lt;a href=&quot;/demos/dissolve/dissolve.html&quot;&gt;here&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;Download the shaders &lt;a href=&quot;https://dl.dropboxusercontent.com/u/6128167/Dissolve%20Shaders.zip&quot;&gt;here&lt;/a&gt; &lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/post_images/2013-09-22/dissolve_screen.png&quot; alt=&quot;Screen 1&quot; /&gt;
-&lt;img src=&quot;/images/post_images/2013-09-22/dissolve_control.png&quot; alt=&quot;Screen 2&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Know something that would make these shaders better? Send me a message &lt;a href=&quot;http://twitter.com/khalladay&quot;&gt;on Twitter&lt;/a&gt;&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>A Simple Flow Map</title>
-   <link href="http://kylehalladay.com/blog/2013/09/02/A-Simple-Flowmap.html"/>
-   <updated>2013-09-02T00:00:00-07:00</updated>
-   <id>http://kylehalladay.com/blog/2013/09/02/A-Simple-Flowmap</id>
-   <content type="html">&lt;p&gt;Water effects have always seemed firmly in the realm of people who have much more graphics experience than me. When the need for a river effect presented itself in a project I’m working on, I was first in line to suggest that we buy a solution, rather than roll our own. However, after surveying what was out there, it became clear that all the options available required us to sacrifice more frame time than I was willing to give up for one effect. &lt;/p&gt;
-
-&lt;p&gt;Since I’m the only programmer on this specific project, this meant that building a river effect that satisfied our requirements fell to me. Since I’m much too stubborn to admit defeat without at least a quart of coffee drank and hours of sleep lost, it became time for water effects to become something that I did too.&lt;/p&gt;
-
-&lt;p&gt;We had already decided that we really liked how the plugin Flow looked, so anything that I built needed to match the appearance of the mobile shaders from there. Luckily, Flow had exposed me to the concept of a flow map, and I was pretty sure I could build my own fairly easily. &lt;/p&gt;
-
-&lt;div align=&quot;center&quot;&gt;
-	&lt;img src=&quot;/images/post_images/2013-09-02/water-effect-comparison.png&quot; /&gt;&lt;br /&gt;
-	&lt;font size=&quot;2&quot;&gt;
-		The right shows what the Flow plugin&#39;s basic mobile shader is, compared to mine on the left.
-	&lt;/font&gt;
-&lt;/div&gt;
-&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
-
-&lt;p&gt;Flow maps, if you’re unfamiliar with them, are textures used to dictate the direction that uv’s are scrolled across a model. Rather than simply scrolling every texture coord uniformly (creating a really lame effect), using a flow map is a relatively lightweight way to create winding, interesting water movement effects. &lt;/p&gt;
-
-&lt;p&gt;Traditionally, the scrolling texture coords are used to move a normal map across the surface of the water. The effect &lt;a href=&quot;http://graphicsrunner.blogspot.ca/2010/08/water-using-flow-maps.html&quot;&gt;looks really good&lt;/a&gt;, but that was going to be far too heavy for what we needed, so I decided to copy Flow again, and simply scroll a secondary water texture overtop of the ground. The shader uses three textures, the ground, the water, and the flow map. The flow map is very simple: the red channel controls x movement, green channel controls y, and blue channel controls blending between the ground and water textures. #777777 is a 50% blend of ground and water that is not moving. &lt;/p&gt;
-
-&lt;div align=&quot;center&quot;&gt;
-	&lt;img src=&quot;/images/post_images/2013-09-02/flow_map.png&quot; /&gt;&lt;br /&gt;
-	&lt;font size=&quot;2&quot;&gt;
-	An example of a flow map used by this shader
-	&lt;/font&gt;
-&lt;/div&gt;
-&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
-
-&lt;p&gt;The only gotcha with this method is resetting the texture offset. To avoid the texcoords getting too distorted over time, the offset value needs to get reset to 0 regularly. This causes the texture to jump and looks terrible. I took a page out of the tutorial linked above, and fixed this by using 2 very similar (but different) offsets, which allow the texture to fade between the two, and hides the reset by never resetting the coord currently being shown. &lt;/p&gt;
-
-&lt;p&gt;Even cooler, because those offsets are uniform across a frame, keeping track of them (and performing any calculations that only involve them) can be moved to a script that executes once a frame and just sets those uniforms once. This isn’t usually something to write home about, but (at least in my experience) it’s uncommon to see scripts interacting with a material’s shader in Unity, and it ended up saving us 7ms a frame. &lt;/p&gt;
-
-&lt;p&gt;The end result of all this trouble is a flow map shader which is roughly 40% faster than the mobile shader included in flow, mostly due to ignoring all lights in the scene (we’re a mobile game, what lights?), and removing a bunch of colour multiply options. I’ve included the shader / script in the graphics section of the site, hopefully it can be useful :D &lt;/p&gt;
-
-&lt;p&gt;As always, send me a message &lt;a href=&quot;http://twitter.com/khalladay&quot;&gt;on Twitter&lt;/a&gt; if you want to chat (especially about games or graphics).&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
    <title>Multi Coloured Shadows In Unity</title>
    <link href="http://kylehalladay.com/blog/2013/08/13/Coloured-Shadows.html"/>
-   <updated>2013-08-13T00:00:00-07:00</updated>
+   <updated>2013-08-13T00:00:00-05:00</updated>
    <id>http://kylehalladay.com/blog/2013/08/13/Coloured-Shadows</id>
-   <content type="html">&lt;p&gt;&lt;strong&gt;UPDATE: I’ve posted a tutorial on how to get coloured shadows working in your project. Check it out &lt;a href=&quot;http://kylehalladay.com/all/blog/2014/05/16/Coloured-Shadows-In-Unity.html&quot;&gt;here&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
+   <content type="html">&lt;div style=&quot;background-color:#EEAAAA;&quot;&gt;NOTE: This article is OLD! (From 2013!). Information in it may be out of date or outright useless, and I have no plansto update it. Beware!
+&lt;/div&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;UPDATE: I’ve posted a tutorial on how to get coloured shadows working in your project. Check it out &lt;a href=&quot;http://kylehalladay.com/all/blog/2014/05/16/Coloured-Shadows-In-Unity.html&quot;&gt;here&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
 
 &lt;p&gt;Lately, in my (precious little) free time, I’ve been working on a custom shadow receiver system which will give me greater control over the appearance of soft shadows in Unity. On the surface, it sounds like a fun project. It gets slightly more insane when you take into account that i had never so much as written my own shadow map system before starting this. Crawling is boring, I tend to jump (metaphorical) cliffs and hope that I figure out flying, running, landing, and crawling by the time I hit ground. &lt;/p&gt;
 
@@ -3532,104 +3339,21 @@ Our shader is on the left, compared to the built in diffuse on the right
  </entry>
  
  <entry>
-   <title>Down The Rabbit Hole With Shadertoy</title>
-   <link href="http://kylehalladay.com/blog/2013/07/20/Down-The-Rabbit-Hole.html"/>
-   <updated>2013-07-20T00:00:00-07:00</updated>
-   <id>http://kylehalladay.com/blog/2013/07/20/Down-The-Rabbit-Hole</id>
-   <content type="html">&lt;p&gt;One of the main reasons why I think I click so much with graphics code is the easy parallel from writing a cool shader or graphics demo and more traditional artistic mediums. I’m a big proponent of video games being art, but they’re definitely (usually) a much more collaborative medium. Making games is a lot of work, and to do it as one person is a herculean feat. Graphics code, because it is more focused, is much more easily compared to painting or composing music.&lt;/p&gt;
-
-&lt;p&gt;Looking at graphics code as art led me to the demo scene. Two days of watching demos later I decided I needed to figure out how to do that kind of thing too, and thus began my free-fall into the world of procedural graphics. &lt;/p&gt;
-
-&lt;p&gt;Huge thanks to &lt;a href=&quot;http://www.iquilezles.org&quot;&gt;Iñigo Quilez&lt;/a&gt;, his website is amazing, and his comments on my first procedural graphics shader on shadertoy.com &lt;a href=&quot;https://www.shadertoy.com/view/Xdl3zB&quot;&gt;(link)&lt;/a&gt; have been tremendously helpful. From what I can tell, the guy just really really digs this sort of stuff, and loves helping other people out. &lt;/p&gt;
-
-&lt;div align=&quot;center&quot;&gt;
-	&lt;a href=&quot;https://www.shadertoy.com/view/Xdl3zB&quot;&gt;
-	&lt;img src=&quot;/images/post_images/2013-07-20/mineshaftshader.png&quot; /&gt;&lt;br /&gt;
-	&lt;/a&gt;
-	&lt;font size=&quot;2&quot;&gt;
-	(my first procedural graphics shader, everything is ray marched inside 1 shader)
-	&lt;/font&gt;
-&lt;/div&gt;
-&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
-
-&lt;p&gt;I’ve also been playing around with shaders, largely for a project at work, but also while working through the rest of the Unity Cookie tutorials. Nothing amazing yet, but I’m getting pretty comfortable with writing basic shaders; it’s a really cool feeling to need a shader while at work and being able to whip it up in a few minutes. Granted, optimizing them for mobile is still something that I struggle with, but I’m learning as I go.&lt;/p&gt;
-
-&lt;p&gt;Finally, I’ve started playing some smaller games to start getting ideas floating about what is a reasonable scope of a 1-2 person project. I play a lot of the larger AAA and indie games, and I think it’s made me expect far too much from projects that I work on. So far I’ve checked out Splice, Solar 2, Auditorium, and gone back to AAAaaAAaAAa. It’s been very refreshing, and I find myself thinking about, and getting excited about, much smaller ideas. Going back to the first paragraph of this post, the real magic of solo game dev is being happy with making a micro scale game, and playing games of that scale is really helping. &lt;/p&gt;
-
-&lt;p&gt;I’m also toying with the idea of adding a unity shader section to the graphics, just to dump all these little shaders I’m making in case they help someone else out.&lt;/p&gt;
-
-&lt;p&gt;As always, send me a message &lt;a href=&quot;http://twitter.com/khalladay&quot;&gt;on Twitter&lt;/a&gt; if you want to chat (especially about games or graphics).&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Selective-Blur</title>
-   <link href="http://kylehalladay.com/all/graphics/2013/07/02/Selective-Blur.html"/>
-   <updated>2013-07-02T00:00:00-07:00</updated>
-   <id>http://kylehalladay.com/all/graphics/2013/07/02/Selective-Blur</id>
-   <content type="html">&lt;p&gt;Selective-Blur is a shader replacement effect for Unity Pro that allows blurring of individual materials without blurring the entire scene. &lt;/p&gt;
-
-&lt;h4&gt;Here&#39;s how it works: &lt;/h4&gt;
-
-&lt;p&gt;A camera with the blur effect script is childed to the user’s camera. The blur effect script calls RenderWithShader on the camera every frame, and uses a replacement shader that looks for specific RenderType tags in the materials in view. The output is rendered to a texture, which then has a gaussian blur applied to it before being drawn as a GUI texture over top of the user’s view. &lt;/p&gt;
-
-&lt;p&gt;A web demo of this project is available &lt;a href=&quot;/demos/blurdemo/blurdemo.html&quot;&gt;here&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;This project is open source! Check out the repo &lt;a href=&quot;https://github.com/khalladay/Unity-SelectiveBlur&quot;&gt;here&lt;/a&gt; &lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/post_images/2013-07-02/blur1.png&quot; alt=&quot;blur1&quot; /&gt;
-&lt;img src=&quot;/images/post_images/2013-07-02/blur2.png&quot; alt=&quot;blur2&quot; /&gt;&lt;/p&gt;
-
-</content>
- </entry>
- 
- <entry>
-   <title>S&#58; Making an Abstract Puzzle Game</title>
-   <link href="http://kylehalladay.com/blog/2013/06/02/S-Making-An-Abstract-Puzzle-Game.html"/>
-   <updated>2013-06-02T00:00:00-07:00</updated>
-   <id>http://kylehalladay.com/blog/2013/06/02/S-Making-An-Abstract-Puzzle-Game</id>
-   <content type="html">&lt;p&gt;After February, &lt;a href=&quot;http://johannesg.com/index.html&quot;&gt;Johannes&lt;/a&gt; and I both agreed that we weren’t having as much fun with 1 Game a Month as we had hoped. Largely, this was due to both of our schedules being too hectic to really work with such a short deadline. So we decided to drop out of 1GAM and work on stuff at a pace that made sense to us. &lt;/p&gt;
-
-&lt;p&gt;Or…that was the plan. &lt;/p&gt;
-
-&lt;p&gt;We started to take a project that Johannes built while at school and flesh it out a bit. For the most part, the game was an interactive music toy, and our work ended up focusing on turning that toy into a more traditional game. It was a really interesting design exercise; I’m usually the one pushing for more whimsical design choices, but I ended up spending most of my time arguing for mechanics to be put in, while Johannes fought to preserve a lot of the sandbox feel of the original game. It worked better than it sounds. Taking opposite viewpoints meant that both of us had to justify things we wanted to add (or not add) to the game.&lt;/p&gt;
-
-&lt;p&gt;Our schedules being what they are, it took us about a month to really hammer down what we wanted to do with the game. Around that time, Johannes also happened to notice that we were about a month out from the submission deadline for the Swedish Game Awards. We both suddenly forgot that we didn’t like working to deadlines. &lt;/p&gt;
-
-&lt;table&gt;
-  &lt;tbody&gt;
-    &lt;tr&gt;
-      &lt;td&gt;So, on May 29th, we submitted S. The game is rather buggy (lesson learned: don’t decide to add swimming to a game at the 11th hour), but it’s probably the most visually interesting project I’ve worked on to date. If you’re interested, you can grab it here: (&lt;a href=&quot;https://dl.dropboxusercontent.com/u/6128167/Windows.zip&quot;&gt;Windows&lt;/a&gt;&lt;/td&gt;
-      &lt;td&gt;&lt;a href=&quot;https://dl.dropboxusercontent.com/u/6128167/S.zip&quot;&gt;Mac&lt;/a&gt;). If you do, I recommend letting the water sink all the way to the bottom before jumping when the time arises. Riding the water down has a tendency to REALLY bug out.&lt;/td&gt;
-    &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/post_images/s/s.jpg&quot; alt=&quot;Alt Text&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;I’m pretty sure that I finally learned my lesson about short deadlines (namely: don’t do them). It was a grind trying to squeeze in as much dev time as possible on this while also balancing it with how busy things get at work. The end result isn’t nearly as stable as I would like, but it is what it is. Learned a lot from it, happy I did it, excited to move on. &lt;/p&gt;
-
-&lt;p&gt;Finally, in the grand tradition of how I end projects, here are the big things that I learned making S: &lt;br /&gt;&lt;/p&gt;
-
-&lt;h4&gt;1 - &lt;strong&gt;Proportion is a big deal in first person games. &lt;/strong&gt;&lt;/h4&gt;
-&lt;p&gt;This was the first game I’ve made with a first person camera. I had no idea how hard it would be to scale objects and environments in order to feel right. We certainly could have done a lot more with S in this regard given more time, and I probably will do a whole post just on this sometime in the future.&lt;/p&gt;
-
-&lt;h4&gt;2 - &lt;strong&gt;Abstract puzzles are all about communication.&lt;/strong&gt;&lt;/h4&gt;
-&lt;p&gt;Creating puzzles that telegraph what the player needs to do without giving away how to do it is tricky to do right. Based on feedback that I’ve gotten from a few players, a few of our puzzles really didn’t do this well. We needed to spend a lot more time figuring out ways to teach the player what to do in each puzzle. Again, this probably warrants its own post once I play with this idea a bit more. &lt;/p&gt;
-
-&lt;h4&gt;3 - &lt;strong&gt;Blurring out distant objects is a surprisingly good way to pull players forward. &lt;/strong&gt;&lt;/h4&gt;
-&lt;p&gt;One of the biggest parts of the visual style of S is the blurring of objects far away from you (not true fog, but it has the same effect). It started out as a way to make our rather simple environment meshes more interesting, but it also ended up being a pretty good way to direct players. People have a tendency to want to see a blurred object come into focus, so teaching them that moving towards something will unblur it ended up being a pretty cool way to make sure players wanted to go forward.&lt;/p&gt;
-
-&lt;p&gt;Anyways, that’s all for now. If you want to share any thoughts about the game or anything I’ve written, send me a message &lt;a href=&quot;http://twitter.com/khalladay&quot;&gt;on Twitter&lt;/a&gt;!&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
    <title>Bit Flags are Pretty Cool</title>
    <link href="http://kylehalladay.com/blog/2013/04/21/Bit-Flags-Are-Pretty-Cool.html"/>
-   <updated>2013-04-21T00:00:00-07:00</updated>
+   <updated>2013-04-21T00:00:00-05:00</updated>
    <id>http://kylehalladay.com/blog/2013/04/21/Bit-Flags-Are-Pretty-Cool</id>
-   <content type="html">&lt;p&gt;I’ve been working on prototype for (possibly) my next personal project, and one of the things I’ve needed to do a number of times is store a lot of boolean attributes on different objects. This led to some really terrible looking scripts with a whole host of boolean flags at the top of them, and I decided I needed to find a better way of handling things. 
+   <content type="html">&lt;div style=&quot;background-color:#EEAAAA;&quot;&gt;NOTE: This article is OLD! (From 2013!). Information in it may be out of date or outright useless, and I have no plans to update it. Beware!
+&lt;/div&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;div style=&quot;background-color:#EEAAAA;&quot;&gt;NOTE: This article is OLD! (From 2013!). Information in it may be out of date or outright useless, and I have no plans on updating it. Beware!
+&lt;/div&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;I’ve been working on prototype for (possibly) my next personal project, and one of the things I’ve needed to do a number of times is store a lot of boolean attributes on different objects. This led to some really terrible looking scripts with a whole host of boolean flags at the top of them, and I decided I needed to find a better way of handling things. 
 &lt;br /&gt;
 &lt;br /&gt;
 I’ve had some fun before with packing a whole bunch of booleans into byte-sized structs using the bit field operator in C++, but I’ve never seen anything like that done in C#, and if I can help it, I try to avoid dealing directly with memory addresses in Unity scripts. Luckily, bit flags seem to do the exact same job (possibly better). To show you what I mean, let me link an example:
@@ -3650,9 +3374,14 @@ So here’s whats going on: rather than specifying a int or float value for the 
  <entry>
    <title>Fun With The Kinect</title>
    <link href="http://kylehalladay.com/blog/2013/03/11/Fun-with-the-kinect.html"/>
-   <updated>2013-03-11T00:00:00-07:00</updated>
+   <updated>2013-03-11T00:00:00-05:00</updated>
    <id>http://kylehalladay.com/blog/2013/03/11/Fun-with-the-kinect</id>
-   <content type="html">&lt;p&gt;I’ve been playing around with the Kinect this month (I love that thing). I’ve used it in the past with some gesture control and image processing at work, but I hadn’t really considered it as an option for gamedev, mostly because I don’t have an xbox sdk. I’ve been trying to think of cool ways to use it though, lest it become the coolest dust collector I have in my apartment, and I think I’m on to something this month &lt;/p&gt;
+   <content type="html">&lt;div style=&quot;background-color:#EEAAAA;&quot;&gt;NOTE: This article is OLD! (From 2013!). Information in it may be out of date or outright useless, and I have no plans to update it. Beware!
+&lt;/div&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;I’ve been playing around with the Kinect this month (I love that thing). I’ve used it in the past with some gesture control and image processing at work, but I hadn’t really considered it as an option for gamedev, mostly because I don’t have an xbox sdk. I’ve been trying to think of cool ways to use it though, lest it become the coolest dust collector I have in my apartment, and I think I’m on to something this month &lt;/p&gt;
 
 &lt;p&gt;As you’ve probably gathered from my other work, I suck at visual art, and it’s probably my least favourite thing to work on when making a game, so any time I can find a cool way to simplify that process I jump on it (why do you think I got into augmented reality?). This month I’ve been experimenting with capturing the output from a kinect and using that in place of 3D models. It may not be useful for all situations, but the results are pretty cool, don’t you think?&lt;/p&gt;
 
@@ -3661,79 +3390,16 @@ So here’s whats going on: rather than specifying a int or float value for the 
  </entry>
  
  <entry>
-   <title>1GAM February Wrap Up</title>
-   <link href="http://kylehalladay.com/blog/2013/03/01/1GAM-February-Wrap-Up.html"/>
-   <updated>2013-03-01T00:00:00-08:00</updated>
-   <id>http://kylehalladay.com/blog/2013/03/01/1GAM-February-Wrap-Up</id>
-   <content type="html">&lt;p&gt;I can’t help but feel a little relieved that February is over, because it means that I can stop working on the month’s 1GAM project and take stock of where I’m at, and what happened this month. It’s been a rough month, with lots of disappointment and soul searching, but probably also a lot of hard earned lessons that are good to have gotten into my system now.&lt;/p&gt;
-
-&lt;p&gt;Did I finish a game this month? No, and it’s a hard pill to swallow. The reasons for this are many, but seeing as the tagline for the One Game a Month challenge is “make games, not excuses,” I’ll spare you the drawn out tale of what exactly went wrong. The short of it is: I unwittingly got drawn into writing an engine, and by the time I realized that’s what I was doing, it was too late to salvage the month’s game. I did manage to build a tutorial level, which implements (VERY roughly) a lot of the ideas that Johannes and I had planned for this month’s game, but it’s a far cry from the original concept.&lt;/p&gt;
-
-&lt;p&gt;But rather than a tale of woe, I’d rather write about what I learned this month:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;em&gt;Make sure you aren’t writing an engine (unless that’s what you want to be doing)&lt;/em&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;I didn’t think I would ever make this mistake. How could I? I knew better than to try to write my own engine, I’ve been trying at making games for 3.5 years now (good god has it really been that long? I feel like I should have much more to my name by now), of course I’ve heard this advice repeated before, I’ve even given it myself. I fell into this pit without even realizing it, and learned a valuable lesson in the process:  if you’re writing more “framework” code than specific to your game code, you’re writing an engine. Don’t think you’re immune to this happening just because you know this is a common pitfall, because I certainly wasn’t.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;em&gt;Everything takes twice as long as you think it will. Plan accordingly.&lt;/em&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Some of you will remember this lesson from last month. It seems I hadn’t fully learned my lesson yet. Estimation is hard, and accurate estimation is a problem being tackled by software engineers everywhere. Games are no different. EVERYTHING will take longer than you expect it to. The only reasonable solution is to either plan to take more time to achieve what you want, or (in the case of something like 1GAM), plan to do less. For us, this means attempting our core idea again in March, but with all the extraneous mechanics and game features removed. This makes sense for more reasons than just timing. Keeping the mechanics in a game limited ensures that your game is a more cohesive whole, and reduces the risk of feature creep. Especially for small indie teams, doing 1 very small game concept well is infinitely better than half implementing a dozen features. One scenario ends with a finished game, one ends with crap.&lt;/p&gt;
-
-&lt;p&gt;No seriously, go read the last header again. This is important. YOUR IDEA IS TOO BIG, GO MAKE IT SMALLER.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;em&gt;Embrace any tools that make it easier to do what you love.&lt;/em&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;This lesson may be more specific to me than the rest, but it’s probably the most important thing I came to terms with this month. I started 1GAM with the intention of using Ogre/Bullet for everything. This decision was motivated by a lot of different factors, but none of them was that I needed Ogre/Bullet to make the games I want to make. It took failing a month of 1GAM to realize how wrong this thinking was. I don’t dream of making engines, or writing frameworks; I spend all my free time working on, thinking about, and playing games because making games is what makes me happy, and from now on, any tool, engine, or process that makes it easier to make the games I want to make is going to be added to my workflow.&lt;/p&gt;
-
-&lt;p&gt;So what’s in store for next month? Hopefully a finished game, and possibly a blog post sometime before the end of the month (I have lots of things I mean to write about, I just never get around to doing it), no promises though, except that I’ll try my best to get there, and  hopefully along the way will learn just as much as I did this month.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/post_images/1gam-feb-wrap-up/screenshot.png&quot; alt=&quot;Alt Text&quot; /&gt;&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>1GAM January Lessons Learned</title>
-   <link href="http://kylehalladay.com/blog/2013/01/30/1GAM-January-Lessons-Learned.html"/>
-   <updated>2013-01-30T00:00:00-08:00</updated>
-   <id>http://kylehalladay.com/blog/2013/01/30/1GAM-January-Lessons-Learned</id>
-   <content type="html">&lt;p&gt;Do you hear that? It’s the sound of a thousands of programmers crunching to finish their game before the end of the month. Uncharacteristically, I’ve already submitted my game for the month, a simple 2 button game which requires players to guide a ball down a randomly generated track (if you’re interested, and on Mac, get it here: http://dl.dropbox.com/u/6128167/HaikuRacer.zip ), but I expect that next month I’ll be joining the legion of code jockeys trying to squeeze in one last bug fix before the month is over.&lt;/p&gt;
-
-&lt;p&gt;At first glance, the game I submitted is rather unimpressive, especially compared to what I do at work all day, or even compared to many of my projects from college, so I won’t spend too much time talking about it specifically. This month wasn’t about creating a masterpiece, it was about exercising code muscles that I haven’t used for almost a year (that is, not for a mobile device or using Unity), so in lieu of a more traditional post mortem, I’m going to take this post to talk about some of the most important lessons that I learned from 1GAM January.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Be comfortable with drastically reducing scope (because estimating is hard)&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;My biggest lesson learned this month is that estimating (time spent to do something) is hard. The month started with me and Johannes (kickass musician and audio designer that I worked with this month, johannesg.com) sketching what at the time seemed like very reasonable ideas. Unfortunately, life got in the way for both of us, and we very quickly found ourselves needing to reduce the scope of our game in order to get something done. As it turns out, what sounded like reasonable goals ended up being rather lofty ambitions for my first month back in the pure C++ saddle. It was lucky that we were both busier than we thought we would be, I would have felt terrible being the only person axing features.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;em&gt;Working with someone else is the best thing you can do for yourself.&lt;/em&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;I don’t think I would have actually finished something at all this month had I been working alone. Life was hectic and it would have been very easy to say screw it this month and try again in February. Having a teammate (or a whole team) makes you accountable, which is fantastic. Even more, working with someone outside of your niche forces you to learn new things to adapt to their skills. I had never worked with an audio designer before, and wasn’t expecting to have to write an easy to modify audio system that didn’t require recompiling. I had to learn a lot more about OpenAL than I was planning this month, and do a whole lot more XML parsing than I would have ever guessed. Considering my end goal for this year is to be proficient enough at working outside of Unity to undertake my next “big” game, this was a god send in that it forced me to work on things I would have found an excuse to half ass this month, and I’m  looking forward to figuring out 3D audio with OpenAL for our February game.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;em&gt;“Hacking” is for sick people&lt;/em&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;This was another eye opening lesson for me this month. When you have a very limited amount of time that you can work on a project, every second that you spend hunting for a bug caused by sloppy coding, in undocumented code, is time that you’re not putting towards the next feature. I don’t think I’ll ever neglect documentation and good coding practice to the same degree as I did this month (reasoning of course, that I didn’t have time to worry those sorts of things). Bug fixing bad code easily cost myself double the amount of time it would have taken to write cleaner code to begin with. Lesson learned, just because it’s a hobby project doesn’t mean you shouldn’t approach it professionally (at least when it comes to code quality standards)&lt;/p&gt;
-
-&lt;p&gt;I guess in summation: this month was a blast, sorry the game runs so poorly (I’m still trying to figure out game dev for non mobile architectures), and I hope that if any of you reading this are about to submit that your final few hours of bug fixing goes well! Any coding lessons that you want to share? tweet them to me @Khalladay!&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
    <title>Unbreaking the Xcode templates in Xcode 4.5</title>
    <link href="http://kylehalladay.com/blog/tutorial/2012/12/02/Taming-The-Ogre-Part2.html"/>
-   <updated>2012-12-02T00:00:00-08:00</updated>
+   <updated>2012-12-02T00:00:00-06:00</updated>
    <id>http://kylehalladay.com/blog/tutorial/2012/12/02/Taming-The-Ogre-Part2</id>
-   <content type="html">&lt;p&gt;The Xcode templates that come with Ogre 1.81 are rather frustrating to get working, especially if you don’t know what the cryptic error messages that it spits out at you mean. So I’m here today to walk you step by step through getting a basic Ogre project up and running.&lt;/p&gt;
+   <content type="html">&lt;div style=&quot;background-color:#EEAAAA;&quot;&gt;NOTE: This article is OLD! (From 2012!). Information in it may be out of date or outright useless, and I have no plans to update it. Beware!
+&lt;/div&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;The Xcode templates that come with Ogre 1.81 are rather frustrating to get working, especially if you don’t know what the cryptic error messages that it spits out at you mean. So I’m here today to walk you step by step through getting a basic Ogre project up and running.&lt;/p&gt;
 
 &lt;p&gt;All of this is taken from my experiences trying to get Ogre to work on my machine. Given that the templates bundled with Ogre were written by people much more knowledgeable than me, it wouldn’t surprise me if some of these issues aren’t universal problems. Hopefully my experiences are helpful, even if you only hit one of the numerous issues I described here.&lt;/p&gt;
 
@@ -3829,9 +3495,13 @@ Welcome to linker hell. &lt;/p&gt;
  <entry>
    <title>Building Ogre 1.81 on Lion</title>
    <link href="http://kylehalladay.com/blog/tutorial/2012/11/19/Taming-The-Ogre-Part1.html"/>
-   <updated>2012-11-19T00:00:00-08:00</updated>
+   <updated>2012-11-19T00:00:00-06:00</updated>
    <id>http://kylehalladay.com/blog/tutorial/2012/11/19/Taming-The-Ogre-Part1</id>
-   <content type="html">&lt;p&gt;I’ve recently decided that I need to go open source for my hobby projects, namely because I’ve reached a point where Unity Free is becoming too restrictive for my tastes, yet I’m still too poor to buy Unity Pro (one day I’ll make a game that pays for more than a night at a bar, but that day hasn’t happened yet).&lt;/p&gt;
+   <content type="html">&lt;div style=&quot;background-color:#EEAAAA;&quot;&gt;NOTE: This article is OLD! (From 2012!). Information in it may be out of date or outright useless, and I have no plans to update it. Beware!
+&lt;/div&gt;
+
+&lt;p&gt;&lt;br /&gt;
+I’ve recently decided that I need to go open source for my hobby projects, namely because I’ve reached a point where Unity Free is becoming too restrictive for my tastes, yet I’m still too poor to buy Unity Pro (one day I’ll make a game that pays for more than a night at a bar, but that day hasn’t happened yet).&lt;/p&gt;
 
 &lt;p&gt;After spending a long week trying to make JMonkey suit my needs (namely: an asset pipeline that doesn’t make me want to shoot myself), I abandoned it and meekly returned to the engine of my third year at Humber: Ogre3D. I had only worked with the precompiled windows binaries until now, but how hard could building it from source (because if I’m going open source, I may as well embrace the whole deal) on my mac be?&lt;/p&gt;
 
@@ -3889,150 +3559,6 @@ Welcome to linker hell. &lt;/p&gt;
 &lt;/ul&gt;
 
 &lt;p&gt;If you run into any problems, message me on twitter and I’ll do my best to figure out what’s going on with your build. I’m definitely not an expert, or even demonstrably good at using Ogre, but I’d like to think that all the troubleshooting I’ve done this week makes me a decent resource when it comes to just building the engine on mac. Good luck!&lt;/p&gt;
-
-</content>
- </entry>
- 
- <entry>
-   <title>A Belated Retrospective on Gamercamp 2012</title>
-   <link href="http://kylehalladay.com/blog/2012/11/11/Belated-Retrospective-Gamercamp.html"/>
-   <updated>2012-11-11T00:00:00-08:00</updated>
-   <id>http://kylehalladay.com/blog/2012/11/11/Belated-Retrospective-Gamercamp</id>
-   <content type="html">&lt;p&gt;So I know I’m a little late writing about it, but 2 weeks ago I spent my weekend speaking at, and attending, Gamercamp 2012. I spoke as part of the emerging artists’ showcase, which means that I had the oddly difficult task of talking about myself for 10 minutes in front of a theater full of people waiting for Vander Caballero’s talk on the design philosophy of Papo &amp;amp; Yo (Vander is an amazing speaker, and you need to go play Papo &amp;amp; Yo right now).&lt;/p&gt;
-
-&lt;p&gt;Talking about yourself is weird. In the past two months I’ve had the chance to do a heck of a lot more public speaking than I ever imagined I would have to as a programmer, but I was always speaking about something technical. Trying to talk about yourself and be interesting is no small feat, and I wussed out at trying. I ended up speaking mostly about Block Academy, and my experience creating it. This was fitting, since Humber College sent me to the conference, and Block Academy was largely done as part of my coursework while in school. The talk went well, and I ended up spending most of the rest of my saturday talking with people who wanted to know more about Block Academy or me, which was awesome. The Toronto gamedev community is nothing if not friendly.&lt;/p&gt;
-
-&lt;p&gt;The highlight of the weekend was definitely the Papo &amp;amp; Yo talk. It’s great that there are people like Caballero finding success in the industry. A lot of talk about the future of video games revolves around the technology behind them, and not enough is about the future of storytelling, or of video games as a means of artistic expression. As Vander put it, the way we make games (putting poly counts and mechanics ahead of emotional experience and story) is broken. The idea that video games need to be treated as more than just amusing toys is something that I talk and think about a lot, and it’s great that theres room in the industry for that point of view to be profitable.&lt;/p&gt;
-
-&lt;p&gt;Getting to see the games being created in Toronto was a lot of fun as well. There were a number of devs there showcasing games they were building for blind gamers. Hearing them talk about having to design games to be fun (as opposed to just being playable) for the blind was eye opening. I, perhaps naively, hadn’t thought about the idea that there could be some game tropes that wouldn’t translate well to audio only games. One example of this was mazes. Although mazes are something that work very well with audio only games, the devs there shared that in all their play tests, they found that the feeling of being lost was something that just wasn’t fun for blind gamers. This makes sense once you hear it of course, but it was eye opening to hear them talk about their work.&lt;/p&gt;
-
-&lt;p&gt;I also had a chance to sit in on a couple of the hands-on workshops. The first was a 1 hour board game jam in which the task was to create a naval war game. My group’s design philosophy was to reject any form of complexity and just find new and unfair ways to kick the crap out of each other, and yet somehow we still managed to integrate kareoke into the mechanics. I’d do another one of these lightning board game creation sessions in a heartbeat.&lt;/p&gt;
-
-&lt;p&gt;The last workshop I attended was a 1 hour physics jam put on by Humber College. It was a lot of fun, but I wish I had spent my time over with the “dreamers” at the chalkboard thinking up crazy mechanics instead of with the programmers all desperately trying to get something working in an hour.&lt;/p&gt;
-
-&lt;p&gt;All in all, a freaking awesome weekend. Now go play Papo &amp;amp; Yo, and get back to me with your thoughts about it.&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Surviving My First Industry Conference</title>
-   <link href="http://kylehalladay.com/blog/2012/09/30/Surviving-My-First-Industry-Conference.html"/>
-   <updated>2012-09-30T00:00:00-07:00</updated>
-   <id>http://kylehalladay.com/blog/2012/09/30/Surviving-My-First-Industry-Conference</id>
-   <content type="html">&lt;p&gt;You know the feeling you get about an hour after you realize that you’re way outside of your depth? That sinking feeling in your stomach? That was me about 10 seconds after agreeing to fill in at the last minute for a speaker at the most recent FITC Screens conference.&lt;/p&gt;
-
-&lt;p&gt;It all started with an email. Not to me, but to one of the designers at BNOTIONS, who was already scheduled to talk at the conference. Did anyone know a Unity developer that would be willing to fill in for a cancelled speaker? About 10 seconds after the email was sent, I had sent an email back saying that I would fill in. I wouldn’t begin crapping my pants for at least another 30 minutes, when news of my upcoming talk was shared with the rest of the engineering team, and it suddenly dawned on me that I had just agreed to give the biggest presentation I had ever given, to a room filled almost exclusively with developers far more experienced than me.&lt;/p&gt;
-
-&lt;p&gt;And so, the pants soiling began.&lt;/p&gt;
-
-&lt;p&gt;Perhaps atypically for a developer, I have no qualms about public speaking. My early school years were peppered with speech competitions, and throughout college I was known for being able to present anything, a valuable trait in a program filled with programmers. Despite this however, the thought of speaking to a room of much more experienced developers scared the pants off of me. Mostly, it was a fear of being simply not experienced enough to be interesting enough. I kept having visions of speaking to a room that slowly emptied over the course of the hour I had to talk. This didn’t subside until about 30 minutes AFTER I had finished speaking.&lt;/p&gt;
-
-&lt;p&gt;None of this made building the presentation any easier, especially since I hadn’t actually written a presentation since my last speech competition (the eighth grade). My standard MO for talks since then has been to write down a list of bullet points on a scrap of paper and improvise, but that wouldn’t work here. Improvising requires confidence, something I was sorely lacking when it came to this talk. It ended up taking me a little more than a week to fully plan out what I was going to say, and find slides to match.&lt;/p&gt;
-
-&lt;p&gt;That left only a few days to practice the talk in it’s entirety. Which I quickly learned, wasn’t going to be nearly as much as I would have liked. When your talk is an hour long, practicing it twice is a good chunk of your evening, and a sore/dry throat. Tea became my best friend while i talked to no one in particular for hours on end, and hoped that the walls in my apartment building were soundproof enough that I wasn’t driving anyone except my budgie insane with all the repetition.&lt;/p&gt;
-
-&lt;p&gt;Then came the day of the presentation. I wish I hadn’t been so nervous, as I missed out on two sessions that I really would have liked to go to out of nerves (the one immediately before my talk, and immediately after as I sat and tried to collect myself). I spent all morning in the presenter’s lounge drinking large quantities of coffee while repeating the words to my presentation under my breath and quickly looking up things that might get asked in the q&amp;amp;a. Coffee was definitely not a good idea. Nervous twitching amplified by coffee makes my hyperactive, which would have been disastrous if not for my ability to overcome nerves so bad that I wanted to puke and give a halfway decent talk. As it turned out, I think said hyperactivity may have been directly responsible for the compliments I got for being “enthusiastic.” (enthusiastic from the latin root “Enthusilius,” meaning the act of desperately trying not to crap yourself in front of a room of colleagues).&lt;/p&gt;
-
-&lt;p&gt;What ended up being my saving grace, both in finding things to talk about for an hour, and in keeping a room full of developers interested in what I was saying was that what I do is relatively odd, even to developers. Augmented Reality is still a fairly niche pursuit, and augmented reality games are (as my talk elaborated on) still a rare sight to see. Even better, I had spent the weeks leading up to the talk working on r&amp;amp;d with some of the most cutting edge tech that the world of Mobile AR has available to it right now. Even better, 3D augmented reality hasn’t been around that long on mobile phones, which meant that only having a year and a half’s worth of experience wasn’t as much of a disadvantage as it seemed at first glance.&lt;/p&gt;
-
-&lt;p&gt;And obviously, from the rather lighthearted tone of this post, the talk went really well. No one walked out on me, lots of people ended up flagging me down afterwards to talk even more, and I’m proud to say, I didn’t end up needing to change pants.&lt;/p&gt;
-
-&lt;p&gt;And so, to end off this post with a list (which I seem to like doing), I hereby present the top 3 things that I learned from all of this:&lt;/p&gt;
-
-&lt;p&gt;Go to the bathroom. Seriously.
-Despite the jokes at my bowel’s expense above, this was a real issue that made my talk that much harder to deliver. Just like exams, make sure to go before you have to go on, there’s nothing worse than trying to give an interview to a reporter while prairie dogging.&lt;/p&gt;
-
-&lt;h3 id=&quot;start-simple&quot;&gt;Start Simple&lt;/h3&gt;
-&lt;p&gt;Assume your audience knows NOTHING about what you’re talking about, and then build up to the more interesting things you have to say. I was lucky, AR is different enough that it would be unreasonable to expect developers who don’t work with it to know anything about it, so I had to start off from ground zero. Other presenters at FITC weren’t that lucky. One unlucky guy had to change his talk on the fly when he realized that no one in his room had even installed the software that he was talking about. Don’t be that guy, unless you think you can pull off improvising an hour long presentation. That guy has my utmost respect, but I guarantee that given the choice, he would have preferred to have planned for that audience beforehand.&lt;/p&gt;
-
-&lt;h3 id=&quot;get-enthusiastic&quot;&gt;Get Enthusiastic&lt;/h3&gt;
-&lt;p&gt;Drink coffee until you puke if you have too, but for the sake of your audience, please be psyched about what you’re talking about. We spend all day behind our computers, so it’s definitely understandable that you may not be the most dynamic presenter in the world, but even the most interesting content in the world is boring as hell if you’re monotone and don’t move around a bit. If you’re excited about your content, your audience will be too  (it worked for me)&lt;/p&gt;
-
-&lt;p&gt;Alright, that’s it for this wall of text. Got a tip for giving a talk? Ever crapped yourself in front of a paying audience? Grab me on twitter!&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Post Mortem - Block Academy</title>
-   <link href="http://kylehalladay.com/blog/2012/08/19/Post-Mortem-Block-Academy.html"/>
-   <updated>2012-08-19T00:00:00-07:00</updated>
-   <id>http://kylehalladay.com/blog/2012/08/19/Post-Mortem-Block-Academy</id>
-   <content type="html">&lt;p&gt;n their final year in Humber College’s Game Programming course, students are tasked with creation of a “Capstone Project,” almost like a journeyman’s piece, which serves to demonstrate the skills that they have developed over the course of the program, and to hopefully get them noticed by industry professionals. Block Academy was my capstone project, and it launched last week.&lt;/p&gt;
-
-&lt;h3 id=&quot;what-went-right&quot;&gt;What Went Right:&lt;/h3&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;The Frame Rate.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Getting a game up to 24+ fps sounds like a basic thing; it was anything but for Block Academy. An empty scene with Unity and Vuforia (the engine and framework used to build the game) running clipped along at 28 fps, meaning I had ~4 frames to cram the rest of the game logic into (although this isn’t exact, because it’s hard to know what amount of the empty scene’s fps was camera limited, and what was cpu limited). It took a LOT of work to get the game optimized enough to run smoothly. The end result is hard to argue with though, even on the iPhone 4, the game is fluid, and the augmented reality is as responsive as you can get on a mobile device.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;The Puzzle Design.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Block Academy was the first game I worked on that didn’t procedurally generate the levels, and was one of the first times I had to design levels for a game. It was nerve wracking. My biggest fear throughout development was that the levels would be too easy, and that people would accuse the game of lacking content. Thankfully, the few people who tested the game before launch assuaged my fears of that. If anything, I needed to have a much gentler difficulty curve.&lt;/p&gt;
-
-&lt;h3 id=&quot;what-went-wrong&quot;&gt;What Went Wrong&lt;/h3&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;The Tutorial (or lack thereof)&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;I struggled a lot with trying to create a decent tutorial for Block Academy, and in the end opted to go with a simple series of text/image dialog boxes presented to the user. I’m not entirely happy with it, but I wanted to avoid forcing new users to go through an overly long or boring tutorial before they got to really play. This was a bit of a cop out on my part, and for my next project I’m going to have to experiment with different ways to get an interactive tutorial to feel fun and not like a boring prelude to fun. Expect a few posts in the future about this, as it’s something not a lot of games get right and I don’t expect to find many easy answers.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;My Marketing Strategy&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Put simply: I built it, didn’t tell anyone about it, and no one came. As said above, I’m REALLY bad at marketing. Although I’m sure the 20 odd people who bought Block Academy are having a great time, I’d really like to grab a wider audience for my next project. I think my biggest problem in marketing the game was that the first time anyone heard about the game was when I was asking them to buy it. Marketing is something I’m really going to have to work, because building games that no one plays is really disheartening&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;The Marker Card&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Expecting users to download a marker card to play the game was a mistake. AR Defender, one of the games that inspired me to build Block Academy in the first place, got around this by allowing users to draw their own marker card, and included instructions to do so. While I’m not sure if this approach would work for the technology used for Block Academy, something needed to be different. Expecting users to put in more work than simply downloading the app in order to enjoy the game’s content isn’t something I should have expected mobile gamers to flock to, and the sales suffered for it.&lt;/p&gt;
-
-&lt;h3 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h3&gt;
-
-&lt;p&gt;Ultimately, Block Academy accomplished everything I needed it to (a great job offer, and a diploma), but fell short when it came to raw sales. It was a great learning experience, but working on something for so long and having so little to show for it at the end of the day isn’t an experience i’m keen on having again. You can be sure that my next project (whenever I decide what it’s going to be) isn’t going to repeat any of these mistakes, and hopefully will be better for it.&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Learning Code Practices From Rocket Scientists</title>
-   <link href="http://kylehalladay.com/blog/2012/08/12/Learning-Code-Practices-From-Rocket-Scientists.html"/>
-   <updated>2012-08-12T00:00:00-07:00</updated>
-   <id>http://kylehalladay.com/blog/2012/08/12/Learning-Code-Practices-From-Rocket-Scientists</id>
-   <content type="html">&lt;p&gt;Watching Curiosity land on Mars was amazing, but it also pointed out how much I have yet to learn about programming. NASA programmers managed to program Curiosity so well that they could land a robot on a specific point on the surface of Mars, Block Academy was submitted to the app store with a messy code base that I’m not looking forward to maintaining. Obviously I have a long way to go (not that this is a bad thing).&lt;/p&gt;
-
-&lt;p&gt;Luckily, someone on Reddit found a link to a published version of the NASA coding guidelines (http://lars-lab.jpl.nasa.gov/JPL_Coding_Standard_C.pdf), and while lots of it doesn’t apply to those of us not writing C code that has to be compliant with systems written in the early 90s, the parts that are contain some excellent coding practices, that I think will go a long way to increasing code clarity, and robustness in my future projects, and from what I’ve seen, in a lot of other people’s projects too.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;strong&gt;Declare variables at the smallest level of scope possible.&lt;/strong&gt; &lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;This is programming 101 really, declaring at the smallest level of scope keeps your code organized and prevents irrelevant variables from sneakily causing problems in weird parts of code. I include it though because I find that I don’t make a conscious effort to ensure this rule is followed, and I’ve run into a number of problems that could have been solved a lot quicker if I didn’t have to deal with variables being declared in confusing places.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;strong&gt;Always check the return value of non void functions&lt;/strong&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;This seemed like an obvious practice until I actually thought about my code, and how many times I’ve written functions with a return value that was only needed about half of the times that it was called, and how many times I simply ignored return values. Writing functions with the intention of always checking the return values eliminates times when a null pointer catches you off guard when it returns, but it also encourages you to write functions that have meaningful return values that are applicable in more than just a few edge cases.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;strong&gt;Check the validity of function parameters at the beginning of each function&lt;/strong&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Just as checking return values would help to avoid unexpected values, checking passed parameters to a function ensure that the data going to it is what you expect, and provides a very logical place for your program to terminate if they aren’t.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;strong&gt;Only declare one statement of variable per line (except for for loops)&lt;/strong&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;This post is rapidly becoming a huge wall of text, so this is the last rule I’ll post about, and it’s also the least critical of all the ones discussed. It won’t make your code function better, and the only debugging value it has is in increasing code legibility. But since programs are written by (very very fallible) people like me, code legibility is painfully important. I’m not sold on this being the be all and end all of legibility practices, but I’ll take NASA at their word and try it out.&lt;/p&gt;
-
-&lt;p&gt;Obviously this list isn’t exhaustive, and I’m always looking for ways to be a better coder. If you’ve got a coding practice or habit that has changed the way you look at code, I’d love to hear about it! Let me know in the comments.&lt;/p&gt;
 
 </content>
  </entry>

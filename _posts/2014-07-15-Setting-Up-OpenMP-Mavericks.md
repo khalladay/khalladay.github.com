@@ -4,7 +4,14 @@ title: Setting Up OpenMP on Mavericks
 categories: 
 - all
 - blog
+tags:
+- <span style="background-color:#88BB88;"><font color="white">&nbsp;&nbsp;Mac&nbsp;&nbsp;</font></span>
+
 ---
+
+<div style="background-color:#EEAAAA;">NOTE: This article is from 2014 and will not be updated. It may or may not still be valid
+</div>
+
 
 If you've ever worked with me (or talked with me for more than a half hour) it's not a secret that I'm completely fascinated with ray and path tracers. My last project was building a [relatively simple ray tracer](https://github.com/khalladay/xRay), so I think it's time to build a path tracer.
 

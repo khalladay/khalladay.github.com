@@ -4,7 +4,15 @@ title: Using Pixel Shaders with Deferred Lighting in Unity 4
 categories:
 - blog
 - tutorial
+tags:
+- <span style="background-color:grey;"><font color="white">&nbsp;Unity&nbsp;</font></span>
+
 ---
+
+<div style="background-color:#EEAAAA;">NOTE: This article is for an old version of Unity (Unity 4...sometime in 2015) and may not run / be useful for the latest version of unity
+</div>
+<br>
+
 
 In a previous post ([link](http://kylehalladay.com/blog/tutorial/2014/04/05/Writing-Shaders-For-Deferred-Lighting-Unity.html)), I talked about why surface shaders are a great way to write shaders for Unity's Deferred Lighting rendering path, and they are.
 

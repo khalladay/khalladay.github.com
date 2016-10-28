@@ -4,7 +4,13 @@ title: Unbreaking the Xcode templates in Xcode 4.5
 categories:
 - blog
 - tutorial
+tags:
+- <span style="background-color:green;"><font color="white">&nbsp;Ogre&nbsp;&nbsp;</font></span>
 ---
+<div style="background-color:#EEAAAA;">NOTE: This article is OLD! (From 2012!). Information in it may be out of date or outright useless, and I have no plans to update it. Beware!
+</div>
+
+<br>
 
 The Xcode templates that come with Ogre 1.81 are rather frustrating to get working, especially if you don’t know what the cryptic error messages that it spits out at you mean. So I’m here today to walk you step by step through getting a basic Ogre project up and running.
 

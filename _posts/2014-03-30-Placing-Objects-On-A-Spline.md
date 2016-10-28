@@ -4,7 +4,14 @@ title: A Spline Based Object Placement Tool
 categories: 
 - blog
 - tutorial
+tags:
+- <span style="background-color:grey;"><font color="white">&nbsp;Unity&nbsp;</font></span>
+
 ---
+
+<div style="background-color:#EEAAAA;">NOTE: This article is for an old version of Unity (Unity 4...sometime in 2014) and probably won't run anymore, but the basic idea is still valid. I just don't want to spend time updating old posts every time Unity increments a version number
+</div>
+
 
 I'm convinced that one of the secrets to levelling up your Unity skills is to become very comfortable writing custom editor tools. Every project I've worked on in the past year has been made significantly better by building tools to automate repetitive or time consuming tasks.
 

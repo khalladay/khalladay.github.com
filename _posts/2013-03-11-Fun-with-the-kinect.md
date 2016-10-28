@@ -3,7 +3,14 @@ layout: post
 title: Fun With The Kinect
 categories:
 - blog
+tags:
+- <span style="background-color:grey;"><font color="white">&nbsp;Unity&nbsp;</font></span>
+
 ---
+<div style="background-color:#EEAAAA;">NOTE: This article is OLD! (From 2013!). Information in it may be out of date or outright useless, and I have no plans to update it. Beware!
+</div>
+
+<br>
 
 I’ve been playing around with the Kinect this month (I love that thing). I’ve used it in the past with some gesture control and image processing at work, but I hadn’t really considered it as an option for gamedev, mostly because I don’t have an xbox sdk. I’ve been trying to think of cool ways to use it though, lest it become the coolest dust collector I have in my apartment, and I think I’m on to something this month 
 

@@ -5,7 +5,15 @@ categories:
 - blog
 - tutorial
 - bestof
+tags:
+- <span style="background-color:grey;"><font color="white">&nbsp;Unity&nbsp;</font></span>
+
 ---
+<div style="background-color:#EEAAAA;">NOTE: This article is for an old version of Unity (Unity 4...sometime in 2014) and probably won't run anymore. Beware!
+</div>
+
+<br>
+
 
 The feeling of solving a problem that seems potentially impossible is awesome. My latest project is no exception.
 

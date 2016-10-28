@@ -5,7 +5,15 @@ categories:
 - blog
 - tutorial
 - math
+tags:
+- <span style="background-color:#55AAAA;"><font color="white">&nbsp;Math&nbsp;&nbsp;</font></span>
+
 ---
+
+<div style="background-color:#EEAAAA;">NOTE: This article is OLD! (From 2013!). Information in it may be out of date or outright useless, and I have no plans to update it. Beware!
+</div>
+
+<br>
 
 Lately I've been working on a ray tracer. It's been going well (or at least as well as I could hope my first renderer could go), but it has been a slow process. I don't have a formal math background - my day to day work only ever goes as far as enough linear algebra to write shaders, and enough of everything else to implement whatever gameplay I need - and none of this prepared me for the endless pages of ray tracing resources that expected much more math knowledge than I have.
 

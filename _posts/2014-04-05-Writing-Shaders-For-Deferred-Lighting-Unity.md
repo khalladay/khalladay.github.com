@@ -4,7 +4,14 @@ title: Writing Shaders for Deferred Lighting in Unity3D
 categories:
 - blog
 - tutorial
+tags:
+- <span style="background-color:grey;"><font color="white">&nbsp;Unity&nbsp;</font></span>
+
 ---
+
+<div style="background-color:#EEAAAA;">NOTE: This article is for an old version of Unity (Unity 4...sometime in 2014) and probably won't run anymore, but the basic idea is still valid. I just don't want to spend time updating old posts every time Unity increments a version number
+</div>
+
 
 Awhile ago, I wrote a post called [Writing Multi Light Pixel Shaders in Unity](http://kylehalladay.com/all/blog/2013/10/13/Multi-Light-Diffuse.html), and covered the basics of how to write shaders that use a whole bunch of lights in forward rendering. This post is the (8 months late) sequel to that post, in which I'm going to talk about the basics of writing shaders for deferred lighting in Unity.
 

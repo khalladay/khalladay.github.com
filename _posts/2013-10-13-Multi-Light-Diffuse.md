@@ -5,7 +5,15 @@ categories:
 - blog
 - tutorial
 - bestof
+tags:
+- <span style="background-color:grey;"><font color="white">&nbsp;Unity&nbsp;</font></span>
+
 ---
+
+<div style="background-color:#EEAAAA;">NOTE: This article is OLD! (From 2013!). Information in it may be out of date or outright useless, and I have no plans to update it. Beware!
+</div>
+
+<br>
 
 One of the first things that people get shown when they start learning shaders is how to write a simple, single light, diffuse shader. I have yet to see a single shader tutorial out there that ever returns to this initial exercise to demonstrate how to write shaders which can properly interact with multiple (and different kinds of) lights. So I'm going to try to fill in that gap with what I've managed to figure out on my own. 
 

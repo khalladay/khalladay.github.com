@@ -5,7 +5,14 @@ categories:
 - blog
 - tutorial
 - bestof
+tags:
+- <span style="background-color:grey;"><font color="white">&nbsp;Unity&nbsp;</font></span>
+
 ---
+
+<div style="background-color:#EEAAAA;">NOTE: This article is for an old version of Unity (Unity 4...sometime in 2014) and probably won't run anymore, but the basic idea is still valid. I just don't want to spend time updating old posts every time Unity increments a version number
+</div>
+
 
 If you've ever looked for help getting different coloured shadows in your Unity game, you were probably surprised by how little there is on the forums in the way of help. In fact, at the time of writing this, the most help that google turned up was a $50 package on the asset store. Colouring shadows is not that hard, in fact, it's only a few lines of shader code. 
 

@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Kyle Halladay - Bit Flags are Pretty Cool</title>
   <meta name="author" content="Kyle Halladay" />
-  <meta name="description" content="My thoughts about game and graphics programming" />
+  <meta name="description" content="I build shaders, renderers, games, and other stuff that's fun to stare at." />
   <link rel="canonical" href="http://kylehalladay.com/blog/2013/04/21/Bit-Flags-Are-Pretty-Cool.html" />
   <meta name="keywords" content="life,code,software,development,games,graphics,shaders,indie" />
 
@@ -85,7 +85,7 @@
 
     <div class="eleven columns content">
       <topbar><div align="center"><h2><a href="/index.html" style="color:#000">KyleHalladay.com</a></h2></div>
-      <div align="center" style="font-size:18px"><a href="/archive.html">Archive</a> | <a href="/portfolio.html">Portfolio</a> | <a href="/graphics.html">Shaders</a></div>
+      <div align="center" style="font-size:18px"><a href="/archive.html">Archive</a></div>
       <hr style="border-color:#000; margin:1em -0.25em;"></topbar>
 
       <p class="meta">
@@ -95,7 +95,17 @@
 <h1 class="title">Bit Flags are Pretty Cool</h1>
 
 <div id="post">
-  <p>I’ve been working on prototype for (possibly) my next personal project, and one of the things I’ve needed to do a number of times is store a lot of boolean attributes on different objects. This led to some really terrible looking scripts with a whole host of boolean flags at the top of them, and I decided I needed to find a better way of handling things. 
+  <div style="background-color:#EEAAAA;">NOTE: This article is OLD! (From 2013!). Information in it may be out of date or outright useless, and I have no plans to update it. Beware!
+</div>
+
+<p><br /></p>
+
+<div style="background-color:#EEAAAA;">NOTE: This article is OLD! (From 2013!). Information in it may be out of date or outright useless, and I have no plans on updating it. Beware!
+</div>
+
+<p><br /></p>
+
+<p>I’ve been working on prototype for (possibly) my next personal project, and one of the things I’ve needed to do a number of times is store a lot of boolean attributes on different objects. This led to some really terrible looking scripts with a whole host of boolean flags at the top of them, and I decided I needed to find a better way of handling things. 
 <br />
 <br />
 I’ve had some fun before with packing a whole bunch of booleans into byte-sized structs using the bit field operator in C++, but I’ve never seen anything like that done in C#, and if I can help it, I try to avoid dealing directly with memory addresses in Unity scripts. Luckily, bit flags seem to do the exact same job (possibly better). To show you what I mean, let me link an example:
@@ -126,7 +136,7 @@ So here’s whats going on: rather than specifying a int or float value for the 
     </li>
     
     <li>
-      <span>06 Jan 2014 &raquo;</span> <a href="/blog/tutorial/bestof/2014/01/06/Hacking-My-Attention-Span.html">Automating SelfControl in OS X Mavericks</a>
+      <span>10 Nov 2013 &raquo;</span> <a href="/blog/tutorial/bestof/2013/11/10/Libpd-and-Unity.html">Combining Pure Data and Unity</a>
     </li>
     
   </ul>

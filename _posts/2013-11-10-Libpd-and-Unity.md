@@ -5,7 +5,15 @@ categories:
 - blog
 - tutorial
 - bestof
+tags:
+- <span style="background-color:grey;"><font color="white">&nbsp;Unity&nbsp;</font></span>
+
 ---
+<div style="background-color:#EEAAAA;">NOTE: This article is OLD! (From 2013!). Information in it may be out of date or outright useless, and I have no plans to update it. Beware!
+</div>
+
+<br>
+
 
 About 6 months ago, for 1GAM, Johannes and I spent a month tinkering with LibPD (the end result was Synapse). LibPD, for those of you who don't know, is a library for working with [Pure-Data](http://puredata.info/), a visual programming tool for procedural audio. Out of the box, it doesn't work nicely with Unity, but there's a repository called libpd4unity that simplifies the process.
 

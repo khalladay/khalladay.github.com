@@ -4,6 +4,9 @@ title: A Burning Paper Shader
 categories:
 - blog
 - tutorial
+tags:
+- <span style="background-color:grey;"><font color="white">&nbsp;Unity&nbsp;</font></span>
+
 ---
 
 After a long hiatus, I've decided to start posting again! And I can think of no better way to kick that off than with revisiting a [cheesy old shader](http://kylehalladay.com/blog/tutorial/bestof/2013/09/28/How-to-dissolve-effect.html) that I posted 2 years ago. 
