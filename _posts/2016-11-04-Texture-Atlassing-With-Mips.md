@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Let's Build A Texture Atlasser That Handles Mips
+title: Minimizing MIp Map Artifacts In Atlassed Textures
 categories:
 - blog
 - tutorial
