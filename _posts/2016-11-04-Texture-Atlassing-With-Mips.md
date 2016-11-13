@@ -51,7 +51,7 @@ If you're using Unity, you've almost certainly been using mip maps the whole tim
 
 In most cases, this is great, but in a texture atlas, this can lead to the edges of individual textures getting mixed with neighboring textures when the mips are generated. In extreme cases (like pictured above), the edges of a really bright texture can pick up dark colours and look very different from what's intended. There are lots of ways to mitigate this in a texture atlasser, but I've yet to find a texture atlasser out there that does any of them by default, so today we're going to build one that does. 
 
-##How A Texture Atlasser Works
+## How A Texture Atlasser Works
 
 At a high level, a texture atlasser consists of two parts, which I've assigned super unofficial names:
 
@@ -60,11 +60,11 @@ At a high level, a texture atlasser consists of two parts, which I've assigned s
 
 The Texture Packer is a pretty universal component. We're going to walk through building one for completeness sake, but the real meat here is what we do in the Blitter to help our mip maps. 
 
-##How to Build a Texture Packer
+## How to Build a Texture Packer
 
 Since it's the first step in the process, let's tackle the packer first. I'm going to write all the code in Unity because then I can piggy back on all their systems and keep the amount of code in this article manageable, but the core concepts are applicable anywhere. It's worth noting that there isn't really anything special about this texture packing implementation, we'll get to the real meat of what I want to talk about in the Blitter section.
 
-###The Output Struct
+### The Output Struct
 
 Speaking of core concepts, let's talk about what our Texture Packer is going to output. 
 
@@ -90,7 +90,7 @@ The reason we need to output all this data is to handle cases where we want to r
 
 So now we have our output set up, let's start fitting rectangles into other rectangles, shall we? There are lots of algorithms for doing this (many are described in detail [here](http://clb.demon.fi/projects/more-rectangle-bin-packing), but the one I like best is the MaxRect algorithm. 
 
-###The PackTextures Function
+### The PackTextures Function
 
 The algorithm works by defining a list of “Free Rectangles”, that is, a list of empty rectangles in the target atlas texture. Before the first texture is packed, our list of Free rectangles will contain a single element which has position (0,0), and be the size of the atlas. I'm going to start putting this initial setup into our PackTexture function, which will be the publically exposed function we call when we want to kick off the TexturePacker.
 
@@ -241,7 +241,7 @@ Remember that the bestShortSideFit and bestLongSideFit arguments are going to be
 
 That's all there is to this function! All that's left now is for us to be able to gracefully remove a rectangle from our free list. 
 
-###The Remove Function
+### The Remove Function
 
 Once we've found our target free rect, we add that placed texture rect to our output list, and remove that texture’s area from the free rectangle that it was placed in. In a lot of cases, this is going to give us a shape that isn’t a rectangle any more.
 
@@ -376,7 +376,7 @@ In my implementation, I wrap all of the code thus far in a TexturePacker class. 
 
 Despite all our hard work, our journey isn't over, it's time to put all this code to work and actually make an atlas.
 
-##Building the Blitter
+## Building the Blitter
 
 As simple as it sounds, the Blitter is actually more nuanced than the packer, because it's where you really start to dig into the features that you want our Texture Atlasser to have. At it's most basic, all it needs to do is to copy pixels from one texture to another, so let's start by getting the simplest impementation possible set up:
 
@@ -429,7 +429,7 @@ To get around that, you can load the image directly from disk as a byte array an
 
 What we have here is where most texture atlassing systems seem to stop, and this is a perfectly sensible place to stop if you aren't going to be mipping your atlasses, but there are two things we can do to make this more friendly, which I'll talk about next. 
 
-###Padding Support
+### Padding Support
 
 One thing we can do is to add support for padding to our blit function. Padding simply means adding space between the different textures that we pack in our atlas: 
 
@@ -487,7 +487,7 @@ Ok, now we're talking!
 
 Notice that we have a check in there to make sure that we never add so much padding that a texture is completely invisible on the atlas, or so much padding that the padded areas overlap. 
 
-###Edge Bleeding
+### Edge Bleeding
 
 So this is great, and is going to make sure that (at least on the higher resolution mips), our textures aren't going to bleed into each other. Unfortunately it means (at least right now), that they'll instead pick up whatever value we clear our texture to. What we want to do next is to make sure that the areas that contain our padding are filled with the edge colour of the textures inside them. This is going to give us an atlas that looks something like this: 
 
@@ -619,7 +619,7 @@ private static float DistanceToRect(Rect r, int x, int y)
 {% endhighlight %}
 
 
-##Wrapping Things Up
+## Wrapping Things Up
 
 What we have now is a perfectly good Texture Atlasser! With padding and edge bleed, the mips you care most about (the higher resolution ones) are likely going to be completely unblemished. If anything here wasn't clear, or you just want some source, it's available at the end of this post. 
 
