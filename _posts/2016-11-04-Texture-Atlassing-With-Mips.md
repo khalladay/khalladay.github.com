@@ -175,7 +175,7 @@ private static void RemoveRectFromFreeList(Rect rectToRemove, List<Rect> freeRec
 
 {% endhighlight %}
 
-###The Placement Function
+### The Placement Function
 
 The Placement Function is where we're going to actually find a rectangle in the atlas to assign to a texture. There are lots of ways to pick a rectangle out of the free list, but the heuristic I'm going to use is the "Short Side Fit" heuristic. This means that we are going to try to find a free rectangle which has the least amount of remaining space along 1 dimension. This sounds much more abstract than it looks like in code, don't worry. 
 
