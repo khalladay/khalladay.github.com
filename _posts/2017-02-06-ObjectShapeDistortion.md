@@ -100,7 +100,7 @@ If you attach this to your main camera and hit play right now, you'll see a love
 </div>
 
 <h3>Rendering the DistortionRT</h3>
-As mentioned above, the first thing we need to do in our OnRenderImage function is to get our filled with some colour (and depth!). Since we're working in OnRenderImage, we already have the main camera's output in RT form (the src argument in the function signature), but we need to get our low res colour buffer built up.
+As mentioned above, the first thing we need to do in our OnRenderImage function is to get our RenderTextures filled with some colour (and depth!). Since we're working in OnRenderImage, we already have the main camera's output in RT form (the src argument in the function signature), but we need to get our low res colour buffer built up.
 
 
 <div style="background-color:#AAEEAA; border-style:solid; border-width:1px">In the interest of simplicity, I'm going to refer to our low res RenderTexture as the "distortingRT," because we are going to render the things we want to distort into it.
