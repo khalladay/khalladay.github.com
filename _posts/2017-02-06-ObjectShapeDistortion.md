@@ -202,6 +202,8 @@ float4 frag (v2f i) : SV_Target
 {
 //other shading logic fills RGB channels
 
+col.a = (i.screen.z / i.screen.w);
+
 //using UNITY_REVERSED_Z becuase SHADER_TARGET_GLSL
 //doesn't seem to work on my machine
 #if !defined(UNITY_REVERSED_Z)
