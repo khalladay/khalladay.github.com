@@ -131,12 +131,12 @@
 
 <p>We’ll start building our shader with an empty pixel shader skeleton: </p>
 
-<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">Shader</span> <span class="s">&quot;Specular-Deferred&quot;</span>
+<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">Shader</span> <span class="s">"Specular-Deferred"</span>
 <span class="p">{</span>
 <span class="n">Properties</span> <span class="p">{</span>
-	<span class="n">_MainTex</span> <span class="p">(</span><span class="s">&quot;Base (RGB)&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="n">D</span><span class="p">)</span> <span class="o">=</span> <span class="s">&quot;white&quot;</span><span class="p">{}</span>
-	<span class="n">_SpecColor</span> <span class="p">(</span><span class="s">&quot;Specular Color&quot;</span><span class="p">,</span> <span class="n">Color</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
- 	<span class="n">_Shininess</span> <span class="p">(</span><span class="s">&quot;Shininess&quot;</span><span class="p">,</span> <span class="n">Range</span><span class="p">(</span><span class="mf">0.01</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span> <span class="o">=</span> <span class="mf">0.078125</span>
+	<span class="n">_MainTex</span> <span class="p">(</span><span class="s">"Base (RGB)"</span><span class="p">,</span> <span class="mi">2</span><span class="n">D</span><span class="p">)</span> <span class="o">=</span> <span class="s">"white"</span><span class="p">{}</span>
+	<span class="n">_SpecColor</span> <span class="p">(</span><span class="s">"Specular Color"</span><span class="p">,</span> <span class="n">Color</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+ 	<span class="n">_Shininess</span> <span class="p">(</span><span class="s">"Shininess"</span><span class="p">,</span> <span class="n">Range</span><span class="p">(</span><span class="mf">0.01</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span> <span class="o">=</span> <span class="mf">0.078125</span>
 <span class="p">}</span>
 <span class="n">SubShader</span><span class="p">{</span>
 	<span class="n">Pass</span><span class="p">{</span>
@@ -159,21 +159,21 @@
 <p>A lot of this pass is very straightforward, since for the most part all we’re doing is outputting normals, but since we also want our objects to be shiny, we need to set the alpha of our fragment shader’s output to our object’s shininess, like so:</p>
 
 <div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">Pass</span><span class="p">{</span>
-	<span class="n">Tags</span> <span class="p">{</span><span class="s">&quot;LightMode&quot;</span> <span class="o">=</span> <span class="s">&quot;PrePassBase&quot;</span><span class="p">}</span>
+	<span class="n">Tags</span> <span class="p">{</span><span class="s">"LightMode"</span> <span class="o">=</span> <span class="s">"PrePassBase"</span><span class="p">}</span>
 	<span class="n">CGPROGRAM</span>
-	<span class="cp">#pragma vertex vert</span>
-	<span class="cp">#pragma fragment frag		</span>
-	<span class="n">uniform</span> <span class="kt">float</span> <span class="n">_Shininess</span><span class="p">;</span>
+	<span class="cp">#pragma vertex vert
+</span>	<span class="cp">#pragma fragment frag		
+</span>	<span class="n">uniform</span> <span class="kt">float</span> <span class="n">_Shininess</span><span class="p">;</span>
 
 	<span class="k">struct</span> <span class="n">vIN</span>
 	<span class="p">{</span>
-		<span class="n">float4</span> <span class="nl">vertex</span> <span class="p">:</span> <span class="n">POSITION</span><span class="p">;</span>
-		<span class="n">float3</span> <span class="nl">normal</span> <span class="p">:</span> <span class="n">NORMAL</span><span class="p">;</span>
+		<span class="n">float4</span> <span class="n">vertex</span> <span class="o">:</span> <span class="n">POSITION</span><span class="p">;</span>
+		<span class="n">float3</span> <span class="n">normal</span> <span class="o">:</span> <span class="n">NORMAL</span><span class="p">;</span>
 	<span class="p">};</span>
 	<span class="k">struct</span> <span class="n">vOUT</span>
 	<span class="p">{</span>
-		<span class="n">float4</span> <span class="nl">pos</span> <span class="p">:</span> <span class="n">SV_POSITION</span><span class="p">;</span>
-		<span class="n">float3</span> <span class="nl">wNorm</span> <span class="p">:</span> <span class="n">TEXCOORD0</span><span class="p">;</span>
+		<span class="n">float4</span> <span class="n">pos</span> <span class="o">:</span> <span class="n">SV_POSITION</span><span class="p">;</span>
+		<span class="n">float3</span> <span class="n">wNorm</span> <span class="o">:</span> <span class="n">TEXCOORD0</span><span class="p">;</span>
 	<span class="p">};</span>
 	<span class="n">vOUT</span> <span class="nf">vert</span><span class="p">(</span><span class="n">vIN</span> <span class="n">v</span><span class="p">)</span>
 	<span class="p">{</span>
@@ -186,7 +186,7 @@
 	<span class="n">float4</span> <span class="n">frag</span><span class="p">(</span><span class="n">vOUT</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span> <span class="n">COLOR</span>
 	<span class="p">{</span>
 		<span class="n">float3</span> <span class="n">norm</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span><span class="p">.</span><span class="n">wNorm</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">;</span>
-		<span class="k">return</span> <span class="nf">float4</span><span class="p">(</span><span class="n">norm</span><span class="p">,</span> <span class="n">_Shininess</span><span class="p">);</span>
+		<span class="k">return</span> <span class="n">float4</span><span class="p">(</span><span class="n">norm</span><span class="p">,</span> <span class="n">_Shininess</span><span class="p">);</span>
 	<span class="p">}</span>
 	<span class="n">ENDCG</span>
 <span class="p">}</span></code></pre></div>
@@ -202,27 +202,27 @@
 <p>Just like forward rendering, our second pass uses a different tag, PrePassFinal, to let Unity know to use this pass for the last step of the deferred rendering process. Otherwise, the first few lines of this pass are unremarkable. </p>
 
 <div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">Pass</span><span class="p">{</span>
-	<span class="n">Tags</span><span class="p">{</span><span class="s">&quot;LightMode&quot;</span> <span class="o">=</span> <span class="s">&quot;PrePassFinal&quot;</span><span class="p">}</span>
+	<span class="n">Tags</span><span class="p">{</span><span class="s">"LightMode"</span> <span class="o">=</span> <span class="s">"PrePassFinal"</span><span class="p">}</span>
 	<span class="n">ZWrite</span> <span class="n">off</span>
 	<span class="n">CGPROGRAM</span>
-	<span class="cp">#pragma vertex vert</span>
-	<span class="cp">#pragma fragment frag</span>
-
+	<span class="cp">#pragma vertex vert
+</span>	<span class="cp">#pragma fragment frag
+</span>
 	<span class="n">sampler2D</span> <span class="n">_MainTex</span><span class="p">;</span>
 	<span class="n">uniform</span> <span class="n">float4</span> <span class="n">_SpecColor</span><span class="p">;</span>
 	<span class="n">uniform</span> <span class="n">sampler2D</span> <span class="n">_LightBuffer</span><span class="p">;</span>
 
 	<span class="k">struct</span> <span class="n">vIN</span>
 	<span class="p">{</span>
-		<span class="n">float4</span> <span class="nl">vertex</span> <span class="p">:</span> <span class="n">POSITION</span><span class="p">;</span>
-		<span class="n">float2</span> <span class="nl">texcoord</span> <span class="p">:</span> <span class="n">TEXCOORD0</span><span class="p">;</span>
+		<span class="n">float4</span> <span class="n">vertex</span> <span class="o">:</span> <span class="n">POSITION</span><span class="p">;</span>
+		<span class="n">float2</span> <span class="n">texcoord</span> <span class="o">:</span> <span class="n">TEXCOORD0</span><span class="p">;</span>
 	<span class="p">};</span>
 
 	<span class="k">struct</span> <span class="n">vOUT</span>
 	<span class="p">{</span>
-		<span class="n">float4</span> <span class="nl">pos</span> <span class="p">:</span> <span class="n">SV_POSITION</span><span class="p">;</span>
-		<span class="n">float2</span> <span class="nl">uv</span> <span class="p">:</span> <span class="n">TEXCOORD0</span><span class="p">;</span>
-		<span class="n">float4</span> <span class="nl">uvProj</span> <span class="p">:</span> <span class="n">TEXCOORD1</span><span class="p">;</span>
+		<span class="n">float4</span> <span class="n">pos</span> <span class="o">:</span> <span class="n">SV_POSITION</span><span class="p">;</span>
+		<span class="n">float2</span> <span class="n">uv</span> <span class="o">:</span> <span class="n">TEXCOORD0</span><span class="p">;</span>
+		<span class="n">float4</span> <span class="n">uvProj</span> <span class="o">:</span> <span class="n">TEXCOORD1</span><span class="p">;</span>
 	<span class="p">};</span>
 <span class="p">}</span></code></pre></div>
 
@@ -263,12 +263,12 @@
 
 <p>But now that that’s covered, our fragment function is really straightforward:</p>
 
-<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">float4</span> <span class="nf">frag</span><span class="p">(</span><span class="n">vOUT</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span> <span class="n">COLOR</span>
+<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">float4</span> <span class="n">frag</span><span class="p">(</span><span class="n">vOUT</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span> <span class="n">COLOR</span>
 <span class="p">{</span>
 	<span class="n">float4</span> <span class="n">light</span> <span class="o">=</span> <span class="n">tex2Dproj</span><span class="p">(</span><span class="n">_LightBuffer</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">uvProj</span><span class="p">);</span>
 	<span class="n">float4</span> <span class="n">logLight</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">log2</span><span class="p">(</span><span class="n">max</span><span class="p">(</span><span class="n">light</span><span class="p">,</span> <span class="n">float4</span><span class="p">(</span><span class="mf">0.001</span><span class="p">,</span><span class="mf">0.001</span><span class="p">,</span><span class="mf">0.001</span><span class="p">,</span><span class="mf">0.001</span><span class="p">))));</span>
 	<span class="n">float4</span> <span class="n">texCol</span> <span class="o">=</span> <span class="n">tex2D</span><span class="p">(</span><span class="n">_MainTex</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">uv</span><span class="p">);</span>
-	<span class="k">return</span> <span class="nf">float4</span><span class="p">((</span><span class="n">texCol</span><span class="p">.</span><span class="n">xyz</span> <span class="o">*</span> <span class="n">light</span><span class="p">.</span><span class="n">xyz</span><span class="p">)</span> <span class="o">+</span> <span class="n">float3</span><span class="p">(</span><span class="n">_SpecColor</span><span class="p">.</span><span class="n">xyz</span><span class="p">)</span> <span class="o">*</span> <span class="n">light</span><span class="p">.</span><span class="n">w</span><span class="p">,</span> <span class="n">texCol</span><span class="p">.</span><span class="n">w</span><span class="p">);</span>
+	<span class="k">return</span> <span class="n">float4</span><span class="p">((</span><span class="n">texCol</span><span class="p">.</span><span class="n">xyz</span> <span class="o">*</span> <span class="n">light</span><span class="p">.</span><span class="n">xyz</span><span class="p">)</span> <span class="o">+</span> <span class="n">float3</span><span class="p">(</span><span class="n">_SpecColor</span><span class="p">.</span><span class="n">xyz</span><span class="p">)</span> <span class="o">*</span> <span class="n">light</span><span class="p">.</span><span class="n">w</span><span class="p">,</span> <span class="n">texCol</span><span class="p">.</span><span class="n">w</span><span class="p">);</span>
 <span class="p">}</span></code></pre></div>
 
 <p>Notice how unlike forward rendering, we don’t have to do any per light calculations, because they’ve already been done for us, and had the resulting value stored in the light buffer. All we have to do is read from that buffer and multiply our fragment colour accordingly. Just like in the first pass, specular values are stored on the alpha channel of the light buffer. </p>
@@ -283,19 +283,19 @@
 Luckily, this pass is the same as any other shadow caster pass in Unity. In theory could let a fallback handle this for you, but for the sake of having a fully standalone shader, let’s add it here as well.</p>
 
 <div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">Pass</span> <span class="p">{</span>
-	<span class="n">Name</span> <span class="s">&quot;ShadowCaster&quot;</span>
-	<span class="n">Tags</span> <span class="p">{</span> <span class="s">&quot;LightMode&quot;</span> <span class="o">=</span> <span class="s">&quot;ShadowCaster&quot;</span> <span class="p">}</span>
+	<span class="n">Name</span> <span class="s">"ShadowCaster"</span>
+	<span class="n">Tags</span> <span class="p">{</span> <span class="s">"LightMode"</span> <span class="o">=</span> <span class="s">"ShadowCaster"</span> <span class="p">}</span>
 	
 	<span class="n">Fog</span> <span class="p">{</span><span class="n">Mode</span> <span class="n">Off</span><span class="p">}</span>
 	<span class="n">ZWrite</span> <span class="n">On</span> <span class="n">ZTest</span> <span class="n">LEqual</span> <span class="n">Cull</span> <span class="n">Off</span>
 	<span class="n">Offset</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span>
 
 	<span class="n">CGPROGRAM</span>
-	<span class="cp">#pragma vertex vert</span>
-	<span class="cp">#pragma fragment frag</span>
-	<span class="cp">#pragma multi_compile_shadowcaster</span>
-	<span class="cp">#include &quot;UnityCG.cginc&quot;</span>
-
+	<span class="cp">#pragma vertex vert
+</span>	<span class="cp">#pragma fragment frag
+</span>	<span class="cp">#pragma multi_compile_shadowcaster
+</span>	<span class="cp">#include "UnityCG.cginc"
+</span>
 	<span class="k">struct</span> <span class="n">v2f</span> <span class="p">{</span> 
 		<span class="n">V2F_SHADOW_CASTER</span><span class="p">;</span>
 	<span class="p">};</span>
@@ -322,8 +322,8 @@ Luckily, this pass is the same as any other shadow caster pass in Unity. In theo
 
 <p>If you want to learn more (like how to add spherical harmonic lights, or use lightmaps), all you need to do in order to do this yourself is add “exclude_path:forward” to your surface pragma, and add an additional pragma below that, like this:</p>
 
-<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="cp">#pragma surface surf BlinnPhong exclude_path:forward</span>
-<span class="cp">#pragma only_renderers gles</span></code></pre></div>
+<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="cp">#pragma surface surf BlinnPhong exclude_path:forward
+#pragma only_renderers gles</span></code></pre></div>
 
 <p>If you’re on desktop, you’ll need to click the “Show All” button in the inspector to get at the gles code, since gles shaders are meant for mobile devices. If you can read ARB or DirectX assembly, you can do that too, but I find glsl much more readable.</p>
 

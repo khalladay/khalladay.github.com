@@ -163,13 +163,13 @@ So CgBatch needs at least 4 parameters. Based on the forum post linked previousl
 
 <div class="highlight"><pre><code class="language-c#" data-lang="c#"><span class="k">using</span> <span class="nn">System.Diagnostics</span><span class="p">;</span>
 	
-<span class="n">Process</span> <span class="n">process</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Process</span><span class="p">();</span>
-<span class="n">process</span><span class="p">.</span><span class="n">StartInfo</span><span class="p">.</span><span class="n">FileName</span> <span class="p">=</span> <span class="s">&quot;bash&quot;</span><span class="p">;</span>
-<span class="n">process</span><span class="p">.</span><span class="n">StartInfo</span><span class="p">.</span><span class="n">Arguments</span> <span class="p">=</span> <span class="s">&quot;-c &#39;&quot;</span> <span class="p">+</span> <span class="p">[</span><span class="n">Command</span><span class="p">]</span> <span class="p">[</span><span class="n">arg1</span><span class="p">]</span> <span class="p">[</span><span class="n">arg2</span><span class="p">]</span> <span class="p">...</span> <span class="p">+</span><span class="s">&quot;&#39;&quot;</span><span class="p">;</span>
+<span class="n">Process</span> <span class="n">process</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Process</span><span class="p">();</span>
+<span class="n">process</span><span class="p">.</span><span class="n">StartInfo</span><span class="p">.</span><span class="n">FileName</span> <span class="p">=</span> <span class="s">"bash"</span><span class="p">;</span>
+<span class="n">process</span><span class="p">.</span><span class="n">StartInfo</span><span class="p">.</span><span class="n">Arguments</span> <span class="p">=</span> <span class="s">"-c '"</span> <span class="p">+</span> <span class="p">[</span><span class="n">Command</span><span class="p">]</span> <span class="p">[</span><span class="n">arg1</span><span class="p">]</span> <span class="p">[</span><span class="n">arg2</span><span class="p">]</span> <span class="p">...</span> <span class="p">+</span><span class="s">"'"</span><span class="p">;</span>
 <span class="n">process</span><span class="p">.</span><span class="n">StartInfo</span><span class="p">.</span><span class="n">RedirectStandardOutput</span> <span class="p">=</span> <span class="k">true</span><span class="p">;</span>
 <span class="n">process</span><span class="p">.</span><span class="n">StartInfo</span><span class="p">.</span><span class="n">UseShellExecute</span> <span class="p">=</span> <span class="k">false</span><span class="p">;</span>
 
-<span class="n">process</span><span class="p">.</span><span class="n">Start</span><span class="p">();</span></code></pre></div>
+<span class="n">process</span><span class="p">.</span><span class="nf">Start</span><span class="p">();</span></code></pre></div>
 
 <p>(the above is mac specific, I don’t have a windows machine to work try this stuff out on right now)</p>
 
@@ -183,14 +183,14 @@ So CgBatch needs at least 4 parameters. Based on the forum post linked previousl
 
 <p>For the proof of concept, I only wanted users to write fragment shaders, so I needed to provide a vertex shader for them:</p>
 
-<div class="highlight"><pre><code class="language-c#" data-lang="c#"><span class="kt">string</span> <span class="n">prefix</span> <span class="p">=</span> <span class="s">&quot;Shader \&quot;Temp\&quot;{\nProperties{\n}\nSubShader {&quot;</span> <span class="p">+</span>
-	<span class="s">&quot;\nTags { \&quot;Queue\&quot; = \&quot;Geometry\&quot; }\nPass {\nGLSLPROGRAM\n#ifdef VERTEX\n&quot;</span> <span class="p">+</span>
-	<span class="s">&quot;void main(){\n&quot;</span> <span class="p">+</span>
-	<span class="s">&quot;gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;\n&quot;</span> <span class="p">+</span>
-	<span class="s">&quot;}\n&quot;</span> <span class="p">+</span>
-	<span class="s">&quot;#endif\n&quot;</span> <span class="p">+</span>
-	<span class="s">&quot;#ifdef FRAGMENT\n&quot;</span> <span class="p">+</span>
-	<span class="s">&quot;uniform float _time;\n&quot;</span><span class="p">;</span></code></pre></div>
+<div class="highlight"><pre><code class="language-c#" data-lang="c#"><span class="kt">string</span> <span class="n">prefix</span> <span class="p">=</span> <span class="s">"Shader \"Temp\"{\nProperties{\n}\nSubShader {"</span> <span class="p">+</span>
+	<span class="s">"\nTags { \"Queue\" = \"Geometry\" }\nPass {\nGLSLPROGRAM\n#ifdef VERTEX\n"</span> <span class="p">+</span>
+	<span class="s">"void main(){\n"</span> <span class="p">+</span>
+	<span class="s">"gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;\n"</span> <span class="p">+</span>
+	<span class="s">"}\n"</span> <span class="p">+</span>
+	<span class="s">"#endif\n"</span> <span class="p">+</span>
+	<span class="s">"#ifdef FRAGMENT\n"</span> <span class="p">+</span>
+	<span class="s">"uniform float _time;\n"</span><span class="p">;</span></code></pre></div>
 
 <p>The above example is for writing a glsl shader at runtime. I haven’t yet been able to get Cg compiling using the method presented in this post, but I’m sure it can be done with the right arguments to CgBatch.</p>
 
@@ -198,7 +198,7 @@ So CgBatch needs at least 4 parameters. Based on the forum post linked previousl
 
 <p>Next up, we need to write the code that will come after the user’s fragment shader to finish off the shader file:</p>
 
-<div class="highlight"><pre><code class="language-c#" data-lang="c#"><span class="kt">string</span> <span class="n">suffix</span> <span class="p">=</span> <span class="s">&quot;\n#endif\nENDGLSL}}}&quot;</span><span class="p">;</span></code></pre></div>
+<div class="highlight"><pre><code class="language-c#" data-lang="c#"><span class="kt">string</span> <span class="n">suffix</span> <span class="p">=</span> <span class="s">"\n#endif\nENDGLSL}}}"</span><span class="p">;</span></code></pre></div>
 
 <p>As the variable names suggest, the user’s fragment shader will be positioned in between these two strings when building our input file. </p>
 
@@ -206,45 +206,45 @@ So CgBatch needs at least 4 parameters. Based on the forum post linked previousl
 
 <p>Once you’ve assembled the full shader string, you need to write it to a file, since CgBatch expects the input parameter to be a file path. Since we don’t want this file to persist between runs, I’m writing the input file to Application.temporaryCachePath. </p>
 
-<div class="highlight"><pre><code class="language-c#" data-lang="c#"><span class="kt">byte</span><span class="p">[]</span> <span class="n">byteShader</span> <span class="p">=</span> <span class="n">System</span><span class="p">.</span><span class="n">Text</span><span class="p">.</span><span class="n">Encoding</span><span class="p">.</span><span class="n">UTF8</span><span class="p">.</span><span class="n">GetBytes</span><span class="p">(</span><span class="n">prefix</span><span class="p">+</span><span class="n">shader</span><span class="p">+</span><span class="n">suffix</span><span class="p">);</span>
+<div class="highlight"><pre><code class="language-c#" data-lang="c#"><span class="kt">byte</span><span class="p">[]</span> <span class="n">byteShader</span> <span class="p">=</span> <span class="n">System</span><span class="p">.</span><span class="n">Text</span><span class="p">.</span><span class="n">Encoding</span><span class="p">.</span><span class="n">UTF8</span><span class="p">.</span><span class="nf">GetBytes</span><span class="p">(</span><span class="n">prefix</span><span class="p">+</span><span class="n">shader</span><span class="p">+</span><span class="n">suffix</span><span class="p">);</span>
 
-<span class="kt">var</span> <span class="n">tempShader</span> <span class="p">=</span> <span class="n">File</span><span class="p">.</span><span class="n">Create</span><span class="p">(</span><span class="n">Application</span><span class="p">.</span><span class="n">temporaryCachePath</span><span class="p">+</span><span class="s">&quot;/tempshader.shader&quot;</span><span class="p">);</span>
-<span class="n">tempShader</span><span class="p">.</span><span class="n">Write</span><span class="p">(</span><span class="n">byteShader</span><span class="p">,</span><span class="m">0</span><span class="p">,(</span><span class="n">prefix</span><span class="p">+</span><span class="n">suffix</span><span class="p">+</span><span class="n">shader</span><span class="p">).</span><span class="n">Length</span><span class="p">);</span>
-<span class="n">tempShader</span><span class="p">.</span><span class="n">Close</span><span class="p">();</span></code></pre></div>
+<span class="kt">var</span> <span class="n">tempShader</span> <span class="p">=</span> <span class="n">File</span><span class="p">.</span><span class="nf">Create</span><span class="p">(</span><span class="n">Application</span><span class="p">.</span><span class="n">temporaryCachePath</span><span class="p">+</span><span class="s">"/tempshader.shader"</span><span class="p">);</span>
+<span class="n">tempShader</span><span class="p">.</span><span class="nf">Write</span><span class="p">(</span><span class="n">byteShader</span><span class="p">,</span><span class="m">0</span><span class="p">,(</span><span class="n">prefix</span><span class="p">+</span><span class="n">suffix</span><span class="p">+</span><span class="n">shader</span><span class="p">).</span><span class="n">Length</span><span class="p">);</span>
+<span class="n">tempShader</span><span class="p">.</span><span class="nf">Close</span><span class="p">();</span></code></pre></div>
 
 <p>Finally, we need to read in the output and actually build a material out of it. All together, the shader compilation process looks like the following: </p>
 
-<div class="highlight"><pre><code class="language-c#" data-lang="c#"><span class="kt">byte</span><span class="p">[]</span> <span class="n">byteShader</span> <span class="p">=</span> <span class="n">System</span><span class="p">.</span><span class="n">Text</span><span class="p">.</span><span class="n">Encoding</span><span class="p">.</span><span class="n">UTF8</span><span class="p">.</span><span class="n">GetBytes</span><span class="p">(</span><span class="n">prefix</span><span class="p">+</span><span class="n">shader</span><span class="p">+</span><span class="n">suffix</span><span class="p">);</span>
+<div class="highlight"><pre><code class="language-c#" data-lang="c#"><span class="kt">byte</span><span class="p">[]</span> <span class="n">byteShader</span> <span class="p">=</span> <span class="n">System</span><span class="p">.</span><span class="n">Text</span><span class="p">.</span><span class="n">Encoding</span><span class="p">.</span><span class="n">UTF8</span><span class="p">.</span><span class="nf">GetBytes</span><span class="p">(</span><span class="n">prefix</span><span class="p">+</span><span class="n">shader</span><span class="p">+</span><span class="n">suffix</span><span class="p">);</span>
 
-<span class="kt">var</span> <span class="n">tempShader</span> <span class="p">=</span> <span class="n">File</span><span class="p">.</span><span class="n">Create</span><span class="p">(</span><span class="n">Application</span><span class="p">.</span><span class="n">temporaryCachePath</span><span class="p">+</span><span class="s">&quot;/tempshader.shader&quot;</span><span class="p">);</span>
-<span class="n">tempShader</span><span class="p">.</span><span class="n">Write</span><span class="p">(</span><span class="n">byteShader</span><span class="p">,</span><span class="m">0</span><span class="p">,(</span><span class="n">prefix</span><span class="p">+</span><span class="n">suffix</span><span class="p">+</span><span class="n">shader</span><span class="p">).</span><span class="n">Length</span><span class="p">);</span>
-<span class="n">tempShader</span><span class="p">.</span><span class="n">Close</span><span class="p">();</span>
+<span class="kt">var</span> <span class="n">tempShader</span> <span class="p">=</span> <span class="n">File</span><span class="p">.</span><span class="nf">Create</span><span class="p">(</span><span class="n">Application</span><span class="p">.</span><span class="n">temporaryCachePath</span><span class="p">+</span><span class="s">"/tempshader.shader"</span><span class="p">);</span>
+<span class="n">tempShader</span><span class="p">.</span><span class="nf">Write</span><span class="p">(</span><span class="n">byteShader</span><span class="p">,</span><span class="m">0</span><span class="p">,(</span><span class="n">prefix</span><span class="p">+</span><span class="n">suffix</span><span class="p">+</span><span class="n">shader</span><span class="p">).</span><span class="n">Length</span><span class="p">);</span>
+<span class="n">tempShader</span><span class="p">.</span><span class="nf">Close</span><span class="p">();</span>
 
-<span class="n">Process</span> <span class="n">compileProcess</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Process</span><span class="p">();</span>
-<span class="n">compileProcess</span><span class="p">.</span><span class="n">StartInfo</span><span class="p">.</span><span class="n">FileName</span> <span class="p">=</span> <span class="s">&quot;bash&quot;</span><span class="p">;</span>
+<span class="n">Process</span> <span class="n">compileProcess</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Process</span><span class="p">();</span>
+<span class="n">compileProcess</span><span class="p">.</span><span class="n">StartInfo</span><span class="p">.</span><span class="n">FileName</span> <span class="p">=</span> <span class="s">"bash"</span><span class="p">;</span>
 
-<span class="n">compileProcess</span><span class="p">.</span><span class="n">StartInfo</span><span class="p">.</span><span class="n">Arguments</span> <span class="p">=</span> <span class="s">&quot;-c &#39;&quot;</span>
+<span class="n">compileProcess</span><span class="p">.</span><span class="n">StartInfo</span><span class="p">.</span><span class="n">Arguments</span> <span class="p">=</span> <span class="s">"-c '"</span>
 	<span class="p">+</span><span class="n">Application</span><span class="p">.</span><span class="n">streamingAssetsPath</span>
-	<span class="p">+</span><span class="s">&quot;/Tools/CGBatch &quot;</span>
+	<span class="p">+</span><span class="s">"/Tools/CGBatch "</span>
 	<span class="p">+</span><span class="n">Application</span><span class="p">.</span><span class="n">temporaryCachePath</span>
-	<span class="p">+</span><span class="s">&quot;/tempshader.shader ../CGIncludes/ ../CGIncludes/&quot;</span>
+	<span class="p">+</span><span class="s">"/tempshader.shader ../CGIncludes/ ../CGIncludes/"</span>
 	<span class="p">+</span><span class="n">Application</span><span class="p">.</span><span class="n">temporaryCachePath</span>
-	<span class="p">+</span><span class="s">&quot;/testOutput.shader&#39;&quot;</span><span class="p">;</span>
+	<span class="p">+</span><span class="s">"/testOutput.shader'"</span><span class="p">;</span>
 	
 <span class="n">compileProcess</span><span class="p">.</span><span class="n">StartInfo</span><span class="p">.</span><span class="n">RedirectStandardOutput</span> <span class="p">=</span> <span class="k">true</span><span class="p">;</span>
 <span class="n">compileProcess</span><span class="p">.</span><span class="n">StartInfo</span><span class="p">.</span><span class="n">UseShellExecute</span> <span class="p">=</span> <span class="k">false</span><span class="p">;</span>
 
-<span class="n">compileProcess</span><span class="p">.</span><span class="n">Start</span><span class="p">();</span>
-<span class="kt">var</span> <span class="n">output</span> <span class="p">=</span> <span class="n">compileProcess</span><span class="p">.</span><span class="n">StandardOutput</span><span class="p">.</span><span class="n">ReadToEnd</span><span class="p">();</span>
-<span class="n">compileProcess</span><span class="p">.</span><span class="n">WaitForExit</span><span class="p">();</span>
+<span class="n">compileProcess</span><span class="p">.</span><span class="nf">Start</span><span class="p">();</span>
+<span class="kt">var</span> <span class="n">output</span> <span class="p">=</span> <span class="n">compileProcess</span><span class="p">.</span><span class="n">StandardOutput</span><span class="p">.</span><span class="nf">ReadToEnd</span><span class="p">();</span>
+<span class="n">compileProcess</span><span class="p">.</span><span class="nf">WaitForExit</span><span class="p">();</span>
 
-<span class="kt">string</span> <span class="n">compiled</span> <span class="p">=</span> <span class="n">File</span><span class="p">.</span><span class="n">ReadAllText</span><span class="p">(</span><span class="n">Application</span><span class="p">.</span><span class="n">temporaryCachePath</span>
-		<span class="p">+</span><span class="s">&quot;/testOutput.shader&quot;</span><span class="p">);</span>
+<span class="kt">string</span> <span class="n">compiled</span> <span class="p">=</span> <span class="n">File</span><span class="p">.</span><span class="nf">ReadAllText</span><span class="p">(</span><span class="n">Application</span><span class="p">.</span><span class="n">temporaryCachePath</span>
+		<span class="p">+</span><span class="s">"/testOutput.shader"</span><span class="p">);</span>
 									
-<span class="n">Material</span> <span class="n">m</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Material</span><span class="p">(</span><span class="n">compiled</span><span class="p">);</span>
+<span class="n">Material</span> <span class="n">m</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Material</span><span class="p">(</span><span class="n">compiled</span><span class="p">);</span>
 <span class="n">cube</span><span class="p">.</span><span class="n">renderer</span><span class="p">.</span><span class="n">material</span> <span class="p">=</span> <span class="n">m</span><span class="p">;</span>
 
-<span class="n">UnityEngine</span><span class="p">.</span><span class="n">Debug</span><span class="p">.</span><span class="n">Log</span><span class="p">(</span><span class="n">output</span><span class="p">);</span></code></pre></div>
+<span class="n">UnityEngine</span><span class="p">.</span><span class="n">Debug</span><span class="p">.</span><span class="nf">Log</span><span class="p">(</span><span class="n">output</span><span class="p">);</span></code></pre></div>
 
 <p>The above has only been tested on mac. On Windows, you will need to replace “bash” with “cmd” and the arguments with whatever is appropriate for your system. I unfortunately don’t have a Windows machine to test it out (again, send me a message <a href="http://twitter.com/khalladay">on twitter</a> and I’ll update this).</p>
 

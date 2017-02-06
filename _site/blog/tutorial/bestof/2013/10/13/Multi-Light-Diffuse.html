@@ -113,39 +113,39 @@ Our shader is on the left, compared to the built in diffuse on the right
 
 <p>Ok, let’s get started with a basic skeleton of what we’re building. Mulit-light shaders (in Forward Rendering) use a separate pass for each pixel light in the scene. How this looks in practice is 2 defined passes in the shader. One (the Base Pass) renders the first light in the scene, and the second pass (the Add pass) gets called once for each additional light, and is additively blended with the previous passes. It looks something like this: </p>
 
-<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">Shader</span> <span class="s">&quot;BetterDiffuse&quot;</span> 
+<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">Shader</span> <span class="s">"BetterDiffuse"</span> 
 <span class="p">{</span>
   <span class="n">Properties</span> 
   <span class="p">{</span>
-  <span class="n">_Color</span> <span class="p">(</span><span class="s">&quot;Main Color&quot;</span><span class="p">,</span> <span class="n">Color</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-  <span class="n">_MainTex</span> <span class="p">(</span><span class="s">&quot;Base (RGB) Alpha (A)&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="n">D</span><span class="p">)</span> <span class="o">=</span> <span class="s">&quot;white&quot;</span> <span class="p">{}</span>
+  <span class="n">_Color</span> <span class="p">(</span><span class="s">"Main Color"</span><span class="p">,</span> <span class="n">Color</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+  <span class="n">_MainTex</span> <span class="p">(</span><span class="s">"Base (RGB) Alpha (A)"</span><span class="p">,</span> <span class="mi">2</span><span class="n">D</span><span class="p">)</span> <span class="o">=</span> <span class="s">"white"</span> <span class="p">{}</span>
   <span class="p">}</span>
   <span class="n">SubShader</span> 
   <span class="p">{</span>
 
-  <span class="n">Tags</span> <span class="p">{</span><span class="s">&quot;Queue&quot;</span> <span class="o">=</span> <span class="s">&quot;Geometry&quot;</span> <span class="s">&quot;RenderType&quot;</span> <span class="o">=</span> <span class="s">&quot;Opaque&quot;</span><span class="p">}</span>
+  <span class="n">Tags</span> <span class="p">{</span><span class="s">"Queue"</span> <span class="o">=</span> <span class="s">"Geometry"</span> <span class="s">"RenderType"</span> <span class="o">=</span> <span class="s">"Opaque"</span><span class="p">}</span>
   <span class="n">Pass</span> 
   <span class="p">{</span>
-  <span class="n">Tags</span> <span class="p">{</span><span class="s">&quot;LightMode&quot;</span> <span class="o">=</span> <span class="s">&quot;ForwardBase&quot;</span><span class="p">}</span>     
+  <span class="n">Tags</span> <span class="p">{</span><span class="s">"LightMode"</span> <span class="o">=</span> <span class="s">"ForwardBase"</span><span class="p">}</span>     
   <span class="n">CGPROGRAM</span>
-  <span class="cp">#pragma vertex vert</span>
-  <span class="cp">#pragma fragment frag</span>
-  
+  <span class="cp">#pragma vertex vert
+</span>  <span class="cp">#pragma fragment frag
+</span>  
   <span class="n">ENDCG</span>
   <span class="p">}</span>
  
   <span class="n">Pass</span> 
   <span class="p">{</span>
-  <span class="n">Tags</span> <span class="p">{</span><span class="s">&quot;LightMode&quot;</span> <span class="o">=</span> <span class="s">&quot;ForwardAdd&quot;</span><span class="p">}</span>    
+  <span class="n">Tags</span> <span class="p">{</span><span class="s">"LightMode"</span> <span class="o">=</span> <span class="s">"ForwardAdd"</span><span class="p">}</span>    
   <span class="n">Blend</span> <span class="n">One</span> <span class="n">One</span>  
   <span class="n">CGPROGRAM</span>
-  <span class="cp">#pragma vertex vert</span>
-  <span class="cp">#pragma fragment frag</span>
-   
+  <span class="cp">#pragma vertex vert
+</span>  <span class="cp">#pragma fragment frag
+</span>   
   <span class="n">ENDCG</span>
   <span class="p">}</span>
   <span class="p">}</span>
-  <span class="n">Fallback</span> <span class="s">&quot;VertexLit&quot;</span>
+  <span class="n">Fallback</span> <span class="s">"VertexLit"</span>
 <span class="p">}</span></code></pre></div>
 
 <p>Nothing compiles yet, but at least we have the basic structure we’re going to use in place. You can see above that the base and add passes are marked using the LightMode tag. This is a tag which tells unity which pass to use for which. The “Forward” prefix on Add and Base identifies that these passes are for Forward rendering. This tutorial won’t cover Deferred Rendering (mostly because I haven’t wrapped my head around it yet). </p>
@@ -156,17 +156,17 @@ Our shader is on the left, compared to the built in diffuse on the right
 
 <div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="k">struct</span> <span class="n">vertex_input</span>
 <span class="p">{</span>
-  <span class="n">float4</span>  <span class="nl">vertex</span>  <span class="p">:</span> <span class="n">POSITION</span><span class="p">;</span>
-  <span class="n">float3</span>  <span class="nl">normal</span>  <span class="p">:</span> <span class="n">NORMAL</span><span class="p">;</span>
-  <span class="n">float4</span>  <span class="nl">texcoord</span>  <span class="p">:</span> <span class="n">TEXCOORD0</span><span class="p">;</span>
+  <span class="n">float4</span>  <span class="n">vertex</span>  <span class="o">:</span> <span class="n">POSITION</span><span class="p">;</span>
+  <span class="n">float3</span>  <span class="n">normal</span>  <span class="o">:</span> <span class="n">NORMAL</span><span class="p">;</span>
+  <span class="n">float4</span>  <span class="n">texcoord</span>  <span class="o">:</span> <span class="n">TEXCOORD0</span><span class="p">;</span>
 <span class="p">};</span></code></pre></div>
 
 <div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="k">struct</span> <span class="n">vertex_output</span>
 <span class="p">{</span>
-  <span class="n">float4</span>  <span class="nl">pos</span>   <span class="p">:</span> <span class="n">SV_POSITION</span><span class="p">;</span>
-  <span class="n">float2</span>  <span class="nl">uv</span>  <span class="p">:</span> <span class="n">TEXCOORD0</span><span class="p">;</span>
-  <span class="n">float3</span>  <span class="nl">lightDir</span>  <span class="p">:</span> <span class="n">TEXCOORD1</span><span class="p">;</span>
-  <span class="n">float3</span>  <span class="nl">normal</span>  <span class="p">:</span> <span class="n">TEXCOORD2</span><span class="p">;</span>
+  <span class="n">float4</span>  <span class="n">pos</span>   <span class="o">:</span> <span class="n">SV_POSITION</span><span class="p">;</span>
+  <span class="n">float2</span>  <span class="n">uv</span>  <span class="o">:</span> <span class="n">TEXCOORD0</span><span class="p">;</span>
+  <span class="n">float3</span>  <span class="n">lightDir</span>  <span class="o">:</span> <span class="n">TEXCOORD1</span><span class="p">;</span>
+  <span class="n">float3</span>  <span class="n">normal</span>  <span class="o">:</span> <span class="n">TEXCOORD2</span><span class="p">;</span>
   <span class="n">LIGHTING_COORDS</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span> 
 <span class="p">};</span></code></pre></div>
 
@@ -201,7 +201,7 @@ Our shader is on the left, compared to the built in diffuse on the right
 <span class="n">fixed4</span> <span class="n">_Color</span><span class="p">;</span>
 <span class="n">fixed4</span> <span class="n">_LightColor0</span><span class="p">;</span>
 
-<span class="n">half4</span> <span class="nf">frag</span><span class="p">(</span><span class="n">vertex_output</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span> <span class="n">COLOR</span>
+<span class="n">half4</span> <span class="n">frag</span><span class="p">(</span><span class="n">vertex_output</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span> <span class="n">COLOR</span>
 <span class="p">{</span>
   <span class="n">fixed4</span> <span class="n">tex</span> <span class="o">=</span> <span class="n">tex2D</span><span class="p">(</span><span class="n">_MainTex</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">uv</span> <span class="o">*</span> <span class="n">_MainTex_ST</span><span class="p">.</span><span class="n">xy</span> <span class="o">+</span> <span class="n">_MainTex_ST</span><span class="p">.</span><span class="n">zw</span><span class="p">);</span>
   <span class="n">tex</span> <span class="o">*=</span> <span class="n">_Color</span><span class="p">;</span>   
@@ -229,12 +229,12 @@ Our shader is on the left, compared to the built in diffuse on the right
 
 <div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="k">struct</span> <span class="n">vertex_output</span>
 <span class="p">{</span>
-  <span class="n">float4</span>  <span class="nl">pos</span>   <span class="p">:</span> <span class="n">SV_POSITION</span><span class="p">;</span>
-  <span class="n">float2</span>  <span class="nl">uv</span>  <span class="p">:</span> <span class="n">TEXCOORD0</span><span class="p">;</span>
-  <span class="n">float3</span>  <span class="nl">lightDir</span>  <span class="p">:</span> <span class="n">TEXCOORD1</span><span class="p">;</span>
-  <span class="n">float3</span>  <span class="nl">normal</span>  <span class="p">:</span> <span class="n">TEXCOORD2</span><span class="p">;</span>
+  <span class="n">float4</span>  <span class="n">pos</span>   <span class="o">:</span> <span class="n">SV_POSITION</span><span class="p">;</span>
+  <span class="n">float2</span>  <span class="n">uv</span>  <span class="o">:</span> <span class="n">TEXCOORD0</span><span class="p">;</span>
+  <span class="n">float3</span>  <span class="n">lightDir</span>  <span class="o">:</span> <span class="n">TEXCOORD1</span><span class="p">;</span>
+  <span class="n">float3</span>  <span class="n">normal</span>  <span class="o">:</span> <span class="n">TEXCOORD2</span><span class="p">;</span>
   <span class="n">LIGHTING_COORDS</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span> 
-  <span class="n">float3</span>  <span class="nl">vertexLighting</span> <span class="p">:</span> <span class="n">TEXCOORD5</span><span class="p">;</span>
+  <span class="n">float3</span>  <span class="n">vertexLighting</span> <span class="o">:</span> <span class="n">TEXCOORD5</span><span class="p">;</span>
 <span class="p">};</span></code></pre></div>
 
 <p>That pass’ vertex function is now: </p>
@@ -253,8 +253,8 @@ Our shader is on the left, compared to the built in diffuse on the right
 
       <span class="n">o</span><span class="p">.</span><span class="n">vertexLighting</span> <span class="o">=</span> <span class="n">float3</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">);</span>
 
-      <span class="cp">#ifdef VERTEXLIGHT_ON</span>
-
+      <span class="cp">#ifdef VERTEXLIGHT_ON
+</span>
       <span class="n">float3</span> <span class="n">worldN</span> <span class="o">=</span> <span class="n">mul</span><span class="p">((</span><span class="n">float3x3</span><span class="p">)</span><span class="n">_Object2World</span><span class="p">,</span> <span class="n">SCALED_NORMAL</span><span class="p">);</span>
       <span class="n">float4</span> <span class="n">worldPos</span> <span class="o">=</span> <span class="n">mul</span><span class="p">(</span><span class="n">_Object2World</span><span class="p">,</span> <span class="n">v</span><span class="p">.</span><span class="n">vertex</span><span class="p">);</span>
 
@@ -278,14 +278,14 @@ Our shader is on the left, compared to the built in diffuse on the right
         <span class="n">o</span><span class="p">.</span><span class="n">vertexLighting</span> <span class="o">=</span> <span class="n">o</span><span class="p">.</span><span class="n">vertexLighting</span> <span class="o">+</span> <span class="n">diffuseReflection</span> <span class="o">*</span> <span class="mi">2</span><span class="p">;</span>
        <span class="p">}</span>
 
-       <span class="cp">#endif</span>
-
+       <span class="cp">#endif
+</span>
        <span class="k">return</span> <span class="n">o</span><span class="p">;</span>
       <span class="p">}</span></code></pre></div>
 
 <p>and the ForwardBase fragment function is:</p>
 
-<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">fixed4</span> <span class="nf">frag</span><span class="p">(</span><span class="n">vertex_output</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span> <span class="n">COLOR</span>
+<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">fixed4</span> <span class="n">frag</span><span class="p">(</span><span class="n">vertex_output</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span> <span class="n">COLOR</span>
 <span class="p">{</span>
   <span class="n">i</span><span class="p">.</span><span class="n">lightDir</span> <span class="o">=</span> <span class="n">normalize</span><span class="p">(</span><span class="n">i</span><span class="p">.</span><span class="n">lightDir</span><span class="p">);</span>
   <span class="n">fixed</span> <span class="n">atten</span> <span class="o">=</span> <span class="n">LIGHT_ATTENUATION</span><span class="p">(</span><span class="n">i</span><span class="p">);</span> 

@@ -16,7 +16,7 @@ Today I'm going to walk through a different take on the distortion effect that I
 
 Pretty snazzy right? The tricky part of the effect isn't the distortion, it's in getting the edges of the distorted objects to sort "correctly". Or...as correctly as the edge of an object distorted in screen space can.
 
-All of this was done using Unity 5.5.x, so if you've arrived here from the future and are using a different version, you may have to tweak what I present here. 
+All of this was done using Unity 5.5.x, so if you've arrived here from the future and are using a different version, you may have to tweak what I present here.
 
 <h3>A High Level View of the Effect</h3>
 Before we dive into the implementation details, here's a quick outline of what we're going to do to make this effect work:

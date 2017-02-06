@@ -160,7 +160,7 @@
 	<span class="k">return</span> <span class="n">o</span><span class="p">;</span>
 <span class="p">}</span>
 
-<span class="n">fixed4</span> <span class="nf">frag</span><span class="p">(</span><span class="n">vOUT</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span> <span class="n">COLOR</span>
+<span class="n">fixed4</span> <span class="n">frag</span><span class="p">(</span><span class="n">vOUT</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span> <span class="n">COLOR</span>
 <span class="p">{</span>
 	<span class="k">return</span> <span class="n">tex2D</span><span class="p">(</span><span class="n">_MainTex</span><span class="p">,</span> <span class="n">fixed2</span><span class="p">(</span> <span class="n">i</span><span class="p">.</span><span class="n">uv</span><span class="p">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">sin</span><span class="p">(</span><span class="n">i</span><span class="p">.</span><span class="n">uv</span><span class="p">.</span><span class="n">y</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span><span class="o">*</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">uv</span><span class="p">.</span><span class="n">y</span><span class="p">)</span> <span class="p">);</span>
 <span class="p">}</span></code></pre></div>
@@ -178,7 +178,7 @@
 	<span class="n">mainCam</span> <span class="o">=</span> <span class="n">GetComponent</span><span class="o">&lt;</span><span class="n">Camera</span><span class="o">&gt;</span><span class="p">();</span>
 	<span class="n">mainCam</span><span class="p">.</span><span class="n">SetTargetBuffers</span><span class="p">(</span><span class="n">screenRT</span><span class="p">.</span><span class="n">colorBuffer</span><span class="p">,</span> <span class="n">screenRT</span><span class="p">.</span><span class="n">depthBuffer</span><span class="p">);</span>
 
-	<span class="n">effectMaterial</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Material</span><span class="p">(</span><span class="n">Shader</span><span class="p">.</span><span class="n">Find</span><span class="p">(</span><span class="s">&quot;Custom/Composite&quot;</span><span class="p">));</span>
+	<span class="n">effectMaterial</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Material</span><span class="p">(</span><span class="n">Shader</span><span class="p">.</span><span class="n">Find</span><span class="p">(</span><span class="s">"Custom/Composite"</span><span class="p">));</span>
 <span class="p">}</span>
 
 <span class="kt">void</span> <span class="nf">OnPostRender</span><span class="p">()</span>
@@ -210,12 +210,12 @@
 	<span class="n">shieldRT</span> <span class="o">=</span> <span class="k">new</span> <span class="n">RenderTexture</span><span class="p">(</span><span class="n">Screen</span><span class="p">.</span><span class="n">width</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="n">Screen</span><span class="p">.</span><span class="n">height</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span> <span class="n">RenderTextureFormat</span><span class="p">.</span><span class="n">Default</span><span class="p">);</span>
 	<span class="n">shieldRT</span><span class="p">.</span><span class="n">wrapMode</span> <span class="o">=</span> <span class="n">TextureWrapMode</span><span class="p">.</span><span class="n">Repeat</span><span class="p">;</span>
 
-	<span class="n">effectMaterial</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Material</span><span class="p">(</span><span class="n">Shader</span><span class="p">.</span><span class="n">Find</span><span class="p">(</span><span class="s">&quot;Custom/Composite&quot;</span><span class="p">));</span>
+	<span class="n">effectMaterial</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Material</span><span class="p">(</span><span class="n">Shader</span><span class="p">.</span><span class="n">Find</span><span class="p">(</span><span class="s">"Custom/Composite"</span><span class="p">));</span>
 
 	<span class="n">mainCam</span> <span class="o">=</span> <span class="n">GetComponent</span><span class="o">&lt;</span><span class="n">Camera</span><span class="o">&gt;</span><span class="p">();</span>
 	<span class="n">mainCam</span><span class="p">.</span><span class="n">SetTargetBuffers</span><span class="p">(</span><span class="n">screenRT</span><span class="p">.</span><span class="n">colorBuffer</span><span class="p">,</span> <span class="n">screenRT</span><span class="p">.</span><span class="n">depthBuffer</span><span class="p">);</span>
 
-	<span class="n">distortCam</span> <span class="o">=</span> <span class="k">new</span> <span class="n">GameObject</span><span class="p">(</span><span class="s">&quot;DistortionCam&quot;</span><span class="p">).</span><span class="n">AddComponent</span><span class="o">&lt;</span><span class="n">Camera</span><span class="o">&gt;</span><span class="p">();</span>
+	<span class="n">distortCam</span> <span class="o">=</span> <span class="k">new</span> <span class="n">GameObject</span><span class="p">(</span><span class="s">"DistortionCam"</span><span class="p">).</span><span class="n">AddComponent</span><span class="o">&lt;</span><span class="n">Camera</span><span class="o">&gt;</span><span class="p">();</span>
 	<span class="n">distortCam</span><span class="p">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
 <span class="p">}</span>
 
@@ -223,18 +223,18 @@
 <span class="p">{</span>
 	<span class="n">distortCam</span><span class="p">.</span><span class="n">CopyFrom</span><span class="p">(</span><span class="n">mainCam</span><span class="p">);</span>
 	<span class="n">distortCam</span><span class="p">.</span><span class="n">backgroundColor</span> <span class="o">=</span> <span class="n">Color</span><span class="p">.</span><span class="n">grey</span><span class="p">;</span>
-	<span class="n">distortCam</span><span class="p">.</span><span class="n">cullingMask</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">LayerMask</span><span class="p">.</span><span class="n">NameToLayer</span><span class="p">(</span><span class="s">&quot;Shield&quot;</span><span class="p">);</span>
+	<span class="n">distortCam</span><span class="p">.</span><span class="n">cullingMask</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">LayerMask</span><span class="p">.</span><span class="n">NameToLayer</span><span class="p">(</span><span class="s">"Shield"</span><span class="p">);</span>
 	<span class="n">distortCam</span><span class="p">.</span><span class="n">targetTexture</span> <span class="o">=</span> <span class="n">shieldRT</span><span class="p">;</span>
 	<span class="n">distortCam</span><span class="p">.</span><span class="n">Render</span> <span class="p">();</span>
 
-	<span class="n">effectMaterial</span><span class="p">.</span><span class="n">SetTexture</span><span class="p">(</span><span class="s">&quot;_DistortionTex&quot;</span><span class="p">,</span> <span class="n">shieldRT</span><span class="p">);</span>
+	<span class="n">effectMaterial</span><span class="p">.</span><span class="n">SetTexture</span><span class="p">(</span><span class="s">"_DistortionTex"</span><span class="p">,</span> <span class="n">shieldRT</span><span class="p">);</span>
 	<span class="n">Graphics</span><span class="p">.</span><span class="n">Blit</span><span class="p">(</span><span class="n">screenRT</span><span class="p">,</span> <span class="n">null</span><span class="p">,</span> <span class="n">effectMaterial</span><span class="p">);</span>
 <span class="p">}</span></code></pre></div>
 
 <p>If you run this now (and make the shieldRT public), you’ll be able to see that we are successfully drawing into our shield buffer, but our effect shader isn’t doing anything useful with that data yet, so let’s look at that next. For this initial step, let’s modify the composite shader to simply subtract the G and B values of the distortion texture from the screen uvs:</p>
 
 <div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">sampler2D</span> <span class="n">_DistortionTex</span><span class="p">;</span>
-<span class="n">fixed4</span> <span class="nf">frag</span><span class="p">(</span><span class="n">vOUT</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span> <span class="n">COLOR</span>
+<span class="n">fixed4</span> <span class="n">frag</span><span class="p">(</span><span class="n">vOUT</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span> <span class="n">COLOR</span>
 <span class="p">{</span>
 	<span class="n">fixed4</span> <span class="n">distort</span> <span class="o">=</span> <span class="n">tex2D</span><span class="p">(</span><span class="n">_DistortionTex</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">uv</span><span class="p">);</span>
 	<span class="n">fixed4</span> <span class="n">tex</span> <span class="o">=</span> <span class="n">tex2D</span><span class="p">(</span><span class="n">_MainTex</span><span class="p">,</span> <span class="n">fixed2</span><span class="p">(</span><span class="n">i</span><span class="p">.</span><span class="n">uv</span><span class="p">.</span><span class="n">xy</span> <span class="o">-</span> <span class="p">(</span><span class="n">distort</span><span class="p">.</span><span class="n">gb</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)));</span>
@@ -258,24 +258,24 @@
 <p>Let’s use the following as a starting point: </p>
 
 <div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">CGPROGRAM</span>
-<span class="cp">#pragma vertex vert</span>
-<span class="cp">#pragma fragment frag</span>
-<span class="cp">#include &quot;ShieldEffect.cginc&quot;</span>
-
+<span class="cp">#pragma vertex vert
+#pragma fragment frag
+#include "ShieldEffect.cginc"
+</span>
 <span class="k">struct</span> <span class="n">vIN</span>
 <span class="p">{</span>
-	<span class="n">float4</span> <span class="nl">vertex</span> <span class="p">:</span> <span class="n">POSITION</span><span class="p">;</span>
-	<span class="n">float2</span> <span class="nl">texcoord</span> <span class="p">:</span> <span class="n">TEXCOORD0</span><span class="p">;</span>
-	<span class="n">float3</span> <span class="nl">normal</span> <span class="p">:</span> <span class="n">NORMAL</span><span class="p">;</span>
+	<span class="n">float4</span> <span class="n">vertex</span> <span class="o">:</span> <span class="n">POSITION</span><span class="p">;</span>
+	<span class="n">float2</span> <span class="n">texcoord</span> <span class="o">:</span> <span class="n">TEXCOORD0</span><span class="p">;</span>
+	<span class="n">float3</span> <span class="n">normal</span> <span class="o">:</span> <span class="n">NORMAL</span><span class="p">;</span>
 <span class="p">};</span>
 
 <span class="k">struct</span> <span class="n">vOUT</span>
 <span class="p">{</span>
-	<span class="n">float4</span> <span class="nl">pos</span> <span class="p">:</span> <span class="n">SV_POSITION</span><span class="p">;</span>
-	<span class="n">float3</span> <span class="nl">oPos</span> <span class="p">:</span> <span class="n">TEXCOORD0</span><span class="p">;</span>
-	<span class="n">float3</span> <span class="nl">wPos</span> <span class="p">:</span> <span class="n">TEXCOORD1</span><span class="p">;</span>
-	<span class="n">float3</span> <span class="nl">wNorm</span> <span class="p">:</span> <span class="n">TEXCOORD2</span><span class="p">;</span>
-	<span class="n">float3</span> <span class="nl">objPos</span> <span class="p">:</span> <span class="n">TEXCOORD3</span><span class="p">;</span>
+	<span class="n">float4</span> <span class="n">pos</span> <span class="o">:</span> <span class="n">SV_POSITION</span><span class="p">;</span>
+	<span class="n">float3</span> <span class="n">oPos</span> <span class="o">:</span> <span class="n">TEXCOORD0</span><span class="p">;</span>
+	<span class="n">float3</span> <span class="n">wPos</span> <span class="o">:</span> <span class="n">TEXCOORD1</span><span class="p">;</span>
+	<span class="n">float3</span> <span class="n">wNorm</span> <span class="o">:</span> <span class="n">TEXCOORD2</span><span class="p">;</span>
+	<span class="n">float3</span> <span class="n">objPos</span> <span class="o">:</span> <span class="n">TEXCOORD3</span><span class="p">;</span>
 <span class="p">};</span>
 
 <span class="n">sampler2D</span> <span class="n">_MainTex</span><span class="p">;</span>
@@ -293,7 +293,7 @@
 	<span class="k">return</span> <span class="n">o</span><span class="p">;</span>
 <span class="p">}</span>
 
-<span class="n">fixed4</span> <span class="nf">frag</span><span class="p">(</span><span class="n">vOUT</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span> <span class="n">COLOR</span>
+<span class="n">fixed4</span> <span class="n">frag</span><span class="p">(</span><span class="n">vOUT</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span> <span class="n">COLOR</span>
 <span class="p">{</span>
 	<span class="n">fixed4</span> <span class="n">tex</span> <span class="o">=</span> <span class="n">fixed4</span><span class="p">(</span><span class="n">i</span><span class="p">.</span><span class="n">oPos</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="n">i</span><span class="p">.</span><span class="n">oPos</span><span class="p">.</span><span class="n">y</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">);</span>
 	<span class="kt">float</span> <span class="n">intensity</span> <span class="o">=</span> <span class="n">CalcShieldIntensity16</span><span class="p">(</span><span class="n">i</span><span class="p">.</span><span class="n">objPos</span><span class="p">);</span>
@@ -366,17 +366,17 @@
 	<span class="n">shieldRT</span> <span class="o">=</span> <span class="k">new</span> <span class="n">RenderTexture</span><span class="p">(</span><span class="n">Screen</span><span class="p">.</span><span class="n">width</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="n">Screen</span><span class="p">.</span><span class="n">height</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span> <span class="n">RenderTextureFormat</span><span class="p">.</span><span class="n">Default</span><span class="p">);</span>
 	<span class="n">shieldRT</span><span class="p">.</span><span class="n">wrapMode</span> <span class="o">=</span> <span class="n">TextureWrapMode</span><span class="p">.</span><span class="n">Repeat</span><span class="p">;</span>
 
-	<span class="n">shieldReplacementShader</span> <span class="o">=</span> <span class="n">Shader</span><span class="p">.</span><span class="n">Find</span><span class="p">(</span><span class="s">&quot;Custom/Replacement&quot;</span><span class="p">);</span>
-	<span class="n">effectMaterial</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Material</span><span class="p">(</span><span class="n">Shader</span><span class="p">.</span><span class="n">Find</span><span class="p">(</span><span class="s">&quot;Custom/Composite&quot;</span><span class="p">));</span>
+	<span class="n">shieldReplacementShader</span> <span class="o">=</span> <span class="n">Shader</span><span class="p">.</span><span class="n">Find</span><span class="p">(</span><span class="s">"Custom/Replacement"</span><span class="p">);</span>
+	<span class="n">effectMaterial</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Material</span><span class="p">(</span><span class="n">Shader</span><span class="p">.</span><span class="n">Find</span><span class="p">(</span><span class="s">"Custom/Composite"</span><span class="p">));</span>
 
 	<span class="n">mainCam</span> <span class="o">=</span> <span class="n">GetComponent</span><span class="o">&lt;</span><span class="n">Camera</span><span class="o">&gt;</span><span class="p">();</span>
 	<span class="n">mainCam</span><span class="p">.</span><span class="n">SetTargetBuffers</span><span class="p">(</span><span class="n">screenRT</span><span class="p">.</span><span class="n">colorBuffer</span><span class="p">,</span> <span class="n">screenRT</span><span class="p">.</span><span class="n">depthBuffer</span><span class="p">);</span>
-	<span class="n">mainCam</span><span class="p">.</span><span class="n">cullingMask</span> <span class="o">&amp;=</span> <span class="o">~</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">LayerMask</span><span class="p">.</span><span class="n">NameToLayer</span><span class="p">(</span><span class="s">&quot;Shield&quot;</span><span class="p">));</span>
+	<span class="n">mainCam</span><span class="p">.</span><span class="n">cullingMask</span> <span class="o">&amp;=</span> <span class="o">~</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">LayerMask</span><span class="p">.</span><span class="n">NameToLayer</span><span class="p">(</span><span class="s">"Shield"</span><span class="p">));</span>
 
-	<span class="n">distortCam</span> <span class="o">=</span> <span class="k">new</span> <span class="n">GameObject</span><span class="p">(</span><span class="s">&quot;DistortionCam&quot;</span><span class="p">).</span><span class="n">AddComponent</span><span class="o">&lt;</span><span class="n">Camera</span><span class="o">&gt;</span><span class="p">();</span>
+	<span class="n">distortCam</span> <span class="o">=</span> <span class="k">new</span> <span class="n">GameObject</span><span class="p">(</span><span class="s">"DistortionCam"</span><span class="p">).</span><span class="n">AddComponent</span><span class="o">&lt;</span><span class="n">Camera</span><span class="o">&gt;</span><span class="p">();</span>
 	<span class="n">distortCam</span><span class="p">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
 
-	<span class="n">shieldCam</span> <span class="o">=</span> <span class="k">new</span> <span class="n">GameObject</span><span class="p">(</span><span class="s">&quot;Shield Cam&quot;</span><span class="p">).</span><span class="n">AddComponent</span><span class="o">&lt;</span><span class="n">Camera</span><span class="o">&gt;</span><span class="p">();</span>	
+	<span class="n">shieldCam</span> <span class="o">=</span> <span class="k">new</span> <span class="n">GameObject</span><span class="p">(</span><span class="s">"Shield Cam"</span><span class="p">).</span><span class="n">AddComponent</span><span class="o">&lt;</span><span class="n">Camera</span><span class="o">&gt;</span><span class="p">();</span>	
 <span class="p">}</span>
 
 <span class="kt">void</span> <span class="nf">Update</span><span class="p">()</span>
@@ -386,13 +386,13 @@
 	<span class="n">shieldCam</span><span class="p">.</span><span class="n">depth</span> <span class="o">=</span> <span class="n">mainCam</span><span class="p">.</span><span class="n">depth</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
 	<span class="n">shieldCam</span><span class="p">.</span><span class="n">transform</span><span class="p">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">mainCam</span><span class="p">.</span><span class="n">transform</span><span class="p">.</span><span class="n">position</span><span class="p">;</span>
 	<span class="n">shieldCam</span><span class="p">.</span><span class="n">transform</span><span class="p">.</span><span class="n">rotation</span> <span class="o">=</span> <span class="n">mainCam</span><span class="p">.</span><span class="n">transform</span><span class="p">.</span><span class="n">rotation</span><span class="p">;</span>
-	<span class="n">shieldCam</span><span class="p">.</span><span class="n">cullingMask</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">LayerMask</span><span class="p">.</span><span class="n">NameToLayer</span><span class="p">(</span><span class="s">&quot;Shield&quot;</span><span class="p">);</span>
+	<span class="n">shieldCam</span><span class="p">.</span><span class="n">cullingMask</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">LayerMask</span><span class="p">.</span><span class="n">NameToLayer</span><span class="p">(</span><span class="s">"Shield"</span><span class="p">);</span>
 	<span class="n">shieldCam</span><span class="p">.</span><span class="n">fieldOfView</span> <span class="o">=</span> <span class="n">mainCam</span><span class="p">.</span><span class="n">fieldOfView</span><span class="p">;</span>
 	<span class="n">shieldCam</span><span class="p">.</span><span class="n">orthographic</span> <span class="o">=</span> <span class="n">mainCam</span><span class="p">.</span><span class="n">orthographic</span><span class="p">;</span>
 	<span class="n">shieldCam</span><span class="p">.</span><span class="n">orthographicSize</span> <span class="o">=</span> <span class="n">mainCam</span><span class="p">.</span><span class="n">orthographicSize</span><span class="p">;</span>
 <span class="p">}</span>
 
-<span class="kt">void</span> <span class="nf">OnPostRender</span><span class="p">(){...}</span></code></pre></div>
+<span class="kt">void</span> <span class="n">OnPostRender</span><span class="p">(){...}</span></code></pre></div>
 
 <p>Notice that we also added a line to remove the Shield layer from the main camera’s culling mask. Now that we have a second camera doing this for us, that camera doesn’t need to create draw calls to incorrectly render the shield colour. </p>
 
@@ -438,7 +438,7 @@
 <div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="kt">void</span> <span class="nf">OnPostRender</span><span class="p">()</span>
 <span class="p">{</span>
 <span class="p">...</span>
-<span class="n">effectMaterial</span><span class="p">.</span><span class="n">SetTexture</span><span class="p">(</span><span class="s">&quot;_DistortionTex&quot;</span><span class="p">,</span> <span class="n">shieldRT</span><span class="p">);</span>
+<span class="n">effectMaterial</span><span class="p">.</span><span class="n">SetTexture</span><span class="p">(</span><span class="s">"_DistortionTex"</span><span class="p">,</span> <span class="n">shieldRT</span><span class="p">);</span>
 <span class="n">Graphics</span><span class="p">.</span><span class="n">Blit</span><span class="p">(</span><span class="n">screenRT</span><span class="p">,</span> <span class="n">null</span><span class="p">,</span> <span class="n">effectMaterial</span><span class="p">);</span>
 <span class="p">}</span></code></pre></div>
 
@@ -447,8 +447,8 @@
 <div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="kt">void</span> <span class="nf">OnPostRender</span><span class="p">()</span>
 <span class="p">{</span>
 <span class="p">...</span>
-<span class="n">Shader</span><span class="p">.</span><span class="n">SetGlobalTexture</span><span class="p">(</span><span class="s">&quot;_DistortionBuffer&quot;</span><span class="p">,</span> <span class="n">shieldRT</span><span class="p">);</span>
-<span class="n">Shader</span><span class="p">.</span><span class="n">SetGlobalTexture</span><span class="p">(</span><span class="s">&quot;_ScreenBuffer&quot;</span><span class="p">,</span> <span class="n">screenRT</span><span class="p">);</span>
+<span class="n">Shader</span><span class="p">.</span><span class="n">SetGlobalTexture</span><span class="p">(</span><span class="s">"_DistortionBuffer"</span><span class="p">,</span> <span class="n">shieldRT</span><span class="p">);</span>
+<span class="n">Shader</span><span class="p">.</span><span class="n">SetGlobalTexture</span><span class="p">(</span><span class="s">"_ScreenBuffer"</span><span class="p">,</span> <span class="n">screenRT</span><span class="p">);</span>
 
 <span class="n">Graphics</span><span class="p">.</span><span class="n">Blit</span><span class="p">(</span><span class="n">screenRT</span><span class="p">,</span> <span class="n">finalRT</span><span class="p">);</span>
 <span class="p">}</span></code></pre></div>
@@ -490,16 +490,16 @@
 	<span class="n">shieldRT</span> <span class="o">=</span> <span class="k">new</span> <span class="n">RenderTexture</span><span class="p">(</span><span class="n">Screen</span><span class="p">.</span><span class="n">width</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="n">Screen</span><span class="p">.</span><span class="n">height</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="mi">16</span><span class="p">,</span> <span class="n">RenderTextureFormat</span><span class="p">.</span><span class="n">Default</span><span class="p">);</span>
 	<span class="n">shieldRT</span><span class="p">.</span><span class="n">wrapMode</span> <span class="o">=</span> <span class="n">TextureWrapMode</span><span class="p">.</span><span class="n">Repeat</span><span class="p">;</span>
 	
-	<span class="n">shieldReplacementShader</span> <span class="o">=</span> <span class="n">Shader</span><span class="p">.</span><span class="n">Find</span><span class="p">(</span><span class="s">&quot;Custom/Replacement&quot;</span><span class="p">);</span>
+	<span class="n">shieldReplacementShader</span> <span class="o">=</span> <span class="n">Shader</span><span class="p">.</span><span class="n">Find</span><span class="p">(</span><span class="s">"Custom/Replacement"</span><span class="p">);</span>
 	
 	<span class="n">mainCam</span> <span class="o">=</span> <span class="n">GetComponent</span><span class="o">&lt;</span><span class="n">Camera</span><span class="o">&gt;</span><span class="p">();</span>
 	<span class="n">mainCam</span><span class="p">.</span><span class="n">SetTargetBuffers</span><span class="p">(</span><span class="n">screenRT</span><span class="p">.</span><span class="n">colorBuffer</span><span class="p">,</span> <span class="n">depthRT</span><span class="p">.</span><span class="n">depthBuffer</span><span class="p">);</span>
-	<span class="n">mainCam</span><span class="p">.</span><span class="n">cullingMask</span> <span class="o">&amp;=</span> <span class="o">~</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">LayerMask</span><span class="p">.</span><span class="n">NameToLayer</span><span class="p">(</span><span class="s">&quot;Shield&quot;</span><span class="p">));</span>
+	<span class="n">mainCam</span><span class="p">.</span><span class="n">cullingMask</span> <span class="o">&amp;=</span> <span class="o">~</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">LayerMask</span><span class="p">.</span><span class="n">NameToLayer</span><span class="p">(</span><span class="s">"Shield"</span><span class="p">));</span>
 	
-	<span class="n">distortCam</span> <span class="o">=</span> <span class="k">new</span> <span class="n">GameObject</span><span class="p">(</span><span class="s">&quot;DistortionCam&quot;</span><span class="p">).</span><span class="n">AddComponent</span><span class="o">&lt;</span><span class="n">Camera</span><span class="o">&gt;</span><span class="p">();</span>
+	<span class="n">distortCam</span> <span class="o">=</span> <span class="k">new</span> <span class="n">GameObject</span><span class="p">(</span><span class="s">"DistortionCam"</span><span class="p">).</span><span class="n">AddComponent</span><span class="o">&lt;</span><span class="n">Camera</span><span class="o">&gt;</span><span class="p">();</span>
 	<span class="n">distortCam</span><span class="p">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
 	
-	<span class="n">shieldCam</span> <span class="o">=</span> <span class="k">new</span> <span class="n">GameObject</span><span class="p">(</span><span class="s">&quot;Shield Cam&quot;</span><span class="p">).</span><span class="n">AddComponent</span><span class="o">&lt;</span><span class="n">Camera</span><span class="o">&gt;</span><span class="p">();</span>	
+	<span class="n">shieldCam</span> <span class="o">=</span> <span class="k">new</span> <span class="n">GameObject</span><span class="p">(</span><span class="s">"Shield Cam"</span><span class="p">).</span><span class="n">AddComponent</span><span class="o">&lt;</span><span class="n">Camera</span><span class="o">&gt;</span><span class="p">();</span>	
 	<span class="n">shieldCam</span><span class="p">.</span><span class="n">SetTargetBuffers</span><span class="p">(</span><span class="n">finalRT</span><span class="p">.</span><span class="n">colorBuffer</span><span class="p">,</span> <span class="n">depthRT</span><span class="p">.</span><span class="n">depthBuffer</span><span class="p">);</span>
 <span class="p">}</span>
 <span class="p">...</span></code></pre></div>
@@ -529,7 +529,7 @@
 
 <p>There’s one last thing we need to do to finish this effect, and that’s to move the logic that used to live in our composite shader to the shader we use to draw our shields. There’s a completed shader at the end of this article but all we’re doing is adding uniforms to the shader so we can see the screenRT and shieldRT (the warp buffer), and then filling in areas of our object that would be transparent if we were alpha blending with a distorted lookup into screenRT. The addition to the fragment shader looks like this: </p>
 
-<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">fixed4</span> <span class="nf">frag</span><span class="p">(</span><span class="n">v2f</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span> <span class="n">SV_Target</span>
+<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">fixed4</span> <span class="n">frag</span><span class="p">(</span><span class="n">v2f</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span> <span class="n">SV_Target</span>
 <span class="p">{</span>
 <span class="n">float3</span> <span class="n">viewdir</span> <span class="o">=</span> <span class="n">normalize</span><span class="p">(</span><span class="n">_WorldSpaceCameraPos</span> <span class="o">-</span> <span class="n">i</span><span class="p">.</span><span class="n">worldPos</span><span class="p">);</span>
 <span class="kt">float</span> <span class="n">ang</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="n">abs</span><span class="p">(</span><span class="n">dot</span><span class="p">(</span><span class="n">viewdir</span><span class="p">,</span> <span class="n">normalize</span><span class="p">(</span><span class="n">i</span><span class="p">.</span><span class="n">normal</span><span class="p">))));</span>

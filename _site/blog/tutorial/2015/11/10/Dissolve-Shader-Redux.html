@@ -129,7 +129,7 @@
 
 <p>As a fragment function, the above logic might look like this:</p>
 
-<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">fixed4</span> <span class="nf">frag</span><span class="p">(</span><span class="n">vOUT</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span> <span class="n">COLOR</span>
+<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">fixed4</span> <span class="n">frag</span><span class="p">(</span><span class="n">vOUT</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span> <span class="n">COLOR</span>
 <span class="p">{</span>
 	<span class="n">fixed4</span> <span class="n">mainTex</span> <span class="o">=</span> <span class="n">tex2D</span><span class="p">(</span><span class="n">_MainTex</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">uv</span><span class="p">);</span>
 	<span class="n">fixed</span> <span class="n">noiseVal</span> <span class="o">=</span> <span class="n">tex2D</span><span class="p">(</span><span class="n">_NoiseTex</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">uv</span><span class="p">).</span><span class="n">r</span><span class="p">;</span>
@@ -154,7 +154,7 @@
 
 <p>This might sound tricky, but it isn’t as long as you set the wrap mode of your gradient to “clamp,” so that we can get values outside the range of 0 and 1.Provided that’s set up correctly, the following will work just fine: </p>
 
-<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">fixed4</span> <span class="nf">frag</span><span class="p">(</span><span class="n">vOUT</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span> <span class="n">COLOR</span>
+<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">fixed4</span> <span class="n">frag</span><span class="p">(</span><span class="n">vOUT</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span> <span class="n">COLOR</span>
 <span class="p">{</span> 
 	<span class="n">fixed4</span> <span class="n">mainTex</span> <span class="o">=</span> <span class="n">tex2D</span><span class="p">(</span><span class="n">_MainTex</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">uv</span><span class="p">);</span>
 	<span class="n">fixed</span> <span class="n">noiseVal</span> <span class="o">=</span> <span class="n">tex2D</span><span class="p">(</span><span class="n">_NoiseTex</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">uv</span><span class="p">).</span><span class="n">r</span><span class="p">;</span>
@@ -201,7 +201,7 @@
 
 <div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="kt">void</span> <span class="nf">Start</span><span class="p">()</span>
 <span class="p">{</span>
-	<span class="kt">float</span> <span class="n">maxVal</span> <span class="o">=</span> <span class="mf">0.0f</span><span class="p">;</span>
+	<span class="kt">float</span> <span class="n">maxVal</span> <span class="o">=</span> <span class="mf">0.0</span><span class="n">f</span><span class="p">;</span>
 	<span class="n">Material</span> <span class="n">dissolveMaterial</span> <span class="o">=</span> <span class="n">GetComponent</span><span class="o">&lt;</span><span class="n">Renderer</span><span class="o">&gt;</span><span class="p">().</span><span class="n">material</span><span class="p">;</span>
 	<span class="n">var</span> <span class="n">verts</span> <span class="o">=</span> <span class="n">GetComponent</span><span class="o">&lt;</span><span class="n">MeshFilter</span><span class="o">&gt;</span><span class="p">().</span><span class="n">mesh</span><span class="p">.</span><span class="n">vertices</span><span class="p">;</span>
 	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">verts</span><span class="p">.</span><span class="n">Length</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
@@ -215,12 +215,12 @@
 			<span class="k">if</span> <span class="p">(</span> <span class="n">mag</span> <span class="o">&gt;</span> <span class="n">maxVal</span> <span class="p">)</span> <span class="n">maxVal</span> <span class="o">=</span> <span class="n">mag</span><span class="p">;</span>
 		<span class="p">}</span>
 	<span class="p">}</span>
-	<span class="n">dissolveMaterial</span><span class="p">.</span><span class="n">SetFloat</span><span class="p">(</span><span class="s">&quot;_LargestVal&quot;</span><span class="p">,</span> <span class="n">maxVal</span> <span class="o">*</span> <span class="mf">0.5f</span><span class="p">);</span>
+	<span class="n">dissolveMaterial</span><span class="p">.</span><span class="n">SetFloat</span><span class="p">(</span><span class="s">"_LargestVal"</span><span class="p">,</span> <span class="n">maxVal</span> <span class="o">*</span> <span class="mf">0.5</span><span class="n">f</span><span class="p">);</span>
 <span class="p">}</span></code></pre></div>
 
 <p>Using this value, we can modify our fragment function to look like so:</p>
 
-<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">fixed4</span> <span class="nf">frag</span><span class="p">(</span><span class="n">vOUT</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span> <span class="n">COLOR</span>
+<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">fixed4</span> <span class="n">frag</span><span class="p">(</span><span class="n">vOUT</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span> <span class="n">COLOR</span>
 <span class="p">{</span>
 	<span class="n">fixed4</span> <span class="n">mainTex</span> <span class="o">=</span> <span class="n">tex2D</span><span class="p">(</span><span class="n">_MainTex</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">uv</span><span class="p">);</span>
 	<span class="n">fixed</span> <span class="n">noiseVal</span> <span class="o">=</span> <span class="n">tex2D</span><span class="p">(</span><span class="n">_NoiseTex</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">uv</span><span class="p">).</span><span class="n">r</span><span class="p">;</span>
@@ -236,7 +236,7 @@
 
 <p>This actually is pretty close to our end product, but now we have a new problem: by scaling our distance like this, we no longer can guarantee that we have a fully opaque mesh at _DissolveValue 1. What we need to do is make our divisor smaller for higher values of _DissolveValue, which can be done like so: </p>
 
-<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">fixed4</span> <span class="nf">frag</span><span class="p">(</span><span class="n">vOUT</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span> <span class="n">COLOR</span>
+<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">fixed4</span> <span class="n">frag</span><span class="p">(</span><span class="n">vOUT</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span> <span class="n">COLOR</span>
 <span class="p">{</span>
 	<span class="n">fixed4</span> <span class="n">mainTex</span> <span class="o">=</span> <span class="n">tex2D</span><span class="p">(</span><span class="n">_MainTex</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">uv</span><span class="p">);</span>
 	<span class="n">fixed</span> <span class="n">noiseVal</span> <span class="o">=</span> <span class="n">tex2D</span><span class="p">(</span><span class="n">_NoiseTex</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">uv</span><span class="p">).</span><span class="n">r</span><span class="p">;</span>
@@ -267,21 +267,21 @@
 
 <p>To do that, let’s expand the script we used to set the max value and give it some additional logic. We also will need to modify our above start function to use the variable _dissolveMaterial instead of the one we used before, which was scoped locally to our start function. I’m going to leave that out here, but the full source is available at the end.</p>
 
-<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="k">private</span> <span class="kt">float</span> <span class="n">_value</span> <span class="o">=</span> <span class="mf">1.0f</span><span class="p">;</span>
+<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="k">private</span> <span class="kt">float</span> <span class="n">_value</span> <span class="o">=</span> <span class="mf">1.0</span><span class="n">f</span><span class="p">;</span>
 <span class="k">private</span> <span class="kt">bool</span> <span class="n">_isRunning</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
 <span class="k">private</span> <span class="n">Material</span> <span class="n">_dissolveMaterial</span> <span class="o">=</span> <span class="n">null</span><span class="p">;</span>
-<span class="k">public</span> <span class="kt">float</span> <span class="n">timeScale</span> <span class="o">=</span> <span class="mf">1.0f</span><span class="p">;</span>
+<span class="k">public</span> <span class="kt">float</span> <span class="n">timeScale</span> <span class="o">=</span> <span class="mf">1.0</span><span class="n">f</span><span class="p">;</span>
 
 <span class="k">public</span> <span class="kt">void</span> <span class="nf">Reset</span><span class="p">()</span>
 <span class="p">{</span>
-	<span class="n">_value</span> <span class="o">=</span> <span class="mf">1.0f</span><span class="p">;</span>
-	<span class="n">_dissolveMaterial</span><span class="p">.</span><span class="n">SetFloat</span><span class="p">(</span><span class="s">&quot;_DissolveValue&quot;</span><span class="p">,</span> <span class="n">_value</span><span class="p">);</span>
+	<span class="n">_value</span> <span class="o">=</span> <span class="mf">1.0</span><span class="n">f</span><span class="p">;</span>
+	<span class="n">_dissolveMaterial</span><span class="p">.</span><span class="n">SetFloat</span><span class="p">(</span><span class="s">"_DissolveValue"</span><span class="p">,</span> <span class="n">_value</span><span class="p">);</span>
 <span class="p">}</span>
 
 <span class="k">public</span> <span class="kt">void</span> <span class="nf">TriggerDissolve</span><span class="p">(</span><span class="n">Vector3</span> <span class="n">hitPoint</span><span class="p">)</span>
 <span class="p">{</span>
-	<span class="n">_value</span> <span class="o">=</span> <span class="mf">1.0f</span><span class="p">;</span>
-	<span class="n">_dissolveMaterial</span><span class="p">.</span><span class="n">SetVector</span><span class="p">(</span><span class="s">&quot;_HitPos&quot;</span><span class="p">,</span> <span class="p">(</span><span class="k">new</span> <span class="n">Vector4</span><span class="p">(</span><span class="n">hitPoint</span><span class="p">.</span><span class="n">x</span><span class="p">,</span> <span class="n">hitPoint</span><span class="p">.</span><span class="n">y</span><span class="p">,</span> <span class="n">hitPoint</span><span class="p">.</span><span class="n">z</span><span class="p">,</span> <span class="mf">1.0f</span><span class="p">)));</span>
+	<span class="n">_value</span> <span class="o">=</span> <span class="mf">1.0</span><span class="n">f</span><span class="p">;</span>
+	<span class="n">_dissolveMaterial</span><span class="p">.</span><span class="n">SetVector</span><span class="p">(</span><span class="s">"_HitPos"</span><span class="p">,</span> <span class="p">(</span><span class="k">new</span> <span class="n">Vector4</span><span class="p">(</span><span class="n">hitPoint</span><span class="p">.</span><span class="n">x</span><span class="p">,</span> <span class="n">hitPoint</span><span class="p">.</span><span class="n">y</span><span class="p">,</span> <span class="n">hitPoint</span><span class="p">.</span><span class="n">z</span><span class="p">,</span> <span class="mf">1.0</span><span class="n">f</span><span class="p">)));</span>
 	<span class="n">_isRunning</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
 <span class="p">}</span>
 
@@ -289,8 +289,8 @@
 <span class="p">{</span>
 	<span class="k">if</span> <span class="p">(</span><span class="n">_isRunning</span><span class="p">)</span>
 	<span class="p">{</span>
-		<span class="n">_value</span> <span class="o">=</span> <span class="n">Mathf</span><span class="p">.</span><span class="n">Max</span><span class="p">(</span><span class="mf">0.0f</span><span class="p">,</span> <span class="n">_value</span> <span class="o">-</span> <span class="n">Time</span><span class="p">.</span><span class="n">deltaTime</span><span class="o">*</span><span class="n">timeScale</span><span class="p">);</span>
-		<span class="n">_dissolveMaterial</span><span class="p">.</span><span class="n">SetFloat</span><span class="p">(</span><span class="s">&quot;_DissolveValue&quot;</span><span class="p">,</span> <span class="n">_value</span><span class="p">);</span>
+		<span class="n">_value</span> <span class="o">=</span> <span class="n">Mathf</span><span class="p">.</span><span class="n">Max</span><span class="p">(</span><span class="mf">0.0</span><span class="n">f</span><span class="p">,</span> <span class="n">_value</span> <span class="o">-</span> <span class="n">Time</span><span class="p">.</span><span class="n">deltaTime</span><span class="o">*</span><span class="n">timeScale</span><span class="p">);</span>
+		<span class="n">_dissolveMaterial</span><span class="p">.</span><span class="n">SetFloat</span><span class="p">(</span><span class="s">"_DissolveValue"</span><span class="p">,</span> <span class="n">_value</span><span class="p">);</span>
 	<span class="p">}</span>
 <span class="p">}</span></code></pre></div>
 

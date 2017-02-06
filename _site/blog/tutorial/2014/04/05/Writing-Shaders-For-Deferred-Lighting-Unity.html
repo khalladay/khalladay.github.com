@@ -178,20 +178,20 @@
 
 <p>To start off, create a new shader. Unity will give you a skeleton of a surface shader. I’ll post it here for those of you not playing along at home:</p>
 
-<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">Shader</span> <span class="s">&quot;Custom/DeferredDiffuse&quot;</span>
+<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">Shader</span> <span class="s">"Custom/DeferredDiffuse"</span>
 <span class="p">{</span>
 <span class="n">Properties</span> 
 <span class="p">{</span>
-	<span class="n">_MainTex</span> <span class="p">(</span><span class="s">&quot;Base (RGB)&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="n">D</span><span class="p">)</span> <span class="o">=</span> <span class="s">&quot;white&quot;</span> <span class="p">{}</span>
+	<span class="n">_MainTex</span> <span class="p">(</span><span class="s">"Base (RGB)"</span><span class="p">,</span> <span class="mi">2</span><span class="n">D</span><span class="p">)</span> <span class="o">=</span> <span class="s">"white"</span> <span class="p">{}</span>
 <span class="p">}</span>
 <span class="n">SubShader</span> 
 <span class="p">{</span>
-	<span class="n">Tags</span> <span class="p">{</span> <span class="s">&quot;RenderType&quot;</span><span class="o">=</span><span class="s">&quot;Opaque&quot;</span> <span class="p">}</span>
+	<span class="n">Tags</span> <span class="p">{</span> <span class="s">"RenderType"</span><span class="o">=</span><span class="s">"Opaque"</span> <span class="p">}</span>
 	<span class="n">LOD</span> <span class="mi">200</span>
 	
 	<span class="n">CGPROGRAM</span>
-	<span class="cp">#pragma surface surf Lambert</span>
-
+	<span class="cp">#pragma surface surf Lambert
+</span>
 	<span class="n">sampler2D</span> <span class="n">_MainTex</span><span class="p">;</span>
 
 	<span class="k">struct</span> <span class="n">Input</span> <span class="p">{</span>
@@ -234,20 +234,20 @@
 
 </div>
 
-<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">Shader</span> <span class="s">&quot;Custom/DeferredDiffuse&quot;</span>
+<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">Shader</span> <span class="s">"Custom/DeferredDiffuse"</span>
 <span class="p">{</span>
 <span class="n">Properties</span> 
 <span class="p">{</span>
-	<span class="n">_MainTex</span> <span class="p">(</span><span class="s">&quot;Base (RGB)&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="n">D</span><span class="p">)</span> <span class="o">=</span> <span class="s">&quot;white&quot;</span> <span class="p">{}</span>
+	<span class="n">_MainTex</span> <span class="p">(</span><span class="s">"Base (RGB)"</span><span class="p">,</span> <span class="mi">2</span><span class="n">D</span><span class="p">)</span> <span class="o">=</span> <span class="s">"white"</span> <span class="p">{}</span>
 <span class="p">}</span>
 <span class="n">SubShader</span> 
 <span class="p">{</span>
-	<span class="n">Tags</span> <span class="p">{</span> <span class="s">&quot;RenderType&quot;</span><span class="o">=</span><span class="s">&quot;Opaque&quot;</span> <span class="p">}</span>
+	<span class="n">Tags</span> <span class="p">{</span> <span class="s">"RenderType"</span><span class="o">=</span><span class="s">"Opaque"</span> <span class="p">}</span>
 	<span class="n">LOD</span> <span class="mi">200</span>
 	
 	<span class="n">CGPROGRAM</span>
-	<span class="cp">#pragma surface surf MyDiffuse</span>
-
+	<span class="cp">#pragma surface surf MyDiffuse
+</span>
 	<span class="n">sampler2D</span> <span class="n">_MainTex</span><span class="p">;</span>
 
 	<span class="k">struct</span> <span class="n">Input</span> <span class="p">{</span>

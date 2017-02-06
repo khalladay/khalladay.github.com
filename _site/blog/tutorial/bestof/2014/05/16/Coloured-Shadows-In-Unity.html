@@ -119,18 +119,18 @@
 
 <p>The default diffuse shader is in a file called Normal-Diffuse.shader. So let’s open it up, and copy the contents into a new shader in Unity: </p>
 
-<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">Shader</span> <span class="s">&quot;Colored Diffuse&quot;</span> <span class="p">{</span>
+<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">Shader</span> <span class="s">"Colored Diffuse"</span> <span class="p">{</span>
 <span class="n">Properties</span> <span class="p">{</span>
-	<span class="n">_Color</span> <span class="p">(</span><span class="s">&quot;Main Color&quot;</span><span class="p">,</span> <span class="n">Color</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-	<span class="n">_MainTex</span> <span class="p">(</span><span class="s">&quot;Base (RGB)&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="n">D</span><span class="p">)</span> <span class="o">=</span> <span class="s">&quot;white&quot;</span> <span class="p">{}</span>
+	<span class="n">_Color</span> <span class="p">(</span><span class="s">"Main Color"</span><span class="p">,</span> <span class="n">Color</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+	<span class="n">_MainTex</span> <span class="p">(</span><span class="s">"Base (RGB)"</span><span class="p">,</span> <span class="mi">2</span><span class="n">D</span><span class="p">)</span> <span class="o">=</span> <span class="s">"white"</span> <span class="p">{}</span>
 <span class="p">}</span>
 <span class="n">SubShader</span> <span class="p">{</span>
-	<span class="n">Tags</span> <span class="p">{</span> <span class="s">&quot;RenderType&quot;</span><span class="o">=</span><span class="s">&quot;Opaque&quot;</span> <span class="p">}</span>
+	<span class="n">Tags</span> <span class="p">{</span> <span class="s">"RenderType"</span><span class="o">=</span><span class="s">"Opaque"</span> <span class="p">}</span>
 	<span class="n">LOD</span> <span class="mi">200</span>
 
 <span class="n">CGPROGRAM</span>
-<span class="cp">#pragma surface surf Lambert</span>
-
+<span class="cp">#pragma surface surf Lambert
+</span>
 <span class="n">sampler2D</span> <span class="n">_MainTex</span><span class="p">;</span>
 <span class="n">fixed4</span> <span class="n">_Color</span><span class="p">;</span>
 
@@ -146,7 +146,7 @@
 <span class="n">ENDCG</span>
 <span class="p">}</span>
 
-<span class="n">Fallback</span> <span class="s">&quot;VertexLit&quot;</span>
+<span class="n">Fallback</span> <span class="s">"VertexLit"</span>
 <span class="p">}</span></code></pre></div>
 
 <p>If you throw this on a material it should, unsurprisingly, look exactly like the “Diffuse” shader that comes with Unity. Now it’s time to have some fun. We’re going to need to write our own lighting function to get the shadows the colour we want them. Right now the shader is using the built in “Lambert” function, and ideally, our lighting should look exactly like it, just more fabulous. The easiest way to do this is to just grab the source for the Lambert function and modify that directly. </p>
@@ -154,8 +154,8 @@
 <p>That built in shaders folder you downloaded also has the source code for the lighting functions (inside the file Lighting.cginc). If you open it up, and ctrl+f for “Lambert” you’ll find what we’re looking for. Let’s paste that into our shader as well:</p>
 
 <div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">CGPROGRAM</span>
-<span class="cp">#pragma surface surf CSLambert</span>
-<span class="n">sampler2D</span> <span class="n">_MainTex</span><span class="p">;</span>
+<span class="cp">#pragma surface surf CSLambert
+</span><span class="n">sampler2D</span> <span class="n">_MainTex</span><span class="p">;</span>
 
 <span class="k">struct</span> <span class="n">Input</span> <span class="p">{</span>
 	<span class="n">float2</span> <span class="n">uv_MainTex</span><span class="p">;</span>
@@ -193,8 +193,8 @@
 	<span class="n">fixed4</span> <span class="n">c</span><span class="p">;</span>
 	<span class="n">c</span><span class="p">.</span><span class="n">rgb</span> <span class="o">=</span> <span class="n">s</span><span class="p">.</span><span class="n">Albedo</span> <span class="o">*</span> <span class="n">_LightColor0</span><span class="p">.</span><span class="n">rgb</span> <span class="o">*</span> <span class="p">(</span><span class="n">diff</span> <span class="o">*</span> <span class="n">atten</span> <span class="o">*</span> <span class="mi">2</span><span class="p">);</span>
 	
-	<span class="c1">//shadow colorization</span>
-	<span class="n">c</span><span class="p">.</span><span class="n">rgb</span> <span class="o">+=</span> <span class="n">_ShadowColor</span><span class="p">.</span><span class="n">xyz</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span><span class="o">-</span><span class="n">atten</span><span class="p">);</span>
+	<span class="c1">//shadow colorization
+</span>	<span class="n">c</span><span class="p">.</span><span class="n">rgb</span> <span class="o">+=</span> <span class="n">_ShadowColor</span><span class="p">.</span><span class="n">xyz</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span><span class="o">-</span><span class="n">atten</span><span class="p">);</span>
 	
 	<span class="n">c</span><span class="p">.</span><span class="n">a</span> <span class="o">=</span> <span class="n">s</span><span class="p">.</span><span class="n">Alpha</span><span class="p">;</span>
 	<span class="k">return</span> <span class="n">c</span><span class="p">;</span>
@@ -226,8 +226,8 @@ This happens because although the atten value tell us if we’re being shadowed 
 	<span class="n">fixed4</span> <span class="n">c</span><span class="p">;</span>
 	<span class="n">c</span><span class="p">.</span><span class="n">rgb</span> <span class="o">=</span> <span class="n">s</span><span class="p">.</span><span class="n">Albedo</span> <span class="o">*</span> <span class="n">_LightColor0</span><span class="p">.</span><span class="n">rgb</span> <span class="o">*</span> <span class="p">(</span><span class="n">diff</span> <span class="o">*</span> <span class="n">atten</span> <span class="o">*</span> <span class="mi">2</span><span class="p">);</span>
 	
-	<span class="c1">//shadow colorization</span>
-	<span class="n">c</span><span class="p">.</span><span class="n">rgb</span> <span class="o">+=</span> <span class="n">_ShadowColor</span><span class="p">.</span><span class="n">xyz</span> <span class="o">*</span> <span class="n">max</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,(</span><span class="mf">1.0</span><span class="o">-</span><span class="p">(</span><span class="n">diff</span><span class="o">*</span><span class="n">atten</span><span class="o">*</span><span class="mi">2</span><span class="p">)))</span> <span class="o">*</span> <span class="n">_DiffuseVal</span><span class="p">;</span>
+	<span class="c1">//shadow colorization
+</span>	<span class="n">c</span><span class="p">.</span><span class="n">rgb</span> <span class="o">+=</span> <span class="n">_ShadowColor</span><span class="p">.</span><span class="n">xyz</span> <span class="o">*</span> <span class="n">max</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,(</span><span class="mf">1.0</span><span class="o">-</span><span class="p">(</span><span class="n">diff</span><span class="o">*</span><span class="n">atten</span><span class="o">*</span><span class="mi">2</span><span class="p">)))</span> <span class="o">*</span> <span class="n">_DiffuseVal</span><span class="p">;</span>
 	<span class="n">c</span><span class="p">.</span><span class="n">a</span> <span class="o">=</span> <span class="n">s</span><span class="p">.</span><span class="n">Alpha</span><span class="p">;</span>
 	<span class="k">return</span> <span class="n">c</span><span class="p">;</span>
 <span class="p">}</span></code></pre></div>

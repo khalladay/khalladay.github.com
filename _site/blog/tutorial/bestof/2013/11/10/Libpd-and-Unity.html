@@ -167,20 +167,20 @@ The sample pd program used in this tutorial
 
 <div class="highlight"><pre><code class="language-c#" data-lang="c#"><span class="k">void</span> <span class="nf">Awake</span> <span class="p">()</span>
 <span class="p">{</span>
-	<span class="n">path</span> <span class="p">=</span> <span class="n">Application</span><span class="p">.</span><span class="n">dataPath</span> <span class="p">+</span> <span class="s">&quot;/Resources/&quot;</span> <span class="p">+</span> <span class="n">patch</span><span class="p">;</span>
-	<span class="k">if</span> <span class="p">(</span> <span class="n">playOnAwake</span><span class="p">)</span><span class="n">loadPatch</span> <span class="p">();</span>
+	<span class="n">path</span> <span class="p">=</span> <span class="n">Application</span><span class="p">.</span><span class="n">dataPath</span> <span class="p">+</span> <span class="s">"/Resources/"</span> <span class="p">+</span> <span class="n">patch</span><span class="p">;</span>
+	<span class="k">if</span> <span class="p">(</span> <span class="n">playOnAwake</span><span class="p">)</span><span class="nf">loadPatch</span> <span class="p">();</span>
 <span class="p">}</span>
 
 <span class="k">public</span> <span class="k">void</span> <span class="nf">loadPatch</span> <span class="p">()</span>
 <span class="p">{</span>
 	<span class="k">if</span><span class="p">(!</span><span class="n">islibpdready</span><span class="p">)</span>
 	<span class="p">{</span>
-		<span class="k">if</span> <span class="p">(!</span><span class="n">patchIsStereo</span><span class="p">)</span>	<span class="n">LibPD</span><span class="p">.</span><span class="n">OpenAudio</span> <span class="p">(</span><span class="m">1</span><span class="p">,</span><span class="m">1</span><span class="p">,</span> <span class="m">48000</span><span class="p">);</span>
-		<span class="k">else</span> <span class="n">LibPD</span><span class="p">.</span><span class="n">OpenAudio</span><span class="p">(</span><span class="m">2</span><span class="p">,</span><span class="m">2</span><span class="p">,</span><span class="m">48000</span><span class="p">);</span>
+		<span class="k">if</span> <span class="p">(!</span><span class="n">patchIsStereo</span><span class="p">)</span>	<span class="n">LibPD</span><span class="p">.</span><span class="nf">OpenAudio</span> <span class="p">(</span><span class="m">1</span><span class="p">,</span><span class="m">1</span><span class="p">,</span> <span class="m">48000</span><span class="p">);</span>
+		<span class="k">else</span> <span class="n">LibPD</span><span class="p">.</span><span class="nf">OpenAudio</span><span class="p">(</span><span class="m">2</span><span class="p">,</span><span class="m">2</span><span class="p">,</span><span class="m">48000</span><span class="p">);</span>
 	<span class="p">}</span>
 	
-	<span class="n">patchName</span> <span class="p">=</span> <span class="n">LibPD</span><span class="p">.</span><span class="n">OpenPatch</span> <span class="p">(</span><span class="n">path</span><span class="p">);</span>
-	<span class="n">LibPD</span><span class="p">.</span><span class="n">ComputeAudio</span> <span class="p">(</span><span class="k">true</span><span class="p">);</span>
+	<span class="n">patchName</span> <span class="p">=</span> <span class="n">LibPD</span><span class="p">.</span><span class="nf">OpenPatch</span> <span class="p">(</span><span class="n">path</span><span class="p">);</span>
+	<span class="n">LibPD</span><span class="p">.</span><span class="nf">ComputeAudio</span> <span class="p">(</span><span class="k">true</span><span class="p">);</span>
 	<span class="n">islibpdready</span> <span class="p">=</span> <span class="k">true</span><span class="p">;</span>
 <span class="p">}</span></code></pre></div>
 
@@ -192,18 +192,18 @@ The sample pd program used in this tutorial
 
 <div class="highlight"><pre><code class="language-c#" data-lang="c#"><span class="k">public</span> <span class="k">void</span> <span class="nf">closePatch</span> <span class="p">()</span>
 <span class="p">{</span>
-	<span class="n">LibPD</span><span class="p">.</span><span class="n">ClosePatch</span> <span class="p">(</span><span class="n">patchName</span><span class="p">);</span>
-	<span class="n">LibPD</span><span class="p">.</span><span class="n">Release</span> <span class="p">();</span>
+	<span class="n">LibPD</span><span class="p">.</span><span class="nf">ClosePatch</span> <span class="p">(</span><span class="n">patchName</span><span class="p">);</span>
+	<span class="n">LibPD</span><span class="p">.</span><span class="nf">Release</span> <span class="p">();</span>
 <span class="p">}</span>
 
 <span class="k">void</span> <span class="nf">OnApplicationQuit</span> <span class="p">()</span>
 <span class="p">{</span>
-	<span class="n">closePatch</span> <span class="p">();</span>
+	<span class="nf">closePatch</span> <span class="p">();</span>
 <span class="p">}</span>
 
 <span class="k">public</span> <span class="k">void</span> <span class="nf">OnDestroy</span><span class="p">()</span>
 <span class="p">{</span>
-	<span class="n">dataHandle</span><span class="p">.</span><span class="n">Free</span><span class="p">();</span>
+	<span class="n">dataHandle</span><span class="p">.</span><span class="nf">Free</span><span class="p">();</span>
 	<span class="n">dataPtr</span> <span class="p">=</span> <span class="n">IntPtr</span><span class="p">.</span><span class="n">Zero</span><span class="p">;</span>
 <span class="p">}</span></code></pre></div>
 
@@ -215,32 +215,32 @@ The sample pd program used in this tutorial
 <span class="p">{</span>	
 	<span class="k">if</span><span class="p">(</span><span class="n">dataPtr</span> <span class="p">==</span> <span class="n">IntPtr</span><span class="p">.</span><span class="n">Zero</span><span class="p">)</span>
 	<span class="p">{</span>
-		<span class="n">dataHandle</span> <span class="p">=</span> <span class="n">GCHandle</span><span class="p">.</span><span class="n">Alloc</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="n">GCHandleType</span><span class="p">.</span><span class="n">Pinned</span><span class="p">);</span>
-		<span class="n">dataPtr</span> <span class="p">=</span> <span class="n">dataHandle</span><span class="p">.</span><span class="n">AddrOfPinnedObject</span><span class="p">();</span>
+		<span class="n">dataHandle</span> <span class="p">=</span> <span class="n">GCHandle</span><span class="p">.</span><span class="nf">Alloc</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="n">GCHandleType</span><span class="p">.</span><span class="n">Pinned</span><span class="p">);</span>
+		<span class="n">dataPtr</span> <span class="p">=</span> <span class="n">dataHandle</span><span class="p">.</span><span class="nf">AddrOfPinnedObject</span><span class="p">();</span>
 	<span class="p">}</span>
 	
-	<span class="k">if</span> <span class="p">(</span><span class="n">LibPD</span><span class="p">.</span><span class="n">Process</span><span class="p">(</span><span class="m">32</span><span class="p">,</span> <span class="n">dataPtr</span><span class="p">,</span> <span class="n">dataPtr</span><span class="p">)==</span><span class="m">0</span><span class="p">)</span> <span class="p">{</span>
-		<span class="n">LibPD</span><span class="p">.</span><span class="n">SendFloat</span><span class="p">(</span><span class="n">patchName</span> <span class="p">+</span> <span class="s">&quot;freq1&quot;</span><span class="p">,</span> <span class="n">freq</span><span class="p">);</span>
-		<span class="n">LibPD</span><span class="p">.</span><span class="n">SendFloat</span><span class="p">(</span><span class="n">patchName</span> <span class="p">+</span> <span class="s">&quot;freq2&quot;</span><span class="p">,</span> <span class="n">freq</span><span class="p">);</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">LibPD</span><span class="p">.</span><span class="nf">Process</span><span class="p">(</span><span class="m">32</span><span class="p">,</span> <span class="n">dataPtr</span><span class="p">,</span> <span class="n">dataPtr</span><span class="p">)==</span><span class="m">0</span><span class="p">)</span> <span class="p">{</span>
+		<span class="n">LibPD</span><span class="p">.</span><span class="nf">SendFloat</span><span class="p">(</span><span class="n">patchName</span> <span class="p">+</span> <span class="s">"freq1"</span><span class="p">,</span> <span class="n">freq</span><span class="p">);</span>
+		<span class="n">LibPD</span><span class="p">.</span><span class="nf">SendFloat</span><span class="p">(</span><span class="n">patchName</span> <span class="p">+</span> <span class="s">"freq2"</span><span class="p">,</span> <span class="n">freq</span><span class="p">);</span>
 		
 	<span class="p">}</span>
 <span class="p">}</span>
 
 <span class="k">void</span> <span class="nf">OnGUI</span><span class="p">()</span>
 <span class="p">{</span>
-	<span class="n">Rect</span> <span class="n">r</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Rect</span><span class="p">(</span><span class="n">Screen</span><span class="p">.</span><span class="n">width</span><span class="p">/</span><span class="m">2</span> <span class="p">-</span> <span class="m">50</span> <span class="p">,</span> 
+	<span class="n">Rect</span> <span class="n">r</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Rect</span><span class="p">(</span><span class="n">Screen</span><span class="p">.</span><span class="n">width</span><span class="p">/</span><span class="m">2</span> <span class="p">-</span> <span class="m">50</span> <span class="p">,</span> 
 			<span class="n">Screen</span><span class="p">.</span><span class="n">height</span><span class="p">/</span><span class="m">2</span> <span class="p">-</span> <span class="m">150</span><span class="p">,</span> 
 			<span class="m">100</span><span class="p">,</span> 
 			<span class="m">300</span><span class="p">);</span>
 						
-	<span class="n">freq</span> <span class="p">=</span> <span class="n">GUI</span><span class="p">.</span><span class="n">VerticalSlider</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">freq</span><span class="p">,</span><span class="m">1000</span><span class="p">,</span> <span class="m">400</span><span class="p">);</span>
+	<span class="n">freq</span> <span class="p">=</span> <span class="n">GUI</span><span class="p">.</span><span class="nf">VerticalSlider</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">freq</span><span class="p">,</span><span class="m">1000</span><span class="p">,</span> <span class="m">400</span><span class="p">);</span>
 	
-	<span class="n">Rect</span> <span class="n">r2</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Rect</span><span class="p">(</span><span class="n">Screen</span><span class="p">.</span><span class="n">width</span><span class="p">/</span><span class="m">2</span><span class="p">-</span><span class="m">30</span><span class="p">,</span> 
+	<span class="n">Rect</span> <span class="n">r2</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Rect</span><span class="p">(</span><span class="n">Screen</span><span class="p">.</span><span class="n">width</span><span class="p">/</span><span class="m">2</span><span class="p">-</span><span class="m">30</span><span class="p">,</span> 
 			<span class="n">Screen</span><span class="p">.</span><span class="n">height</span><span class="p">/</span><span class="m">2</span> <span class="p">-</span> <span class="m">30</span><span class="p">,</span> 
 			<span class="m">80</span><span class="p">,</span> 
 			<span class="m">30</span><span class="p">);</span>
 						
-	<span class="n">GUI</span><span class="p">.</span><span class="n">Box</span><span class="p">(</span><span class="n">r2</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">+</span><span class="n">freq</span><span class="p">+</span><span class="s">&quot; hz&quot;</span><span class="p">);</span>
+	<span class="n">GUI</span><span class="p">.</span><span class="nf">Box</span><span class="p">(</span><span class="n">r2</span><span class="p">,</span> <span class="s">""</span><span class="p">+</span><span class="n">freq</span><span class="p">+</span><span class="s">" hz"</span><span class="p">);</span>
 <span class="p">}</span></code></pre></div>
 
 <p>OnAudioFilterRead is the callback method used by LibPd4Unity’s library. It will be called whenever the internal audio buffer has been filled. I’m really not sure why we’re checking that libPD.Process returns 0, although I assume that’s LibPD’s “all good” return value. 

@@ -111,10 +111,10 @@
 
 <p>I’ve tinkered with a few open source path tracers out there, but the one that caught my eye originally was <a href="http://www.kevinbeason.com/smallpt/">SmallPT</a>, which uses OpenMP. OpenMP is an API built by Intel that makes it dead simple to write parallel code. Want to have a for loop distribute itself over multiple cores? That looks like this: </p>
 
-<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="cp">#pragma omp parallel for</span>
-<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="cp">#pragma omp parallel for
+</span><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
 <span class="p">{</span>
-	<span class="n">printf</span><span class="p">(</span><span class="s">&quot;Loop executed on thread %d&quot;</span><span class="p">,</span>  <span class="n">omp_get_thread_num</span><span class="p">());</span>
+	<span class="n">printf</span><span class="p">(</span><span class="s">"Loop executed on thread %d"</span><span class="p">,</span>  <span class="n">omp_get_thread_num</span><span class="p">());</span>
 <span class="p">}</span></code></pre></div>
 
 <p>After working with Boost’s Thread library on the ray tracer, which ended up dictating a lot of the structure of the renderer, OpenMP seems like a great way to let the compiler/runtime handle the implementation of the threading code and let me focus on actually building something cool. </p>

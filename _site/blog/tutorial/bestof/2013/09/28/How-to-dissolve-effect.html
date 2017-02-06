@@ -109,7 +109,7 @@
 
 <p>Now that that’s cleaned up, start your shader with the lines:</p>
 
-<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">Shader</span> <span class="s">&quot;MyDissolveShader&quot;</span>
+<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">Shader</span> <span class="s">"MyDissolveShader"</span>
 <span class="p">{</span>
 	<span class="n">Properties</span>
 	<span class="p">{</span>
@@ -135,11 +135,11 @@
 
 <p>First off, we’re going to need the user to tell us what texture the put on the mesh for its normal undissolved state. The convention with Unity shaders is to call this texture _MainTex. So let’s add that to our properties.</p>
 
-<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">Shader</span> <span class="s">&quot;MyDissolveShader&quot;</span>
+<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">Shader</span> <span class="s">"MyDissolveShader"</span>
 <span class="p">{</span>
 	<span class="n">Properties</span>
 	<span class="p">{</span>
-		<span class="n">_MainTex</span><span class="p">(</span><span class="s">&quot;Main Texture&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="n">D</span><span class="p">)</span> <span class="o">=</span> <span class="s">&quot;white&quot;</span><span class="p">{}</span>
+		<span class="n">_MainTex</span><span class="p">(</span><span class="s">"Main Texture"</span><span class="p">,</span> <span class="mi">2</span><span class="n">D</span><span class="p">)</span> <span class="o">=</span> <span class="s">"white"</span><span class="p">{}</span>
 	<span class="p">}</span>
 	<span class="n">SubShader</span>
 	<span class="p">{</span>
@@ -151,12 +151,12 @@
 
 <p>Ok, so now that we’ve figured out how to declare a texture, what other textures will we need? For this shader, we’re not going to use bump maps, so the only other texture we need is something to define the shape of the dissolve effect. Let’s call that _DissolveMap. </p>
 
-<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">Shader</span> <span class="s">&quot;MyDissolveShader&quot;</span>
+<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">Shader</span> <span class="s">"MyDissolveShader"</span>
 <span class="p">{</span>
 	<span class="n">Properties</span>
 	<span class="p">{</span>
-		<span class="n">_MainTex</span><span class="p">(</span><span class="s">&quot;Main Texture&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="n">D</span><span class="p">)</span> <span class="o">=</span> <span class="s">&quot;white&quot;</span><span class="p">{}</span>
-		<span class="n">_DissolveMap</span><span class="p">(</span><span class="s">&quot;Dissolve Shape&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="n">D</span><span class="p">)</span> <span class="o">=</span> <span class="s">&quot;white&quot;</span><span class="p">{}</span>
+		<span class="n">_MainTex</span><span class="p">(</span><span class="s">"Main Texture"</span><span class="p">,</span> <span class="mi">2</span><span class="n">D</span><span class="p">)</span> <span class="o">=</span> <span class="s">"white"</span><span class="p">{}</span>
+		<span class="n">_DissolveMap</span><span class="p">(</span><span class="s">"Dissolve Shape"</span><span class="p">,</span> <span class="mi">2</span><span class="n">D</span><span class="p">)</span> <span class="o">=</span> <span class="s">"white"</span><span class="p">{}</span>
 	<span class="p">}</span>
 	<span class="n">SubShader</span>
 	<span class="p">{</span>
@@ -168,17 +168,17 @@
 
 <p>Finally, I’m going to add a Color variable to allow us to define what colour the edges of the effect are. </p>
 
-<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">Shader</span> <span class="s">&quot;MyDissolveShader&quot;</span>
+<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">Shader</span> <span class="s">"MyDissolveShader"</span>
 <span class="p">{</span>
 	<span class="n">Properties</span>
 	<span class="p">{</span>
-		<span class="n">_MainTex</span><span class="p">(</span><span class="s">&quot;Main Texture&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="n">D</span><span class="p">)</span> <span class="o">=</span> <span class="s">&quot;white&quot;</span><span class="p">{}</span>
-		<span class="n">_DissolveMap</span><span class="p">(</span><span class="s">&quot;Dissolve Shape&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="n">D</span><span class="p">)</span> <span class="o">=</span> <span class="s">&quot;white&quot;</span><span class="p">{}</span>
+		<span class="n">_MainTex</span><span class="p">(</span><span class="s">"Main Texture"</span><span class="p">,</span> <span class="mi">2</span><span class="n">D</span><span class="p">)</span> <span class="o">=</span> <span class="s">"white"</span><span class="p">{}</span>
+		<span class="n">_DissolveMap</span><span class="p">(</span><span class="s">"Dissolve Shape"</span><span class="p">,</span> <span class="mi">2</span><span class="n">D</span><span class="p">)</span> <span class="o">=</span> <span class="s">"white"</span><span class="p">{}</span>
 		
-		<span class="n">_DissolveVal</span><span class="p">(</span><span class="s">&quot;Dissolve Value&quot;</span><span class="p">,</span> <span class="n">Range</span><span class="p">(</span><span class="o">-</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">))</span> <span class="o">=</span> <span class="mf">1.2</span>
-		<span class="n">_LineWidth</span><span class="p">(</span><span class="s">&quot;Line Width&quot;</span><span class="p">,</span> <span class="n">Range</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">))</span> <span class="o">=</span> <span class="mf">0.1</span>
+		<span class="n">_DissolveVal</span><span class="p">(</span><span class="s">"Dissolve Value"</span><span class="p">,</span> <span class="n">Range</span><span class="p">(</span><span class="o">-</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">))</span> <span class="o">=</span> <span class="mf">1.2</span>
+		<span class="n">_LineWidth</span><span class="p">(</span><span class="s">"Line Width"</span><span class="p">,</span> <span class="n">Range</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">))</span> <span class="o">=</span> <span class="mf">0.1</span>
 		
-		<span class="n">_LineColor</span><span class="p">(</span><span class="s">&quot;Line Color&quot;</span><span class="p">,</span> <span class="n">Color</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+		<span class="n">_LineColor</span><span class="p">(</span><span class="s">"Line Color"</span><span class="p">,</span> <span class="n">Color</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
 	<span class="p">}</span>
 	<span class="n">SubShader</span>
 	<span class="p">{</span>
@@ -196,23 +196,23 @@
 
 <p>The first things we need to do with our shader are tell Unity to expect CG code, and what variables we want our code to access from outside of the shader itself. </p>
 
-<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">Shader</span> <span class="s">&quot;MyDissolveShader&quot;</span>
+<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">Shader</span> <span class="s">"MyDissolveShader"</span>
 <span class="p">{</span>
 	<span class="n">Properties</span>
 	<span class="p">{</span>
-		<span class="n">_MainTex</span><span class="p">(</span><span class="s">&quot;Main Texture&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="n">D</span><span class="p">)</span> <span class="o">=</span> <span class="s">&quot;white&quot;</span><span class="p">{}</span>
-		<span class="n">_DissolveMap</span><span class="p">(</span><span class="s">&quot;Dissolve Shape&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="n">D</span><span class="p">)</span> <span class="o">=</span> <span class="s">&quot;white&quot;</span><span class="p">{}</span>
+		<span class="n">_MainTex</span><span class="p">(</span><span class="s">"Main Texture"</span><span class="p">,</span> <span class="mi">2</span><span class="n">D</span><span class="p">)</span> <span class="o">=</span> <span class="s">"white"</span><span class="p">{}</span>
+		<span class="n">_DissolveMap</span><span class="p">(</span><span class="s">"Dissolve Shape"</span><span class="p">,</span> <span class="mi">2</span><span class="n">D</span><span class="p">)</span> <span class="o">=</span> <span class="s">"white"</span><span class="p">{}</span>
 		
-		<span class="n">_DissolveVal</span><span class="p">(</span><span class="s">&quot;Dissolve Value&quot;</span><span class="p">,</span> <span class="n">Range</span><span class="p">(</span><span class="o">-</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">))</span> <span class="o">=</span> <span class="mf">1.2</span>
-		<span class="n">_LineWidth</span><span class="p">(</span><span class="s">&quot;Line Width&quot;</span><span class="p">,</span> <span class="n">Range</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">))</span> <span class="o">=</span> <span class="mf">0.1</span>
+		<span class="n">_DissolveVal</span><span class="p">(</span><span class="s">"Dissolve Value"</span><span class="p">,</span> <span class="n">Range</span><span class="p">(</span><span class="o">-</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">))</span> <span class="o">=</span> <span class="mf">1.2</span>
+		<span class="n">_LineWidth</span><span class="p">(</span><span class="s">"Line Width"</span><span class="p">,</span> <span class="n">Range</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">))</span> <span class="o">=</span> <span class="mf">0.1</span>
 		
-		<span class="n">_LineColor</span><span class="p">(</span><span class="s">&quot;Line Color&quot;</span><span class="p">,</span> <span class="n">Color</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+		<span class="n">_LineColor</span><span class="p">(</span><span class="s">"Line Color"</span><span class="p">,</span> <span class="n">Color</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
 	<span class="p">}</span>
 	<span class="n">SubShader</span>
 	<span class="p">{</span>
 		<span class="n">CGPROGRAM</span>
-		<span class="cp">#pragma surface surf Lambert</span>
-		
+		<span class="cp">#pragma surface surf Lambert
+</span>		
 		<span class="n">sampler2D</span> <span class="n">_MainTex</span><span class="p">;</span>
 		<span class="n">sampler2D</span> <span class="n">_DissolveMap</span><span class="p">;</span>
 		
@@ -230,23 +230,23 @@
 
 <p>Now, let’s add the rest of the structural code we need in order for our shader to start taking shape. </p>
 
-<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">Shader</span> <span class="s">&quot;MyDissolveShader&quot;</span>
+<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">Shader</span> <span class="s">"MyDissolveShader"</span>
 <span class="p">{</span>
 	<span class="n">Properties</span>
 	<span class="p">{</span>
-		<span class="n">_MainTex</span><span class="p">(</span><span class="s">&quot;Main Texture&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="n">D</span><span class="p">)</span> <span class="o">=</span> <span class="s">&quot;white&quot;</span><span class="p">{}</span>
-		<span class="n">_DissolveMap</span><span class="p">(</span><span class="s">&quot;Dissolve Shape&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="n">D</span><span class="p">)</span> <span class="o">=</span> <span class="s">&quot;white&quot;</span><span class="p">{}</span>
+		<span class="n">_MainTex</span><span class="p">(</span><span class="s">"Main Texture"</span><span class="p">,</span> <span class="mi">2</span><span class="n">D</span><span class="p">)</span> <span class="o">=</span> <span class="s">"white"</span><span class="p">{}</span>
+		<span class="n">_DissolveMap</span><span class="p">(</span><span class="s">"Dissolve Shape"</span><span class="p">,</span> <span class="mi">2</span><span class="n">D</span><span class="p">)</span> <span class="o">=</span> <span class="s">"white"</span><span class="p">{}</span>
 		
-		<span class="n">_DissolveVal</span><span class="p">(</span><span class="s">&quot;Dissolve Value&quot;</span><span class="p">,</span> <span class="n">Range</span><span class="p">(</span><span class="o">-</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">))</span> <span class="o">=</span> <span class="mf">1.2</span>
-		<span class="n">_LineWidth</span><span class="p">(</span><span class="s">&quot;Line Width&quot;</span><span class="p">,</span> <span class="n">Range</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">))</span> <span class="o">=</span> <span class="mf">0.1</span>
+		<span class="n">_DissolveVal</span><span class="p">(</span><span class="s">"Dissolve Value"</span><span class="p">,</span> <span class="n">Range</span><span class="p">(</span><span class="o">-</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">))</span> <span class="o">=</span> <span class="mf">1.2</span>
+		<span class="n">_LineWidth</span><span class="p">(</span><span class="s">"Line Width"</span><span class="p">,</span> <span class="n">Range</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">))</span> <span class="o">=</span> <span class="mf">0.1</span>
 		
-		<span class="n">_LineColor</span><span class="p">(</span><span class="s">&quot;Line Color&quot;</span><span class="p">,</span> <span class="n">Color</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+		<span class="n">_LineColor</span><span class="p">(</span><span class="s">"Line Color"</span><span class="p">,</span> <span class="n">Color</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
 	<span class="p">}</span>
 	<span class="n">SubShader</span>
 	<span class="p">{</span>
 		<span class="n">CGPROGRAM</span>
-		<span class="cp">#pragma surface surf Lambert</span>
-		
+		<span class="cp">#pragma surface surf Lambert
+</span>		
 		<span class="n">sampler2D</span> <span class="n">_MainTex</span><span class="p">;</span>
 		<span class="n">sampler2D</span> <span class="n">_DissolveMap</span><span class="p">;</span>
 		
@@ -276,23 +276,23 @@
 
 <p>The o.Albedo line shows how to set the colour of a fragment. In this case, all we’re doing is assigning each fragment the color white. We’re going to modify this now. The next example will show how to set a fragment to the colour it should be to display _MainTex properly.</p>
 
-<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">Shader</span> <span class="s">&quot;MyDissolveShader&quot;</span>
+<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">Shader</span> <span class="s">"MyDissolveShader"</span>
 <span class="p">{</span>
 	<span class="n">Properties</span>
 	<span class="p">{</span>
-		<span class="n">_MainTex</span><span class="p">(</span><span class="s">&quot;Main Texture&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="n">D</span><span class="p">)</span> <span class="o">=</span> <span class="s">&quot;white&quot;</span><span class="p">{}</span>
-		<span class="n">_DissolveMap</span><span class="p">(</span><span class="s">&quot;Dissolve Shape&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="n">D</span><span class="p">)</span> <span class="o">=</span> <span class="s">&quot;white&quot;</span><span class="p">{}</span>
+		<span class="n">_MainTex</span><span class="p">(</span><span class="s">"Main Texture"</span><span class="p">,</span> <span class="mi">2</span><span class="n">D</span><span class="p">)</span> <span class="o">=</span> <span class="s">"white"</span><span class="p">{}</span>
+		<span class="n">_DissolveMap</span><span class="p">(</span><span class="s">"Dissolve Shape"</span><span class="p">,</span> <span class="mi">2</span><span class="n">D</span><span class="p">)</span> <span class="o">=</span> <span class="s">"white"</span><span class="p">{}</span>
 		
-		<span class="n">_DissolveVal</span><span class="p">(</span><span class="s">&quot;Dissolve Value&quot;</span><span class="p">,</span> <span class="n">Range</span><span class="p">(</span><span class="o">-</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">))</span> <span class="o">=</span> <span class="mf">1.2</span>
-		<span class="n">_LineWidth</span><span class="p">(</span><span class="s">&quot;Line Width&quot;</span><span class="p">,</span> <span class="n">Range</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">))</span> <span class="o">=</span> <span class="mf">0.1</span>
+		<span class="n">_DissolveVal</span><span class="p">(</span><span class="s">"Dissolve Value"</span><span class="p">,</span> <span class="n">Range</span><span class="p">(</span><span class="o">-</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">))</span> <span class="o">=</span> <span class="mf">1.2</span>
+		<span class="n">_LineWidth</span><span class="p">(</span><span class="s">"Line Width"</span><span class="p">,</span> <span class="n">Range</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">))</span> <span class="o">=</span> <span class="mf">0.1</span>
 		
-		<span class="n">_LineColor</span><span class="p">(</span><span class="s">&quot;Line Color&quot;</span><span class="p">,</span> <span class="n">Color</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+		<span class="n">_LineColor</span><span class="p">(</span><span class="s">"Line Color"</span><span class="p">,</span> <span class="n">Color</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
 	<span class="p">}</span>
 	<span class="n">SubShader</span>
 	<span class="p">{</span>
 		<span class="n">CGPROGRAM</span>
-		<span class="cp">#pragma surface surf Lambert</span>
-		
+		<span class="cp">#pragma surface surf Lambert
+</span>		
 		<span class="n">sampler2D</span> <span class="n">_MainTex</span><span class="p">;</span>
 		<span class="n">sampler2D</span> <span class="n">_DissolveMap</span><span class="p">;</span>
 		
@@ -368,26 +368,26 @@
 
 <p>We’re almost done! If you switch over to Unity now you might notice that nothing is really going transparent, it’s just going black. This is because we haven’t yet told Unity that this will be a transparent shader. Because of the order things are rendered, you need to explicitly tell Unity when a shader will draw transparent fragments. Luckily this is a pretty simple addition to the top of the shader. </p>
 
-<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">Shader</span> <span class="s">&quot;MyDissolveShader&quot;</span>
+<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">Shader</span> <span class="s">"MyDissolveShader"</span>
 <span class="p">{</span>
 	<span class="n">Properties</span>
 	<span class="p">{</span>
-		<span class="n">_MainTex</span><span class="p">(</span><span class="s">&quot;Main Texture&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="n">D</span><span class="p">)</span> <span class="o">=</span> <span class="s">&quot;white&quot;</span><span class="p">{}</span>
-		<span class="n">_DissolveMap</span><span class="p">(</span><span class="s">&quot;Dissolve Shape&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="n">D</span><span class="p">)</span> <span class="o">=</span> <span class="s">&quot;white&quot;</span><span class="p">{}</span>
+		<span class="n">_MainTex</span><span class="p">(</span><span class="s">"Main Texture"</span><span class="p">,</span> <span class="mi">2</span><span class="n">D</span><span class="p">)</span> <span class="o">=</span> <span class="s">"white"</span><span class="p">{}</span>
+		<span class="n">_DissolveMap</span><span class="p">(</span><span class="s">"Dissolve Shape"</span><span class="p">,</span> <span class="mi">2</span><span class="n">D</span><span class="p">)</span> <span class="o">=</span> <span class="s">"white"</span><span class="p">{}</span>
 		
-		<span class="n">_DissolveVal</span><span class="p">(</span><span class="s">&quot;Dissolve Value&quot;</span><span class="p">,</span> <span class="n">Range</span><span class="p">(</span><span class="o">-</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">))</span> <span class="o">=</span> <span class="mf">1.2</span>
-		<span class="n">_LineWidth</span><span class="p">(</span><span class="s">&quot;Line Width&quot;</span><span class="p">,</span> <span class="n">Range</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">))</span> <span class="o">=</span> <span class="mf">0.1</span>
+		<span class="n">_DissolveVal</span><span class="p">(</span><span class="s">"Dissolve Value"</span><span class="p">,</span> <span class="n">Range</span><span class="p">(</span><span class="o">-</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">))</span> <span class="o">=</span> <span class="mf">1.2</span>
+		<span class="n">_LineWidth</span><span class="p">(</span><span class="s">"Line Width"</span><span class="p">,</span> <span class="n">Range</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">))</span> <span class="o">=</span> <span class="mf">0.1</span>
 		
-		<span class="n">_LineColor</span><span class="p">(</span><span class="s">&quot;Line Color&quot;</span><span class="p">,</span> <span class="n">Color</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+		<span class="n">_LineColor</span><span class="p">(</span><span class="s">"Line Color"</span><span class="p">,</span> <span class="n">Color</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
 	<span class="p">}</span>
 	<span class="n">SubShader</span>
 	<span class="p">{</span>
-		<span class="n">Tags</span><span class="p">{</span> <span class="s">&quot;Queue&quot;</span> <span class="o">=</span> <span class="s">&quot;Transparent&quot;</span><span class="p">}</span>
+		<span class="n">Tags</span><span class="p">{</span> <span class="s">"Queue"</span> <span class="o">=</span> <span class="s">"Transparent"</span><span class="p">}</span>
 		<span class="n">Blend</span> <span class="n">SrcAlpha</span> <span class="n">OneMinusSrcAlpha</span>
 		
 		<span class="n">CGPROGRAM</span>
-		<span class="cp">#pragma surface surf Lambert</span>
-		
+		<span class="cp">#pragma surface surf Lambert
+</span>		
 		<span class="n">sampler2D</span> <span class="n">_MainTex</span><span class="p">;</span>
 		<span class="n">sampler2D</span> <span class="n">_DissolveMap</span><span class="p">;</span>
 		

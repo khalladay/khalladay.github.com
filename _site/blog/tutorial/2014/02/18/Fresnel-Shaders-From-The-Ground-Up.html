@@ -188,10 +188,10 @@
 
 <p>Once you have the R value calculated, the rest of the implementation is just a lerp in the fragment shader: </p>
 
-<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">float4</span> <span class="nf">frag</span><span class="p">(</span><span class="n">vOUT</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span>  <span class="n">COLOR</span>
+<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">float4</span> <span class="n">frag</span><span class="p">(</span><span class="n">vOUT</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span>  <span class="n">COLOR</span>
 <span class="p">{</span>  
 	<span class="n">float4</span> <span class="n">col</span> <span class="o">=</span> <span class="n">tex2D</span><span class="p">(</span><span class="n">_MainTex</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">uv</span><span class="p">.</span><span class="n">xy</span> <span class="o">*</span> <span class="n">_MainTex_ST</span><span class="p">.</span><span class="n">xy</span> <span class="o">+</span> <span class="n">_MainTex_ST</span><span class="p">.</span><span class="n">zw</span><span class="p">);</span>
-	<span class="k">return</span> <span class="nf">lerp</span><span class="p">(</span><span class="n">col</span><span class="p">,</span><span class="n">_Color</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">R</span><span class="p">);</span>
+	<span class="k">return</span> <span class="n">lerp</span><span class="p">(</span><span class="n">col</span><span class="p">,</span><span class="n">_Color</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">R</span><span class="p">);</span>
 <span class="p">}</span></code></pre></div>
 
 <p>If you’re not a Unity programmer, ignore all the _MainTex_ST stuff, that’s just a unity specific bit of code to handle tiling textures across an object. </p>
