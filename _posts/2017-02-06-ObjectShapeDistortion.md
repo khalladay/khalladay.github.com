@@ -110,7 +110,7 @@ As mentioned above, the first thing we need to do in our OnRenderImage function 
 Before we render our distorting objects however, we need to copy the contents of main RT's RGB channels into the distortingRT. This will help eliminate ugly artifacts around the edges of our wobbly GameObjects which get caused because we're using a lower resolution image to grab their colours from. This artifact ends up looking like this:
 
 <div align="center">
-<img src="/images/post_images/2017-02-05/lowresartifact.png" /><br>
+<img src="/images/post_images/2017-02-05/lowresartifact.PNG" /><br>
 </div>
 
 We also need to output a specific constant into the alpha channel of the distortingRT. We are going to be using the alpha channel as a low resolution depth buffer to let us sort our distorting objects with the ones seen by the main camera, but before we do that, we need a clean slate to work with, so we need to fill the alpha channel of distortingRT with a value that represents the farthest depth possible (the far clip plane).
@@ -178,7 +178,7 @@ If you aren't on a platform that gives you access to floating point textures, yo
 If you take a peek at your distortingRT in the inspector, you should see your distorting objects being rendered on top of a copy of what the main camera sees. In the image below, the robots are actually located behind the other geometry in world space, but they are rendered in front of it for the purposes of the distortion buffer.
 
 <div align="center">
-<img src="/images/post_images/2017-02-05/withdistort.png" /><br>
+<img src="/images/post_images/2017-02-05/withdistort.PNG" /><br>
 </div>
 
 This is expected and important. If we let our distorting objects sort now, then when an object is partly occluded, we won't have all the colour information we need to distort the object behind the occluder, leading to artifacts along the edges of occluding objects. So to address this, we're going to let our objects render on top of everything now, and manually do the depth sorting later. It's fun! And speaking of rendering our distorting objects, I think now is as good a time as any to talk about what needs to be in the shaders that the distorting object use.
@@ -215,7 +215,7 @@ float4 frag (v2f i) : SV_Target
 With that modification to your shaders, if you render only the alpha channel of your distortingRT, it should look something like this:
 
 <div align="center">
-<img src="/images/post_images/2017-02-05/distortdepth.png" /><br>
+<img src="/images/post_images/2017-02-05/distortdepth.PNG" /><br>
 </div>
 
 <h3>The Composite Shader</h3>
