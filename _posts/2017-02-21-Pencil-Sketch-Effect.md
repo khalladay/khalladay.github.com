@@ -20,7 +20,7 @@ Real Time Hatching is the fancy (and much more concise) way of describing the cl
 I'm going to present the basic effect as it would look if you wanted to write a shader to attach to a single object, how to turn that into a post effect that will work on the whole screen, and take a few detours in the process. All the code here is going to be for Unity 5.5, so your mileage may vary if you're using a different version.
 
 
-##Tonal Art Maps
+## Tonal Art Maps
 Before we do anything though, we need to talk about the basic theory behind real time hatching. The whole effect is based on the concept of Tonal Art Maps (or TAMs). These are a series of textures which correspond to how you want your art to like at different lighting intensities. The tricky part about them is that in order for things to look right, each texture needs to contain all the information stored in all the maps which correspond to brighter tones within them. So your second brightest map needs to contain all the texture data of your brightest, plus the additional data that makes this map darker.
 
 This is sorta complicated when stated in words, but it's a lot more intuitive when you see the textures. The following was taken from a widely cited research paper (located [here](http://hhoppe.com/hatching.pdf) which presented the technique we're going to use today.
