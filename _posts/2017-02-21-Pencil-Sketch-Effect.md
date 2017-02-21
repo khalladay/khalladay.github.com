@@ -42,7 +42,7 @@ I'm actually going to skip all of this custom mip texture generation stuff, beca
 
 Ok, that was a lot of writing for not a lot of output, but now that we have our TAM images, we can proceed with actually creating the effect.
 
-##A Single Object Shader
+## A Single Object Shader
 
 So now that we have our TAM, we need to create a shader that uses them. The paper that I cited earlier presents a method for applying a set of TAMs to an object using 6 texture lookups, because (importantly), you could pack those 6 lookups into two texture accesses. This is an important thing to dwell on for a second, because it gets missed a lot of the time when people post real time hatching shaders: DO NOT add 6 texture lookups to your shader for hatching. Pack the textures into the channels of 2 RGB textures instead.
 
@@ -264,7 +264,7 @@ We end up with a lovely hatch material:
 Last thing to note here is that I'm multiplying the input UVs by 8 when I pass them to the hatch function. This is purely a hack because I think it looks better with the hatch textures I'm using. YMMV, especially if you're generating your own TAM.
 
 
-##A Post Processing Effect
+## A Post Processing Effect
 
 So now that we have the basic effect, it's time to do something more exciting with it. Moving this to a post effect makes it much easier to use in a project, and do fun things like integrate with other effects, like a vignette:
 
@@ -374,13 +374,13 @@ return col;
 
 Speaking of precision though, you'll notice that using the above code, the hack we used earlier to have very bright objects go to white no longer works, this is again because of buffer precision: the buffer that our main camera is rendering to only stores values up to 1.0, so that extra information is getting clipped before it gets to us. You can certainly make it happen - you'll need the main camera rendering into a high precision buffer, and you'll need the shaders on individual elements to output halfs or floats - but this violates our principle of not requiring changes to the shaders objects are using, therefore I'm calling it outside the scope of this post.
 
-##Performance
+## Performance
 
 On an iPhone 6, rendering the scene you see in the gif at the beginning of the post with a htaching shader on each robot was blazing fast (almost exactly the speed that rendering them with a diffuse shader was). However, turning on the post effect added 4 ms to the render time. This is likely due to the fact that we're performing 4 texture lookups (main cam, uv buffer, 2 hatch textures) and a not insignificant amount of math inside the composite shader (which operates at full res).
 
 I didn't do any performance testing on desktop, mostly because after working in mobile for half a decade, it's just easier for me to grab the numbers off of a phone. My gut says that anything a phone can do in 4 ms, my laptops can do in basically no time, but I'm basing that on basically nothing but a hunch.
 
-##Conclusion
+## Conclusion
 
 Firstly, all the code that I talked about is available [on github](https://github.com/khalladay/PencilSketchEffect). It's GPL'ed because to the best of my knowledge, the hatch images I found were released under the GPL.
 
