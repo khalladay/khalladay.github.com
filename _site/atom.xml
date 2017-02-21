@@ -4,7 +4,7 @@
  <title>The blog of Kyle Halladay</title>
  <link href="http://kylehalladay.com/atom.xml" rel="self"/>
  <link href="http://kylehalladay.com"/>
- <updated>2017-02-21T08:57:57-06:00</updated>
+ <updated>2017-02-21T09:14:44-06:00</updated>
  <id>http://kylehalladay.com</id>
  <author>
    <name>Kyle Halladay</name>
@@ -33,7 +33,7 @@
 &lt;p&gt;This is sorta complicated when stated in words, but it’s a lot more intuitive when you see the textures. The following was taken from a widely cited research paper (located &lt;a href=&quot;http://hhoppe.com/hatching.pdf&quot;&gt;here&lt;/a&gt; which presented the technique we’re going to use today.&lt;/p&gt;
 
 &lt;div align=&quot;center&quot;&gt;
-&lt;img src=&quot;/images/post_images/2017-02-19/tamimages.png&quot; /&gt;&lt;br /&gt;
+&lt;img src=&quot;/images/post_images/2017-02-19/tamimages.PNG&quot; /&gt;&lt;br /&gt;
 &lt;/div&gt;
 
 &lt;p&gt;As you can see, each map represents pencil strokes that an artist would make to shade in a part of a piece of paper. The darker maps contain all the pencil strokes from the brighter regions, and then add more. If you don’t follow this rule when creating your maps, the strokes won’t nicely flow into each other, and you’ll end up with very weird looking line shading.&lt;/p&gt;
@@ -41,7 +41,7 @@
 &lt;p&gt;In order for us to have a “proper” TAM, we need to go a step further than simply authoring our hatching textures according to the above rules, we also need to provide custom mips. If you don’t, then as your objects get farther away, you’re going to see less and less stroke detail on them. The paper goes into detail as to how they generated the custom mips, and provides an example of what they made:&lt;/p&gt;
 
 &lt;div align=&quot;center&quot;&gt;
-&lt;img src=&quot;/images/post_images/2017-02-19/tammips.png&quot; /&gt;
+&lt;img src=&quot;/images/post_images/2017-02-19/tammips.PNG&quot; /&gt;
 &lt;font size=&quot;2&quot;&gt;&lt;i&gt;from http://hhoppe.com/hatching.pdf&lt;/i&gt;&lt;/font&gt;&lt;br /&gt;&lt;br /&gt;
 &lt;/div&gt;
 
@@ -104,7 +104,7 @@
 &lt;p&gt;If we add that line to our shader, and output the result, we’ll end up with a nice grayscale effect:&lt;/p&gt;
 
 &lt;div align=&quot;center&quot;&gt;
-&lt;img src=&quot;/images/post_images/2017-02-19/grayscale.png&quot; style=&quot;width:300px; height:300px&quot; /&gt;&lt;br /&gt;
+&lt;img src=&quot;/images/post_images/2017-02-19/grayscale.PNG&quot; style=&quot;width:300px; height:300px&quot; /&gt;&lt;br /&gt;
 &lt;/div&gt;
 
 &lt;p&gt;Now all we need to do is to convert that scalar intensity value into a hatch texture sample. We have 6 hatch channels, which means that there are going to be 6 different intensity values that will map to a sample from only 1 hatch texture (1/6, 2/6, 3/6, 4/6, 5/6, 6/6). Any value that isn’t one of these exact values is going to require us to blend between the two textures that our value is between. This means that an intensity value of 1.5 / 6 (or 0.25) will require us to blend between the texture that corresponds to 1/6 and 2/6. This is demonstrated in the diagram below.&lt;/p&gt;
@@ -311,7 +311,7 @@
 &lt;p&gt;It’s very easy to make a mistake when rendering the UV buffer. With UVs, we need much more precision than we can store in a default RT texel. Remember earlier when I was talking about needing to store the luminosity constant in a half3 because a fixed3 didn’t have enough precision? That goes double for UVs. If you forget about this and try output your UVs to a regular buffer, you end up with a mess:&lt;/p&gt;
 
 &lt;div align=&quot;center&quot;&gt;
-&lt;img src=&quot;/images/post_images/2017-02-19/hatchbadprecision.png&quot; /&gt;
+&lt;img src=&quot;/images/post_images/2017-02-19/hatchbadprecision.PNG&quot; /&gt;
 &lt;font size=&quot;2&quot;&gt;Wrong Precision Left, Correct Precision Right&lt;/font&gt;&lt;br /&gt;&lt;br /&gt;
 &lt;/div&gt;
 
@@ -548,6 +548,8 @@
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c#&quot; data-lang=&quot;c#&quot;&gt;&lt;span class=&quot;n&quot;&gt;float4&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;frag&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;v2f&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SV_Target&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
 &lt;span class=&quot;c1&quot;&gt;//other shading logic fills RGB channels&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;col&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;screen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;z&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;screen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;w&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 
 &lt;span class=&quot;c1&quot;&gt;//using UNITY_REVERSED_Z becuase SHADER_TARGET_GLSL&lt;/span&gt;
 &lt;span class=&quot;c1&quot;&gt;//doesn&#39;t seem to work on my machine&lt;/span&gt;

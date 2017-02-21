@@ -275,6 +275,8 @@
 <span class="p">{</span>
 <span class="c1">//other shading logic fills RGB channels</span>
 
+<span class="n">col</span><span class="p">.</span><span class="n">a</span> <span class="p">=</span> <span class="p">(</span><span class="n">i</span><span class="p">.</span><span class="n">screen</span><span class="p">.</span><span class="n">z</span> <span class="p">/</span> <span class="n">i</span><span class="p">.</span><span class="n">screen</span><span class="p">.</span><span class="n">w</span><span class="p">);</span>
+
 <span class="c1">//using UNITY_REVERSED_Z becuase SHADER_TARGET_GLSL</span>
 <span class="c1">//doesn't seem to work on my machine</span>
 <span class="cp">#if !defined(UNITY_REVERSED_Z)

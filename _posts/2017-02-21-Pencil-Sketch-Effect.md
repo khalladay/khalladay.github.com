@@ -26,7 +26,7 @@ Before we do anything though, we need to talk about the basic theory behind real
 This is sorta complicated when stated in words, but it's a lot more intuitive when you see the textures. The following was taken from a widely cited research paper (located [here](http://hhoppe.com/hatching.pdf) which presented the technique we're going to use today.
 
 <div align="center">
-<img src="/images/post_images/2017-02-19/tamimages.png"/><br>
+<img src="/images/post_images/2017-02-19/tamimages.PNG"/><br>
 </div>
 
 As you can see, each map represents pencil strokes that an artist would make to shade in a part of a piece of paper. The darker maps contain all the pencil strokes from the brighter regions, and then add more. If you don't follow this rule when creating your maps, the strokes won't nicely flow into each other, and you'll end up with very weird looking line shading.
@@ -34,7 +34,7 @@ As you can see, each map represents pencil strokes that an artist would make to 
 In order for us to have a "proper" TAM, we need to go a step further than simply authoring our hatching textures according to the above rules, we also need to provide custom mips. If you don't, then as your objects get farther away, you're going to see less and less stroke detail on them. The paper goes into detail as to how they generated the custom mips, and provides an example of what they made:
 
 <div align="center">
-<img src="/images/post_images/2017-02-19/tammips.png"/>
+<img src="/images/post_images/2017-02-19/tammips.PNG"/>
 <font size="2"><i>from http://hhoppe.com/hatching.pdf</i></font><br><br>
 </div>
 
@@ -100,7 +100,7 @@ Also note that we're calculating this value in halfs. While you likely wouldn't 
 If we add that line to our shader, and output the result, we'll end up with a nice grayscale effect:
 
 <div align="center">
-<img src="/images/post_images/2017-02-19/grayscale.png" style="width:300px; height:300px"/><br>
+<img src="/images/post_images/2017-02-19/grayscale.PNG" style="width:300px; height:300px"/><br>
 </div>
 
 Now all we need to do is to convert that scalar intensity value into a hatch texture sample. We have 6 hatch channels, which means that there are going to be 6 different intensity values that will map to a sample from only 1 hatch texture (1/6, 2/6, 3/6, 4/6, 5/6, 6/6). Any value that isn't one of these exact values is going to require us to blend between the two textures that our value is between. This means that an intensity value of 1.5 / 6 (or 0.25) will require us to blend between the texture that corresponds to 1/6 and 2/6. This is demonstrated in the diagram below.
@@ -336,7 +336,7 @@ Once we have our UV buffer populated, we pass it to our composite shader, which 
 It's very easy to make a mistake when rendering the UV buffer. With UVs, we need much more precision than we can store in a default RT texel. Remember earlier when I was talking about needing to store the luminosity constant in a half3 because a fixed3 didn't have enough precision? That goes double for UVs. If you forget about this and try output your UVs to a regular buffer, you end up with a mess:
 
 <div align="center">
-<img src="/images/post_images/2017-02-19/hatchbadprecision.png"/>
+<img src="/images/post_images/2017-02-19/hatchbadprecision.PNG"/>
 <font size="2">Wrong Precision Left, Correct Precision Right</font><br><br>
 </div>
 
