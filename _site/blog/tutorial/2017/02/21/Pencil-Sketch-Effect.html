@@ -434,7 +434,7 @@
 
 <p>There are lots of potential issues you’ll run into with this effect if you use it in a real project. For example, handling non uniform object scale can present some odd issues, especially if you don’t want to break static batching by passing scale to the object’s material. I think you could get around this by encoding the scale of objects into their vertex color, but if you know the scale of your object at bake time, you should probably just resize your mesh.</p>
 
-<p>In reality though, the effect as presented here is likely not going to make your art team very happy. I think you’d likely run into artists wanting to author density texture maps for each object to control how dense the hatching was at every point.</p>
+<p>In reality though, the effect as presented here is likely not going to make your art team very happy. I think you’d likely run into artists wanting to author custom TAMs with different types of strokes, and maps for each object to control which type of stroke was used where. </p>
 
 <p>That about wraps things up, this was a lot of fun! If you have any questions, shoot me a message <a href="https://twitter.com/khalladay">on twitter</a>, I’d love to see more projects using this type of effect, so send me screenshots of anything you build with it!</p>
 

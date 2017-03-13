@@ -935,7 +935,7 @@ topbar {
 		line-height: 24px;
 	}
 }
-.highlight {line-height: 14px; font-size: 14px;}
+.highlight {line-height: 16px; font-size: 14px;}
 .highlight .hll { background-color: #ffffcc }
 .highlight .c { color: #0099FF; font-style: italic } /* Comment */
 .highlight .err { color: #AA0000; background-color: #FFAAAA } /* Error */
@@ -997,3 +997,4 @@ topbar {
 .highlight .vg { color: #003333 } /* Name.Variable.Global */
 .highlight .vi { color: #003333 } /* Name.Variable.Instance */
 .highlight .il { color: #FF6600 } /* Literal.Number.Integer.Long */
+
