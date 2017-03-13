@@ -29,7 +29,7 @@ The first thing we'll need to do is find some way to divide our screen up into r
 Since this texture identifies each block with a value between 0 and 1 (the intensity of the colour), we'll pass a second value to our shader also between 0 and 1. As the shader executes, any fragment which is in a block that has a value greater than our control value will sample the screen buffer using UVs which have had a constant value added or subtracted to them. This will keep all texture samples within a block cohesive with each other, producing the effect we want:
 
 <div align="center">
-<img src="/images/post_images/2017-03-13/offset_sample.png"/><br>
+<img src="/images/post_images/2017-03-13/offset_sample.PNG"/><br>
 </div>
 
 if we use the grayscale image above however, our UV offset will always be diagonal and in the same direction, which isn't exactly what we want. So I'm going to use the R channel as our identifier channel, and put different random values into the GB channels of the noise texture, which we'll use to drive our UV offsets:
@@ -224,7 +224,7 @@ In a real project though, you'll want to pre-process your glitch map to make sur
 You may have noticed if you run this right now, you get some weird colours in your glitched image, for me, this looked like way more brown than there should have been:
 
 <div align="center">
-<img src="/images/post_images/2017-03-13/edge.png" style="width:300px; height:250px;"/><br>
+<img src="/images/post_images/2017-03-13/edge.PNG" style="width:300px; height:250px;"/><br>
 </div>
 
 This is because when we add our UV offset to our UV coordinates, we're ending up sampling from outside of the area of the screen buffer. The buffer is set to clamp at the border, meaning what we're seeing is a lot of fragments picking up pixels from the edge of our image. Since we don't care about the integer value of our UV coordinates (and in fact want to get rid of them), we can add a frac() function to our shader and get home-grown UV wrapping.
