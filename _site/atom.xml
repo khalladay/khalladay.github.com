@@ -4,7 +4,7 @@
  <title>The blog of Kyle Halladay</title>
  <link href="http://kylehalladay.com/atom.xml" rel="self"/>
  <link href="http://kylehalladay.com"/>
- <updated>2017-03-28T06:48:19-05:00</updated>
+ <updated>2017-03-28T08:02:57-05:00</updated>
  <id>http://kylehalladay.com</id>
  <author>
    <name>Kyle Halladay</name>
@@ -159,7 +159,7 @@ tags:
 
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;unused&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;BBB&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;BBGG&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;GGGR&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;RRRR&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;Note that each colour getting only 5 bits means that channels can only store 1 of 32 values (0 - 31), so passing a number outside this range to the function is essentially useless. I’ve seen some other tutorials recommend AND-ing the passed in channel values with 0x1F to clamp them to a 5 bit value, but I feel like ensuring the inputs to your functions are correct is a problem for an assert in a debug build and not runtime cycles. That being said, how to debug a GBA game is beyong the scope of what I want to talk about today (and to be honest, outside the scope of what I know how to do right now), so maybe AND-ing isn’t such a bad idea:&lt;/p&gt;
+&lt;p&gt;Note that each colour getting only 5 bits means that channels can only store 1 of 32 values (0 - 31), so passing a number outside this range to the function is essentially useless. I’ve seen some other tutorials recommend AND-ing the passed in channel values with 0x1F to clamp them to a 5 bit value, but I feel like ensuring the inputs to your functions are correct is a problem for an assert in a debug build and not runtime cycles. That being said, how to debug a GBA game is beyond the scope of what I want to talk about today (and to be honest, outside the scope of what I know how to do right now), so maybe AND-ing isn’t such a bad idea:&lt;/p&gt;
 
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;kr&quot;&gt;inline&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;uint16&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;MakeCol&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;uint8&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;red&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;uint8&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;green&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;uint8&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;blue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;

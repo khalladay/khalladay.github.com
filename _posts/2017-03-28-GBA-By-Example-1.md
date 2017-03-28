@@ -124,7 +124,7 @@ To give credit where it's due, the above function comes from the [Tonc tutorial]
 
 {% endhighlight %}
 
-Note that each colour getting only 5 bits means that channels can only store 1 of 32 values (0 - 31), so passing a number outside this range to the function is essentially useless. I've seen some other tutorials recommend AND-ing the passed in channel values with 0x1F to clamp them to a 5 bit value, but I feel like ensuring the inputs to your functions are correct is a problem for an assert in a debug build and not runtime cycles. That being said, how to debug a GBA game is beyong the scope of what I want to talk about today (and to be honest, outside the scope of what I know how to do right now), so maybe AND-ing isn't such a bad idea:
+Note that each colour getting only 5 bits means that channels can only store 1 of 32 values (0 - 31), so passing a number outside this range to the function is essentially useless. I've seen some other tutorials recommend AND-ing the passed in channel values with 0x1F to clamp them to a 5 bit value, but I feel like ensuring the inputs to your functions are correct is a problem for an assert in a debug build and not runtime cycles. That being said, how to debug a GBA game is beyond the scope of what I want to talk about today (and to be honest, outside the scope of what I know how to do right now), so maybe AND-ing isn't such a bad idea:
 
 {% highlight c %}
 inline uint16 MakeCol(uint8 red, uint8 green, uint8 blue)
