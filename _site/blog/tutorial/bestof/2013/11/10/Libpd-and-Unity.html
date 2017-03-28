@@ -111,16 +111,19 @@ The sample pd program used in this tutorial
 
 <p>Libpd4unity isn’t suited to really in depth PD development in Unity (at the moment it seems to only support loading one patch at a time), but you can still do some interesting things with it. So today, I’m going to go over the process of setting up libpd4unity with Unity.</p>
 
-<p>If you’re on mac, you may be a bit disappointed to see that there isn’t a mac compatible pd library in the libpd4unity class, so the first step for us is to compile a .bundle for mac. If you’re on windows, skip down to the actual programming. </p>
+<p>If you’re on mac, you may be a bit disappointed to see that there isn’t a mac compatible pd library in the libpd4unity class, so the first step for us is to compile a .bundle for mac. If you’re on windows, skip down to the actual programming.</p>
 
 <h2>Building libpdcsharp.bundle</h2>
 
-<p>Thankfully this is pretty straightfoward, if a bit weird: 
-* Download the <a href="https://github.com/libpd/libpd">LibPD Project</a> from github
-* In terminal, cd into the downloaded project folder and type the command <a href="https://github.com/libpd/libpd/wiki/Building-the-C%23-Api">make csharplib</a>
-* libcsharp.dylib should now be created inside the libs folder. Copy that to the Assets/Plugins folder in Unity
-* Rename this file to libcsharp.bundle. Unity has a problem locating dylibs. 
-* You’re good to go!</p>
+<p>Thankfully this is pretty straightfoward, if a bit weird:</p>
+
+<ul>
+  <li>Download the <a href="https://github.com/libpd/libpd">LibPD Project</a> from github</li>
+  <li>In terminal, cd into the downloaded project folder and type the command <a href="https://github.com/libpd/libpd/wiki/Building-the-C%23-Api">make csharplib</a></li>
+  <li>libcsharp.dylib should now be created inside the libs folder. Copy that to the Assets/Plugins folder in Unity</li>
+  <li>Rename this file to libcsharp.bundle. Unity has a problem locating dylibs.</li>
+  <li>You’re good to go!</li>
+</ul>
 
 <h2>LibPD and Unity</h2>
 <p>Note: You will need to download <a href="https://github.com/patricksebastien/libpd4unity">Libpd4Unity</a></p>
@@ -129,7 +132,7 @@ The sample pd program used in this tutorial
 
 <p>Next, make an Assets/Resources folder. This is a special folder that allows you to specify resources that you want to have available to Unity at runtime. Put your patches in this folder (or a subfolder of it). If you don’t have a patch to work with, or want to follow along exactly with this demo, you can grab the <a href="https://github.com/khalladay/Unity-PD-Sample/blob/master/Assets/Resources/example.pd">simple sine patch</a> from the repo for this post’s example project (patch courtesy of <a href="johannesg.com">johannesg.com</a> ).</p>
 
-<p>Now that all the housekeeping is taken care of, it’s time to actually interact with a patch program from Unity. LibPd4Unity comes with an example script called LibPdFilterRead.cs that will serve as the basic outline for our class, but we’re going to tailor ours to suit our needs a bit better. </p>
+<p>Now that all the housekeeping is taken care of, it’s time to actually interact with a patch program from Unity. LibPd4Unity comes with an example script called LibPdFilterRead.cs that will serve as the basic outline for our class, but we’re going to tailor ours to suit our needs a bit better.</p>
 
 <div class="highlight"><pre><code class="language-c#" data-lang="c#"><span class="k">using</span> <span class="nn">UnityEngine</span><span class="p">;</span>
 <span class="k">using</span> <span class="nn">System.Collections</span><span class="p">;</span>
@@ -137,12 +140,12 @@ The sample pd program used in this tutorial
 <span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
 <span class="k">using</span> <span class="nn">System.Runtime.InteropServices</span><span class="p">;</span>
 
-<span class="k">public</span> <span class="k">class</span> <span class="nc">OSCControl</span> <span class="p">:</span> <span class="n">MonoBehaviour</span> 
+<span class="k">public</span> <span class="k">class</span> <span class="nc">OSCControl</span> <span class="p">:</span> <span class="n">MonoBehaviour</span>
 <span class="p">{</span>
 	<span class="k">public</span> <span class="kt">string</span> <span class="n">patch</span><span class="p">;</span>
 	<span class="k">public</span> <span class="kt">bool</span> <span class="n">playOnAwake</span> <span class="p">=</span> <span class="k">false</span><span class="p">;</span>		
 	<span class="k">public</span> <span class="kt">bool</span> <span class="n">patchIsStereo</span> <span class="p">=</span> <span class="k">false</span><span class="p">;</span>
-	
+
 	<span class="k">private</span> <span class="kt">int</span> <span class="n">patchName</span><span class="p">;</span>
 	<span class="k">private</span> <span class="kt">bool</span> <span class="n">islibpdready</span><span class="p">;</span>
 	<span class="k">private</span> <span class="kt">string</span> <span class="n">path</span><span class="p">;</span>
@@ -152,16 +155,19 @@ The sample pd program used in this tutorial
 
 <p>The script I’m going to build here interacts with the sample patch linked above.</p>
 
-<p>Lets go through these variables:
-* patch: the name of the patch file to use
-* playOnAwake: what it says on the tin
-* patchIsStereo: only check this if you are SURE your patch is stereo, otherwise you’ll hear garbled crap
-* patchName: the integer patch name generated by LibPD
-* islibpdready: does what it says on the tin
-* path: this will be the patch variable with the rest of the filepath prepended to it
-* dataHandle: this will eventually be used to let us have access to the audio stream from pd without worrying about the garbage collector
-* dataPtr: this will hold the address of the patch we’re interacting with
-* freq: the frequency we want to pass to our program</p>
+<p>Lets go through these variables:</p>
+
+<ul>
+  <li>patch: the name of the patch file to use</li>
+  <li>playOnAwake: what it says on the tin</li>
+  <li>patchIsStereo: only check this if you are SURE your patch is stereo, otherwise you’ll hear garbled crap</li>
+  <li>patchName: the integer patch name generated by LibPD</li>
+  <li>islibpdready: does what it says on the tin</li>
+  <li>path: this will be the patch variable with the rest of the filepath prepended to it</li>
+  <li>dataHandle: this will eventually be used to let us have access to the audio stream from pd without worrying about the garbage collector</li>
+  <li>dataPtr: this will hold the address of the patch we’re interacting with</li>
+  <li>freq: the frequency we want to pass to our program</li>
+</ul>
 
 <p>Now let’s get to some functionality</p>
 
@@ -178,17 +184,17 @@ The sample pd program used in this tutorial
 		<span class="k">if</span> <span class="p">(!</span><span class="n">patchIsStereo</span><span class="p">)</span>	<span class="n">LibPD</span><span class="p">.</span><span class="nf">OpenAudio</span> <span class="p">(</span><span class="m">1</span><span class="p">,</span><span class="m">1</span><span class="p">,</span> <span class="m">48000</span><span class="p">);</span>
 		<span class="k">else</span> <span class="n">LibPD</span><span class="p">.</span><span class="nf">OpenAudio</span><span class="p">(</span><span class="m">2</span><span class="p">,</span><span class="m">2</span><span class="p">,</span><span class="m">48000</span><span class="p">);</span>
 	<span class="p">}</span>
-	
+
 	<span class="n">patchName</span> <span class="p">=</span> <span class="n">LibPD</span><span class="p">.</span><span class="nf">OpenPatch</span> <span class="p">(</span><span class="n">path</span><span class="p">);</span>
 	<span class="n">LibPD</span><span class="p">.</span><span class="nf">ComputeAudio</span> <span class="p">(</span><span class="k">true</span><span class="p">);</span>
 	<span class="n">islibpdready</span> <span class="p">=</span> <span class="k">true</span><span class="p">;</span>
 <span class="p">}</span></code></pre></div>
 
-<p>Awake isn’t all that interesting, except to show off how to get the actual file path to the patch. Also note that loadPath() needs to be called before we can start working with pd. </p>
+<p>Awake isn’t all that interesting, except to show off how to get the actual file path to the patch. Also note that loadPath() needs to be called before we can start working with pd.</p>
 
-<p>loadPatch is the standard initialization sequence for working with libPd. </p>
+<p>loadPatch is the standard initialization sequence for working with libPd.</p>
 
-<p>I’m going to hold off on the good stuff until the end, so we’re going to skip from the initialization process down to the cleanup process. This is a little more involved than the usual in C# because we are explicitly telling the garbage collector to not interact with the data stream, so we need to do a bit of manual memory management. This is taken directly from the example project in LibPd4Unity. </p>
+<p>I’m going to hold off on the good stuff until the end, so we’re going to skip from the initialization process down to the cleanup process. This is a little more involved than the usual in C# because we are explicitly telling the garbage collector to not interact with the data stream, so we need to do a bit of manual memory management. This is taken directly from the example project in LibPd4Unity.</p>
 
 <div class="highlight"><pre><code class="language-c#" data-lang="c#"><span class="k">public</span> <span class="k">void</span> <span class="nf">closePatch</span> <span class="p">()</span>
 <span class="p">{</span>
@@ -207,50 +213,50 @@ The sample pd program used in this tutorial
 	<span class="n">dataPtr</span> <span class="p">=</span> <span class="n">IntPtr</span><span class="p">.</span><span class="n">Zero</span><span class="p">;</span>
 <span class="p">}</span></code></pre></div>
 
-<p>I don’t have a good explanation for why we don’t need to free the dataHandle on close patch, so if anyone has an idea, shoot me a message on twitter and I can update the post. Otherwise, this is boilerplate code that will need to be added to every class that you write that will handle loading a Pd program. </p>
+<p>I don’t have a good explanation for why we don’t need to free the dataHandle on close patch, so if anyone has an idea, shoot me a message on twitter and I can update the post. Otherwise, this is boilerplate code that will need to be added to every class that you write that will handle loading a Pd program.</p>
 
 <p>And now finally, the good stuff!</p>
 
 <div class="highlight"><pre><code class="language-c#" data-lang="c#"><span class="k">public</span> <span class="k">void</span> <span class="nf">OnAudioFilterRead</span> <span class="p">(</span><span class="kt">float</span><span class="p">[]</span> <span class="n">data</span><span class="p">,</span> <span class="kt">int</span> <span class="n">channels</span><span class="p">)</span>
-<span class="p">{</span>	
+<span class="p">{</span>
 	<span class="k">if</span><span class="p">(</span><span class="n">dataPtr</span> <span class="p">==</span> <span class="n">IntPtr</span><span class="p">.</span><span class="n">Zero</span><span class="p">)</span>
 	<span class="p">{</span>
 		<span class="n">dataHandle</span> <span class="p">=</span> <span class="n">GCHandle</span><span class="p">.</span><span class="nf">Alloc</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="n">GCHandleType</span><span class="p">.</span><span class="n">Pinned</span><span class="p">);</span>
 		<span class="n">dataPtr</span> <span class="p">=</span> <span class="n">dataHandle</span><span class="p">.</span><span class="nf">AddrOfPinnedObject</span><span class="p">();</span>
 	<span class="p">}</span>
-	
+
 	<span class="k">if</span> <span class="p">(</span><span class="n">LibPD</span><span class="p">.</span><span class="nf">Process</span><span class="p">(</span><span class="m">32</span><span class="p">,</span> <span class="n">dataPtr</span><span class="p">,</span> <span class="n">dataPtr</span><span class="p">)==</span><span class="m">0</span><span class="p">)</span> <span class="p">{</span>
 		<span class="n">LibPD</span><span class="p">.</span><span class="nf">SendFloat</span><span class="p">(</span><span class="n">patchName</span> <span class="p">+</span> <span class="s">"freq1"</span><span class="p">,</span> <span class="n">freq</span><span class="p">);</span>
 		<span class="n">LibPD</span><span class="p">.</span><span class="nf">SendFloat</span><span class="p">(</span><span class="n">patchName</span> <span class="p">+</span> <span class="s">"freq2"</span><span class="p">,</span> <span class="n">freq</span><span class="p">);</span>
-		
+
 	<span class="p">}</span>
 <span class="p">}</span>
 
 <span class="k">void</span> <span class="nf">OnGUI</span><span class="p">()</span>
 <span class="p">{</span>
-	<span class="n">Rect</span> <span class="n">r</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Rect</span><span class="p">(</span><span class="n">Screen</span><span class="p">.</span><span class="n">width</span><span class="p">/</span><span class="m">2</span> <span class="p">-</span> <span class="m">50</span> <span class="p">,</span> 
-			<span class="n">Screen</span><span class="p">.</span><span class="n">height</span><span class="p">/</span><span class="m">2</span> <span class="p">-</span> <span class="m">150</span><span class="p">,</span> 
-			<span class="m">100</span><span class="p">,</span> 
+	<span class="n">Rect</span> <span class="n">r</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Rect</span><span class="p">(</span><span class="n">Screen</span><span class="p">.</span><span class="n">width</span><span class="p">/</span><span class="m">2</span> <span class="p">-</span> <span class="m">50</span> <span class="p">,</span>
+			<span class="n">Screen</span><span class="p">.</span><span class="n">height</span><span class="p">/</span><span class="m">2</span> <span class="p">-</span> <span class="m">150</span><span class="p">,</span>
+			<span class="m">100</span><span class="p">,</span>
 			<span class="m">300</span><span class="p">);</span>
-						
+
 	<span class="n">freq</span> <span class="p">=</span> <span class="n">GUI</span><span class="p">.</span><span class="nf">VerticalSlider</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">freq</span><span class="p">,</span><span class="m">1000</span><span class="p">,</span> <span class="m">400</span><span class="p">);</span>
-	
-	<span class="n">Rect</span> <span class="n">r2</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Rect</span><span class="p">(</span><span class="n">Screen</span><span class="p">.</span><span class="n">width</span><span class="p">/</span><span class="m">2</span><span class="p">-</span><span class="m">30</span><span class="p">,</span> 
-			<span class="n">Screen</span><span class="p">.</span><span class="n">height</span><span class="p">/</span><span class="m">2</span> <span class="p">-</span> <span class="m">30</span><span class="p">,</span> 
-			<span class="m">80</span><span class="p">,</span> 
+
+	<span class="n">Rect</span> <span class="n">r2</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Rect</span><span class="p">(</span><span class="n">Screen</span><span class="p">.</span><span class="n">width</span><span class="p">/</span><span class="m">2</span><span class="p">-</span><span class="m">30</span><span class="p">,</span>
+			<span class="n">Screen</span><span class="p">.</span><span class="n">height</span><span class="p">/</span><span class="m">2</span> <span class="p">-</span> <span class="m">30</span><span class="p">,</span>
+			<span class="m">80</span><span class="p">,</span>
 			<span class="m">30</span><span class="p">);</span>
-						
+
 	<span class="n">GUI</span><span class="p">.</span><span class="nf">Box</span><span class="p">(</span><span class="n">r2</span><span class="p">,</span> <span class="s">""</span><span class="p">+</span><span class="n">freq</span><span class="p">+</span><span class="s">" hz"</span><span class="p">);</span>
 <span class="p">}</span></code></pre></div>
 
-<p>OnAudioFilterRead is the callback method used by LibPd4Unity’s library. It will be called whenever the internal audio buffer has been filled. I’m really not sure why we’re checking that libPD.Process returns 0, although I assume that’s LibPD’s “all good” return value. 
-Inside that block you can see how to pass messages to the currently running patch. What tripped me up for awhile was both the need to prepend the target value’s name with the int name of the loaded patch, and the need to leave off the “$0” part of the variable name, which is displayed when you open the patch in pd. </p>
+<p>OnAudioFilterRead is the callback method used by LibPd4Unity’s library. It will be called whenever the internal audio buffer has been filled. I’m really not sure why we’re checking that libPD.Process returns 0, although I assume that’s LibPD’s “all good” return value.
+Inside that block you can see how to pass messages to the currently running patch. What tripped me up for awhile was both the need to prepend the target value’s name with the int name of the loaded patch, and the need to leave off the “$0” part of the variable name, which is displayed when you open the patch in pd.</p>
 
 <h2>Building a Project on Mac</h2>
 
 <p>Everything should now work fine in the editor, but if you’re on mac, your journey is not over yet!</p>
 
-<p>If you have tried to actually create a build, you will have noticed the big, ugly error message that pops up: </p>
+<p>If you have tried to actually create a build, you will have noticed the big, ugly error message that pops up:</p>
 
 <p><strong>Error building Player: IOException: Cannot create Temp/StagingArea/UnityPlayer.app/Contents/Plugins/libpdcsharp.bundle/libpdcsharp.bundle because a file with the same name already exists.</strong></p>
 
@@ -260,15 +266,15 @@ Inside that block you can see how to pass messages to the currently running patc
   <li>Remove libpdcsharp.bundle from your plugins folder (but don’t delete it, we’ll need it in a second)</li>
   <li>Build your project as you normally would</li>
   <li>Locate the .app file that you just built, right click on it, and select “Show Package Contents,” and open the “Contents” folder within</li>
-  <li>If there is no folder named “Plugins” inside Contents, create one now. </li>
+  <li>If there is no folder named “Plugins” inside Contents, create one now.</li>
   <li>Paste libpdcsharp.bundle into the Plugins folder</li>
   <li>Go back to your Unity project, and copy the .pd file from your resources folder</li>
   <li>Paste this file into the Resources folder located inside your .app’s Contents folder.</li>
 </ul>
 
-<p>All of this is necessary because Unity’s build process doesn’t like the libpdcsharp bundle, and attempts to copy it multiple times (creating that ugly error), and completely ignores the patch file in Resources because it doesn’t recognize the file extension. Thankfully, all that’s needed to resolve this a mildly annoying process. </p>
+<p>All of this is necessary because Unity’s build process doesn’t like the libpdcsharp bundle, and attempts to copy it multiple times (creating that ugly error), and completely ignores the patch file in Resources because it doesn’t recognize the file extension. Thankfully, all that’s needed to resolve this a mildly annoying process.</p>
 
-<p>If you’ve made it this far, you should now have a unity project that can interact with Pure Data plugins, and can actually create builds! Congratulations! If you’ve hit any difficulties or need further clarification on something I’ve said here, you can download a sample project <a href="https://dl.dropboxusercontent.com/u/6128167/Unity-PD-Sample.zip">from my dropbox</a>, or send me a message <a href="http://twitter.com/khalladay">on Twitter.</a> Hope this tutorial helped! </p>
+<p>If you’ve made it this far, you should now have a unity project that can interact with Pure Data plugins, and can actually create builds! Congratulations! If you’ve hit any difficulties or need further clarification on something I’ve said here, you can download a sample project <a href="https://dl.dropboxusercontent.com/u/6128167/Unity-PD-Sample.zip">from my dropbox</a>, or send me a message <a href="http://twitter.com/khalladay">on Twitter.</a> Hope this tutorial helped!</p>
 
 </div>
 

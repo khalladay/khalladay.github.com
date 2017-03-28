@@ -4,13 +4,283 @@
  <title>The blog of Kyle Halladay</title>
  <link href="http://kylehalladay.com/atom.xml" rel="self"/>
  <link href="http://kylehalladay.com"/>
- <updated>2017-03-13T09:03:51-05:00</updated>
+ <updated>2017-03-28T06:43:41-05:00</updated>
  <id>http://kylehalladay.com</id>
  <author>
    <name>Kyle Halladay</name>
    <email>k.mj.halladay@gmail.com</email>
  </author>
 
+ 
+ <entry>
+   <title>Gba By Example 2</title>
+   <link href="http://kylehalladay.com/2017/04/17/GBA-By-Example-2.html"/>
+   <updated>2017-04-17T00:00:00-05:00</updated>
+   <id>http://kylehalladay.com/2017/04/17/GBA-By-Example-2</id>
+   <content type="html">&lt;hr /&gt;
+&lt;p&gt;layout: post
+title: What Causes Texture Border Artifacts?
+categories:
+tags:
+- &lt;span style=&quot;background-color:#DD6655;&quot;&gt;&lt;font color=&quot;white&quot;&gt;&amp;nbsp;&amp;nbsp;GBA&amp;nbsp;&amp;nbsp;&lt;/font&gt;&lt;/span&gt;
+—&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>What Causes Texture Border Artifacts?</title>
+   <link href="http://kylehalladay.com/2017/04/10/The-Perils-Of-Compressed-UI.html"/>
+   <updated>2017-04-10T00:00:00-05:00</updated>
+   <id>http://kylehalladay.com/2017/04/10/The-Perils-Of-Compressed-UI</id>
+   <content type="html">
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Preprocess Meshes For Fun And Profit</title>
+   <link href="http://kylehalladay.com/2017/04/03/Preprocess-Static-Meshes.html"/>
+   <updated>2017-04-03T00:00:00-05:00</updated>
+   <id>http://kylehalladay.com/2017/04/03/Preprocess-Static-Meshes</id>
+   <content type="html">&lt;p&gt;One of my goals for 2017 is to learn a new graphics api (I chose DX12), and of course to do anything useful without an engine, this means that I’m also re-learning a bunch of things that I haven’t had to do in years, like loading meshes. I’ve been spoiled by big shiny game engines that have done this for me for so long that I forgot how to do it.&lt;/p&gt;
+
+&lt;p&gt;Googling around turned up a bunch of tutorials, which were handy when combined with the FBX SDK docs, but none of the tutorials by themselves really explained things in a way that made sense to me. So… I figured I’d try my hand at writing one. This post is just going to cover loading a static mesh with normals, tangents, uvs, and vertex color. I’ll write a second installment to cover skinned meshes later (when I decide I want skinned meshes in my DX12 programs).&lt;/p&gt;
+
+&lt;p&gt;Here goes.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>GBA By Example - Drawing and Moving Rectangles</title>
+   <link href="http://kylehalladay.com/blog/tutorial/2017/03/31/GBA-By-Example-1.html"/>
+   <updated>2017-03-31T00:00:00-05:00</updated>
+   <id>http://kylehalladay.com/blog/tutorial/2017/03/31/GBA-By-Example-1</id>
+   <content type="html">&lt;p&gt;The idea of making something for GameBoy has always appealed to me. Not only was it my platform of choice when I was a little kid, but naively, it has always looked like the relaxing combination of hardware simple enough to really understand, an OS (or BIOS) that gets out of your way (no firmware updates), and a platform that’s open enough to not need to deal with jailbreaking the device, and the GBA could do 3D!&lt;/p&gt;
+
+&lt;p&gt;I’ve had a &lt;a href=&quot;http://krikzz.com/store/home/42-everdrive-gba-x5.html&quot;&gt;Kirkzz Everdrive&lt;/a&gt; sitting around for a few months that I’ve meant to play with, and I finally had some time during my vacation lask week to try it out. Behold the fruits of my labors:&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+&lt;img src=&quot;/images/post_images/2017-03-31/snake.gif&quot; style=&quot;width:240px;height:160px&quot; /&gt;
+
+&lt;font size=&quot;2&quot;&gt;(I on the other hand, cannot make the GBA do 3D yet)&lt;/font&gt;&lt;br /&gt;&lt;br /&gt;
+
+&lt;/div&gt;
+
+&lt;p&gt;So, it isn’t exactly impressive, but it was a lot of fun, and I definitely want to play around with the GBA some more.&lt;/p&gt;
+
+&lt;p&gt;One of the great things about being late to the dev scene for a console is that lots of people have come before you and written great material, especially &lt;a href=&quot;http://problemkaputt.de/gbatek.htm&quot;&gt;GBATek&lt;/a&gt; and the &lt;a href=&quot;http://www.coranac.com/tonc/text/&quot;&gt;Tonc Tutorials&lt;/a&gt;. But what I really wish existed was a GBA version of the excellent &lt;a href=&quot;http://metalbyexample.com/&quot;&gt;Metal By Example&lt;/a&gt;, which does an amazing job at easing into the nuts and bolts of the Metal API, by presenting each step as a small, buildable example.&lt;/p&gt;
+
+&lt;p&gt;Since that doesn’t exist for the GBA yet, I’m here to make that happen. To that end: this article is going to focus on the absolute minimum you need to know to draw and move rectangles around the screen on the GBA. You can do a lot with just that, and it feels great to see something moving on screen, so let’s get started!&lt;/p&gt;
+
+&lt;h2 id=&quot;setting-up-your-dev-environment&quot;&gt;Setting Up Your Dev Environment&lt;/h2&gt;
+
+&lt;p&gt;First thing first, we’re going to need a way to run our project. As mentioned, I have an Everdrive GBA cart so I could put my stuff on actual hardware, but that’s completely overkill for this tutorial (and to be honest, most of the time it was faster to work in emulator anyway). I downloaded &lt;a href=&quot;https://sourceforge.net/projects/vba/&quot;&gt;VisualBoyAdvance&lt;/a&gt; to work with, which is a great open source emulator, but there are lots out there to choose from, and any of them should be able to do what we need them to do.&lt;/p&gt;
+
+&lt;p&gt;Secondly, we’re going to need a way to build our projects. There are fewer options here, and the one that I found the best was &lt;a href=&quot;https://devkitpro.org/&quot;&gt;DevKitPro&lt;/a&gt;. This has tools for lots of platforms, but make sure you enable the GBA and ARM components when you’re installing. Once you have that installed, it’s time to set up your project. The easiest thing for my was to copy one of the makefiles from the devkitpro examples folder and simply change the name of the “sources” folder to the one that I was using for my build:&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+&lt;img src=&quot;/images/post_images/2017-03-31/make.png&quot; /&gt;&lt;br /&gt;
+&lt;/div&gt;
+
+&lt;p&gt;I placed that make file in the same directory as the folder which held my code (which was the root dir of my project). With that, all it took was a simple call to make to get a fully working GBA game!&lt;/p&gt;
+
+&lt;p&gt;If you’re dubious about this working, [this gist] has a minimal gba example which will clear the screen red. Try putting that in your source directory and running make, and then opening the result in your emulator of choice. If you see a red screen, everything is working as intended.&lt;/p&gt;
+
+&lt;h2 id=&quot;setting-a-video-mode&quot;&gt;Setting a Video Mode&lt;/h2&gt;
+
+&lt;p&gt;Ok, so now we know our build process works, it’s time to dig into the nuts and bolts of building something for gameboy!&lt;/p&gt;
+
+&lt;p&gt;The first thing we need to do is pick a video mode to use. The GBA has five different modes that control how you draw to the screen. Eventually, I’m sure it will be good to know how to use each one of these modes, but mode 3 seemed like the easiest to use, so that’s where I started. What this means is that our screen buffer is going to be a 240 x 160, 16 bit buffer. It’s also going to be single-buffered, so if we want to change the pixel at (50,50) on the screen, all we need to do is go to that point in video memory and change the value there.&lt;/p&gt;
+
+&lt;p&gt;Now here’s where things started feeling weird to me: in order to set the gameboy to video mode 3, we need to set a display control byte to the correct value. I expected that this meant there’d be a function to call, but there isn’t. What we need to do is go to memory address 0x04000000, and set the correct video mode flag there. It turns out that GBA dev is full of this paradigm - the hardware is simple enough that a lot of things can be controlled by a specific bit or byte being said, and rather than expose this via a system call, you just set the value directly at the appropriate address. Ahh, the wonders of old school tech.&lt;/p&gt;
+
+&lt;p&gt;Predictably, to set the hardware to video mode 3, we need to set the display control register (0x04000000) to a value of 3 (more specifically 0x0003). We also need to set a background mode. This is important for other video modes, but since we’re using mode 3, all we need to know is that our background mode needs to be set to mode 2 in order for anything to show up.&lt;/p&gt;
+
+&lt;p&gt;We can set these values like this:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;k&quot;&gt;typedef&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;uint32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;cp&quot;&gt;#define REG_DISPLAYCONTROL	*((volatile uint32*)(0x04000000))
+#define VIDEOMODE_3                 	0x0003
+#define BGMODE_2 		         	0x0400
+&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;REG_DISPLAYCONTROL&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;VIDEOMODE_3&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;DCNT_BG2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;A lot of tutorials use more concise constant names, and while they may be more standard (like REG_DISPCNT), I found it much easier to use more descriptive names. Additionally, you may be wondering why our pointer to the REG_DISPLAYCONTROL address needs to be marked “volatile,” this is an instruction to the compiler to tell it that even though nothing in our code is reading from this address, we don’t want the compiler to optimize away the logic that sets it’s value (since the hardware is going to look at this address).&lt;/p&gt;
+
+&lt;p&gt;You probably also noticed that I defined my own convenience type for unsigned ints. Since we’re going to do a lot of writing values directly to memory addresses, the size of our integers matters a lot, and typing “unsigned int” out all the time will drive you mad.&lt;/p&gt;
+
+&lt;p&gt;Lastly, you definitely noticed that the program immediately enters an infinite while loop. We really, really, don’t want to have our main function exit, since that would mean the gameboy game would exit, and what that means is undefined. So instead of a traditional game loop with a flag to control when to exit, game loops on GBA will always be infinite.&lt;/p&gt;
+
+&lt;p&gt;If you run this, it will (unsurprisingly) do nothing, so maybe we should tell it to do something?&lt;/p&gt;
+
+&lt;h2 id=&quot;drawing-to-the-screen&quot;&gt;Drawing To The Screen&lt;/h2&gt;
+
+&lt;p&gt;Like I mentioned before, in mode 3, we don’t need to worry about managing multiple color buffers, or working with tile maps, or anything else. All we need to do is set the pixels in video memory to what we want. This is virtually identical to what we had to do previously to set the video mode, except that the screen buffer starts at memory address 0x06000000:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;k&quot;&gt;typedef&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;      &lt;span class=&quot;n&quot;&gt;uint8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;typedef&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;short&lt;/span&gt;     &lt;span class=&quot;n&quot;&gt;uint16&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;typedef&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt;          &lt;span class=&quot;n&quot;&gt;uint32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;cp&quot;&gt;#define REG_DISPLAYCONTROL	*((volatile uint32*)(0x04000000))
+#define VIDEOMODE_3     	               0x0003
+#define BGMODE_2 			       0x0400
+&lt;/span&gt;
+&lt;span class=&quot;cp&quot;&gt;#define SCREENBUFFER                    ((volatile uint16*)0x06000000)
+#define SCREEN_W                            240
+#define SCREEN_H                            160
+&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;REG_DISPLAYCONTROL&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;VIDEOMODE_3&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;BGMODE_2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+	&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SCREEN_W&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SCREEN_H&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+	&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+		&lt;span class=&quot;n&quot;&gt;SCREENBUFFER&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0xFFFF&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+	&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){}&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Running this now will get you a nice white screen. Progress! Note that we don’t dereference the pointer to the screen buffer in the macro, because we want to index into the screen buffer array to set pixels that aren’t the top left corner of the screen (on GBA, the Y axis increases as it gets lower on screen), and to do that, we need a pointer to the beginning of the array.&lt;/p&gt;
+
+&lt;p&gt;The only sorta weird thing about this is how the GBA stores colours. Earlier I said that Mode 3 meant our screen was 16 bit color, but that’s not really true. The GBA actually uses 15 bit color, leaving the first bit alone. In the above example, we didn’t need to know this, because we were just setting things to pure white, but assuming you’ll want to write a colour that isn’t black or white, the following function comes in handy:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;kr&quot;&gt;inline&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;uint16&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;MakeCol&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;uint8&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;red&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;uint8&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;green&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;uint8&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;blue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;red&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;green&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;blue&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;To give credit where it’s due, the above function comes from the &lt;a href=&quot;http://www.coranac.com/tonc/text/&quot;&gt;Tonc tutorial&lt;/a&gt; As you may have guessed from the above, colours on the GBA are stored as 16 bit integers, with the data laid out like this:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;unused&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;BBB&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;BBGG&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;GGGR&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;RRRR&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Note that each colour getting only 5 bits means that channels can only store 1 of 32 values (0 - 31), so passing a number outside this range to the function is essentially useless. I’ve seen some other tutorials recommend AND-ing the passed in channel values with 0x1F to clamp them to a 5 bit value, but I feel like ensuring the inputs to your functions are correct is a problem for an assert in a debug build and not runtime cycles. That being said, how to debug a GBA game is beyong the scope of what I want to talk about today (and to be honest, outside the scope of what I know how to do right now), so maybe AND-ing isn’t such a bad idea:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;kr&quot;&gt;inline&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;uint16&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;MakeCol&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;uint8&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;red&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;uint8&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;green&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;uint8&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;blue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;red&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x1F&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;green&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x1F&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;blue&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x1F&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;You can use the above function to make any colour your screen is capable of displaying, but right now all we have is the logic to clear the screen to a colour. Let’s do something a bit more interesting and write the (hopefully) extremely simple function for drawing differently sized rectangles:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;drawRect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;left&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;top&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;width&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;height&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;uint16&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;clr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;height&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;width&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+			&lt;span class=&quot;n&quot;&gt;SCREENBUFFER&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;top&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SCREEN_W&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;left&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;clr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;That’s much more useful! Now we can make vertical and horizontal lines, and rectangles of all shapes and sizes. You can even divide up the screen into 8x8 blocks and set each one to something different if you feel like it!&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+&lt;img src=&quot;/images/post_images/2017-03-31/screenfill.png&quot; /&gt;
+&lt;font size=&quot;2&quot;&gt;(I did)&lt;/font&gt;&lt;br /&gt;&lt;br /&gt;
+
+&lt;/div&gt;
+
+&lt;p&gt;But this is only useful if you want to make static images appear on your screen, and the title of this post also promised that our rectangles would move, so it’s time to move inside our infinite game loop and do some work there.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-gba-drawing-process&quot;&gt;The GBA Drawing Process&lt;/h2&gt;
+
+&lt;p&gt;Before we get to the fun stuff though, I need to talk briefly about how the GBA takes the data in the SCREENBUFFER array draws it on the screen.&lt;/p&gt;
+
+&lt;p&gt;The GBA draws each row of the screen sequentially, and serially (one after the other). Updating a pixel on the screen takes the hardware 4 cycles, which means that updating a single row of the screen takes 4 * 160 cycles. At the end of each row, the hardware pauses briefly. This pause is known as the Horizontal Blank, or HBLANK, and takes as long as it would take the hardware to update another 68 pixels (272 cycles).&lt;/p&gt;
+
+&lt;p&gt;This process continues for each row on the screen. Once all the rows have been updated, there is a larger pause called the Vertical Blank, or VBLANK. This pause lasts as long as it would take the hardware to update 68 more rows of pixels (including the HBLANK time). This works out to 4 * (240 + 68) * 68, or 83776 cycles. These numbers will be very important in more complex project, but are included here just because I thought it was good info to know.&lt;/p&gt;
+
+&lt;p&gt;This drawing process is going to occur no matter what our code is doing, without us having to tell the hardware to do it, which means that any code which modifies the data in the SCREENBUFFER array, should do so in the VBLANK pause. Otherwise, we could update the screen halfway through it being drawn, which would lead to tearing artifacts where part of the screen is displaying 1 frame behind other parts.&lt;/p&gt;
+
+&lt;p&gt;//image of tearing artifact&lt;/p&gt;
+
+&lt;p&gt;This means that we need to be able to detect when we’re in VBLANK! There’s two ways to do this, the proper way and the easy way. For my first attempt at GBA dev, I chose the easy way:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;cp&quot;&gt;#define REG_VCOUNT      (* (volatile uint16*) 0x04000006)
+&lt;/span&gt;&lt;span class=&quot;kr&quot;&gt;inline&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;vsync&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;REG_VCOUNT&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;160&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;REG_VCOUNT&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;160&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The value at REG_VCOUNT holds the index of the current row being drawn to by the hardware. The above function simply waits until we are at an index that is beyond the height of the screen (160). If called inside VBLANK, it will block until the next VBLANK is hit. Is this awful and complete overkill? YES! It also works pretty nicely for something as simple as a moving rectangle game.&lt;/p&gt;
+
+&lt;p&gt;It’s worth noting that you are free to do any calculations you want during VDRAW (what it’s called when the hardware is not in VBLANK), as long as you don’t update the values in the screen buffer.&lt;/p&gt;
+
+&lt;p&gt;Using the above vsync() function, we can finally add some animation, since the function above not only blocks until VBLANK, but will also block until next frame:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;REG_DISPLAYCONTROL&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;VIDEOMODE_3&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;BGMODE_2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+	&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SCREEN_W&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SCREEN_H&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+	&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+		&lt;span class=&quot;n&quot;&gt;SCREENBUFFER&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MakeCol&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+	&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+	&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+	&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+		&lt;span class=&quot;n&quot;&gt;vsync&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+		&lt;span class=&quot;n&quot;&gt;drawRect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SCREEN_W&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SCREEN_W&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MakeCol&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;31&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+		&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+	&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;If you run this, you’ll slowly see your screen get filled, 10 pixels at a time, by a lovely white color:&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+&lt;img src=&quot;/images/post_images/2017-03-31/fill.gif&quot; style=&quot;width:240px;height:160px&quot; /&gt;
+&lt;br /&gt;&lt;br /&gt;
+&lt;/div&gt;
+
+&lt;p&gt;You’ll notice that the screen doesn’t do any clearing for us at all. This is actually good news, since writing to the SCREENBUFFER array takes up cycles, and we don’t want our hardware using up any of our precious CPU time that it doesn’t have to. This means that if you wanted to say, move a rectangle across the screen instead of having the screen fill up, you also need to write black to the previous location of the rectangle:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;k&quot;&gt;while&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;vsync&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SCREEN_W&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SCREEN_H&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;last&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;drawRect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;last&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SCREEN_W&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;last&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SCREEN_W&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MakeCol&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;drawRect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SCREEN_W&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SCREEN_W&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MakeCol&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;31&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;31&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;31&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;You’ll notice I also added a bit of logic to wrap the x value when it goes off the end of the screen. This gives you a lovely white rectangle which traverses each row on your screen. If it looks like the rectangle is skipping frames, make sure the “frameskip” option in your emulator isn’t turned on.&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+&lt;img src=&quot;/images/post_images/2017-03-31/rect.gif&quot; style=&quot;width:240px;height:160px&quot; /&gt;
+&lt;br /&gt;&lt;br /&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Note that the gif above IS skipping frames, because capturing my gif capturing program only suports up to 30 fps, so if your game is as choppy as the gif, your frameskip option is turned on.&lt;/p&gt;
+
+&lt;p&gt;Other than that, you should be good to go!&lt;/p&gt;
+
+&lt;h2 id=&quot;wrap-up&quot;&gt;Wrap Up&lt;/h2&gt;
+
+&lt;p&gt;Usually I’d talk about performance, but I haven’t figured out how to get a timer running on the GBA yet, so I really can’t, other than to say the snake game runs smoothly. I have no idea when I’ll post more about game boy stuff, since I have other projects that I want to get done, but hopefully this was helpful enough to get you started, and pointed at some much more detailed resources!&lt;/p&gt;
+
+&lt;p&gt;If you’re interested in the Snake game that I made for GBA, all the source is available on github &lt;a href=&quot;https://github.com/khalladay/GBASnake&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;As always, if you have any questions, comments, or cat gifs, send them my way &lt;a href=&quot;https://twitter.com/khalladay&quot;&gt;on Twitter!&lt;/a&gt;&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Fixeds, Floats and a Block Damage Effect</title>
@@ -23,7 +293,7 @@
 &lt;img src=&quot;/images/post_images/2017-03-13/preview.gif&quot; /&gt;&lt;br /&gt;
 &lt;/div&gt;
 
-&lt;p&gt;It’s a very simple effect, but it’s also a perfect excuse to talk about using the correct precision for variables when writing shaders. In the &lt;a href=&quot;http://localhost:4000/blog/tutorial/2017/02/21/Pencil-Sketch-Effect.html&quot;&gt;last article I wrote&lt;/a&gt;, I touched a bit on using texture formats that have enough precision for the data you’re storing in them; today I’m going to go over how to decide whether to use a fixed, half or float on a line to line basis when writing a shader.&lt;/p&gt;
+&lt;p&gt;It’s a very simple effect, but it’s also a perfect excuse to talk about using the correct precision for variables when writing shaders. In the &lt;a href=&quot;http://kylehalladay.com/blog/tutorial/2017/02/21/Pencil-Sketch-Effect.html&quot;&gt;last article I wrote&lt;/a&gt;, I touched a bit on using texture formats that have enough precision for the data you’re storing in them; today I’m going to go over how to decide whether to use a fixed, half or float on a line to line basis when writing a shader.&lt;/p&gt;
 
 &lt;p&gt;That will come later though, first, let’s go over how the glitch effect we’re building works:&lt;/p&gt;
 
@@ -38,7 +308,7 @@
 &lt;p&gt;Since this texture identifies each block with a value between 0 and 1 (the intensity of the colour), we’ll pass a second value to our shader also between 0 and 1. As the shader executes, any fragment which is in a block that has a value greater than our control value will sample the screen buffer using UVs which have had a constant value added or subtracted to them. This will keep all texture samples within a block cohesive with each other, producing the effect we want:&lt;/p&gt;
 
 &lt;div align=&quot;center&quot;&gt;
-&lt;img src=&quot;/images/post_images/2017-03-13/offset_sample.png&quot; /&gt;&lt;br /&gt;
+&lt;img src=&quot;/images/post_images/2017-03-13/offset_sample.PNG&quot; /&gt;&lt;br /&gt;
 &lt;/div&gt;
 
 &lt;p&gt;if we use the grayscale image above however, our UV offset will always be diagonal and in the same direction, which isn’t exactly what we want. So I’m going to use the R channel as our identifier channel, and put different random values into the GB channels of the noise texture, which we’ll use to drive our UV offsets:&lt;/p&gt;
@@ -213,7 +483,7 @@
 &lt;p&gt;You may have noticed if you run this right now, you get some weird colours in your glitched image, for me, this looked like way more brown than there should have been:&lt;/p&gt;
 
 &lt;div align=&quot;center&quot;&gt;
-&lt;img src=&quot;/images/post_images/2017-03-13/edge.png&quot; style=&quot;width:300px; height:250px;&quot; /&gt;&lt;br /&gt;
+&lt;img src=&quot;/images/post_images/2017-03-13/edge.PNG&quot; style=&quot;width:300px; height:250px;&quot; /&gt;&lt;br /&gt;
 &lt;/div&gt;
 
 &lt;p&gt;This is because when we add our UV offset to our UV coordinates, we’re ending up sampling from outside of the area of the screen buffer. The buffer is set to clamp at the border, meaning what we’re seeing is a lot of fragments picking up pixels from the edge of our image. Since we don’t care about the integer value of our UV coordinates (and in fact want to get rid of them), we can add a frac() function to our shader and get home-grown UV wrapping.&lt;/p&gt;
@@ -4242,16 +4512,19 @@ The sample pd program used in this tutorial
 
 &lt;p&gt;Libpd4unity isn’t suited to really in depth PD development in Unity (at the moment it seems to only support loading one patch at a time), but you can still do some interesting things with it. So today, I’m going to go over the process of setting up libpd4unity with Unity.&lt;/p&gt;
 
-&lt;p&gt;If you’re on mac, you may be a bit disappointed to see that there isn’t a mac compatible pd library in the libpd4unity class, so the first step for us is to compile a .bundle for mac. If you’re on windows, skip down to the actual programming. &lt;/p&gt;
+&lt;p&gt;If you’re on mac, you may be a bit disappointed to see that there isn’t a mac compatible pd library in the libpd4unity class, so the first step for us is to compile a .bundle for mac. If you’re on windows, skip down to the actual programming.&lt;/p&gt;
 
 &lt;h2&gt;Building libpdcsharp.bundle&lt;/h2&gt;
 
-&lt;p&gt;Thankfully this is pretty straightfoward, if a bit weird: 
-* Download the &lt;a href=&quot;https://github.com/libpd/libpd&quot;&gt;LibPD Project&lt;/a&gt; from github
-* In terminal, cd into the downloaded project folder and type the command &lt;a href=&quot;https://github.com/libpd/libpd/wiki/Building-the-C%23-Api&quot;&gt;make csharplib&lt;/a&gt;
-* libcsharp.dylib should now be created inside the libs folder. Copy that to the Assets/Plugins folder in Unity
-* Rename this file to libcsharp.bundle. Unity has a problem locating dylibs. 
-* You’re good to go!&lt;/p&gt;
+&lt;p&gt;Thankfully this is pretty straightfoward, if a bit weird:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Download the &lt;a href=&quot;https://github.com/libpd/libpd&quot;&gt;LibPD Project&lt;/a&gt; from github&lt;/li&gt;
+  &lt;li&gt;In terminal, cd into the downloaded project folder and type the command &lt;a href=&quot;https://github.com/libpd/libpd/wiki/Building-the-C%23-Api&quot;&gt;make csharplib&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;libcsharp.dylib should now be created inside the libs folder. Copy that to the Assets/Plugins folder in Unity&lt;/li&gt;
+  &lt;li&gt;Rename this file to libcsharp.bundle. Unity has a problem locating dylibs.&lt;/li&gt;
+  &lt;li&gt;You’re good to go!&lt;/li&gt;
+&lt;/ul&gt;
 
 &lt;h2&gt;LibPD and Unity&lt;/h2&gt;
 &lt;p&gt;Note: You will need to download &lt;a href=&quot;https://github.com/patricksebastien/libpd4unity&quot;&gt;Libpd4Unity&lt;/a&gt;&lt;/p&gt;
@@ -4260,7 +4533,7 @@ The sample pd program used in this tutorial
 
 &lt;p&gt;Next, make an Assets/Resources folder. This is a special folder that allows you to specify resources that you want to have available to Unity at runtime. Put your patches in this folder (or a subfolder of it). If you don’t have a patch to work with, or want to follow along exactly with this demo, you can grab the &lt;a href=&quot;https://github.com/khalladay/Unity-PD-Sample/blob/master/Assets/Resources/example.pd&quot;&gt;simple sine patch&lt;/a&gt; from the repo for this post’s example project (patch courtesy of &lt;a href=&quot;johannesg.com&quot;&gt;johannesg.com&lt;/a&gt; ).&lt;/p&gt;
 
-&lt;p&gt;Now that all the housekeeping is taken care of, it’s time to actually interact with a patch program from Unity. LibPd4Unity comes with an example script called LibPdFilterRead.cs that will serve as the basic outline for our class, but we’re going to tailor ours to suit our needs a bit better. &lt;/p&gt;
+&lt;p&gt;Now that all the housekeeping is taken care of, it’s time to actually interact with a patch program from Unity. LibPd4Unity comes with an example script called LibPdFilterRead.cs that will serve as the basic outline for our class, but we’re going to tailor ours to suit our needs a bit better.&lt;/p&gt;
 
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c#&quot; data-lang=&quot;c#&quot;&gt;&lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;UnityEngine&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 &lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;System.Collections&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
@@ -4268,12 +4541,12 @@ The sample pd program used in this tutorial
 &lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;System&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 &lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;System.Runtime.InteropServices&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 
-&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;OSCControl&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MonoBehaviour&lt;/span&gt; 
+&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;OSCControl&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MonoBehaviour&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
 	&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;patch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 	&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;playOnAwake&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;		
 	&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;patchIsStereo&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-	
+
 	&lt;span class=&quot;k&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;patchName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 	&lt;span class=&quot;k&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;islibpdready&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 	&lt;span class=&quot;k&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
@@ -4283,16 +4556,19 @@ The sample pd program used in this tutorial
 
 &lt;p&gt;The script I’m going to build here interacts with the sample patch linked above.&lt;/p&gt;
 
-&lt;p&gt;Lets go through these variables:
-* patch: the name of the patch file to use
-* playOnAwake: what it says on the tin
-* patchIsStereo: only check this if you are SURE your patch is stereo, otherwise you’ll hear garbled crap
-* patchName: the integer patch name generated by LibPD
-* islibpdready: does what it says on the tin
-* path: this will be the patch variable with the rest of the filepath prepended to it
-* dataHandle: this will eventually be used to let us have access to the audio stream from pd without worrying about the garbage collector
-* dataPtr: this will hold the address of the patch we’re interacting with
-* freq: the frequency we want to pass to our program&lt;/p&gt;
+&lt;p&gt;Lets go through these variables:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;patch: the name of the patch file to use&lt;/li&gt;
+  &lt;li&gt;playOnAwake: what it says on the tin&lt;/li&gt;
+  &lt;li&gt;patchIsStereo: only check this if you are SURE your patch is stereo, otherwise you’ll hear garbled crap&lt;/li&gt;
+  &lt;li&gt;patchName: the integer patch name generated by LibPD&lt;/li&gt;
+  &lt;li&gt;islibpdready: does what it says on the tin&lt;/li&gt;
+  &lt;li&gt;path: this will be the patch variable with the rest of the filepath prepended to it&lt;/li&gt;
+  &lt;li&gt;dataHandle: this will eventually be used to let us have access to the audio stream from pd without worrying about the garbage collector&lt;/li&gt;
+  &lt;li&gt;dataPtr: this will hold the address of the patch we’re interacting with&lt;/li&gt;
+  &lt;li&gt;freq: the frequency we want to pass to our program&lt;/li&gt;
+&lt;/ul&gt;
 
 &lt;p&gt;Now let’s get to some functionality&lt;/p&gt;
 
@@ -4309,17 +4585,17 @@ The sample pd program used in this tutorial
 		&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(!&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;patchIsStereo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;	&lt;span class=&quot;n&quot;&gt;LibPD&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;OpenAudio&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;48000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 		&lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;LibPD&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;OpenAudio&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;48000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 	&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-	
+
 	&lt;span class=&quot;n&quot;&gt;patchName&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;LibPD&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;OpenPatch&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 	&lt;span class=&quot;n&quot;&gt;LibPD&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;ComputeAudio&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 	&lt;span class=&quot;n&quot;&gt;islibpdready&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;Awake isn’t all that interesting, except to show off how to get the actual file path to the patch. Also note that loadPath() needs to be called before we can start working with pd. &lt;/p&gt;
+&lt;p&gt;Awake isn’t all that interesting, except to show off how to get the actual file path to the patch. Also note that loadPath() needs to be called before we can start working with pd.&lt;/p&gt;
 
-&lt;p&gt;loadPatch is the standard initialization sequence for working with libPd. &lt;/p&gt;
+&lt;p&gt;loadPatch is the standard initialization sequence for working with libPd.&lt;/p&gt;
 
-&lt;p&gt;I’m going to hold off on the good stuff until the end, so we’re going to skip from the initialization process down to the cleanup process. This is a little more involved than the usual in C# because we are explicitly telling the garbage collector to not interact with the data stream, so we need to do a bit of manual memory management. This is taken directly from the example project in LibPd4Unity. &lt;/p&gt;
+&lt;p&gt;I’m going to hold off on the good stuff until the end, so we’re going to skip from the initialization process down to the cleanup process. This is a little more involved than the usual in C# because we are explicitly telling the garbage collector to not interact with the data stream, so we need to do a bit of manual memory management. This is taken directly from the example project in LibPd4Unity.&lt;/p&gt;
 
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c#&quot; data-lang=&quot;c#&quot;&gt;&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;closePatch&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
@@ -4338,50 +4614,50 @@ The sample pd program used in this tutorial
 	&lt;span class=&quot;n&quot;&gt;dataPtr&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;IntPtr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Zero&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;I don’t have a good explanation for why we don’t need to free the dataHandle on close patch, so if anyone has an idea, shoot me a message on twitter and I can update the post. Otherwise, this is boilerplate code that will need to be added to every class that you write that will handle loading a Pd program. &lt;/p&gt;
+&lt;p&gt;I don’t have a good explanation for why we don’t need to free the dataHandle on close patch, so if anyone has an idea, shoot me a message on twitter and I can update the post. Otherwise, this is boilerplate code that will need to be added to every class that you write that will handle loading a Pd program.&lt;/p&gt;
 
 &lt;p&gt;And now finally, the good stuff!&lt;/p&gt;
 
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c#&quot; data-lang=&quot;c#&quot;&gt;&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;OnAudioFilterRead&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[]&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;channels&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;	
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
 	&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dataPtr&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;IntPtr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Zero&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 	&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
 		&lt;span class=&quot;n&quot;&gt;dataHandle&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;GCHandle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Alloc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;GCHandleType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Pinned&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 		&lt;span class=&quot;n&quot;&gt;dataPtr&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dataHandle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;AddrOfPinnedObject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
 	&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-	
+
 	&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;LibPD&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Process&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dataPtr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dataPtr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)==&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
 		&lt;span class=&quot;n&quot;&gt;LibPD&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;SendFloat&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;patchName&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;freq1&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;freq&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 		&lt;span class=&quot;n&quot;&gt;LibPD&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;SendFloat&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;patchName&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;freq2&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;freq&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-		
+
 	&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 
 &lt;span class=&quot;k&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;OnGUI&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;Rect&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Rect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Screen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;width&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;2&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;50&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
-			&lt;span class=&quot;n&quot;&gt;Screen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;height&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;2&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;150&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
-			&lt;span class=&quot;m&quot;&gt;100&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+	&lt;span class=&quot;n&quot;&gt;Rect&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Rect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Screen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;width&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;2&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;50&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+			&lt;span class=&quot;n&quot;&gt;Screen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;height&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;2&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;150&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+			&lt;span class=&quot;m&quot;&gt;100&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
 			&lt;span class=&quot;m&quot;&gt;300&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-						
+
 	&lt;span class=&quot;n&quot;&gt;freq&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;GUI&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;VerticalSlider&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;freq&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;400&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-	
-	&lt;span class=&quot;n&quot;&gt;Rect&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r2&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Rect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Screen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;width&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;30&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
-			&lt;span class=&quot;n&quot;&gt;Screen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;height&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;2&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;30&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
-			&lt;span class=&quot;m&quot;&gt;80&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+
+	&lt;span class=&quot;n&quot;&gt;Rect&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r2&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Rect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Screen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;width&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;30&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+			&lt;span class=&quot;n&quot;&gt;Screen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;height&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;2&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;30&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+			&lt;span class=&quot;m&quot;&gt;80&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
 			&lt;span class=&quot;m&quot;&gt;30&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-						
+
 	&lt;span class=&quot;n&quot;&gt;GUI&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Box&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;r2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;freq&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot; hz&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;OnAudioFilterRead is the callback method used by LibPd4Unity’s library. It will be called whenever the internal audio buffer has been filled. I’m really not sure why we’re checking that libPD.Process returns 0, although I assume that’s LibPD’s “all good” return value. 
-Inside that block you can see how to pass messages to the currently running patch. What tripped me up for awhile was both the need to prepend the target value’s name with the int name of the loaded patch, and the need to leave off the “$0” part of the variable name, which is displayed when you open the patch in pd. &lt;/p&gt;
+&lt;p&gt;OnAudioFilterRead is the callback method used by LibPd4Unity’s library. It will be called whenever the internal audio buffer has been filled. I’m really not sure why we’re checking that libPD.Process returns 0, although I assume that’s LibPD’s “all good” return value.
+Inside that block you can see how to pass messages to the currently running patch. What tripped me up for awhile was both the need to prepend the target value’s name with the int name of the loaded patch, and the need to leave off the “$0” part of the variable name, which is displayed when you open the patch in pd.&lt;/p&gt;
 
 &lt;h2&gt;Building a Project on Mac&lt;/h2&gt;
 
 &lt;p&gt;Everything should now work fine in the editor, but if you’re on mac, your journey is not over yet!&lt;/p&gt;
 
-&lt;p&gt;If you have tried to actually create a build, you will have noticed the big, ugly error message that pops up: &lt;/p&gt;
+&lt;p&gt;If you have tried to actually create a build, you will have noticed the big, ugly error message that pops up:&lt;/p&gt;
 
 &lt;p&gt;&lt;strong&gt;Error building Player: IOException: Cannot create Temp/StagingArea/UnityPlayer.app/Contents/Plugins/libpdcsharp.bundle/libpdcsharp.bundle because a file with the same name already exists.&lt;/strong&gt;&lt;/p&gt;
 
@@ -4391,15 +4667,15 @@ Inside that block you can see how to pass messages to the currently running patc
   &lt;li&gt;Remove libpdcsharp.bundle from your plugins folder (but don’t delete it, we’ll need it in a second)&lt;/li&gt;
   &lt;li&gt;Build your project as you normally would&lt;/li&gt;
   &lt;li&gt;Locate the .app file that you just built, right click on it, and select “Show Package Contents,” and open the “Contents” folder within&lt;/li&gt;
-  &lt;li&gt;If there is no folder named “Plugins” inside Contents, create one now. &lt;/li&gt;
+  &lt;li&gt;If there is no folder named “Plugins” inside Contents, create one now.&lt;/li&gt;
   &lt;li&gt;Paste libpdcsharp.bundle into the Plugins folder&lt;/li&gt;
   &lt;li&gt;Go back to your Unity project, and copy the .pd file from your resources folder&lt;/li&gt;
   &lt;li&gt;Paste this file into the Resources folder located inside your .app’s Contents folder.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;All of this is necessary because Unity’s build process doesn’t like the libpdcsharp bundle, and attempts to copy it multiple times (creating that ugly error), and completely ignores the patch file in Resources because it doesn’t recognize the file extension. Thankfully, all that’s needed to resolve this a mildly annoying process. &lt;/p&gt;
+&lt;p&gt;All of this is necessary because Unity’s build process doesn’t like the libpdcsharp bundle, and attempts to copy it multiple times (creating that ugly error), and completely ignores the patch file in Resources because it doesn’t recognize the file extension. Thankfully, all that’s needed to resolve this a mildly annoying process.&lt;/p&gt;
 
-&lt;p&gt;If you’ve made it this far, you should now have a unity project that can interact with Pure Data plugins, and can actually create builds! Congratulations! If you’ve hit any difficulties or need further clarification on something I’ve said here, you can download a sample project &lt;a href=&quot;https://dl.dropboxusercontent.com/u/6128167/Unity-PD-Sample.zip&quot;&gt;from my dropbox&lt;/a&gt;, or send me a message &lt;a href=&quot;http://twitter.com/khalladay&quot;&gt;on Twitter.&lt;/a&gt; Hope this tutorial helped! &lt;/p&gt;
+&lt;p&gt;If you’ve made it this far, you should now have a unity project that can interact with Pure Data plugins, and can actually create builds! Congratulations! If you’ve hit any difficulties or need further clarification on something I’ve said here, you can download a sample project &lt;a href=&quot;https://dl.dropboxusercontent.com/u/6128167/Unity-PD-Sample.zip&quot;&gt;from my dropbox&lt;/a&gt;, or send me a message &lt;a href=&quot;http://twitter.com/khalladay&quot;&gt;on Twitter.&lt;/a&gt; Hope this tutorial helped!&lt;/p&gt;
 </content>
  </entry>
  
@@ -5012,17 +5288,12 @@ Our shader is on the left, compared to the built in diffuse on the right
    <link href="http://kylehalladay.com/blog/2013/04/21/Bit-Flags-Are-Pretty-Cool.html"/>
    <updated>2013-04-21T00:00:00-05:00</updated>
    <id>http://kylehalladay.com/blog/2013/04/21/Bit-Flags-Are-Pretty-Cool</id>
-   <content type="html">&lt;div style=&quot;background-color:#EEAAAA;&quot;&gt;NOTE: This article is OLD! (From 2013!). Information in it may be out of date or outright useless, and I have no plans to update it. Beware!
+   <content type="html">&lt;div style=&quot;background-color:#EEAAAA;&quot;&gt;NOTE: This article is OLD! (From 2013!). Information in it may be out of date or outright useless, and I have no plans on updating it. Beware!
 &lt;/div&gt;
 
 &lt;p&gt;&lt;br /&gt;&lt;/p&gt;
 
-&lt;div style=&quot;background-color:#EEAAAA;&quot;&gt;NOTE: This article is OLD! (From 2013!). Information in it may be out of date or outright useless, and I have no plans on updating it. Beware!
-&lt;/div&gt;
-
-&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
-
-&lt;p&gt;I’ve been working on prototype for (possibly) my next personal project, and one of the things I’ve needed to do a number of times is store a lot of boolean attributes on different objects. This led to some really terrible looking scripts with a whole host of boolean flags at the top of them, and I decided I needed to find a better way of handling things. 
+&lt;p&gt;I’ve been working on prototype for (possibly) my next personal project, and one of the things I’ve needed to do a number of times is store a lot of boolean attributes on different objects. This led to some really terrible looking scripts with a whole host of boolean flags at the top of them, and I decided I needed to find a better way of handling things.
 &lt;br /&gt;
 &lt;br /&gt;
 I’ve had some fun before with packing a whole bunch of booleans into byte-sized structs using the bit field operator in C++, but I’ve never seen anything like that done in C#, and if I can help it, I try to avoid dealing directly with memory addresses in Unity scripts. Luckily, bit flags seem to do the exact same job (possibly better). To show you what I mean, let me link an example:
@@ -5032,11 +5303,11 @@ I’ve had some fun before with packing a whole bunch of booleans into byte-size
 &lt;script src=&quot;https://gist.github.com/khalladay/5432282.js&quot; class=&quot;gist&quot;&gt;&amp;nbsp;&lt;/script&gt;
 
 &lt;p&gt;&lt;br /&gt;
-So here’s whats going on: rather than specifying a int or float value for the members of the enum, you can assign each of them a hex number. Provided each of these hex numbers match up to the values represented by each bit in a byte (powers of 2), you can use all of the regular bitwise operations with these new enum values. &lt;/p&gt;
+So here’s whats going on: rather than specifying a int or float value for the members of the enum, you can assign each of them a hex number. Provided each of these hex numbers match up to the values represented by each bit in a byte (powers of 2), you can use all of the regular bitwise operations with these new enum values.&lt;/p&gt;
 
 &lt;script src=&quot;https://gist.github.com/khalladay/a5ecf560b97f746829b1.js&quot; class=&quot;gist&quot;&gt;&amp;nbsp;&lt;/script&gt;
 
-&lt;p&gt;Provided the player can only have 1 of each item, you could do an entire inventory this way (not that I think that would be the greatest idea). Nevertheless, it’s certainly handy for fast prototyping, and I’m sure that less contrived examples will find their way into production code at some point. &lt;/p&gt;
+&lt;p&gt;Provided the player can only have 1 of each item, you could do an entire inventory this way (not that I think that would be the greatest idea). Nevertheless, it’s certainly handy for fast prototyping, and I’m sure that less contrived examples will find their way into production code at some point.&lt;/p&gt;
 </content>
  </entry>
  

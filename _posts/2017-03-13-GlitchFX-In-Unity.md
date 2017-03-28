@@ -14,7 +14,7 @@ As you may have guessed from the everything that I post, I love cheesy rendering
 <img src="/images/post_images/2017-03-13/preview.gif"/><br>
 </div>
 
-It's a very simple effect, but it's also a perfect excuse to talk about using the correct precision for variables when writing shaders. In the [last article I wrote](http://localhost:4000/blog/tutorial/2017/02/21/Pencil-Sketch-Effect.html), I touched a bit on using texture formats that have enough precision for the data you're storing in them; today I'm going to go over how to decide whether to use a fixed, half or float on a line to line basis when writing a shader.
+It's a very simple effect, but it's also a perfect excuse to talk about using the correct precision for variables when writing shaders. In the [last article I wrote](http://kylehalladay.com/blog/tutorial/2017/02/21/Pencil-Sketch-Effect.html), I touched a bit on using texture formats that have enough precision for the data you're storing in them; today I'm going to go over how to decide whether to use a fixed, half or float on a line to line basis when writing a shader.
 
 That will come later though, first, let's go over how the glitch effect we're building works:
 
