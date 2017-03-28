@@ -32,7 +32,7 @@ First thing first, we're going to need a way to run our project. As mentioned, I
 Secondly, we're going to need a way to build our projects. There are fewer options here, and the one that I found the best was [DevKitPro](https://devkitpro.org/). This has tools for lots of platforms, but make sure you enable the GBA and ARM components when you're installing. Once you have that installed, it's time to set up your project. The easiest thing for my was to copy one of the makefiles from the devkitpro examples folder and simply change the name of the "sources" folder to the one that I was using for my build:
 
 <div align="center">
-<img src="/images/post_images/2017-03-31/make.png"/><br>
+<img src="/images/post_images/2017-03-31/make.PNG"/><br>
 </div>
 
 I placed that make file in the same directory as the folder which held my code (which was the root dir of my project). With that, all it took was a simple call to make to get a fully working GBA game!
@@ -168,8 +168,6 @@ The GBA draws each row of the screen sequentially, and serially (one after the o
 This process continues for each row on the screen. Once all the rows have been updated, there is a larger pause called the Vertical Blank, or VBLANK. This pause lasts as long as it would take the hardware to update 68 more rows of pixels (including the HBLANK time). This works out to 4 * (240 + 68) * 68, or 83776 cycles. These numbers will be very important in more complex project, but are included here just because I thought it was good info to know.
 
 This drawing process is going to occur no matter what our code is doing, without us having to tell the hardware to do it, which means that any code which modifies the data in the SCREENBUFFER array, should do so in the VBLANK pause. Otherwise, we could update the screen halfway through it being drawn, which would lead to tearing artifacts where part of the screen is displaying 1 frame behind other parts.
-
-//image of tearing artifact
 
 This means that we need to be able to detect when we're in VBLANK! There's two ways to do this, the proper way and the easy way. For my first attempt at GBA dev, I chose the easy way:
 
