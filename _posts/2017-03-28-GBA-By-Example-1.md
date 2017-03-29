@@ -143,7 +143,7 @@ void drawRect(int left, int top, int width, int height, uint16 clr)
     {
         for (int x = 0; x < width; ++x)
         {
-			SCREENBUFFER[(top + y) * SCREEN_W + left + x] = clr;
+    	   SCREENBUFFER[(top + y) * SCREEN_W + left + x] = clr;
         }
     }
 }
@@ -191,18 +191,18 @@ int main()
 {
     REG_DISPLAYCONTROL = VIDEOMODE_3 | BGMODE_2;
 
-	for (int i = 0; i < SCREEN_W * SCREEN_H; ++i)
-	{
-		SCREENBUFFER[i] = MakeCol(0,0,0);
-	}
+    for (int i = 0; i < SCREEN_W * SCREEN_H; ++i)
+    {
+    	SCREENBUFFER[i] = MakeCol(0,0,0);
+    }
 
-	int x = 0;
-        while(1)
-	{
-		vsync();
-		drawRect(x % SCREEN_W, (x / SCREEN_W) * 10, 10, 10,MakeCol(0,31,0));
-		x += 10;
-	}
+    int x = 0;
+    while(1)
+    {
+    	vsync();
+    	drawRect(x % SCREEN_W, (x / SCREEN_W) * 10, 10, 10,MakeCol(0,31,0));
+    	x += 10;
+    }
 
     return 0;
 }
