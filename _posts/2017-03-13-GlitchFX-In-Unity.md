@@ -62,20 +62,20 @@ private Material _glitchMat;
 
 void Start ()
 {
-_glitchShader = Shader.Find("Hidden/GlitchFX/GlitchFX_Shift");
-_glitchMat = new Material(_glitchShader);
-_glitchMat.SetTexture("_GlitchMap", blockTexture);
+    _glitchShader = Shader.Find("Hidden/GlitchFX/GlitchFX_Shift");
+    _glitchMat = new Material(_glitchShader);
+    _glitchMat.SetTexture("_GlitchMap", blockTexture);
 }
 
 private void OnRenderImage(RenderTexture source, RenderTexture destination)
 {
-Graphics.Blit(source, destination, _glitchMat);
+    Graphics.Blit(source, destination, _glitchMat);
 }
 
 void Update ()
 {
-glitchAmount = Mathf.Clamp(glitchAmount, 0.0f, 1.0f);
-_glitchMat.SetFloat("_GlitchAmount", glitchAmount);
+    glitchAmount = Mathf.Clamp(glitchAmount, 0.0f, 1.0f);
+    _glitchMat.SetFloat("_GlitchAmount", glitchAmount);
 }
 {% endhighlight %}
 
@@ -84,9 +84,9 @@ We'll revisit this script later on when we want to tweak the effect, but for now
 {% highlight c# %}
 fixed4 frag (v2f i) : SV_Target
 {
-fixed2 glitch = (tex2D(_GlitchMap, i.uv)).rg;			
-fixed4 col = tex2D(_MainTex, i.uv + glitch.rg);
-return col;
+    fixed2 glitch = (tex2D(_GlitchMap, i.uv)).rg;			
+    fixed4 col = tex2D(_MainTex, i.uv + glitch.rg);
+    return col;
 }
 {% endhighlight %}
 
@@ -108,14 +108,14 @@ You can test this yourself the same way I did, and run the above post process ef
 
 private void OnRenderImage(RenderTexture source, RenderTexture destination)
 {
-RenderTexture t = RenderTexture.GetTemporary(source.width, source.height);
-for (int i = 0; i < 50; ++i)
-{
-    Graphics.Blit(source, t, _glitchMat);
-    Graphics.Blit(t, source, _glitchMat);
-}
-Graphics.Blit(source, destination, _glitchMat);
-RenderTexture.ReleaseTemporary(t);
+    RenderTexture t = RenderTexture.GetTemporary(source.width, source.height);
+    for (int i = 0; i < 50; ++i)
+    {
+        Graphics.Blit(source, t, _glitchMat);
+        Graphics.Blit(t, source, _glitchMat);
+    }
+    Graphics.Blit(source, destination, _glitchMat);
+    RenderTexture.ReleaseTemporary(t);
 }
 {% endhighlight %}
 
@@ -185,16 +185,16 @@ If all GPUs were good at branching, this could be written like this:
 {% highlight c# %}
 fixed4 frag(v2f i) : SV_Target
 {
-fixed2 glitch = (tex2D(_GlitchMap, i.uv)).rg;
+    fixed2 glitch = (tex2D(_GlitchMap, i.uv)).rg;
 
-float2 uvShift = glitch.rg;
-if (glitch.r >= _GlitchAmount)
-{
-    uvShift *= 0.0;
-}
+    float2 uvShift = glitch.rg;
+    if (glitch.r >= _GlitchAmount)
+    {
+        uvShift *= 0.0;
+    }
 
-fixed4 col = tex2D(_MainTex, frac(i.uv + uvShift));
-return col;
+    fixed4 col = tex2D(_MainTex, frac(i.uv + uvShift));
+    return col;
 }
 
 {% endhighlight %}
@@ -204,12 +204,12 @@ But since we can't be sure what device this effect will need to run on, I'm goin
 {% highlight c# %}
 fixed4 frag(v2f i) : SV_Target
 {
-fixed2 glitch = (tex2D(_GlitchMap, i.uv)).rg;
+    fixed2 glitch = (tex2D(_GlitchMap, i.uv)).rg;
 
-float2 uvShift = glitch.rg * ceil(_GlitchAmount - glitch.r);
+    float2 uvShift = glitch.rg * ceil(_GlitchAmount - glitch.r);
 
-fixed4 col = tex2D(_MainTex, i.uv + uvShift));
-return col;
+    fixed4 col = tex2D(_MainTex, i.uv + uvShift));
+    return col;
 }
 {% endhighlight %}
 
@@ -244,7 +244,7 @@ Put all this together and you get an effect that looks like this as the _GlitchA
 We have another line of shader code now, so let's talk about
 
 {% highlight c# %}
-float2 uvShift = glitch.rg * ceil(max(-0.99,_GlitchAmount - glitch.r));
+    float2 uvShift = glitch.rg * ceil(max(-0.99,_GlitchAmount - glitch.r));
 {% endhighlight %}
 
 First of all, it's almost always a bad idea to use anything but floats to hold UV coordinates. The other datatypes don't have enough precision to accurately sample a texture, which is what you want them to do 99% of the time.. We don't really care about whether or not our shifted coordinates are super accurate though, so the question of what data type to use comes down to raw performance.
@@ -266,7 +266,7 @@ Luckily, the commonly copy/pasted one liner for generating random numbers in a s
 {% highlight c# %}
 float rand(float2 co)
 {
-return frac(sin(dot(co.xy, float2(12.9898, 78.233))) * 43758.5453);
+    return frac(sin(dot(co.xy, float2(12.9898, 78.233))) * 43758.5453);
 }
 {% endhighlight %}
 
@@ -285,20 +285,20 @@ float _GlitchRandom;
 
 float rand(float2 co)
 {
-return frac(sin(dot(co.xy, float2(12.9898, 78.233))) * 43758.5453);
+    return frac(sin(dot(co.xy, float2(12.9898, 78.233))) * 43758.5453);
 }
 
 fixed4 frag(v2f i) : SV_Target
 {
-fixed2 glitch = (tex2D(_GlitchMap, i.uv)).rg;
+    fixed2 glitch = (tex2D(_GlitchMap, i.uv)).rg;
 
-float r = (rand(float2(glitch.r, _GlitchRandom)));
-float gFlag = max(0.0, ceil(_GlitchAmount - r));
+    float r = (rand(float2(glitch.r, _GlitchRandom)));
+    float gFlag = max(0.0, ceil(_GlitchAmount - r));
 
-float2 uvShift = glitch.rg * gFlag;
+    float2 uvShift = glitch.rg * gFlag;
 
-fixed4 col = tex2D(_MainTex, frac(i.uv + uvShift));
-return col;
+    fixed4 col = tex2D(_MainTex, frac(i.uv + uvShift));
+    return col;
 }
 {% endhighlight %}
 
@@ -325,17 +325,17 @@ Which is much better, but a little bit too spastic for my liking. I ended up put
 {% highlight c# %}
 void Start ()
 {
-_glitchShader = Shader.Find("Hidden/GlitchFX/GlitchFX_Shift");
-_glitchMat = new Material(_glitchShader);
-_glitchMat.SetTexture("_GlitchMap", blockTexture);
+    _glitchShader = Shader.Find("Hidden/GlitchFX/GlitchFX_Shift");
+    _glitchMat = new Material(_glitchShader);
+    _glitchMat.SetTexture("_GlitchMap", blockTexture);
 
-Invoke("UpdateRandom", 0.25f);
+    Invoke("UpdateRandom", 0.25f);
 }
 
 void UpdateRandom()
 {
-_glitchMat.SetFloat("_GlitchRandom", Random.Range(-1.0f, 1.0f));
-Invoke("UpdateRandom", Random.Range(0.01f, 0.15f));
+    _glitchMat.SetFloat("_GlitchRandom", Random.Range(-1.0f, 1.0f));
+    Invoke("UpdateRandom", Random.Range(0.01f, 0.15f));
 }
 {% endhighlight %}
 
@@ -363,15 +363,15 @@ And secondly, we're finally going to use that coloured noise map I showed you at
 {% highlight c# %}
 fixed4 frag(v2f i) : SV_Target
 {
-fixed3 glitch = (tex2D(_GlitchMap, i.uv)).rgb;
+    fixed3 glitch = (tex2D(_GlitchMap, i.uv)).rgb;
 
-float r = (rand(float2(glitch.r, _GlitchRandom)));
-float gFlag = max(0.0, ceil(_GlitchAmount-r));
+    float r = (rand(float2(glitch.r, _GlitchRandom)));
+    float gFlag = max(0.0, ceil(_GlitchAmount-r));
 
-float2 uvShift = glitch.gb * gFlag;
+    float2 uvShift = glitch.gb * gFlag;
 
-fixed4 col = tex2D(_MainTex, frac(i.uv + uvShift));
-return col;
+    fixed4 col = tex2D(_MainTex, frac(i.uv + uvShift));
+    return col;
 }
 {% endhighlight %}
 

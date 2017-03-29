@@ -147,29 +147,29 @@
 
 <span class="k">void</span> <span class="nf">Start</span> <span class="p">()</span>
 <span class="p">{</span>
-<span class="n">_glitchShader</span> <span class="p">=</span> <span class="n">Shader</span><span class="p">.</span><span class="nf">Find</span><span class="p">(</span><span class="s">"Hidden/GlitchFX/GlitchFX_Shift"</span><span class="p">);</span>
-<span class="n">_glitchMat</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Material</span><span class="p">(</span><span class="n">_glitchShader</span><span class="p">);</span>
-<span class="n">_glitchMat</span><span class="p">.</span><span class="nf">SetTexture</span><span class="p">(</span><span class="s">"_GlitchMap"</span><span class="p">,</span> <span class="n">blockTexture</span><span class="p">);</span>
+    <span class="n">_glitchShader</span> <span class="p">=</span> <span class="n">Shader</span><span class="p">.</span><span class="nf">Find</span><span class="p">(</span><span class="s">"Hidden/GlitchFX/GlitchFX_Shift"</span><span class="p">);</span>
+    <span class="n">_glitchMat</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Material</span><span class="p">(</span><span class="n">_glitchShader</span><span class="p">);</span>
+    <span class="n">_glitchMat</span><span class="p">.</span><span class="nf">SetTexture</span><span class="p">(</span><span class="s">"_GlitchMap"</span><span class="p">,</span> <span class="n">blockTexture</span><span class="p">);</span>
 <span class="p">}</span>
 
 <span class="k">private</span> <span class="k">void</span> <span class="nf">OnRenderImage</span><span class="p">(</span><span class="n">RenderTexture</span> <span class="n">source</span><span class="p">,</span> <span class="n">RenderTexture</span> <span class="n">destination</span><span class="p">)</span>
 <span class="p">{</span>
-<span class="n">Graphics</span><span class="p">.</span><span class="nf">Blit</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">destination</span><span class="p">,</span> <span class="n">_glitchMat</span><span class="p">);</span>
+    <span class="n">Graphics</span><span class="p">.</span><span class="nf">Blit</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">destination</span><span class="p">,</span> <span class="n">_glitchMat</span><span class="p">);</span>
 <span class="p">}</span>
 
 <span class="k">void</span> <span class="nf">Update</span> <span class="p">()</span>
 <span class="p">{</span>
-<span class="n">glitchAmount</span> <span class="p">=</span> <span class="n">Mathf</span><span class="p">.</span><span class="nf">Clamp</span><span class="p">(</span><span class="n">glitchAmount</span><span class="p">,</span> <span class="m">0.0f</span><span class="p">,</span> <span class="m">1.0f</span><span class="p">);</span>
-<span class="n">_glitchMat</span><span class="p">.</span><span class="nf">SetFloat</span><span class="p">(</span><span class="s">"_GlitchAmount"</span><span class="p">,</span> <span class="n">glitchAmount</span><span class="p">);</span>
+    <span class="n">glitchAmount</span> <span class="p">=</span> <span class="n">Mathf</span><span class="p">.</span><span class="nf">Clamp</span><span class="p">(</span><span class="n">glitchAmount</span><span class="p">,</span> <span class="m">0.0f</span><span class="p">,</span> <span class="m">1.0f</span><span class="p">);</span>
+    <span class="n">_glitchMat</span><span class="p">.</span><span class="nf">SetFloat</span><span class="p">(</span><span class="s">"_GlitchAmount"</span><span class="p">,</span> <span class="n">glitchAmount</span><span class="p">);</span>
 <span class="p">}</span></code></pre></div>
 
 <p>We’ll revisit this script later on when we want to tweak the effect, but for now, this is all we’ll need to get going. Next up, we need to get our shader set up. I’m going to assume that you can set up most of the material file yourself, and skip right to the fragment shader. If you’re lost, the shader is also in the github repo <a href="">here</a></p>
 
 <div class="highlight"><pre><code class="language-c#" data-lang="c#"><span class="n">fixed4</span> <span class="nf">frag</span> <span class="p">(</span><span class="n">v2f</span> <span class="n">i</span><span class="p">)</span> <span class="p">:</span> <span class="n">SV_Target</span>
 <span class="p">{</span>
-<span class="n">fixed2</span> <span class="n">glitch</span> <span class="p">=</span> <span class="p">(</span><span class="nf">tex2D</span><span class="p">(</span><span class="n">_GlitchMap</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">uv</span><span class="p">)).</span><span class="n">rg</span><span class="p">;</span>			
-<span class="n">fixed4</span> <span class="n">col</span> <span class="p">=</span> <span class="nf">tex2D</span><span class="p">(</span><span class="n">_MainTex</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">uv</span> <span class="p">+</span> <span class="n">glitch</span><span class="p">.</span><span class="n">rg</span><span class="p">);</span>
-<span class="k">return</span> <span class="n">col</span><span class="p">;</span>
+    <span class="n">fixed2</span> <span class="n">glitch</span> <span class="p">=</span> <span class="p">(</span><span class="nf">tex2D</span><span class="p">(</span><span class="n">_GlitchMap</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">uv</span><span class="p">)).</span><span class="n">rg</span><span class="p">;</span>			
+    <span class="n">fixed4</span> <span class="n">col</span> <span class="p">=</span> <span class="nf">tex2D</span><span class="p">(</span><span class="n">_MainTex</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">uv</span> <span class="p">+</span> <span class="n">glitch</span><span class="p">.</span><span class="n">rg</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">col</span><span class="p">;</span>
 <span class="p">}</span></code></pre></div>
 
 <p>Alright, now we’re cooking! If you run this now you should get a full screen of glitchy goodness! If you’re seeing weirdness around the edges of the blocks like this:</p>
@@ -188,14 +188,14 @@
 
 <div class="highlight"><pre><code class="language-c#" data-lang="c#"><span class="k">private</span> <span class="k">void</span> <span class="nf">OnRenderImage</span><span class="p">(</span><span class="n">RenderTexture</span> <span class="n">source</span><span class="p">,</span> <span class="n">RenderTexture</span> <span class="n">destination</span><span class="p">)</span>
 <span class="p">{</span>
-<span class="n">RenderTexture</span> <span class="n">t</span> <span class="p">=</span> <span class="n">RenderTexture</span><span class="p">.</span><span class="nf">GetTemporary</span><span class="p">(</span><span class="n">source</span><span class="p">.</span><span class="n">width</span><span class="p">,</span> <span class="n">source</span><span class="p">.</span><span class="n">height</span><span class="p">);</span>
-<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="p">=</span> <span class="m">0</span><span class="p">;</span> <span class="n">i</span> <span class="p">&lt;</span> <span class="m">50</span><span class="p">;</span> <span class="p">++</span><span class="n">i</span><span class="p">)</span>
-<span class="p">{</span>
-    <span class="n">Graphics</span><span class="p">.</span><span class="nf">Blit</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">_glitchMat</span><span class="p">);</span>
-    <span class="n">Graphics</span><span class="p">.</span><span class="nf">Blit</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">_glitchMat</span><span class="p">);</span>
-<span class="p">}</span>
-<span class="n">Graphics</span><span class="p">.</span><span class="nf">Blit</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">destination</span><span class="p">,</span> <span class="n">_glitchMat</span><span class="p">);</span>
-<span class="n">RenderTexture</span><span class="p">.</span><span class="nf">ReleaseTemporary</span><span class="p">(</span><span class="n">t</span><span class="p">);</span>
+    <span class="n">RenderTexture</span> <span class="n">t</span> <span class="p">=</span> <span class="n">RenderTexture</span><span class="p">.</span><span class="nf">GetTemporary</span><span class="p">(</span><span class="n">source</span><span class="p">.</span><span class="n">width</span><span class="p">,</span> <span class="n">source</span><span class="p">.</span><span class="n">height</span><span class="p">);</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="p">=</span> <span class="m">0</span><span class="p">;</span> <span class="n">i</span> <span class="p">&lt;</span> <span class="m">50</span><span class="p">;</span> <span class="p">++</span><span class="n">i</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">Graphics</span><span class="p">.</span><span class="nf">Blit</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">_glitchMat</span><span class="p">);</span>
+        <span class="n">Graphics</span><span class="p">.</span><span class="nf">Blit</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">_glitchMat</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="n">Graphics</span><span class="p">.</span><span class="nf">Blit</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">destination</span><span class="p">,</span> <span class="n">_glitchMat</span><span class="p">);</span>
+    <span class="n">RenderTexture</span><span class="p">.</span><span class="nf">ReleaseTemporary</span><span class="p">(</span><span class="n">t</span><span class="p">);</span>
 <span class="p">}</span></code></pre></div>
 
 <p>On my iPhone 6, the performance impact was too small to see without doing something like the above, and even in the above stress test, we’re talking about a difference of about 2 ms. It’s not like your project will fail if you don’t know this technique, but small optimizations add up, especially when you’re trying to hit 60 fps on mobile.  </p>
@@ -257,28 +257,28 @@
 
 <div class="highlight"><pre><code class="language-c#" data-lang="c#"><span class="n">fixed4</span> <span class="nf">frag</span><span class="p">(</span><span class="n">v2f</span> <span class="n">i</span><span class="p">)</span> <span class="p">:</span> <span class="n">SV_Target</span>
 <span class="p">{</span>
-<span class="n">fixed2</span> <span class="n">glitch</span> <span class="p">=</span> <span class="p">(</span><span class="nf">tex2D</span><span class="p">(</span><span class="n">_GlitchMap</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">uv</span><span class="p">)).</span><span class="n">rg</span><span class="p">;</span>
+    <span class="n">fixed2</span> <span class="n">glitch</span> <span class="p">=</span> <span class="p">(</span><span class="nf">tex2D</span><span class="p">(</span><span class="n">_GlitchMap</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">uv</span><span class="p">)).</span><span class="n">rg</span><span class="p">;</span>
 
-<span class="n">float2</span> <span class="n">uvShift</span> <span class="p">=</span> <span class="n">glitch</span><span class="p">.</span><span class="n">rg</span><span class="p">;</span>
-<span class="k">if</span> <span class="p">(</span><span class="n">glitch</span><span class="p">.</span><span class="n">r</span> <span class="p">&gt;=</span> <span class="n">_GlitchAmount</span><span class="p">)</span>
-<span class="p">{</span>
-    <span class="n">uvShift</span> <span class="p">*=</span> <span class="m">0.0</span><span class="p">;</span>
-<span class="p">}</span>
+    <span class="n">float2</span> <span class="n">uvShift</span> <span class="p">=</span> <span class="n">glitch</span><span class="p">.</span><span class="n">rg</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">glitch</span><span class="p">.</span><span class="n">r</span> <span class="p">&gt;=</span> <span class="n">_GlitchAmount</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">uvShift</span> <span class="p">*=</span> <span class="m">0.0</span><span class="p">;</span>
+    <span class="p">}</span>
 
-<span class="n">fixed4</span> <span class="n">col</span> <span class="p">=</span> <span class="nf">tex2D</span><span class="p">(</span><span class="n">_MainTex</span><span class="p">,</span> <span class="nf">frac</span><span class="p">(</span><span class="n">i</span><span class="p">.</span><span class="n">uv</span> <span class="p">+</span> <span class="n">uvShift</span><span class="p">));</span>
-<span class="k">return</span> <span class="n">col</span><span class="p">;</span>
+    <span class="n">fixed4</span> <span class="n">col</span> <span class="p">=</span> <span class="nf">tex2D</span><span class="p">(</span><span class="n">_MainTex</span><span class="p">,</span> <span class="nf">frac</span><span class="p">(</span><span class="n">i</span><span class="p">.</span><span class="n">uv</span> <span class="p">+</span> <span class="n">uvShift</span><span class="p">));</span>
+    <span class="k">return</span> <span class="n">col</span><span class="p">;</span>
 <span class="p">}</span></code></pre></div>
 
 <p>But since we can’t be sure what device this effect will need to run on, I’m going to replace the conditional with a bit of math that accomplishes the same thing:</p>
 
 <div class="highlight"><pre><code class="language-c#" data-lang="c#"><span class="n">fixed4</span> <span class="nf">frag</span><span class="p">(</span><span class="n">v2f</span> <span class="n">i</span><span class="p">)</span> <span class="p">:</span> <span class="n">SV_Target</span>
 <span class="p">{</span>
-<span class="n">fixed2</span> <span class="n">glitch</span> <span class="p">=</span> <span class="p">(</span><span class="nf">tex2D</span><span class="p">(</span><span class="n">_GlitchMap</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">uv</span><span class="p">)).</span><span class="n">rg</span><span class="p">;</span>
+    <span class="n">fixed2</span> <span class="n">glitch</span> <span class="p">=</span> <span class="p">(</span><span class="nf">tex2D</span><span class="p">(</span><span class="n">_GlitchMap</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">uv</span><span class="p">)).</span><span class="n">rg</span><span class="p">;</span>
 
-<span class="n">float2</span> <span class="n">uvShift</span> <span class="p">=</span> <span class="n">glitch</span><span class="p">.</span><span class="n">rg</span> <span class="p">*</span> <span class="nf">ceil</span><span class="p">(</span><span class="n">_GlitchAmount</span> <span class="p">-</span> <span class="n">glitch</span><span class="p">.</span><span class="n">r</span><span class="p">);</span>
+    <span class="n">float2</span> <span class="n">uvShift</span> <span class="p">=</span> <span class="n">glitch</span><span class="p">.</span><span class="n">rg</span> <span class="p">*</span> <span class="nf">ceil</span><span class="p">(</span><span class="n">_GlitchAmount</span> <span class="p">-</span> <span class="n">glitch</span><span class="p">.</span><span class="n">r</span><span class="p">);</span>
 
-<span class="n">fixed4</span> <span class="n">col</span> <span class="p">=</span> <span class="nf">tex2D</span><span class="p">(</span><span class="n">_MainTex</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">uv</span> <span class="p">+</span> <span class="n">uvShift</span><span class="p">));</span>
-<span class="k">return</span> <span class="n">col</span><span class="p">;</span>
+    <span class="n">fixed4</span> <span class="n">col</span> <span class="p">=</span> <span class="nf">tex2D</span><span class="p">(</span><span class="n">_MainTex</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">uv</span> <span class="p">+</span> <span class="n">uvShift</span><span class="p">));</span>
+    <span class="k">return</span> <span class="n">col</span><span class="p">;</span>
 <span class="p">}</span></code></pre></div>
 
 <p>All we’re doing here is comparing our two values with a subtract and rounding up to the nearest whole number, this only works because we know that both numbers have the same range (0 to 1). However, this has an edge case: if your glitch value is exactly 1.0, this calculation can result in a value of -1, which would distort part of the image even when we want no glitching, which is obviously incorrect. I’m going to add a max to the calculation here to resolve this:</p>
@@ -327,7 +327,7 @@
 
 <div class="highlight"><pre><code class="language-c#" data-lang="c#"><span class="kt">float</span> <span class="nf">rand</span><span class="p">(</span><span class="n">float2</span> <span class="n">co</span><span class="p">)</span>
 <span class="p">{</span>
-<span class="k">return</span> <span class="nf">frac</span><span class="p">(</span><span class="nf">sin</span><span class="p">(</span><span class="nf">dot</span><span class="p">(</span><span class="n">co</span><span class="p">.</span><span class="n">xy</span><span class="p">,</span> <span class="nf">float2</span><span class="p">(</span><span class="m">12.9898</span><span class="p">,</span> <span class="m">78.233</span><span class="p">)))</span> <span class="p">*</span> <span class="m">43758.5453</span><span class="p">);</span>
+    <span class="k">return</span> <span class="nf">frac</span><span class="p">(</span><span class="nf">sin</span><span class="p">(</span><span class="nf">dot</span><span class="p">(</span><span class="n">co</span><span class="p">.</span><span class="n">xy</span><span class="p">,</span> <span class="nf">float2</span><span class="p">(</span><span class="m">12.9898</span><span class="p">,</span> <span class="m">78.233</span><span class="p">)))</span> <span class="p">*</span> <span class="m">43758.5453</span><span class="p">);</span>
 <span class="p">}</span></code></pre></div>
 
 <p>So we’re going to use that, and pass the red channel value as the first component of co, and pass a uniform float that we send from c# to the shader as the second component. It’s beyond the cope of this post to talk about how this one liner works, but if you have a spare second it’s definitely worth googling.</p>
@@ -344,20 +344,20 @@
 
 <span class="kt">float</span> <span class="nf">rand</span><span class="p">(</span><span class="n">float2</span> <span class="n">co</span><span class="p">)</span>
 <span class="p">{</span>
-<span class="k">return</span> <span class="nf">frac</span><span class="p">(</span><span class="nf">sin</span><span class="p">(</span><span class="nf">dot</span><span class="p">(</span><span class="n">co</span><span class="p">.</span><span class="n">xy</span><span class="p">,</span> <span class="nf">float2</span><span class="p">(</span><span class="m">12.9898</span><span class="p">,</span> <span class="m">78.233</span><span class="p">)))</span> <span class="p">*</span> <span class="m">43758.5453</span><span class="p">);</span>
+    <span class="k">return</span> <span class="nf">frac</span><span class="p">(</span><span class="nf">sin</span><span class="p">(</span><span class="nf">dot</span><span class="p">(</span><span class="n">co</span><span class="p">.</span><span class="n">xy</span><span class="p">,</span> <span class="nf">float2</span><span class="p">(</span><span class="m">12.9898</span><span class="p">,</span> <span class="m">78.233</span><span class="p">)))</span> <span class="p">*</span> <span class="m">43758.5453</span><span class="p">);</span>
 <span class="p">}</span>
 
 <span class="n">fixed4</span> <span class="nf">frag</span><span class="p">(</span><span class="n">v2f</span> <span class="n">i</span><span class="p">)</span> <span class="p">:</span> <span class="n">SV_Target</span>
 <span class="p">{</span>
-<span class="n">fixed2</span> <span class="n">glitch</span> <span class="p">=</span> <span class="p">(</span><span class="nf">tex2D</span><span class="p">(</span><span class="n">_GlitchMap</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">uv</span><span class="p">)).</span><span class="n">rg</span><span class="p">;</span>
+    <span class="n">fixed2</span> <span class="n">glitch</span> <span class="p">=</span> <span class="p">(</span><span class="nf">tex2D</span><span class="p">(</span><span class="n">_GlitchMap</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">uv</span><span class="p">)).</span><span class="n">rg</span><span class="p">;</span>
 
-<span class="kt">float</span> <span class="n">r</span> <span class="p">=</span> <span class="p">(</span><span class="nf">rand</span><span class="p">(</span><span class="nf">float2</span><span class="p">(</span><span class="n">glitch</span><span class="p">.</span><span class="n">r</span><span class="p">,</span> <span class="n">_GlitchRandom</span><span class="p">)));</span>
-<span class="kt">float</span> <span class="n">gFlag</span> <span class="p">=</span> <span class="nf">max</span><span class="p">(</span><span class="m">0.0</span><span class="p">,</span> <span class="nf">ceil</span><span class="p">(</span><span class="n">_GlitchAmount</span> <span class="p">-</span> <span class="n">r</span><span class="p">));</span>
+    <span class="kt">float</span> <span class="n">r</span> <span class="p">=</span> <span class="p">(</span><span class="nf">rand</span><span class="p">(</span><span class="nf">float2</span><span class="p">(</span><span class="n">glitch</span><span class="p">.</span><span class="n">r</span><span class="p">,</span> <span class="n">_GlitchRandom</span><span class="p">)));</span>
+    <span class="kt">float</span> <span class="n">gFlag</span> <span class="p">=</span> <span class="nf">max</span><span class="p">(</span><span class="m">0.0</span><span class="p">,</span> <span class="nf">ceil</span><span class="p">(</span><span class="n">_GlitchAmount</span> <span class="p">-</span> <span class="n">r</span><span class="p">));</span>
 
-<span class="n">float2</span> <span class="n">uvShift</span> <span class="p">=</span> <span class="n">glitch</span><span class="p">.</span><span class="n">rg</span> <span class="p">*</span> <span class="n">gFlag</span><span class="p">;</span>
+    <span class="n">float2</span> <span class="n">uvShift</span> <span class="p">=</span> <span class="n">glitch</span><span class="p">.</span><span class="n">rg</span> <span class="p">*</span> <span class="n">gFlag</span><span class="p">;</span>
 
-<span class="n">fixed4</span> <span class="n">col</span> <span class="p">=</span> <span class="nf">tex2D</span><span class="p">(</span><span class="n">_MainTex</span><span class="p">,</span> <span class="nf">frac</span><span class="p">(</span><span class="n">i</span><span class="p">.</span><span class="n">uv</span> <span class="p">+</span> <span class="n">uvShift</span><span class="p">));</span>
-<span class="k">return</span> <span class="n">col</span><span class="p">;</span>
+    <span class="n">fixed4</span> <span class="n">col</span> <span class="p">=</span> <span class="nf">tex2D</span><span class="p">(</span><span class="n">_MainTex</span><span class="p">,</span> <span class="nf">frac</span><span class="p">(</span><span class="n">i</span><span class="p">.</span><span class="n">uv</span> <span class="p">+</span> <span class="n">uvShift</span><span class="p">));</span>
+    <span class="k">return</span> <span class="n">col</span><span class="p">;</span>
 <span class="p">}</span></code></pre></div>
 
 <p>And in c#, we have to add a line to our update() function:</p>
@@ -380,17 +380,17 @@
 
 <div class="highlight"><pre><code class="language-c#" data-lang="c#"><span class="k">void</span> <span class="nf">Start</span> <span class="p">()</span>
 <span class="p">{</span>
-<span class="n">_glitchShader</span> <span class="p">=</span> <span class="n">Shader</span><span class="p">.</span><span class="nf">Find</span><span class="p">(</span><span class="s">"Hidden/GlitchFX/GlitchFX_Shift"</span><span class="p">);</span>
-<span class="n">_glitchMat</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Material</span><span class="p">(</span><span class="n">_glitchShader</span><span class="p">);</span>
-<span class="n">_glitchMat</span><span class="p">.</span><span class="nf">SetTexture</span><span class="p">(</span><span class="s">"_GlitchMap"</span><span class="p">,</span> <span class="n">blockTexture</span><span class="p">);</span>
+    <span class="n">_glitchShader</span> <span class="p">=</span> <span class="n">Shader</span><span class="p">.</span><span class="nf">Find</span><span class="p">(</span><span class="s">"Hidden/GlitchFX/GlitchFX_Shift"</span><span class="p">);</span>
+    <span class="n">_glitchMat</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Material</span><span class="p">(</span><span class="n">_glitchShader</span><span class="p">);</span>
+    <span class="n">_glitchMat</span><span class="p">.</span><span class="nf">SetTexture</span><span class="p">(</span><span class="s">"_GlitchMap"</span><span class="p">,</span> <span class="n">blockTexture</span><span class="p">);</span>
 
-<span class="nf">Invoke</span><span class="p">(</span><span class="s">"UpdateRandom"</span><span class="p">,</span> <span class="m">0.25f</span><span class="p">);</span>
+    <span class="nf">Invoke</span><span class="p">(</span><span class="s">"UpdateRandom"</span><span class="p">,</span> <span class="m">0.25f</span><span class="p">);</span>
 <span class="p">}</span>
 
 <span class="k">void</span> <span class="nf">UpdateRandom</span><span class="p">()</span>
 <span class="p">{</span>
-<span class="n">_glitchMat</span><span class="p">.</span><span class="nf">SetFloat</span><span class="p">(</span><span class="s">"_GlitchRandom"</span><span class="p">,</span> <span class="n">Random</span><span class="p">.</span><span class="nf">Range</span><span class="p">(-</span><span class="m">1.0f</span><span class="p">,</span> <span class="m">1.0f</span><span class="p">));</span>
-<span class="nf">Invoke</span><span class="p">(</span><span class="s">"UpdateRandom"</span><span class="p">,</span> <span class="n">Random</span><span class="p">.</span><span class="nf">Range</span><span class="p">(</span><span class="m">0.01f</span><span class="p">,</span> <span class="m">0.15f</span><span class="p">));</span>
+    <span class="n">_glitchMat</span><span class="p">.</span><span class="nf">SetFloat</span><span class="p">(</span><span class="s">"_GlitchRandom"</span><span class="p">,</span> <span class="n">Random</span><span class="p">.</span><span class="nf">Range</span><span class="p">(-</span><span class="m">1.0f</span><span class="p">,</span> <span class="m">1.0f</span><span class="p">));</span>
+    <span class="nf">Invoke</span><span class="p">(</span><span class="s">"UpdateRandom"</span><span class="p">,</span> <span class="n">Random</span><span class="p">.</span><span class="nf">Range</span><span class="p">(</span><span class="m">0.01f</span><span class="p">,</span> <span class="m">0.15f</span><span class="p">));</span>
 <span class="p">}</span></code></pre></div>
 
 <p>It’s a little change, but it makes a big difference!</p>
@@ -416,15 +416,15 @@
 
 <div class="highlight"><pre><code class="language-c#" data-lang="c#"><span class="n">fixed4</span> <span class="nf">frag</span><span class="p">(</span><span class="n">v2f</span> <span class="n">i</span><span class="p">)</span> <span class="p">:</span> <span class="n">SV_Target</span>
 <span class="p">{</span>
-<span class="n">fixed3</span> <span class="n">glitch</span> <span class="p">=</span> <span class="p">(</span><span class="nf">tex2D</span><span class="p">(</span><span class="n">_GlitchMap</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">uv</span><span class="p">)).</span><span class="n">rgb</span><span class="p">;</span>
+    <span class="n">fixed3</span> <span class="n">glitch</span> <span class="p">=</span> <span class="p">(</span><span class="nf">tex2D</span><span class="p">(</span><span class="n">_GlitchMap</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">uv</span><span class="p">)).</span><span class="n">rgb</span><span class="p">;</span>
 
-<span class="kt">float</span> <span class="n">r</span> <span class="p">=</span> <span class="p">(</span><span class="nf">rand</span><span class="p">(</span><span class="nf">float2</span><span class="p">(</span><span class="n">glitch</span><span class="p">.</span><span class="n">r</span><span class="p">,</span> <span class="n">_GlitchRandom</span><span class="p">)));</span>
-<span class="kt">float</span> <span class="n">gFlag</span> <span class="p">=</span> <span class="nf">max</span><span class="p">(</span><span class="m">0.0</span><span class="p">,</span> <span class="nf">ceil</span><span class="p">(</span><span class="n">_GlitchAmount</span><span class="p">-</span><span class="n">r</span><span class="p">));</span>
+    <span class="kt">float</span> <span class="n">r</span> <span class="p">=</span> <span class="p">(</span><span class="nf">rand</span><span class="p">(</span><span class="nf">float2</span><span class="p">(</span><span class="n">glitch</span><span class="p">.</span><span class="n">r</span><span class="p">,</span> <span class="n">_GlitchRandom</span><span class="p">)));</span>
+    <span class="kt">float</span> <span class="n">gFlag</span> <span class="p">=</span> <span class="nf">max</span><span class="p">(</span><span class="m">0.0</span><span class="p">,</span> <span class="nf">ceil</span><span class="p">(</span><span class="n">_GlitchAmount</span><span class="p">-</span><span class="n">r</span><span class="p">));</span>
 
-<span class="n">float2</span> <span class="n">uvShift</span> <span class="p">=</span> <span class="n">glitch</span><span class="p">.</span><span class="n">gb</span> <span class="p">*</span> <span class="n">gFlag</span><span class="p">;</span>
+    <span class="n">float2</span> <span class="n">uvShift</span> <span class="p">=</span> <span class="n">glitch</span><span class="p">.</span><span class="n">gb</span> <span class="p">*</span> <span class="n">gFlag</span><span class="p">;</span>
 
-<span class="n">fixed4</span> <span class="n">col</span> <span class="p">=</span> <span class="nf">tex2D</span><span class="p">(</span><span class="n">_MainTex</span><span class="p">,</span> <span class="nf">frac</span><span class="p">(</span><span class="n">i</span><span class="p">.</span><span class="n">uv</span> <span class="p">+</span> <span class="n">uvShift</span><span class="p">));</span>
-<span class="k">return</span> <span class="n">col</span><span class="p">;</span>
+    <span class="n">fixed4</span> <span class="n">col</span> <span class="p">=</span> <span class="nf">tex2D</span><span class="p">(</span><span class="n">_MainTex</span><span class="p">,</span> <span class="nf">frac</span><span class="p">(</span><span class="n">i</span><span class="p">.</span><span class="n">uv</span> <span class="p">+</span> <span class="n">uvShift</span><span class="p">));</span>
+    <span class="k">return</span> <span class="n">col</span><span class="p">;</span>
 <span class="p">}</span></code></pre></div>
 
 <p>This is better, but since the .gb channels will always have positive values, our texture lookups still only in 2 directions: positive in both axes. To fix this, we need to stretch the range of these channels so that 0.5 becomes our new 0, and values lower than 0.5 become negative. This just takes a quick multiply and subtract:</p>

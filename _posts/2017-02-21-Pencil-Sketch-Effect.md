@@ -218,27 +218,27 @@ Altogether, the hatching function looks like this:
 {% highlight c# %}
 fixed3 Hatching(float2 _uv, half _intensity)
 {
-half3 hatch0 = tex2D(_Hatch0, _uv).rgb;
-half3 hatch1 = tex2D(_Hatch1, _uv).rgb;
+    half3 hatch0 = tex2D(_Hatch0, _uv).rgb;
+    half3 hatch1 = tex2D(_Hatch1, _uv).rgb;
 
-half3 overbright = max(0, _intensity - 1.0);
+    half3 overbright = max(0, _intensity - 1.0);
 
-half3 weightsA = saturate((_intensity * 6.0) + half3(-0, -1, -2));
-half3 weightsB = saturate((_intensity * 6.0) + half3(-3, -4, -5));
+    half3 weightsA = saturate((_intensity * 6.0) + half3(-0, -1, -2));
+    half3 weightsB = saturate((_intensity * 6.0) + half3(-3, -4, -5));
 
-weightsA.xy -= weightsA.yz;
-weightsA.z -= weightsB.x;
-weightsB.xy -= weightsB.zy;
+    weightsA.xy -= weightsA.yz;
+    weightsA.z -= weightsB.x;
+    weightsB.xy -= weightsB.zy;
 
-hatch0 = hatch0 * weightsA;
-hatch1 = hatch1 * weightsB;
+    hatch0 = hatch0 * weightsA;
+    hatch1 = hatch1 * weightsB;
 
-half3 hatching = overbright + hatch0.r +
-	hatch0.g + hatch0.b +
-	hatch1.r + hatch1.g +
-	hatch1.b;
+    half3 hatching = overbright + hatch0.r +
+    	hatch0.g + hatch0.b +
+    	hatch1.r + hatch1.g +
+    	hatch1.b;
 
-return hatching;
+    return hatching;
 }
 {% endhighlight %}
 
@@ -247,14 +247,14 @@ If we plug that into our pixel shader like so:
 {% highlight c# %}
 fixed4 frag (v2f i) : SV_Target
 {
-fixed4 color = tex2D(_MainTex, i.uv);
-fixed3 diffuse = color.rgb * _LightColor0.rgb * dot(_WorldSpaceLightPos0, normalize(i.nrm));
+    fixed4 color = tex2D(_MainTex, i.uv);
+    fixed3 diffuse = color.rgb * _LightColor0.rgb * dot(_WorldSpaceLightPos0, normalize(i.nrm));
 
-fixed intensity = dot(diffuse, fixed3(0.2326, 0.7152, 0.0722));
+    fixed intensity = dot(diffuse, fixed3(0.2326, 0.7152, 0.0722));
 
-color.rgb =  Hatching(i.uv * 8, intensity);
+    color.rgb =  Hatching(i.uv * 8, intensity);
 
-return color;
+    return color;
 }
 {% endhighlight %}
 
@@ -310,21 +310,21 @@ If you're familiar with my previous posts, this should look very familiar. All w
 {% highlight c# %}
 private void OnRenderImage(RenderTexture src, RenderTexture dst)
 {
-effectCamera.CopyFrom(mainCam);
-effectCamera.transform.position = transform.position;
-effectCamera.transform.rotation = transform.rotation;
+    effectCamera.CopyFrom(mainCam);
+    effectCamera.transform.position = transform.position;
+    effectCamera.transform.rotation = transform.rotation;
 
-//redner scene into a UV buffer
-RenderTexture uvBuffer = RenderTexture.GetTemporary(scaledWidth, scaledHeight, 24, RenderTextureFormat.ARGBFloat);
-effectCamera.SetTargetBuffers(uvBuffer.colorBuffer, uvBuffer.depthBuffer);
-effectCamera.RenderWithShader(uvReplacementShader, "");
+    //redner scene into a UV buffer
+    RenderTexture uvBuffer = RenderTexture.GetTemporary(scaledWidth, scaledHeight, 24, RenderTextureFormat.ARGBFloat);
+    effectCamera.SetTargetBuffers(uvBuffer.colorBuffer, uvBuffer.depthBuffer);
+    effectCamera.RenderWithShader(uvReplacementShader, "");
 
-compositeMat.SetTexture("_UVBuffer", uvBuffer);
+    compositeMat.SetTexture("_UVBuffer", uvBuffer);
 
-//Composite pass with packed TAMs
-Graphics.Blit(src, dst, compositeMat);
+    //Composite pass with packed TAMs
+    Graphics.Blit(src, dst, compositeMat);
 
-RenderTexture.ReleaseTemporary(uvBuffer);
+    RenderTexture.ReleaseTemporary(uvBuffer);
 }
 
 {% endhighlight %}
@@ -358,17 +358,17 @@ Finally, the composite shader is very simple, now that you know what the hatchin
 {% highlight c# %}
 fixed4 frag (v2f i) : SV_Target
 {
-fixed4 col = tex2D(_MainTex, i.uv);
+    fixed4 col = tex2D(_MainTex, i.uv);
 
-float4 uv = tex2D(_UVBuffer, i.uvFlipY);
+    float4 uv = tex2D(_UVBuffer, i.uvFlipY);
 
-half intensity = dot(col.rgb, float3(0.2326, 0.7152, 0.0722));
+    half intensity = dot(col.rgb, float3(0.2326, 0.7152, 0.0722));
 
-half3 hatch =  Hatching(uv.xy * 8, intensity);
+    half3 hatch =  Hatching(uv.xy * 8, intensity);
 
-col.rgb = hatch;
+    col.rgb = hatch;
 
-return col;
+    return col;
 }
 {% endhighlight %}
 
@@ -386,6 +386,6 @@ Firstly, all the code that I talked about is available [on github](https://githu
 
 There are lots of potential issues you'll run into with this effect if you use it in a real project. For example, handling non uniform object scale can present some odd issues, especially if you don't want to break static batching by passing scale to the object's material. I think you could get around this by encoding the scale of objects into their vertex color, but if you know the scale of your object at bake time, you should probably just resize your mesh.
 
-In reality though, the effect as presented here is likely not going to make your art team very happy. I think you'd likely run into artists wanting to author custom TAMs with different types of strokes, and maps for each object to control which type of stroke was used where. 
+In reality though, the effect as presented here is likely not going to make your art team very happy. I think you'd likely run into artists wanting to author custom TAMs with different types of strokes, and maps for each object to control which type of stroke was used where.
 
 That about wraps things up, this was a lot of fun! If you have any questions, shoot me a message [on twitter](https://twitter.com/khalladay), I'd love to see more projects using this type of effect, so send me screenshots of anything you build with it!
