@@ -37,7 +37,7 @@ Secondly, we're going to need a way to build our projects. There are fewer optio
 
 I placed that make file in the same directory as the folder which held my code (which was the root dir of my project). With that, all it took was a simple call to make to get a fully working GBA game!
 
-If you're dubious about this working, [this gist] has a minimal gba example which will clear the screen red. Try putting that in your source directory and running make, and then opening the result in your emulator of choice. If you see a red screen, everything is working as intended.
+If you're dubious about this working, [this gist](https://gist.github.com/khalladay/7c86f092a48342adf6d35aa2861b3ed3) has a minimal gba example which will clear the screen red. Try putting that in your source directory and running make, and then opening the result in your emulator of choice. If you see a red screen, everything is working as intended.
 
 ## Setting a Video Mode
 
@@ -54,9 +54,9 @@ We can set these values like this:
 {% highlight c %}
 typedef unsigned int    uint32;
 
-#define REG_DISPLAYCONTROL	*((volatile uint32*)(0x04000000))
-#define VIDEOMODE_3                 	0x0003
-#define BGMODE_2 		         	0x0400
+#define REG_DISPLAYCONTROL *((volatile uint32*)(0x04000000))
+#define VIDEOMODE_3         0x0003
+#define BGMODE_2            0x0400
 
 int main()
 {
@@ -79,24 +79,24 @@ Like I mentioned before, in mode 3, we don't need to worry about managing multip
 
 {% highlight c %}typedef unsigned char      uint8;
 typedef unsigned short     uint16;
-typedef unsigned int          uint32;
+typedef unsigned int       uint32;
 
-#define REG_DISPLAYCONTROL	*((volatile uint32*)(0x04000000))
-#define VIDEOMODE_3     	               0x0003
-#define BGMODE_2 			       0x0400
+#define REG_DISPLAYCONTROL *((volatile uint32*)(0x04000000))
+#define VIDEOMODE_3         0x0003
+#define BGMODE_2            0x0400
 
-#define SCREENBUFFER                    ((volatile uint16*)0x06000000)
-#define SCREEN_W                            240
-#define SCREEN_H                            160
+#define SCREENBUFFER        ((volatile uint16*)0x06000000)
+#define SCREEN_W            240
+#define SCREEN_H            160
 
 int main()
 {
     REG_DISPLAYCONTROL = VIDEOMODE_3 | BGMODE_2;
 
-	for (int i = 0; i < SCREEN_W * SCREEN_H; ++i)
-	{
-		SCREENBUFFER[i] = 0xFFFF;
-	}
+    for (int i = 0; i < SCREEN_W * SCREEN_H; ++i)
+    {
+    	SCREENBUFFER[i] = 0xFFFF;
+    }
 
     while(1){}
     return 0;

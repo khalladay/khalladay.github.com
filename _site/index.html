@@ -124,7 +124,7 @@
 
 <p>I placed that make file in the same directory as the folder which held my code (which was the root dir of my project). With that, all it took was a simple call to make to get a fully working GBA game!</p>
 
-<p>If you’re dubious about this working, [this gist] has a minimal gba example which will clear the screen red. Try putting that in your source directory and running make, and then opening the result in your emulator of choice. If you see a red screen, everything is working as intended.</p>
+<p>If you’re dubious about this working, <a href="https://gist.github.com/khalladay/7c86f092a48342adf6d35aa2861b3ed3">this gist</a> has a minimal gba example which will clear the screen red. Try putting that in your source directory and running make, and then opening the result in your emulator of choice. If you see a red screen, everything is working as intended.</p>
 
 <h2 id="setting-a-video-mode">Setting a Video Mode</h2>
 
@@ -140,9 +140,9 @@
 
 <div class="highlight"><pre><code class="language-c" data-lang="c"><span class="k">typedef</span> <span class="kt">unsigned</span> <span class="kt">int</span>    <span class="n">uint32</span><span class="p">;</span>
 
-<span class="cp">#define REG_DISPLAYCONTROL	*((volatile uint32*)(0x04000000))
-#define VIDEOMODE_3                 	0x0003
-#define BGMODE_2 		         	0x0400
+<span class="cp">#define REG_DISPLAYCONTROL *((volatile uint32*)(0x04000000))
+#define VIDEOMODE_3         0x0003
+#define BGMODE_2            0x0400
 </span>
 <span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
 <span class="p">{</span>
@@ -164,24 +164,24 @@
 
 <div class="highlight"><pre><code class="language-c" data-lang="c"><span class="k">typedef</span> <span class="kt">unsigned</span> <span class="kt">char</span>      <span class="n">uint8</span><span class="p">;</span>
 <span class="k">typedef</span> <span class="kt">unsigned</span> <span class="kt">short</span>     <span class="n">uint16</span><span class="p">;</span>
-<span class="k">typedef</span> <span class="kt">unsigned</span> <span class="kt">int</span>          <span class="n">uint32</span><span class="p">;</span>
+<span class="k">typedef</span> <span class="kt">unsigned</span> <span class="kt">int</span>       <span class="n">uint32</span><span class="p">;</span>
 
-<span class="cp">#define REG_DISPLAYCONTROL	*((volatile uint32*)(0x04000000))
-#define VIDEOMODE_3     	               0x0003
-#define BGMODE_2 			       0x0400
+<span class="cp">#define REG_DISPLAYCONTROL *((volatile uint32*)(0x04000000))
+#define VIDEOMODE_3         0x0003
+#define BGMODE_2            0x0400
 </span>
-<span class="cp">#define SCREENBUFFER                    ((volatile uint16*)0x06000000)
-#define SCREEN_W                            240
-#define SCREEN_H                            160
+<span class="cp">#define SCREENBUFFER        ((volatile uint16*)0x06000000)
+#define SCREEN_W            240
+#define SCREEN_H            160
 </span>
 <span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
 <span class="p">{</span>
     <span class="n">REG_DISPLAYCONTROL</span> <span class="o">=</span> <span class="n">VIDEOMODE_3</span> <span class="o">|</span> <span class="n">BGMODE_2</span><span class="p">;</span>
 
-	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">SCREEN_W</span> <span class="o">*</span> <span class="n">SCREEN_H</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
-	<span class="p">{</span>
-		<span class="n">SCREENBUFFER</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mh">0xFFFF</span><span class="p">;</span>
-	<span class="p">}</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">SCREEN_W</span> <span class="o">*</span> <span class="n">SCREEN_H</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+    <span class="p">{</span>
+    	<span class="n">SCREENBUFFER</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mh">0xFFFF</span><span class="p">;</span>
+    <span class="p">}</span>
 
     <span class="k">while</span><span class="p">(</span><span class="mi">1</span><span class="p">){}</span>
     <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
