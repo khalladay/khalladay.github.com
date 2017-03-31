@@ -60,7 +60,7 @@ typedef unsigned int    uint32;
 
 int main()
 {
-    REG_DISPLAYCONTROL = VIDEOMODE_3 | DCNT_BG2;
+    REG_DISPLAYCONTROL = VIDEOMODE_3 | BGMODE_2;
     while(1){}
 }
 {% endhighlight %}
