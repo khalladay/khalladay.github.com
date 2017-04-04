@@ -6,10 +6,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Kyle Halladay - Home Page</title>
+  <title>Kyle Halladay - GBA By Example - Drawing and Moving Sprites</title>
   <meta name="author" content="Kyle Halladay" />
   <meta name="description" content="I build shaders, renderers, games, and other stuff that's fun to stare at." />
-  <link rel="canonical" href="http://kylehalladay.com/" />
+  <link rel="canonical" href="http://kylehalladay.com/blog/tutorial/2017/04/04/GBA-By-Example-2.html" />
   <meta name="keywords" content="life,code,software,development,games,graphics,shaders,indie" />
 
   <link href="//fonts.googleapis.com/css?family=Open+Sans:600,800" rel="stylesheet" type="text/css">
@@ -88,14 +88,13 @@
       <hr style="border-color:#000; margin:1em -0.25em;"></topbar>
 
       <p class="meta">
-   
-
+ 
 </p>
 
 <h1 class="title">GBA By Example - Drawing and Moving Sprites</h1>
 
 <div id="post">
- <p><a href="http://kylehalladay.com/blog/tutorial/2017/03/28/GBA-By-Example-1.html">Last week</a>, we were working in video mode 3, which is one of the “bitmap” video modes. These modes are named so because they use the GBA’s 96K of video memory (VRAM) to store a representation of the screen as an array of colour values. If you want to draw to pixel (0,0), you simply set the first element in the screen buffer array to the colour you want, and when the hardware draws, it reads the value at that location, and draws it to the screen.</p>
+  <p><a href="http://kylehalladay.com/blog/tutorial/2017/03/28/GBA-By-Example-1.html">Last week</a>, we were working in video mode 3, which is one of the “bitmap” video modes. These modes are named so because they use the GBA’s 96K of video memory (VRAM) to store a representation of the screen as an array of colour values. If you want to draw to pixel (0,0), you simply set the first element in the screen buffer array to the colour you want, and when the hardware draws, it reads the value at that location, and draws it to the screen.</p>
 
 <p>While some games did use the bitmap modes to do some pretty amazing stuff (like <a href="http://www.ign.com/games/james-bond-007-nightfire/gba-497891">James Bond 007: NightFire</a> and <a href="http://www.ign.com/games/stuntman/gba-550094">Stuntman</a>), they were the exception, not the rule. Most GBA games that were released were purely 2D, and used what are called Tiled Video Modes, which provide hardware level optimizations for 2D drawing tasks.</p>
 
@@ -579,6 +578,7 @@ Hopefully that’s all relatively clear! Let’s start putting all of this toget
     
   </ul>
 </div>
+
 
       <div class="footer">
         <div class="disclaimer">

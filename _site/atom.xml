@@ -4,28 +4,13 @@
  <title>The blog of Kyle Halladay</title>
  <link href="http://kylehalladay.com/atom.xml" rel="self"/>
  <link href="http://kylehalladay.com"/>
- <updated>2017-03-29T06:30:25-05:00</updated>
+ <updated>2017-04-04T06:44:34-05:00</updated>
  <id>http://kylehalladay.com</id>
  <author>
    <name>Kyle Halladay</name>
    <email>k.mj.halladay@gmail.com</email>
  </author>
 
- 
- <entry>
-   <title>Gba By Example 2</title>
-   <link href="http://kylehalladay.com/2017/04/17/GBA-By-Example-2.html"/>
-   <updated>2017-04-17T00:00:00-05:00</updated>
-   <id>http://kylehalladay.com/2017/04/17/GBA-By-Example-2</id>
-   <content type="html">&lt;hr /&gt;
-&lt;p&gt;layout: post
-title: What Causes Texture Border Artifacts?
-categories:
-tags:
-- &lt;span style=&quot;background-color:#DD6655;&quot;&gt;&lt;font color=&quot;white&quot;&gt;&amp;nbsp;&amp;nbsp;GBA&amp;nbsp;&amp;nbsp;&lt;/font&gt;&lt;/span&gt;
-—&lt;/p&gt;
-</content>
- </entry>
  
  <entry>
    <title>What Causes Texture Border Artifacts?</title>
@@ -37,15 +22,528 @@ tags:
  </entry>
  
  <entry>
-   <title>Preprocess Meshes For Fun And Profit</title>
-   <link href="http://kylehalladay.com/2017/04/03/Preprocess-Static-Meshes.html"/>
-   <updated>2017-04-03T00:00:00-05:00</updated>
-   <id>http://kylehalladay.com/2017/04/03/Preprocess-Static-Meshes</id>
-   <content type="html">&lt;p&gt;One of my goals for 2017 is to learn a new graphics api (I chose DX12), and of course to do anything useful without an engine, this means that I’m also re-learning a bunch of things that I haven’t had to do in years, like loading meshes. I’ve been spoiled by big shiny game engines that have done this for me for so long that I forgot how to do it.&lt;/p&gt;
+   <title>Loading Static Meshes With the FBX SDK</title>
+   <link href="http://kylehalladay.com/2017/04/07/Loading-Static-Meshes-FBX.html"/>
+   <updated>2017-04-07T00:00:00-05:00</updated>
+   <id>http://kylehalladay.com/2017/04/07/Loading-Static-Meshes-FBX</id>
+   <content type="html">&lt;p&gt;One of my goals for 2017 is to learn a new graphics api, and since this means working without an engine for the first time in years, this means that I’m also re-learning a bunch of things that I’ve long since forgotten, like loading meshes. I’ve been spoiled by big shiny game engines that have done this for me for so long that I forgot how to do it.&lt;/p&gt;
 
-&lt;p&gt;Googling around turned up a bunch of tutorials, which were handy when combined with the FBX SDK docs, but none of the tutorials by themselves really explained things in a way that made sense to me. So… I figured I’d try my hand at writing one. This post is just going to cover loading a static mesh with normals, tangents, uvs, and vertex color. I’ll write a second installment to cover skinned meshes later (when I decide I want skinned meshes in my DX12 programs).&lt;/p&gt;
+&lt;p&gt;Since it seems that fbx has won the mesh file format wars for now, I figured it made the most sense to write an FBX importer. Googling around turned up a bunch of tutorials, which were handy when combined with the FBX SDK docs, but none of the tutorials by themselves really explained things in a way that made sense to me, so I thought I’d write my own.&lt;/p&gt;
 
-&lt;p&gt;Here goes.&lt;/p&gt;
+&lt;p&gt;This post is just going to cover loading a static mesh with normals, multiple uv sets, and vertex colors. We’ll just be filling out a simple Mesh struct with this info; you’ll have to do the work of actually rendering it yourself. I’ll write a second installment to cover skinned meshes later.&lt;/p&gt;
+
+&lt;p&gt;If you need a mesh to work with for this tutorial, you can use the one that I’ve uploaded &lt;a href=&quot;&quot;&gt;here&lt;/a&gt;, it’s a super fun cube mesh, so be excited. Finally, This post was written assuming that you’re using the 2017 sdk, so if you’re from the future, things might be different for you.&lt;/p&gt;
+
+&lt;h2 id=&quot;setting-up-your-project&quot;&gt;Setting Up Your Project&lt;/h2&gt;
+
+&lt;p&gt;This section is assuming that you’re using Visual Studio. Skip it and do your own thing if that isn’t the case for you :)&lt;/p&gt;
+
+&lt;p&gt;The first thing that we need to do is get a project including/linking with the FBX SDK. You can grab the sdk off of &lt;a href=&quot;http://usa.autodesk.com/adsk/servlet/pc/item?siteID=123112&amp;amp;id=10775847&quot;&gt;Autodesk’s Site&lt;/a&gt;, and install it wherever you want it to be.&lt;/p&gt;
+
+&lt;p&gt;Next, create a project in VS, and open up the project properties window. We need to tell our project where to look to see the SDK we just installed. This part should mostly be familiar to you if you’ve ever worked with an external library before, but there’s some nuances to the FBX SDK that are worth mentioning.&lt;/p&gt;
+
+&lt;p&gt;In the Property window, navigate to the “VC++ Directories” tab. It should look something like this:&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+&lt;img src=&quot;/images/post_images/2017-04-07/vcdirectories.PNG&quot; /&gt;&lt;br /&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Just like any other library, you need to add the “include” directory of the FBX SDK to the “Include Directories” item, and the path to the SDK library folder to your “Library Directories” item. Make sure that you use the debug libraries for your debug project configuration, and the release libraries for your release config, otherwise you may run into issues when you try to build.&lt;/p&gt;
+
+&lt;p&gt;Next, we need to tell the linker which library file to use, so navigate to the Linker-&amp;gt;Input page:&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+&lt;img src=&quot;/images/post_images/2017-04-07/linkerinput.PNG&quot; /&gt;&lt;br /&gt;
+&lt;/div&gt;
+
+&lt;p&gt;We need to add the library name to the “Additional Dependencies” item, but this is where we need to pay some special attention to what we’re doing. The FBX SDK ships with a number of libraries, a .DLL and two .lib files. To make things easier, I used one of the static libraries instead of the dll (so that I didn’t have to worry about where the DLL was located). This means that there were two options: libfbxsdk-md.lib and libfbxsdk-mt.lib (mt for multithreaded). You can choose to use either one, but both of them require one additional step.&lt;/p&gt;
+
+&lt;p&gt;Regardless of which one you entered, you will need to navigate to the code generation tab:&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+&lt;img src=&quot;/images/post_images/2017-04-07/codegeneration.png&quot; /&gt;&lt;br /&gt;
+&lt;/div&gt;
+
+&lt;p&gt;If you chose to use the -MD variant, you will need to make sure that your “Runtime Library” setting is set to “/MD” in release and “/MDd” in debug. Predictably, if you choose the -MT variant (like I did), these need to be “/MT” and “/MTd” respectively.&lt;/p&gt;
+
+&lt;p&gt;Ok, that covers the set up, let’s import some meshes shall we?&lt;/p&gt;
+
+&lt;h2 id=&quot;setting-up-the-fbx-importer&quot;&gt;Setting up the FBX Importer&lt;/h2&gt;
+
+&lt;h2 id=&quot;getting-to-the-mesh&quot;&gt;Getting To The Mesh&lt;/h2&gt;
+
+&lt;p&gt;While they’re probably most commonly used to store meshes (at least in my experience), FBX files can be used to store entire 3D scenes, containing meshes, materials, lights, animation data, NURB curves, LOD Groups, and a whole bunch of other stuff. For the most part, if you’re importing a mesh from and FBX file, you hope that the file just has the mesh you want, but that isn’t always the case, which is why the first thing we need to do is traverse our imported FBX scene and find the mesh (or meshes!) contained in it.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>GBA By Example - Drawing and Moving Sprites</title>
+   <link href="http://kylehalladay.com/blog/tutorial/2017/04/04/GBA-By-Example-2.html"/>
+   <updated>2017-04-04T00:00:00-05:00</updated>
+   <id>http://kylehalladay.com/blog/tutorial/2017/04/04/GBA-By-Example-2</id>
+   <content type="html">&lt;p&gt;&lt;a href=&quot;http://kylehalladay.com/blog/tutorial/2017/03/28/GBA-By-Example-1.html&quot;&gt;Last week&lt;/a&gt;, we were working in video mode 3, which is one of the “bitmap” video modes. These modes are named so because they use the GBA’s 96K of video memory (VRAM) to store a representation of the screen as an array of colour values. If you want to draw to pixel (0,0), you simply set the first element in the screen buffer array to the colour you want, and when the hardware draws, it reads the value at that location, and draws it to the screen.&lt;/p&gt;
+
+&lt;p&gt;While some games did use the bitmap modes to do some pretty amazing stuff (like &lt;a href=&quot;http://www.ign.com/games/james-bond-007-nightfire/gba-497891&quot;&gt;James Bond 007: NightFire&lt;/a&gt; and &lt;a href=&quot;http://www.ign.com/games/stuntman/gba-550094&quot;&gt;Stuntman&lt;/a&gt;), they were the exception, not the rule. Most GBA games that were released were purely 2D, and used what are called Tiled Video Modes, which provide hardware level optimizations for 2D drawing tasks.&lt;/p&gt;
+
+&lt;p&gt;So today I’m going to walk through the bare minimum needed to use one of these tiled video modes to draw (and move) a sprite across the screen, which might end up looking like this:&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+&lt;img src=&quot;/images/post_images/2017-04-04/preview.gif&quot; style=&quot;width:240px;height:160px&quot; /&gt;
+&lt;font size=&quot;2&quot;&gt;(Forgive the Programmer Art)&lt;/font&gt;&lt;br /&gt;&lt;br /&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Let’s get started!&lt;/p&gt;
+
+&lt;h2 id=&quot;introducing-tiled-video-modes&quot;&gt;Introducing Tiled Video Modes&lt;/h2&gt;
+
+&lt;p&gt;Tiled video modes are different from the bitmap modes because they don’t store large colour arrays in VRAM. Instead, VRAM is used to store collections of tiles (8x8 collections of colour values), and data about how to display these tiles. There are 3 different tiled video modes (mode 0 - mode 2), but I don’t really know enough right now to worry about the differences between them right now to make an informed choice about which one to use. Until that changes, I’m going to work in Mode 0 and kinda plug my ears and try not to think too hard about it:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;cp&quot;&gt;#define REG_DISPLAYCONTROL     *((volatile uint16*)(0x04000000))
+&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;REG_DISPLAYCONTROL&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//mode 0, no background enabled
+&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){}&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Since what we store in VRAM has changed since last week, it makes sense that there are a few new data structures that we’re going to have to understand in order to get anything useful into memory (and do anything interesting).&lt;/p&gt;
+
+&lt;p&gt;As mentioned, a &lt;em&gt;Tile&lt;/em&gt; is an 8x8 collection of colour values (stored linearly, one row after the other), but these colour values are not the colours the sprite will actually use on screen. Instead, these values are used to look up the colour in a &lt;em&gt;Palette&lt;/em&gt;, which is another data structure we’re going to have to wrangle today.&lt;/p&gt;
+
+&lt;p&gt;A &lt;em&gt;Palette&lt;/em&gt; is a block of memory that contains colour values, plain and simple. An application gets 2 of these blocks of memory, one for backgrounds, and one for sprites. Each section is large enough to contain 256 colour values.&lt;/p&gt;
+
+&lt;p&gt;Tiles can take the form of 8bpp (bits per pixel), or 4bpp. 8bpp mode is pretty straightforward - we have 8 bits to play with, which means each value in our tile can be one of 256 possible values, which is exactly how many values we can store in a palette. In 4bpp mode, we get up to 16 possible values for each pixel, which means that we can only use a section of our palette memory for each sprite.&lt;/p&gt;
+
+&lt;p&gt;Because it sounds easier, and I promised that this article was the bare minimum we needed to draw a sprite, we’re going to use 8bpp today.&lt;/p&gt;
+
+&lt;p&gt;Finally, a Sprite is a rectangular collection of tiles, so when we format images to be used on the GBA, we need to break them up into 8x8 tiles, and a palette of colours that those tiles use, and then provide some data about which locations in Tile and Palette memory our sprite will use. It’s important to note that the GBA calls Sprites “Objects” (not the OOP kind). You can split hairs about this, but a GBA Object is a collection of tiles, arranged rectangularly, that move around the screen. Sounds like a Sprite to me.&lt;/p&gt;
+
+&lt;p&gt;I’m sure there are reasons why this isn’t true 100% of the time, but those reasons aren’t really important today.&lt;/p&gt;
+
+&lt;p&gt;So to wrap this section up:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;A Palette is an array of 256 colour values&lt;/li&gt;
+  &lt;li&gt;A Tile’s colour values are actually indices into Palette memory&lt;/li&gt;
+  &lt;li&gt;A Sprite is a (theoretical) rectangular collection of tiles.&lt;/li&gt;
+  &lt;li&gt;The hardware equivalent of a Sprite is called an Object&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;br /&gt;
+Hopefully that’s all relatively clear! Let’s start putting all of this together&lt;/p&gt;
+
+&lt;h2 id=&quot;working-with-sprite-data&quot;&gt;Working With Sprite Data&lt;/h2&gt;
+
+&lt;p&gt;The first thing we need to do is to actually have some tile and colour data to use in our program.&lt;/p&gt;
+
+&lt;p&gt;For this section, I’m going to simply provide the data that we’re going to use. At the end of this post, I’ll link you to tools that you can use to make your own. To start with, let’s consider a really simple sprite, which consists of only a single tile, and 3 palette colours.&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+&lt;img src=&quot;/images/post_images/2017-04-04/testsprite.PNG&quot; /&gt;
+&lt;font size=&quot;2&quot;&gt;(Grid lines added to help differentiate pixels, not included in sprite)&lt;/font&gt;&lt;br /&gt;&lt;br /&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Here’s what that sprite might look like in our program:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;testTiles&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;16&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;__attribute__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;aligned&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)))&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;mh&quot;&gt;0x00000000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x00000000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;mh&quot;&gt;0x00000001&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x00000000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;mh&quot;&gt;0x00000000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x00000000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;mh&quot;&gt;0x00000000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x00000000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;mh&quot;&gt;0x00000000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x00000000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;mh&quot;&gt;0x00000000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x00000000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;mh&quot;&gt;0x02020102&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x02020202&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;mh&quot;&gt;0x00000000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x00000000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;testPal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;__attribute__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;aligned&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)))&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;mh&quot;&gt;0x03E0001F&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x00007C00&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;You can see that most of this is what we would expect, the testTiles data traverses each row in order from top to bottom, with each tile index getting 8 bits (2 hex numbers) of data allocated, so each 32 bit value represents 4 pixels. The lowest bits represent the leftmost pixels, which makes sense logically, even if it makes things harder to read when you’re looking at hex values.&lt;/p&gt;
+
+&lt;p&gt;The palette data is also as we would expect, containing the three colours used in our sprite, represented as 15 bit colours, with 2 colours per 32 bit value.&lt;/p&gt;
+
+&lt;p&gt;The &lt;strong&gt;attribute&lt;/strong&gt;((aligned(4))) is a gcc macro to force your data to be aligned on 4 byte boundaries. I took it straight from the &lt;a href=&quot;http://www.coranac.com/tonc/text/regobj.htm&quot;&gt;Tonc tutorial&lt;/a&gt;, which says:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;As of devkitARM r19, there are new rules on struct alignments, which means that structs may not always be word aligned, and in the case of OBJ_ATTR structs (and others), means that [some] struct-copies …  will not only be slow, they may actually break. For that reason, I will force word-alignment on many of my structs…&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Since I don’t know enough to argue with that right now, I’m taking it on faith that this is still a good idea.&lt;/p&gt;
+
+&lt;p&gt;I’m using 32 bit integers to store tile data because the GBA is a 32 bit machine at heart, and I’ve found a couple places online that talk about how much faster the GBA hardware is at working with 32 bit integers vs 16 bit ones when possible. Since I have no way of verifying this right now (no timers yet!), this is also a matter of faith for the moment.&lt;/p&gt;
+
+&lt;p&gt;Now that we know what our sprite data is going to look like, let’s use a slightly larger data set. This is mostly to make sure that what we do later is correctly ordering the tiles in our sprite. If we used the example data above, we wouldn’t be able to verify this because we only had 1 tile. Here’s the sprite and data that I’m going to be using for the rest of the article:&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+&lt;img src=&quot;/images/post_images/2017-04-04/realsprite.PNG&quot; /&gt;&lt;br /&gt;
+&lt;/div&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;spriteTiles&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;64&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;__attribute__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;aligned&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)))&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;mh&quot;&gt;0x00000000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x01000000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x00000000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x01010000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x00000000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x01010100&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x00000000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x01010101&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;mh&quot;&gt;0x01000000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x01010101&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x01010000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x01010101&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x01010100&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x01010101&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x01010101&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x01010101&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;mh&quot;&gt;0x00000003&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x00000000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x00000303&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x00000000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x00030303&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x00000000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x03030303&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x00000000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;mh&quot;&gt;0x03030303&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x00000003&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x03030303&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x00000303&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x03030303&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x00030303&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x03030303&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x03030303&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;mh&quot;&gt;0x04040404&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x04040404&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x04040400&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x04040404&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x04040000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x04040404&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x04000000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x04040404&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;mh&quot;&gt;0x00000000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x04040404&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x00000000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x04040400&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x00000000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x04040000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x00000000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x04000000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;mh&quot;&gt;0x02020202&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x02020202&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x02020202&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x00020202&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x02020202&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x00000202&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x02020202&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x00000002&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;mh&quot;&gt;0x02020202&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x00000000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x00020202&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x00000000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x00000202&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x00000000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x00000002&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x00000000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;spritePal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;__attribute__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;aligned&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)))&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;mh&quot;&gt;0x001E0000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x03E07FFF&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x00007C1F&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;If you take a look at this larger sprite data, you’ll notice that it’s stored as a sequential array of 8x8 tiles, that is, the 3rd 32 bit value isn’t the first four pixels of the top right tile, it’s the first four pixels of the second row of the top left tile. This is to make things easier to get into VRAM, since we have to upload tiles, not whole images. Mercifully, there’s a command line tool that I’ll link later that will convert images to this format for us, so we don’t have to try to author images like this.&lt;/p&gt;
+
+&lt;p&gt;For readability sake, I’m going to put the above block of code into it’ own .c file, that I’m going to call sprite.c. I’m also going to create sprite.h, which looks like this:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;cp&quot;&gt;#ifndef SPRITE_H
+#define SPRITE_H
+&lt;/span&gt;
+&lt;span class=&quot;cp&quot;&gt;#define spriteTilesLen 256 //size in bytes
+&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;extern&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;spriteTiles&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;64&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+
+&lt;span class=&quot;cp&quot;&gt;#define spritePalLen 12
+&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;extern&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;spritePal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+
+&lt;span class=&quot;cp&quot;&gt;#endif&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;getting-all-this-into-vram&quot;&gt;Getting All This Into VRAM&lt;/h2&gt;
+
+&lt;p&gt;We have sprite data and palette data ready to go, but as we discussed earlier, we’re going to need to get this data into the proper parts of memory. Specifically, we’ll need to add the palette values to our larger 256 colour palette memory, upload tile data to tile memory, and then create a sprite that references those tiles.&lt;/p&gt;
+
+&lt;p&gt;Let’s start with the palette memory:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;cp&quot;&gt;#include &quot;sprite.h&quot;
+&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;typedef&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;      &lt;span class=&quot;n&quot;&gt;uint8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;typedef&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;short&lt;/span&gt;     &lt;span class=&quot;n&quot;&gt;uint16&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;typedef&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt;       &lt;span class=&quot;n&quot;&gt;uint32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;cp&quot;&gt;#define MEM_PALETTE   ((uint16*)(0x05000200))
+&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;UploadPaletteMem&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;memcpy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MEM_PALETTE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;spritePal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;spritePalLen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;This is pretty straightforward, the only thing to note is that in other articles, what I’m calling MEM_PALETTE here is usually called MEM_OBJ_PAL, or something similar. This is because palette memory on the GBA is divided into two sections, but we’re only using one of them today, so for simplicity’s sake, I’m just calling it MEM_PALETTE and pretending that’s all there is to it.&lt;/p&gt;
+
+&lt;p&gt;Next we need to upload our tile memory, this is a bit less straightforward:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;k&quot;&gt;typedef&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;uint32&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Tile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;16&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;typedef&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Tile&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;TileBlock&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;256&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+
+&lt;span class=&quot;cp&quot;&gt;#define MEM_VRAM        ((volatile uint32*)0x06000000)
+#define MEM_TILE        ( (TileBlock*)MEM_VRAM )
+&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;UploadTileMem&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;memcpy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MEM_TILE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;][&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;spriteTiles&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;spriteTilesLen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;To understand what’s going on here, we need to know a bit more about how tiles are stored in VRAM. In tiled video modes, VRAM is used to store tile data, and that data is arranged in 16kb blocks, called “tile blocks” or (more confusingly) “charblocks.” Since the GBA has 96kb of VRAM, this gives us 6 tile blocks total.&lt;/p&gt;
+
+&lt;p&gt;The first four of these tile blocks are reserved for backgrounds (which we aren’t delving into today), and the remainder are for tiles. This means that when we want to put a tile into memory, the first possible memory slot for us is at  MEM_VRAM + 64k bytes (or really, + 65536 bytes because of data alignment). This gives us a memory address of 0x6010000, but it’s much easier to get at individual tile addresses using the structs / array notation you see here.&lt;/p&gt;
+
+&lt;p&gt;I’m putting my sprite into [4][1] instead of [4][0] because writing into [4][0] ended up putting some weird artifacts on the top left corner of my screen. I’m not sure why that is yet, and I haven’t found another example of using 8bpp sprites online to see what they’re doing, so I’m going to leave it for now (if you know what’s going on, shoot me a message &lt;a href=&quot;https://twitter.com/khalladay&quot;&gt;on Twitter&lt;/a&gt;).&lt;/p&gt;
+
+&lt;p&gt;The last thing we need to get into memory is a description of our sprite (since we need to know how to combine all these tiles we just put into VRAM). To do that, we’re going to define an Object.&lt;/p&gt;
+
+&lt;h2 id=&quot;gba-objects-arent-objects&quot;&gt;GBA Objects Aren’t “Objects”&lt;/h2&gt;
+
+&lt;p&gt;As mentioned earlier, a GBA Object is NOT an OOP style Object. Instead, they’re  simply a collections of tiles which can be transformed / drawn without needing to clear where they were. If you remember from &lt;a href=&quot;http://kylehalladay.com/blog/tutorial/2017/03/28/GBA-By-Example-1.html&quot;&gt;last week&lt;/a&gt;, we had to do all our own clearing. Objects relieve us of that duty.&lt;/p&gt;
+
+&lt;p&gt;Unfortunately, creating an Object is a bit of an arcane exercise, so bear with me here. The first thing we need to do is to define the Object data structure, and where object memory lives:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;k&quot;&gt;typedef&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ObjectAttributes&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;uint16&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;attr0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;uint16&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;attr1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;uint16&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;attr2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;uint16&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pad&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;__attribute__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;packed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;aligned&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)))&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ObjectAttributes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;cp&quot;&gt;#define MEM_OAM  ((volatile ObjectAttributes *)0x07000000)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;As you may have guessed from above, you don’t technically store objects in memory (although you’re free to call your struct whatever you want), instead we store what’s referred to as “Object Attributes.” These structs are stored in “Object Attribute Memory”, or OAM.&lt;/p&gt;
+
+&lt;p&gt;There’s a lot of information packed into the three uint16 variables in the ObjectAttributes struct, and it’s easy to get lost. In the interest of being the “bare minimum” you need to move a sprite around the screen, I’m only going to talk about the bits that we’re going to use today. If you want a more granular look at things, &lt;a href=&quot;http://www.coranac.com/tonc/text/regobj.htm&quot;&gt;Tonc&lt;/a&gt; does an excellent job at explaining what every bit does.&lt;/p&gt;
+
+&lt;p&gt;It’s easiest to describe how these variables work in a table, so here’s attr0&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+&lt;table style=&quot;border:1px solid black; width=600px; padding:2px;&quot;&gt;
+&lt;colgroup&gt;
+&lt;col width=&quot;200px&quot; /&gt;
+&lt;col width=&quot;400px&quot; /&gt;
+&lt;/colgroup&gt;
+&lt;thead style=&quot;border:1px solid black; background-color:#FF8854;&quot;&gt;
+&lt;tr class=&quot;header&quot;&gt;
+&lt;th&gt;Attr 0&lt;/th&gt;
+&lt;th&gt; 0x FEDC BA98 7654 3210&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr style=&quot;border:1px solid black; background-color:#DDDDDD;&quot;&gt;
+&lt;td&gt;FE&lt;/td&gt;
+&lt;td style=&quot;border:1px solid black;&quot;&gt;Shape of Sprite: 00 = Square, 01 = Tall, 10 = Wide&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr style=&quot;border:1px solid black;&quot;&gt;
+&lt;td style=&quot;border:1px solid black;&quot;&gt;D&lt;/td&gt;
+&lt;td&gt;Colour Mode: 0 = 4bpp, 1 = 8bpp&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr style=&quot;border:1px solid black; background-color:#DDDDDD;&quot;&gt;
+&lt;td style=&quot;border:1px solid black;&quot;&gt;C&lt;/td&gt;
+&lt;td&gt;Not used today&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr style=&quot;border:1px solid black;&quot;&gt;
+&lt;td style=&quot;border:1px solid black;&quot;&gt;AB&lt;/td&gt;
+&lt;td&gt;Not used today&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr style=&quot;border:1px solid black; background-color:#DDDDDD;&quot;&gt;
+&lt;td style=&quot;border:1px solid black;&quot;&gt;89&lt;/td&gt;
+&lt;td&gt;Not used today&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr style=&quot;border:1px solid black;&quot;&gt;
+&lt;td style=&quot;border:1px solid black;&quot;&gt;7654 3210&lt;/td&gt;
+&lt;td&gt;Y Coordinate&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;Our sprite is an 8bpp, square sprite. Using this table, if we wanted to define a sprite like that, and place it at a Y coordinate of 50, we could do so like this:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;k&quot;&gt;volatile&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ObjectAttributes&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;spriteAttribs&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MEM_OAM&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;spriteAttribs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;attr0&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x2032&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Here’s what we need in Attr1:&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+&lt;table style=&quot;border:1px solid black; width=600px;&quot;&gt;
+&lt;colgroup&gt;
+&lt;col width=&quot;200px&quot; /&gt;
+&lt;col width=&quot;400px&quot; /&gt;
+&lt;/colgroup&gt;
+&lt;thead style=&quot;border:1px solid black; background-color:#FF8854&quot;&gt;
+&lt;tr class=&quot;header&quot;&gt;
+&lt;th&gt;Attr 1&lt;/th&gt;
+&lt;th&gt; 0x FEDC BA98 7654 3210&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr style=&quot;border:1px solid black; background-color:#DDDDDD;&quot;&gt;
+&lt;td&gt;FE&lt;/td&gt;
+&lt;td style=&quot;border:1px solid black;&quot;&gt;Sprite Size (discussed below)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr style=&quot;border:1px solid black;&quot;&gt;
+&lt;td style=&quot;border:1px solid black;&quot;&gt;DCBA9&lt;/td&gt;
+&lt;td&gt;Not Used Today&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr style=&quot;border:1px solid black; background-color:#DDDDDD;&quot;&gt;
+&lt;td style=&quot;border:1px solid black;&quot;&gt;7654 3210&lt;/td&gt;
+&lt;td&gt;X coordinate
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;Sprite size is weird on the GBA. A sprite can be a maximum of 64x64, but doesn’t necessarily have to be square, meaning that what size your sprite is depends both on the value in FE or Attribute 1, and on the shape you defined in Attribute 0. They work together like this:&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+&lt;table style=&quot;border:1px solid black; width=480px;&quot;&gt;
+&lt;colgroup&gt;
+&lt;col width=&quot;80px&quot; /&gt;
+&lt;col width=&quot;100px&quot; /&gt;
+&lt;col width=&quot;100px&quot; /&gt;
+&lt;col width=&quot;100px&quot; /&gt;
+&lt;col width=&quot;100px&quot; /&gt;
+
+&lt;/colgroup&gt;
+&lt;tbody&gt;
+&lt;tr style=&quot;border:1px solid black; background-color:#DDDDDD;&quot;&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td style=&quot;border:1px solid black;&quot;&gt;Size 00 &lt;/td&gt;
+&lt;td style=&quot;border:1px solid black;&quot;&gt;Size 01 &lt;/td&gt;
+&lt;td style=&quot;border:1px solid black;&quot;&gt;Size 10 &lt;/td&gt;
+&lt;td style=&quot;border:1px solid black;&quot;&gt;Size 11 &lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr style=&quot;border:1px solid black;&quot;&gt;
+&lt;td style=&quot;background-color:#DDDDDD;&quot;&gt;Shape 00&lt;/td&gt;
+&lt;td style=&quot;border:1px solid black;&quot;&gt;8x8 &lt;/td&gt;
+&lt;td style=&quot;border:1px solid black;&quot;&gt;16x16 &lt;/td&gt;
+&lt;td style=&quot;border:1px solid black;&quot;&gt;32x23 &lt;/td&gt;
+&lt;td style=&quot;border:1px solid black;&quot;&gt;64x64 &lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr style=&quot;border:1px solid black;&quot;&gt;
+&lt;td style=&quot;background-color:#DDDDDD;&quot;&gt;Shape 01&lt;/td&gt;
+&lt;td style=&quot;border:1px solid black;&quot;&gt;16x8 &lt;/td&gt;
+&lt;td style=&quot;border:1px solid black;&quot;&gt;32x8 &lt;/td&gt;
+&lt;td style=&quot;border:1px solid black;&quot;&gt;32x16 &lt;/td&gt;
+&lt;td style=&quot;border:1px solid black;&quot;&gt;64x32 &lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr style=&quot;border:1px solid black;&quot;&gt;
+&lt;td style=&quot;background-color:#DDDDDD;&quot;&gt;Shape 10&lt;/td&gt;
+&lt;td style=&quot;border:1px solid black;&quot;&gt;8x16 &lt;/td&gt;
+&lt;td style=&quot;border:1px solid black;&quot;&gt;8x32 &lt;/td&gt;
+&lt;td style=&quot;border:1px solid black;&quot;&gt;16x32 &lt;/td&gt;
+&lt;td style=&quot;border:1px solid black;&quot;&gt;32x64 &lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;It certainly has some logical consistency to it, but I still find it really cumbersome to figure out what I need. In any case, given that we defined a square sprite in attribute 0, if we wanted to define a 16x16 sprite (and we do), at an x coordinate of 100, it would look like this:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;k&quot;&gt;volatile&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ObjectAttributes&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;spriteAttribs&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MEM_OAM&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;spriteAttribs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;attr0&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x2032&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// 8bpp tiles, SQUARE shape
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;spriteAttribs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;attr1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x4064&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The last attribute we need to define is maybe the most important, since it tells the hardware where to look for the tiles in VRAM:&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+&lt;table style=&quot;border:1px solid black; width=600px;&quot;&gt;
+&lt;colgroup&gt;
+&lt;col width=&quot;200px&quot; /&gt;
+&lt;col width=&quot;400px&quot; /&gt;
+&lt;/colgroup&gt;
+&lt;thead style=&quot;border:1px solid black; background-color:#FF8854&quot;&gt;
+&lt;tr class=&quot;header&quot;&gt;
+&lt;th&gt;Attr 2&lt;/th&gt;
+&lt;th&gt; 0x FEDC BA98 7654 3210&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr style=&quot;border:1px solid black; background-color:#DDDDDD;&quot;&gt;
+&lt;td&gt;FEDC&lt;/td&gt;
+&lt;td style=&quot;border:1px solid black;&quot;&gt;Not Used Today&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr style=&quot;border:1px solid black;&quot;&gt;
+&lt;td&gt;BA&lt;/td&gt;
+&lt;td style=&quot;border:1px solid black;&quot;&gt;Not Used Today&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr style=&quot;border:1px solid black; background-color:#DDDDDD;&quot;&gt;
+&lt;td&gt;98 7654 3210&lt;/td&gt;
+&lt;td style=&quot;border:1px solid black;&quot;&gt;First Tile Index&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;It’s worth noting that some of these tables are different when you’re working in 4bpp mode. Eventually I’ll end up using all the options available for sprite drawing, but today I just want to move a thing across my screen.&lt;/p&gt;
+
+&lt;p&gt;Combining everything we just talked about: defining our 16x16, 8bpp sprite, at location 100,50, and starting with the tile at index [4][1] looks like this:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;k&quot;&gt;volatile&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ObjectAttributes&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;spriteAttribs&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MEM_OAM&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;spriteAttribs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;attr0&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x2032&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// 8bpp tiles, SQUARE shape
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;spriteAttribs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;attr1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x4064&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// 16x16 size when using the SQUARE shape
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;spriteAttribs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;attr2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;      &lt;span class=&quot;o&quot;&gt;//&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Start&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;at&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;][&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;You’ll notice that the index we pass to attr2 isn’t 1, which is what you’d expect to see passed there since we’re at element 1 of the array. However, the index stored in attr2 assumes that you’re using 4bpp sprites. If you’re using 8bpp like us, you need to go up by 2 indices every time you want to access the next tile.&lt;/p&gt;
+
+&lt;p&gt;With that set up, we actually have (almost) everything we need to draw our sprite, we just need to set a few more flags on our DisplayControl variable:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;cp&quot;&gt;#define REG_DISPLAYCONTROL     *((volatile uint16*)(0x04000000))
+&lt;/span&gt;
+&lt;span class=&quot;cp&quot;&gt;#define VIDEOMODE_0    0x0000
+#define ENABLE_OBJECTS 0x1000
+#define MAPPINGMODE_1D 0x0040
+&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;REG_DISPLAYCONTROL&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;  &lt;span class=&quot;n&quot;&gt;VIDEOMODE_0&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ENABLE_OBJECTS&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MAPPINGMODE_1D&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;As the names suggest, these flags tell the hardware to enable support for objects, and to expect tile memory to be stored as a 1D array. I’ve already covered all the info needed to understand what these mean, so hopefully they make sense now. If you’re confused about the 1D array flag, know that the only other option for tile mapping is in a 2D array, but in the interest of brevity (and imo, coding sanity), I’ve omitted that from this article. As usual, &lt;a href=&quot;http://www.coranac.com/tonc/text/regobj.htm&quot;&gt;Tonc&lt;/a&gt; covers it very well if you’re interested in knowing more.&lt;/p&gt;
+
+&lt;h2 id=&quot;putting-it-all-together&quot;&gt;Putting It All Together&lt;/h2&gt;
+
+&lt;p&gt;All that’s left is to put together what we already have. Aside from the sprite include files I added earlier, all the code we need to move a sprite across the screen can easily fit below:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;cp&quot;&gt;#include &quot;sprite.h&quot;
+#include &amp;lt;string.h&amp;gt;
+&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;typedef&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;      &lt;span class=&quot;n&quot;&gt;uint8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;typedef&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;short&lt;/span&gt;     &lt;span class=&quot;n&quot;&gt;uint16&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;typedef&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt;       &lt;span class=&quot;n&quot;&gt;uint32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;typedef&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;uint32&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Tile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;16&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;typedef&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Tile&lt;/span&gt;   &lt;span class=&quot;n&quot;&gt;TileBlock&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;256&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+
+&lt;span class=&quot;cp&quot;&gt;#define VIDEOMODE_0    0x0000
+#define ENABLE_OBJECTS 0x1000
+#define MAPPINGMODE_1D 0x0040
+&lt;/span&gt;
+&lt;span class=&quot;cp&quot;&gt;#define REG_VCOUNT              (*(volatile uint16*) 0x04000006)
+#define REG_DISPLAYCONTROL      (*(volatile uint16*) 0x04000000)
+&lt;/span&gt;
+&lt;span class=&quot;cp&quot;&gt;#define MEM_VRAM      ((volatile uint16*)0x6000000)
+#define MEM_TILE      ((TileBlock*)0x6000000 )
+#define MEM_PALETTE   ((uint16*)(0x05000200))
+#define SCREEN_W      240
+#define SCREEN_H      160
+&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;typedef&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ObjectAttributes&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;uint16&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;attr0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;uint16&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;attr1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;uint16&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;attr2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;uint16&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pad&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;__attribute__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;packed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;aligned&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)))&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ObjectAttributes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;cp&quot;&gt;#define MEM_OAM       ((volatile ObjectAttributes *)0x07000000)
+&lt;/span&gt;
+&lt;span class=&quot;kr&quot;&gt;inline&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;vsync&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;REG_VCOUNT&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;160&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;REG_VCOUNT&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;160&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;memcpy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MEM_PALETTE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;spritePal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;  &lt;span class=&quot;n&quot;&gt;spritePalLen&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;memcpy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MEM_TILE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;][&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;spriteTiles&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;spriteTilesLen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;volatile&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ObjectAttributes&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;spriteAttribs&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MEM_OAM&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;spriteAttribs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;attr0&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x2032&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// 8bpp tiles, SQUARE shape, at y coord 50
+&lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;spriteAttribs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;attr1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x4064&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// 16x16 size when using the SQUARE shape
+&lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;spriteAttribs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;attr2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;      &lt;span class=&quot;c1&quot;&gt;// Start at the first tile in tile
+&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;REG_DISPLAYCONTROL&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;  &lt;span class=&quot;n&quot;&gt;VIDEOMODE_0&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ENABLE_OBJECTS&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MAPPINGMODE_1D&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;vsync&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SCREEN_W&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;spriteAttribs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;attr1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x4000&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x1FF&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Voila! You are now in posession of your very own moving sprite. Notice that unlike last week, we don’t have to do any work to clear the screen (thanks objects!), and all it takes to move the sprite is to update the appropriate attribute.&lt;/p&gt;
+
+&lt;p&gt;Finally, I promised to link you to the tools that I used to generate the sprites, both of which were written by the author of the &lt;a href=&quot;http://www.coranac.com/projects/tonc/&quot;&gt;Tonc tutorial&lt;/a&gt;. For bitmap editing (and bitmap palette editing), I used &lt;a href=&quot;http://www.coranac.com/projects/usenti/&quot;&gt;Usenti&lt;/a&gt;, and for exporting that bitmap to the .c code we looked at, I used &lt;a href=&quot;http://www.coranac.com/projects/grit/&quot;&gt;Grit&lt;/a&gt;. Both tools are very straightforward, but definitely don’t overlook Grit’s GUI client (helpfully called “WinGrit”), it makes life much easier.  &lt;/p&gt;
+
+&lt;p&gt;That’s it for today! Hope you had as much fun as I did! As always, if you want to say hi, I’m most accessible &lt;a href=&quot;https://twitter.com/khalladay&quot;&gt;on Twitter&lt;/a&gt;, Have a good one!&lt;/p&gt;
 </content>
  </entry>
  
@@ -105,7 +603,7 @@ tags:
 &lt;/span&gt;
 &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;REG_DISPLAYCONTROL&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;VIDEOMODE_3&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;DCNT_BG2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;REG_DISPLAYCONTROL&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;VIDEOMODE_3&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;BGMODE_2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
     &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){}&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kyle Halladay - Loading Static Meshes With the FBX SDK</title>
+  <meta name="author" content="Kyle Halladay" />
+  <meta name="description" content="I build shaders, renderers, games, and other stuff that's fun to stare at." />
+  <link rel="canonical" href="http://kylehalladay.com/2017/04/07/Loading-Static-Meshes-FBX.html" />
+  <meta name="keywords" content="life,code,software,development,games,graphics,shaders,indie" />
+
+  <link href="//fonts.googleapis.com/css?family=Open+Sans:600,800" rel="stylesheet" type="text/css">
+  <link rel="shortcut icon" href="/favicon.png">
+  <link rel="alternate" type="application/rss+xml" title="Kyle Halladay" href="http://kylehalladay.com/atom.xml" />
+
+  <link rel="stylesheet" href="/assets/css/all.css">
+  <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <div class="four columns sidebar">
+      <nav>
+  <a href="/">
+    <img src="/logo.jpg" id="logo" alt="Blog logo"/>
+  </a>
+  <h2>I'm <a href="/">Kyle Halladay</a>.</h2>
+  <div id="bio">
+    <p>I build shaders, graphics tech, and art pipelines for games. </p>
+    <p>Check out <a href="/archive.html">Some other stuff I've written</a></p>
+  </div>
+  <div id="social">
+    Want to say hi?
+<div id="stalker">
+  
+  <a title="khalladay on Github" href="https://github.com/khalladay">
+    <i class="fa fa-github-square"></i>
+  </a>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  <a title="khalladay on Twitter" href="https://twitter.com/khalladay">
+    <i class="fa fa-twitter-square"></i>
+  </a>
+  
+
+  
+
+  
+
+  
+  <a title="Kyle Halladay on LinkedIn" href="https://www.linkedin.com/in/kylehalladay">
+    <i class="fa fa-linkedin-square"></i>
+  </a>
+  
+
+  
+
+  
+  <a title="Kyle Halladay via Email" href="mailto:k.mj.halladay@gmail.com">
+    <i class="fa fa-envelope-square"></i>
+  </a>
+  
+
+  <a title="RSS feed" id="rss" href="/atom.xml">
+    <i class="fa fa-rss-square"></i>
+  </a>
+</div>
+
+  </div>
+</nav>
+
+    </div>
+
+    <div class="eleven columns content">
+      <topbar><div align="center"><h2><a href="/index.html" style="color:#000">KyleHalladay.com</a></h2></div>
+      <div align="center" style="font-size:18px"><a href="/archive.html">Archive</a></div>
+      <hr style="border-color:#000; margin:1em -0.25em;"></topbar>
+
+      <p class="meta">
+ 
+</p>
+
+<h1 class="title">Loading Static Meshes With the FBX SDK</h1>
+
+<div id="post">
+  <p>One of my goals for 2017 is to learn a new graphics api, and since this means working without an engine for the first time in years, this means that I’m also re-learning a bunch of things that I’ve long since forgotten, like loading meshes. I’ve been spoiled by big shiny game engines that have done this for me for so long that I forgot how to do it.</p>
+
+<p>Since it seems that fbx has won the mesh file format wars for now, I figured it made the most sense to write an FBX importer. Googling around turned up a bunch of tutorials, which were handy when combined with the FBX SDK docs, but none of the tutorials by themselves really explained things in a way that made sense to me, so I thought I’d write my own.</p>
+
+<p>This post is just going to cover loading a static mesh with normals, multiple uv sets, and vertex colors. We’ll just be filling out a simple Mesh struct with this info; you’ll have to do the work of actually rendering it yourself. I’ll write a second installment to cover skinned meshes later.</p>
+
+<p>If you need a mesh to work with for this tutorial, you can use the one that I’ve uploaded <a href="">here</a>, it’s a super fun cube mesh, so be excited. Finally, This post was written assuming that you’re using the 2017 sdk, so if you’re from the future, things might be different for you.</p>
+
+<h2 id="setting-up-your-project">Setting Up Your Project</h2>
+
+<p>This section is assuming that you’re using Visual Studio. Skip it and do your own thing if that isn’t the case for you :)</p>
+
+<p>The first thing that we need to do is get a project including/linking with the FBX SDK. You can grab the sdk off of <a href="http://usa.autodesk.com/adsk/servlet/pc/item?siteID=123112&amp;id=10775847">Autodesk’s Site</a>, and install it wherever you want it to be.</p>
+
+<p>Next, create a project in VS, and open up the project properties window. We need to tell our project where to look to see the SDK we just installed. This part should mostly be familiar to you if you’ve ever worked with an external library before, but there’s some nuances to the FBX SDK that are worth mentioning.</p>
+
+<p>In the Property window, navigate to the “VC++ Directories” tab. It should look something like this:</p>
+
+<div align="center">
+<img src="/images/post_images/2017-04-07/vcdirectories.PNG" /><br />
+</div>
+
+<p>Just like any other library, you need to add the “include” directory of the FBX SDK to the “Include Directories” item, and the path to the SDK library folder to your “Library Directories” item. Make sure that you use the debug libraries for your debug project configuration, and the release libraries for your release config, otherwise you may run into issues when you try to build.</p>
+
+<p>Next, we need to tell the linker which library file to use, so navigate to the Linker-&gt;Input page:</p>
+
+<div align="center">
+<img src="/images/post_images/2017-04-07/linkerinput.PNG" /><br />
+</div>
+
+<p>We need to add the library name to the “Additional Dependencies” item, but this is where we need to pay some special attention to what we’re doing. The FBX SDK ships with a number of libraries, a .DLL and two .lib files. To make things easier, I used one of the static libraries instead of the dll (so that I didn’t have to worry about where the DLL was located). This means that there were two options: libfbxsdk-md.lib and libfbxsdk-mt.lib (mt for multithreaded). You can choose to use either one, but both of them require one additional step.</p>
+
+<p>Regardless of which one you entered, you will need to navigate to the code generation tab:</p>
+
+<div align="center">
+<img src="/images/post_images/2017-04-07/codegeneration.png" /><br />
+</div>
+
+<p>If you chose to use the -MD variant, you will need to make sure that your “Runtime Library” setting is set to “/MD” in release and “/MDd” in debug. Predictably, if you choose the -MT variant (like I did), these need to be “/MT” and “/MTd” respectively.</p>
+
+<p>Ok, that covers the set up, let’s import some meshes shall we?</p>
+
+<h2 id="setting-up-the-fbx-importer">Setting up the FBX Importer</h2>
+
+<h2 id="getting-to-the-mesh">Getting To The Mesh</h2>
+
+<p>While they’re probably most commonly used to store meshes (at least in my experience), FBX files can be used to store entire 3D scenes, containing meshes, materials, lights, animation data, NURB curves, LOD Groups, and a whole bunch of other stuff. For the most part, if you’re importing a mesh from and FBX file, you hope that the file just has the mesh you want, but that isn’t always the case, which is why the first thing we need to do is traverse our imported FBX scene and find the mesh (or meshes!) contained in it.</p>
+
+</div>
+
+<div id="related">
+  <h3>More Posts</h3>
+  <ul class="posts">
+    
+    <li>
+      <span>16 May 2014 &raquo;</span> <a href="/blog/tutorial/bestof/2014/05/16/Coloured-Shadows-In-Unity.html">Colouring Shadows in Unity</a>
+    </li>
+    
+    <li>
+      <span>12 Jan 2014 &raquo;</span> <a href="/blog/tutorial/bestof/2014/01/12/Runtime-Shader-Compilation-Unity.html">Creating GLSL Shaders at Runtime in Unity3D</a>
+    </li>
+    
+    <li>
+      <span>10 Nov 2013 &raquo;</span> <a href="/blog/tutorial/bestof/2013/11/10/Libpd-and-Unity.html">Combining Pure Data and Unity</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      <div class="footer">
+        <div class="disclaimer">
+  
+  <p>
+    The postings on this site are my own and don't necessarily represent my 
+    employer’s positions, strategies or opinions.
+  </p>
+  
+
+  <p>
+    © Kyle Halladay, 2014 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
+  </p>
+</div>
+      </div>
+    </div>
+  </div>
+
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-40292745-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+</body>
+</html>
