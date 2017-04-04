@@ -155,7 +155,7 @@ Hopefully that’s all relatively clear! Let’s start putting all of this toget
 <p>For this section, I’m going to simply provide the data that we’re going to use. At the end of this post, I’ll link you to tools that you can use to make your own. To start with, let’s consider a really simple sprite, which consists of only a single tile, and 3 palette colours.</p>
 
 <div align="center">
-<img src="/images/post_images/2017-04-04/testsprite.PNG" />
+<img src="/images/post_images/2017-04-04/testsprite.png" />
 <font size="2">(Grid lines added to help differentiate pixels, not included in sprite)</font><br /><br />
 </div>
 
@@ -195,7 +195,7 @@ Hopefully that’s all relatively clear! Let’s start putting all of this toget
 <p>Now that we know what our sprite data is going to look like, let’s use a slightly larger data set. This is mostly to make sure that what we do later is correctly ordering the tiles in our sprite. If we used the example data above, we wouldn’t be able to verify this because we only had 1 tile. Here’s the sprite and data that I’m going to be using for the rest of the article:</p>
 
 <div align="center">
-<img src="/images/post_images/2017-04-04/realsprite.PNG" /><br />
+<img src="/images/post_images/2017-04-04/realsprite.png" /><br />
 </div>
 
 <div class="highlight"><pre><code class="language-c" data-lang="c"><span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">spriteTiles</span><span class="p">[</span><span class="mi">64</span><span class="p">]</span> <span class="n">__attribute__</span><span class="p">((</span><span class="n">aligned</span><span class="p">(</span><span class="mi">4</span><span class="p">)))</span><span class="o">=</span>

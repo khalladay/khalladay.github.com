@@ -4,7 +4,7 @@
  <title>The blog of Kyle Halladay</title>
  <link href="http://kylehalladay.com/atom.xml" rel="self"/>
  <link href="http://kylehalladay.com"/>
- <updated>2017-04-04T06:48:13-05:00</updated>
+ <updated>2017-04-04T06:49:49-05:00</updated>
  <id>http://kylehalladay.com</id>
  <author>
    <name>Kyle Halladay</name>
@@ -141,7 +141,7 @@ Hopefully that’s all relatively clear! Let’s start putting all of this toget
 &lt;p&gt;For this section, I’m going to simply provide the data that we’re going to use. At the end of this post, I’ll link you to tools that you can use to make your own. To start with, let’s consider a really simple sprite, which consists of only a single tile, and 3 palette colours.&lt;/p&gt;
 
 &lt;div align=&quot;center&quot;&gt;
-&lt;img src=&quot;/images/post_images/2017-04-04/testsprite.PNG&quot; /&gt;
+&lt;img src=&quot;/images/post_images/2017-04-04/testsprite.png&quot; /&gt;
 &lt;font size=&quot;2&quot;&gt;(Grid lines added to help differentiate pixels, not included in sprite)&lt;/font&gt;&lt;br /&gt;&lt;br /&gt;
 &lt;/div&gt;
 
@@ -181,7 +181,7 @@ Hopefully that’s all relatively clear! Let’s start putting all of this toget
 &lt;p&gt;Now that we know what our sprite data is going to look like, let’s use a slightly larger data set. This is mostly to make sure that what we do later is correctly ordering the tiles in our sprite. If we used the example data above, we wouldn’t be able to verify this because we only had 1 tile. Here’s the sprite and data that I’m going to be using for the rest of the article:&lt;/p&gt;
 
 &lt;div align=&quot;center&quot;&gt;
-&lt;img src=&quot;/images/post_images/2017-04-04/realsprite.PNG&quot; /&gt;&lt;br /&gt;
+&lt;img src=&quot;/images/post_images/2017-04-04/realsprite.png&quot; /&gt;&lt;br /&gt;
 &lt;/div&gt;
 
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;spriteTiles&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;64&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;__attribute__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;aligned&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)))&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;

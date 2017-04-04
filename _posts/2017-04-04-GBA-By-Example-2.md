@@ -68,7 +68,7 @@ The first thing we need to do is to actually have some tile and colour data to u
 For this section, I'm going to simply provide the data that we're going to use. At the end of this post, I'll link you to tools that you can use to make your own. To start with, let's consider a really simple sprite, which consists of only a single tile, and 3 palette colours.
 
 <div align="center">
-<img src="/images/post_images/2017-04-04/testsprite.PNG"/>
+<img src="/images/post_images/2017-04-04/testsprite.png"/>
 <font size="2">(Grid lines added to help differentiate pixels, not included in sprite)</font><br><br>
 </div>
 
@@ -108,7 +108,7 @@ I'm using 32 bit integers to store tile data because the GBA is a 32 bit machine
 Now that we know what our sprite data is going to look like, let's use a slightly larger data set. This is mostly to make sure that what we do later is correctly ordering the tiles in our sprite. If we used the example data above, we wouldn't be able to verify this because we only had 1 tile. Here's the sprite and data that I'm going to be using for the rest of the article:
 
 <div align="center">
-<img src="/images/post_images/2017-04-04/realsprite.PNG"/><br>
+<img src="/images/post_images/2017-04-04/realsprite.png"/><br>
 </div>
 
 {% highlight c %}
@@ -495,4 +495,3 @@ Voila! You are now in posession of your very own moving sprite. Notice that unli
 Finally, I promised to link you to the tools that I used to generate the sprites, both of which were written by the author of the [Tonc tutorial](http://www.coranac.com/projects/tonc/). For bitmap editing (and bitmap palette editing), I used [Usenti](http://www.coranac.com/projects/usenti/), and for exporting that bitmap to the .c code we looked at, I used [Grit](http://www.coranac.com/projects/grit/). Both tools are very straightforward, but definitely don't overlook Grit's GUI client (helpfully called "WinGrit"), it makes life much easier.  
 
 That's it for today! Hope you had as much fun as I did! As always, if you want to say hi, I'm most accessible [on Twitter](https://twitter.com/khalladay), Have a good one!
- 
