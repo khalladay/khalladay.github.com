@@ -495,3 +495,4 @@ Voila! You are now in posession of your very own moving sprite. Notice that unli
 Finally, I promised to link you to the tools that I used to generate the sprites, both of which were written by the author of the [Tonc tutorial](http://www.coranac.com/projects/tonc/). For bitmap editing (and bitmap palette editing), I used [Usenti](http://www.coranac.com/projects/usenti/), and for exporting that bitmap to the .c code we looked at, I used [Grit](http://www.coranac.com/projects/grit/). Both tools are very straightforward, but definitely don't overlook Grit's GUI client (helpfully called "WinGrit"), it makes life much easier.  
 
 That's it for today! Hope you had as much fun as I did! As always, if you want to say hi, I'm most accessible [on Twitter](https://twitter.com/khalladay), Have a good one!
+ 
