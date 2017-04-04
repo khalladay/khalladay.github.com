@@ -287,7 +287,7 @@ Here's what we need in Attr1:
 <td markdown="span" style="border:1px solid black;">Sprite Size (discussed below)</td>
 </tr>
 <tr style="border:1px solid black;">
-<td markdown="span" style="border:1px solid black;">DCBA9</td>
+<td markdown="span" style="border:1px solid black;">DCBA98</td>
 <td markdown="span">Not Used Today</td>
 </tr>
 <tr style="border:1px solid black; background-color:#DDDDDD;">
