@@ -75,35 +75,35 @@ For this section, I'm going to simply provide the data that we're going to use. 
 Here's what that sprite might look like in our program:
 
 {% highlight c %}
-const unsigned int testTiles[16] __attribute__((aligned(4)))=
+const unsigned short testTiles[32] __attribute__((aligned(4)))=
 {
-    0x00000000,0x00000000,
-    0x00000001,0x00000000,
-    0x00000000,0x00000000,
-    0x00000000,0x00000000,
-    0x00000000,0x00000000,
-    0x00000000,0x00000000,
-    0x02020102,0x02020202,
-    0x00000000,0x00000000,
+	0x0000,0x0000,0x0000,0x0000
+	0x0001,0x0000,0x0000,0x0000,
+	0x0000,0x0000,0x0000,0x0000,
+	0x0000,0x0000,0x0000,0x0000,
+	0x0000,0x0000,0x0000,0x0000,
+	0x0000,0x0000,0x0000,0x0000,
+	0x0102,0x0202,0x0202,0x0202,
+	0x0000,0x0000,0x0000,0x0000,
 };
 
-const unsigned int testPal[2] __attribute__((aligned(4)))=
+const unsigned short testPal[4] __attribute__((aligned(4)))=
 {
-    0x03E0001F,0x00007C00,
+	0x001F,0x03E0,0x7C00,
 };
 {% endhighlight %}
 
-You can see that most of this is what we would expect, the testTiles data traverses each row in order from top to bottom, with each tile index getting 8 bits (2 hex numbers) of data allocated, so each 32 bit value represents 4 pixels. The lowest bits represent the leftmost pixels, which makes sense logically, even if it makes things harder to read when you're looking at hex values.
+You can see that most of this is what we would expect, the testTiles data traverses each row in order from top to bottom, with each tile index getting 8 bits (2 hex numbers) of data allocated, so each 16 bit value represents 2 pixels. The lowest bits represent the leftmost pixels, which makes sense logically, even if it makes things harder to read when you're looking at hex values.
 
-The palette data is also as we would expect, containing the three colours used in our sprite, represented as 15 bit colours, with 2 colours per 32 bit value.
+The palette data is also as we would expect, containing the three colours used in our sprite, represented as 15 bit colours, stored 1 colour per 16 bit value.
 
 The __attribute__((aligned(4))) is a gcc macro to force your data to be aligned on 4 byte boundaries. I took it straight from the [Tonc tutorial](http://www.coranac.com/tonc/text/regobj.htm), which says:
 
 >As of devkitARM r19, there are new rules on struct alignments, which means that structs may not always be word aligned, and in the case of OBJ_ATTR structs (and others), means that [some] struct-copies ...  will not only be slow, they may actually break. For that reason, I will force word-alignment on many of my structs...
 
-Since I don't know enough to argue with that right now, I'm taking it on faith that this is still a good idea.
+Since I don't know enough to argue with that right now, I'm taking it on faith that this is still a good idea, and regardless, ARM devices (like the GBA) have an optimized memcpy codepath for 4 byte aligned data according to [their documentation](http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.faqs/ka3934.html).
 
-I'm using 32 bit integers to store tile data because the GBA is a 32 bit machine at heart, and I've found a couple places online that talk about how much faster the GBA hardware is at working with 32 bit integers vs 16 bit ones when possible. Since I have no way of verifying this right now (no timers yet!), this is also a matter of faith for the moment.
+As far as I can tell, it really doesn't matter what datatype you use to store your sprite data, since it's all just going to end up transferred to VRAM via a memcpy anyway. I chose 16 bit values here because palette colours are 16 bit, and even though storing things in 8 bit would make the tile indices slightly easier to read, it would break each colour up into two values. I could have used different types for each, but my exporter (and the one I'm going to link you) doesn't do that, so we may as well get comfy with its default output.
 
 Now that we know what our sprite data is going to look like, let's use a slightly larger data set. This is mostly to make sure that what we do later is correctly ordering the tiles in our sprite. If we used the example data above, we wouldn't be able to verify this because we only had 1 tile. Here's the sprite and data that I'm going to be using for the rest of the article:
 
@@ -112,25 +112,34 @@ Now that we know what our sprite data is going to look like, let's use a slightl
 </div>
 
 {% highlight c %}
-const unsigned int spriteTiles[64] __attribute__((aligned(4)))=
+const unsigned short spriteTiles[128] __attribute__((aligned(4)))=
 {
-    0x00000000,0x01000000,0x00000000,0x01010000,0x00000000,0x01010100,0x00000000,0x01010101,
-    0x01000000,0x01010101,0x01010000,0x01010101,0x01010100,0x01010101,0x01010101,0x01010101,
-    0x00000003,0x00000000,0x00000303,0x00000000,0x00030303,0x00000000,0x03030303,0x00000000,
-    0x03030303,0x00000003,0x03030303,0x00000303,0x03030303,0x00030303,0x03030303,0x03030303,
-    0x04040404,0x04040404,0x04040400,0x04040404,0x04040000,0x04040404,0x04000000,0x04040404,
-    0x00000000,0x04040404,0x00000000,0x04040400,0x00000000,0x04040000,0x00000000,0x04000000,
-    0x02020202,0x02020202,0x02020202,0x00020202,0x02020202,0x00000202,0x02020202,0x00000002,
-    0x02020202,0x00000000,0x00020202,0x00000000,0x00000202,0x00000000,0x00000002,0x00000000,
+	0x0000,0x0000,0x0000,0x0100,0x0000,0x0000,0x0000,0x0101,
+	0x0000,0x0000,0x0100,0x0101,0x0000,0x0000,0x0101,0x0101,
+	0x0000,0x0100,0x0101,0x0101,0x0000,0x0101,0x0101,0x0101,
+	0x0100,0x0101,0x0101,0x0101,0x0101,0x0101,0x0101,0x0101,
+	0x0003,0x0000,0x0000,0x0000,0x0303,0x0000,0x0000,0x0000,
+	0x0303,0x0003,0x0000,0x0000,0x0303,0x0303,0x0000,0x0000,
+	0x0303,0x0303,0x0003,0x0000,0x0303,0x0303,0x0303,0x0000,
+	0x0303,0x0303,0x0303,0x0003,0x0303,0x0303,0x0303,0x0303,
+
+	0x0404,0x0404,0x0404,0x0404,0x0400,0x0404,0x0404,0x0404,
+	0x0000,0x0404,0x0404,0x0404,0x0000,0x0400,0x0404,0x0404,
+	0x0000,0x0000,0x0404,0x0404,0x0000,0x0000,0x0400,0x0404,
+	0x0000,0x0000,0x0000,0x0404,0x0000,0x0000,0x0000,0x0400,
+	0x0202,0x0202,0x0202,0x0202,0x0202,0x0202,0x0202,0x0002,
+	0x0202,0x0202,0x0202,0x0000,0x0202,0x0202,0x0002,0x0000,
+	0x0202,0x0202,0x0000,0x0000,0x0202,0x0002,0x0000,0x0000,
+	0x0202,0x0000,0x0000,0x0000,0x0002,0x0000,0x0000,0x0000,
 };
 
-const unsigned int spritePal[3] __attribute__((aligned(4)))=
+const unsigned short spritePal[6] __attribute__((aligned(4)))=
 {
-    0x001E0000,0x03E07FFF,0x00007C1F,
+	0x0000,0x001E,0x7FFF,0x03E0,0x7C1F,
 };
 {% endhighlight %}
 
-If you take a look at this larger sprite data, you'll notice that it's stored as a sequential array of 8x8 tiles, that is, the 3rd 32 bit value isn't the first four pixels of the top right tile, it's the first four pixels of the second row of the top left tile. This is to make things easier to get into VRAM, since we have to upload tiles, not whole images. Mercifully, there's a command line tool that I'll link later that will convert images to this format for us, so we don't have to try to author images like this.
+If you take a look at this larger sprite data, you'll notice that it's stored as a sequential array of 8x8 tiles, that is, the 5th 16 bit value isn't the first two pixels of the top right tile, it's the first two pixels of the second row of the top left tile. This is to make things easier to get into VRAM, since we have to upload tiles, not whole images. Mercifully, there's a command line tool that I'll link later that will convert images to this format for us, so we don't have to try to author images like this.
 
 For readability sake, I'm going to put the above block of code into it' own .c file, that I'm going to call sprite.c. I'm also going to create sprite.h, which looks like this:
 
@@ -139,10 +148,10 @@ For readability sake, I'm going to put the above block of code into it' own .c f
 #define SPRITE_H
 
 #define spriteTilesLen 256 //size in bytes
-extern const unsigned int spriteTiles[64];
+extern const unsigned short spriteTiles[128];
 
 #define spritePalLen 12
-extern const unsigned int spritePal[3];
+extern const unsigned short spritePal[6];
 
 #endif
 {% endhighlight %}
