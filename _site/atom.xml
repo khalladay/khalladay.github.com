@@ -4,7 +4,7 @@
  <title>The blog of Kyle Halladay</title>
  <link href="http://kylehalladay.com/atom.xml" rel="self"/>
  <link href="http://kylehalladay.com"/>
- <updated>2017-04-11T09:13:33-05:00</updated>
+ <updated>2017-04-11T09:16:28-05:00</updated>
  <id>http://kylehalladay.com</id>
  <author>
    <name>Kyle Halladay</name>
@@ -13,7 +13,7 @@
 
  
  <entry>
-   <title>GBA By Example - Introducing Backgrounds</title>
+   <title>GBA By Example - Drawing and Moving Backgrounds</title>
    <link href="http://kylehalladay.com/blog/tutorial/2017/04/11/GBA-By-Example-3.html"/>
    <updated>2017-04-11T00:00:00-05:00</updated>
    <id>http://kylehalladay.com/blog/tutorial/2017/04/11/GBA-By-Example-3</id>

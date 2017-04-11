@@ -1,6 +1,6 @@
 ---
 layout: post
-title: GBA By Example - Introducing Backgrounds
+title: GBA By Example - Drawing and Moving Backgrounds
 categories:
 - blog
 - tutorial
