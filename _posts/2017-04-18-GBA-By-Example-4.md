@@ -16,7 +16,7 @@ We've covered an awful lot of drawing in these posts, but it takes a lot more th
 
 <div align="center">
 <img src="/images/post_images/2017-04-18/input.gif" />
-<font size="2"> Initially this cleared the screen after each press so I could properly do the Konami code. The gif was reeeaalllyy annoying though</font>
+<font size="2"> Initially this cleared the screen after each press so I could properly do the Konami code.<br>The gif was reeeaalllyy annoying though</font>
 <br><br>
 </div>
 
