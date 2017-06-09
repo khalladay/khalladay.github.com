@@ -46,14 +46,14 @@ Grit is a tool for taking bitmap images, and exporting them into .h/.c files (am
 I'm going to use the GUI version of grit, which you can find in the program folder, titled "wingrit." There's a command line app as well, but I haven't needed to use it yet (and if I can avoid memorizing more command line args, I will), so if you're following along with me, open wingrit, and you should see the following:
 
 <div align="center">
-<img src="/images/post_images/2017-06-07/wingrit.png" />
+<img src="/images/post_images/2017-06-07/wingrit.PNG" />
 <br>
 </div>
 
 Simply open our sprite sheet image (with File->Open), and you should see it in the GUI window. Once you see the image, we need to open the export window, so go to View->GBAExport, and you should see this rather intimidating window pop up:
 
 <div align="center">
-<img src="/images/post_images/2017-06-07/exportwindow.png" />
+<img src="/images/post_images/2017-06-07/exportwindow.PNG" />
 <br>
 </div>
 
