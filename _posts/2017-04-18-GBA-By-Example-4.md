@@ -4,11 +4,12 @@ title: GBA By Example - Getting User Input
 categories:
 - blog
 - tutorial
+- gba
 tags:
 - <span style="background-color:#DD6655;"><font color="white">&nbsp;&nbsp;GBA&nbsp;&nbsp;</font></span>
 ---
 
-(Note: This is Part 4 of my GBA by Example series. A list of my GBA tutorials, and everything else I've written, can be found [here](http://kylehalladay.com/archive.html))
+(Note: This is Part 5 of my GBA by Example series. A list of my other GBA tutorials can be found [here](http://kylehalladay.com/gba.html))
 
 We've covered an awful lot of drawing in these posts, but it takes a lot more than drawing code to make a game. One of the key parts of building something playable is letting users actually be able to interact with our code, so today I'm going to go over how to get user input on the GBA. It's going to be short and sweet, because it's really not that complicated on this platform, which is great, because it means that we can spend more time on building an example program this week.
 

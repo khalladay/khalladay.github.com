@@ -1,16 +1,22 @@
 [
 
+{"date": "2017-06-02 00:00:00 -0500",
+"categories": ["blog","tutorial","gba"],
+"tags": ["<span style=\"background-color:#DD6655;\"><font color=\"white\">&nbsp;&nbsp;GBA&nbsp;&nbsp;</font></span>"],
+"title": "GBA By Example - Sprite Animation",
+"url": "/blog/tutorial/gba/2017/06/02/GBA-By-Example-5.html"},
+
 {"date": "2017-04-18 00:00:00 -0500",
-"categories": ["blog","tutorial"],
+"categories": ["blog","tutorial","gba"],
 "tags": ["<span style=\"background-color:#DD6655;\"><font color=\"white\">&nbsp;&nbsp;GBA&nbsp;&nbsp;</font></span>"],
 "title": "GBA By Example - Getting User Input",
-"url": "/blog/tutorial/2017/04/18/GBA-By-Example-4.html"},
+"url": "/blog/tutorial/gba/2017/04/18/GBA-By-Example-4.html"},
 
 {"date": "2017-04-11 00:00:00 -0500",
-"categories": ["blog","tutorial"],
+"categories": ["blog","tutorial","gba"],
 "tags": ["<span style=\"background-color:#DD6655;\"><font color=\"white\">&nbsp;&nbsp;GBA&nbsp;&nbsp;</font></span>"],
 "title": "GBA By Example - Drawing and Moving Backgrounds",
-"url": "/blog/tutorial/2017/04/11/GBA-By-Example-3.html"},
+"url": "/blog/tutorial/gba/2017/04/11/GBA-By-Example-3.html"},
 
 {"date": "2017-04-07 00:00:00 -0500",
 "categories": [],
@@ -19,16 +25,16 @@
 "url": "/2017/04/07/Loading-Static-Meshes-FBX.html"},
 
 {"date": "2017-04-04 00:00:00 -0500",
-"categories": ["blog","tutorial"],
+"categories": ["blog","tutorial","gba"],
 "tags": ["<span style=\"background-color:#DD6655;\"><font color=\"white\">&nbsp;&nbsp;GBA&nbsp;&nbsp;</font></span>"],
 "title": "GBA By Example - Drawing and Moving Sprites",
-"url": "/blog/tutorial/2017/04/04/GBA-By-Example-2.html"},
+"url": "/blog/tutorial/gba/2017/04/04/GBA-By-Example-2.html"},
 
 {"date": "2017-03-28 00:00:00 -0500",
-"categories": ["blog","tutorial"],
+"categories": ["blog","tutorial","gba"],
 "tags": ["<span style=\"background-color:#DD6655;\"><font color=\"white\">&nbsp;&nbsp;GBA&nbsp;&nbsp;</font></span>"],
 "title": "GBA By Example - Drawing and Moving Rectangles",
-"url": "/blog/tutorial/2017/03/28/GBA-By-Example-1.html"},
+"url": "/blog/tutorial/gba/2017/03/28/GBA-By-Example-1.html"},
 
 {"date": "2017-03-13 00:00:00 -0500",
 "categories": ["blog","tutorial"],

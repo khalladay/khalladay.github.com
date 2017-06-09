@@ -4,9 +4,12 @@ title: GBA By Example - Drawing and Moving Sprites
 categories:
 - blog
 - tutorial
+- gba
 tags:
 - <span style="background-color:#DD6655;"><font color="white">&nbsp;&nbsp;GBA&nbsp;&nbsp;</font></span>
 ---
+
+(Note: This is Part 2 of my GBA by Example series. A list of my other GBA tutorials can be found [here](http://kylehalladay.com/gba.html))
 
 [Last week](http://kylehalladay.com/blog/tutorial/2017/03/28/GBA-By-Example-1.html), we were working in video mode 3, which is one of the "bitmap" video modes. These modes are named so because they use the GBA's 96K of video memory (VRAM) to store a representation of the screen as an array of colour values. If you want to draw to pixel (0,0), you simply set the first element in the screen buffer array to the colour you want, and when the hardware draws, it reads the value at that location, and draws it to the screen.
 

@@ -4,7 +4,7 @@
  <title>The blog of Kyle Halladay</title>
  <link href="http://kylehalladay.com/atom.xml" rel="self"/>
  <link href="http://kylehalladay.com"/>
- <updated>2017-04-17T07:23:13-05:00</updated>
+ <updated>2017-06-09T07:21:51-05:00</updated>
  <id>http://kylehalladay.com</id>
  <author>
    <name>Kyle Halladay</name>
@@ -13,11 +13,498 @@
 
  
  <entry>
+   <title>GBA By Example - Sprite Animation</title>
+   <link href="http://kylehalladay.com/blog/tutorial/gba/2017/06/02/GBA-By-Example-5.html"/>
+   <updated>2017-06-02T00:00:00-05:00</updated>
+   <id>http://kylehalladay.com/blog/tutorial/gba/2017/06/02/GBA-By-Example-5</id>
+   <content type="html">&lt;p&gt;(Note: This is Part 5 of my GBA by Example series. A list of my other GBA tutorials can be found &lt;a href=&quot;http://kylehalladay.com/gba.html&quot;&gt;here&lt;/a&gt;)&lt;/p&gt;
+
+&lt;p&gt;Whew, it’s been awhile! I know I said I’d put up another tutorial in 2 weeks…but that didn’t happen. Between shipping a game at work, and diving into Vulkan, my interest for GBA stuff definitely took a back seat. Lesson learned, don’t put a deadline on blog posts :)&lt;/p&gt;
+
+&lt;p&gt;So far, I’ve gotten by with doing the bare minimum for anything art related, but our end products have never been too exciting. So this article is going to fix that. First, we’re going to walk through the process of grabbing some (public domain) sprites off of &lt;a href=&quot;&quot;&gt;OpenGameArt.com&lt;/a&gt;, importing those into our game, and then using them to animate a character as we move them around the screen.&lt;/p&gt;
+
+&lt;p&gt;At the end of the article, we should have something that looks like this:&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+&lt;img src=&quot;/images/post_images/2017-06-07/hero.gif&quot; style=&quot;width:240px;height:160px&quot; /&gt;
+&lt;br /&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Wooooo! Finally something that kinda looks like a game! Let’s get this train rolling.&lt;/p&gt;
+
+&lt;h2 id=&quot;getting-our-assets&quot;&gt;Getting Our Assets&lt;/h2&gt;
+
+&lt;p&gt;All the character sprites we’re working with today come from &lt;a href=&quot;https://opengameart.org/content/classic-hero-and-baddies-pack&quot;&gt;this asset&lt;/a&gt; on OpenGameArt, I chose these sprites not only because they had a sane palette and sprite size (which is hard to find, since not a lot of people are making assets with the GBA’s limitations), but also because they’re public domain, so I can use them in this article without the chance of getting sued. woohoo!&lt;/p&gt;
+
+&lt;p&gt;It also means you can use these sprites in your own projects (even commercial projects), which is also pretty cool.&lt;/p&gt;
+
+&lt;p&gt;I took the liberty of extracting only the character sprites we’re going to use today into their own spritesheet, which you can grab below:&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+&lt;img src=&quot;/images/post_images/2017-06-07/charsprites.bmp&quot; /&gt;
+&lt;br /&gt;
+&lt;/div&gt;
+
+&lt;p&gt;This should save us having to do any pixel editing for this blog post, but we will have to export these sprites into a useable format for our game. To do that, we’re going to use a nifty open source tool called &lt;a href=&quot;http://www.coranac.com/projects/grit/&quot;&gt;Grit&lt;/a&gt;. I mentioned this tool in a previous post, but today I’m going to walk through using it as well. If you don’t have that downloaded already, grab it now and let’s get started.&lt;/p&gt;
+
+&lt;h2 id=&quot;exporting-sprite-data&quot;&gt;Exporting Sprite Data&lt;/h2&gt;
+
+&lt;p&gt;Grit is a tool for taking bitmap images, and exporting them into .h/.c files (among other potential types of files), for consumption by a GBA game. We need to export each of our character sprites using it, and then manually load that data in our program like we’ve been doing before.&lt;/p&gt;
+
+&lt;p&gt;I’m going to use the GUI version of grit, which you can find in the program folder, titled “wingrit.” There’s a command line app as well, but I haven’t needed to use it yet (and if I can avoid memorizing more command line args, I will), so if you’re following along with me, open wingrit, and you should see the following:&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+&lt;img src=&quot;/images/post_images/2017-06-07/wingrit.png&quot; /&gt;
+&lt;br /&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Simply open our sprite sheet image (with File-&amp;gt;Open), and you should see it in the GUI window. Once you see the image, we need to open the export window, so go to View-&amp;gt;GBAExport, and you should see this rather intimidating window pop up:&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+&lt;img src=&quot;/images/post_images/2017-06-07/exportwindow.png&quot; /&gt;
+&lt;br /&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Like the window itself says, don’t panic :) there’s only a few things we need to do. First, we need to make sure that we’ve set the exported to 8 bits per pixel, you’ll find that option in the top right of the window. Next, tell it to export .h/.c files, so in the “File” section, set the type to “C (*.c),” you’ll also want to set where the exported files should go in the larget text field above the type dropdown. Finally, we need to set the size of our sprite, which, for all of our sprites here, means setting the “Meta/Obj” section to square, size 2, which corresponds to 16x16 pixel sprites.&lt;/p&gt;
+
+&lt;p&gt;Finally, I always export the data as unsigned integers. Whenever I use a smaller data type I end up running into weirdness with memcpy at some point. Since we aren’t going to be modifying the raw data anyway, the fact that storing all the data as 32 bit integers makes it harder for humans to read is a non issue. So set your export type to “u32”&lt;/p&gt;
+
+&lt;p&gt;Once all that is set up, click ok, and you should see a success popup.&lt;/p&gt;
+
+&lt;p&gt;One of the coolest parts about grit is its ability to export multiple sprites from a sprite sheet. Since we told Grit that our sprites were 16x16 pixels in size, it was smart enough to be able to parse the sprite sheet correctly and give us .h/.c files with the data in a nicely useable format. So don’t worry about needing to run grit for each individual sprite, it’s already done all the work for us.&lt;/p&gt;
+
+&lt;h2 id=&quot;importing-sprite-data&quot;&gt;Importing Sprite Data&lt;/h2&gt;
+
+&lt;p&gt;Now that we have our sprite data exported, we need to get it into VRAM. This should look familiar if you’ve been following along with previous articles. All we need to do is a few memcpys and we’re good to go:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;cp&quot;&gt;#include &quot;charsprites.h&quot;
+#include &amp;lt;string.h&amp;gt;
+#include &quot;gba.h&quot;
+&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;memcpy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MEM_TILE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;][&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;charspritesTiles&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;charspritesTilesLen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;memcpy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MEM_PALETTE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;charspritesPal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;charspritesPalLen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;One thing that is different this week is that I’ve moved all the memory address defines, and typedefs that we need to use to an include file called gba.h . This is mostly for my sanity, and to keep my code samples cleaner. You can grab this include file &lt;a href=&quot;https://github.com/khalladay/GBA-By-Example/blob/master/4-SpriteAnimation/code/gba.h&quot;&gt;here&lt;/a&gt;. Everything that is in this include has been shown explicitly in a previous post I’ve made, so don’t worry about parsing through it, unless you see something in a code sample that you don’t remember.&lt;/p&gt;
+
+&lt;p&gt;Ok, now that we have our data into video memory, we also need to set up our application’s Display Control register so it knows how to interpret it:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;n&quot;&gt;REG_DISPLAYCONTROL&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;  &lt;span class=&quot;n&quot;&gt;VIDEOMODE_0&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;BACKGROUND_0&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ENABLE_OBJECTS&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MAPPINGMODE_1D&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;This should look identical to the last time we used sprites, because it is ;) but as a refresher:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;VIDEOMODE_0 is a tiled video mode, meaning that we’re using sprites instead of drawing directly to the screen buffer&lt;/li&gt;
+  &lt;li&gt;BACKGROUND_0 enables the 0th background. I’m going to use this to colour the background of our game&lt;/li&gt;
+  &lt;li&gt;ENABLE_OBJECTS is the flag that tells our program to use sprites&lt;/li&gt;
+  &lt;li&gt;MAPPINGMODE_1D means that our sprites are stored in a 1 Dimensional array. Grit takes care of this for us.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Wonderful! To finish off our setup, let’s add our game loop. Remember that returning from a GBA program’s main function is undefined, so our game loop needs to never terminate. For now, let’s also add a call to our hacky little vsync function in the main loop. This function is defined in gba.h, but is the same as every other post I’ve made.&lt;/p&gt;
+
+&lt;p&gt;Put together, our starting point looks like this:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;cp&quot;&gt;#include &quot;charsprites.h&quot;
+#include &amp;lt;string.h&amp;gt;
+#include &quot;gba.h&quot;
+&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;memcpy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MEM_TILE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;][&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;charspritesTiles&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;charspritesTilesLen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;memcpy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MEM_PALETTE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;charspritesPal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;charspritesPalLen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;REG_DISPLAYCONTROL&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;  &lt;span class=&quot;n&quot;&gt;VIDEOMODE_0&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;BACKGROUND_0&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ENABLE_OBJECTS&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MAPPINGMODE_1D&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;vsync&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Perfect! No we’re ready to get down to the fun stuff!&lt;/p&gt;
+
+&lt;h2 id=&quot;getting-our-character-on-screen&quot;&gt;Getting our Character On Screen&lt;/h2&gt;
+
+&lt;p&gt;I always like to work in small, easily verifiable steps when I’m learning something new. So before we dig really far into animating our character, let’s just get our hero on screen. We covered this &lt;a href=&quot;http://localhost:4000/blog/tutorial/gba/2017/04/04/GBA-By-Example-2.html&quot;&gt;in an earlier post&lt;/a&gt;, but today I want to do things a bit differently. Since we’re animating our character today, we should probably talk about double buffering object memory.&lt;/p&gt;
+
+&lt;p&gt;Since the GBA hardware draws the screen 1 line at a time, it’s possible to modify the object memory for a sprite while it’s being drawn. In some cases this will just mean a bit of tearing (if the sprite is moving), but in the case of animation, it could lead to the top of the sprite being rendered in a different animation frame from the bottom part. Gross! This isn’t really an issue for us today because we aren’t doing enough work for us to leave the VBLANK pause, but it’s worth noting so that we learn to do things right before from the get go.&lt;/p&gt;
+
+&lt;p&gt;In order to avoid this potential problem, one thing we can do is to create a second buffer of memory, which shadows object memory. Whenever we want to update something about a sprite in our game logic, we modify the data inside our own copy of object memory. Then when we hit the VBlank pause, we copy all the data from our shadow buffer to real object memory. This lets us do whatever we want in our logic, while keeping our sprites looking exactly how they should.&lt;/p&gt;
+
+&lt;p&gt;We could define our object-memory shadow buffer like so:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;n&quot;&gt;ObjectAttributes&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;oam_object_backbuffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;128&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Remember that the definition of the ObjectAttributes struct is inside gba.h if you forget what that looks like.&lt;/p&gt;
+
+&lt;p&gt;Now we should also add the code to copy data from our backbuffer to the real Object Attribute Memory. For now, I’m just going to copy the first element, because that’s all we need for today. In a real application, you’d probably want to copy the whole thing, or at least larger chunks at a time.&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;k&quot;&gt;while&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;vsync&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;MEM_OAM&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;oam_object_backbuffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Now that that’s set up, let’s actually copy something useful into VRAM.&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;n&quot;&gt;ObjectAttributes&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;spriteAttribs&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;oam_object_backbuffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;spriteAttribs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;attr0&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x2000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;spriteAttribs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;attr1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x4000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;spriteAttribs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;attr2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Which means that, when everything is put together, your main function should look like this:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;memcpy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MEM_TILE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;][&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;charspritesTiles&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;charspritesTilesLen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;memcpy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MEM_PALETTE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;charspritesPal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;charspritesPalLen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;REG_DISPLAYCONTROL&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;  &lt;span class=&quot;n&quot;&gt;VIDEOMODE_0&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;BACKGROUND_0&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ENABLE_OBJECTS&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MAPPINGMODE_1D&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;ObjectAttributes&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;spriteAttribs&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;oam_object_backbuffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;spriteAttribs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;attr0&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x2000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;spriteAttribs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;attr1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x4000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;spriteAttribs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;attr2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;vsync&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;MEM_OAM&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;oam_object_backbuffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;With the sprite defined like we have, running the program should yield this:&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+&lt;img src=&quot;/images/post_images/2017-06-07/firstdraw.png&quot; /&gt;
+&lt;br /&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Perfect! Now we know our data is in memory correctly! Next let’s get some animations going.&lt;/p&gt;
+
+&lt;h2 id=&quot;hello-sprite-animation&quot;&gt;Hello Sprite Animation&lt;/h2&gt;
+
+&lt;p&gt;Before we dig into making our hero run and jump, let’s just get his idle animation cycle running to be sure that things are working how we expect. In the sprite sheet that I provided earlier, the animation cycle is located in the first 4 frames. We want to have our hero cycle through these frames whenever he isn’t moving.&lt;/p&gt;
+
+&lt;p&gt;Setting this up a single animation like this is really simple, because all we need to do is point attr2 in our sprite attributes to a new place in tile memory. You’ll notice that right now, our sprite is simply stuck on the first frame of his idle animation. This is because we put the sprites into tile memory at the start of the tile block, so the index of the first frame is 0. It stands to reason that updating this should just be a simple add…&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;n&quot;&gt;spriteAttribs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;attr2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;spriteAttribs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;attr2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;buuut it isn’t! Remember that attr2 is the index of the tile to use to render the top left most part of your sprite. Since our sprite is 2 tiles by 2 tiles, this means that in theory, to advance a whole frame, our attr2 value must increment by 4. In reality, since we are using 8bpp tiles, we have to double that, so advancing a frame of animation means advancing attr2 by 8. With that in mind, running our idle loop actually requires the following:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;n&quot;&gt;spriteAttribs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;attr2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;spriteAttribs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;attr2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;With that bit of code added to the update loop, our protagonist should now be happily bouncing in place:&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+&lt;img src=&quot;/images/post_images/2017-06-07/dude.gif&quot; /&gt;
+&lt;br /&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Alright, with that in mind, let’s move on to actually hooking up some input and getting this guy moving around the screen.&lt;/p&gt;
+
+&lt;h2 id=&quot;setting-up-input&quot;&gt;Setting Up Input&lt;/h2&gt;
+
+&lt;p&gt;Just like &lt;a href=&quot;http://localhost:4000/blog/tutorial/gba/2017/04/18/GBA-By-Example-4.html&quot;&gt;last time&lt;/a&gt;, all our input handling code is stored in &lt;a href=&quot;https://github.com/khalladay/GBA-By-Example/blob/master/4-SpriteAnimation/code/input.h&quot;&gt;input.h&lt;/a&gt;, so make sure that you add that to your includes. Once that’s included, just make sure to add a call to key_poll in your main function, otherwise we’ll never know when the input state changes. If you’re following along, your main function should look like this:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;k&quot;&gt;while&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;vsync&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;key_poll&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;spriteAttribs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;attr2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;spriteAttribs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;attr2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;MEM_OAM&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;oam_object_backbuffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Before we get to actually writing our movement and animation functions there, there’s one last bit of theory to get out of the way: there are some new bits in the object attributes attr1 variable that we’re going to need today.&lt;/p&gt;
+
+&lt;h2 id=&quot;more-details-about-object-attributes&quot;&gt;More Details About Object Attributes&lt;/h2&gt;
+
+&lt;p&gt;When I last talked about sprites, I presented 3 tables describing which bits in the sprite attribute values corresponded to what. In the interest of simplicity, I left out a lot of details. In this post, we need to fill in one of those details, so here is a more complete description of what attribute 1 does:&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+&lt;table style=&quot;border:1px solid black; width=600px;&quot;&gt;
+&lt;colgroup&gt;
+&lt;col width=&quot;200px&quot; /&gt;
+&lt;col width=&quot;400px&quot; /&gt;
+&lt;/colgroup&gt;
+&lt;thead style=&quot;border:1px solid black; background-color:#FF8854&quot;&gt;
+&lt;tr class=&quot;header&quot;&gt;
+&lt;th&gt;Attr 1&lt;/th&gt;
+&lt;th&gt; 0x FEDC BA98 7654 3210&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr style=&quot;border:1px solid black; background-color:#DDDDDD;&quot;&gt;
+&lt;td&gt;FE&lt;/td&gt;
+&lt;td style=&quot;border:1px solid black;&quot;&gt;Sprite Size (discussed below)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr style=&quot;border:1px solid black;&quot;&gt;
+&lt;td style=&quot;border:1px solid black;&quot;&gt;D&lt;/td&gt;
+&lt;td&gt;Vertical Flip &lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr style=&quot;border:1px solid black; background-color:#DDDDDD;&quot;&gt;
+&lt;td style=&quot;border:1px solid black;&quot;&gt;C&lt;/td&gt;
+&lt;td&gt;Horizontal Flip &lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr style=&quot;border:1px solid black;&quot;&gt;
+&lt;td style=&quot;border:1px solid black;&quot;&gt;BA98&lt;/td&gt;
+&lt;td&gt;Not Used Today&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr style=&quot;border:1px solid black; background-color:#DDDDDD;&quot;&gt;
+&lt;td style=&quot;border:1px solid black;&quot;&gt;7654 3210&lt;/td&gt;
+&lt;td&gt;X coordinate
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;Yes, there’s still some data we don’t need to worry about, but the stuff to pay attention to here are the bit flags for vertical and horizontal flipping. You may have noticed that our sprites only have our protagonist facing one way, the horizontal flip flag is how we’re going to handle the other direction.&lt;/p&gt;
+
+&lt;h2 id=&quot;moving-our-hero&quot;&gt;Moving Our Hero&lt;/h2&gt;
+
+&lt;p&gt;Let’s tackle moving our hero around the screen next, and finish off with adding support for the rest of our animation frames. To make things easier (and more readable), I’m going to define a struct to hold all the information we need to move and animate our hero. For simplicity’s sake, I’m just going to make all the fields we need ints.&lt;/p&gt;
+
+&lt;p&gt;Here’s what my struct and it’s initialization code look like:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FLOOR_Y&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;160&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;16&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;typedef&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;ObjectAttributes&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;spriteAttribs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;facingRight&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;firstAnimCycleFrame&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;animFrame&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;posX&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;posY&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;velX&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;velY&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;framesInAir&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;HeroSprite&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;InitializeHeroSprite&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;HeroSprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ObjectAttributes&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;attribs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;spriteAttribs&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;attribs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;facingRight&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;firstAnimCycleFrame&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;animFrame&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;posX&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;posY&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FLOOR_Y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;velX&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;velY&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;framesInAir&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Nothing too fancy here. Notice though, that I also defined a constant for the location of the “floor” which is actually 16 pixels above the floor. This is because our hero is 16 pixels tall and when you set a sprite’s position, you set it’s top left corner; thus, I’ve defined the floor Y as the location of the top of our hero’s head when he’s on the floor for simplicity.&lt;/p&gt;
+
+&lt;p&gt;To handle character movement, I’m going to create another function called updateSpritePosition.&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;updateSpritePosition&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;HeroSprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;This function is going to first determine our hero’s velocity for the current frame, and then add those velocities to his position. It will also set up a few other bits of data that we’ll use later when determining what animation frame to display, and actually translate these struct member vars into actual values inside object attribute memory. To start with though, let’s just start dealing with user input from the DPAD:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;WALK_SPEED&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;updateSpritePosition&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;HeroSprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;getKeyState&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;KEY_LEFT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;facingRight&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;velX&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ANIM_SPEED&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;getKeyState&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;KEY_RIGHT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;facingRight&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;velX&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ANIM_SPEED&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;velX&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;posX&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;velX&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;posX&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;min&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;240&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;16&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;posX&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;posX&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;max&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;posX&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;This should all be pretty straightforward. The only bit you may be wondering about is the facingRight flag. We’re going to use this later to handle horizontally flipping our sprites so that we can use one set of sprites but have our hero be able to look and move both left and right. Also note that I’m clamping the x position to keep our sprite on the screen at all times.&lt;/p&gt;
+
+&lt;p&gt;Next, we need to add support for jumping. Note  that if we’re already in the air, we don’t want to jump again, so we’re going to have to take that into account:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;updateSpritePosition&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;HeroSprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;//previous code omitted for brevity
+&lt;/span&gt;
+    &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;isMidAir&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;posY&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FLOOR_Y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;getKeyState&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;KEY_A&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;isMidAir&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;velY&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;JUMP_VI&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;framesInAir&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;isMidAir&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;velY&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;JUMP_VI&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;GRAVITY&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;framesInAir&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;velY&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;min&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;velY&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;framesInAir&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;posY&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;velY&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;posY&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;min&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;posY&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FLOOR_Y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Hopefully nothing here is surprising. If you haven’t implemented gravity before, you may want to check out &lt;a href=&quot;https://www.khanacademy.org/science/physics/one-dimensional-motion/kinematic-formulas/a/what-are-the-kinematic-formulas&quot;&gt;this excellent article&lt;/a&gt; on Khan Academy about Kinematic equations. Since they’re not the focus of today, that’s all I’m going to say about them here. I’m using the framesInAir variable in place of an actual time calculation for now, which is why it reset whenever a new jump starts.&lt;/p&gt;
+
+&lt;p&gt;None of this code actually moves our sprite, so we need to finish off this function by setting a few key variables:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;spriteAttribs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;attr0&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x2000&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;posY&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;spriteAttribs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;attr1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;facingRight&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;?&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x4000&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x5000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;posX&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;As you can see, because the lowest bits in these flags store positions, it’s enough for us to just add our x and y position to the end of them. You can also see how the facingRight flag corresponds to the value we set in the horizontal flip bit that we talked about earlier.&lt;/p&gt;
+
+&lt;p&gt;Now we need to add a call to this function to main:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;memcpy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MEM_TILE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;][&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;charspritesTiles&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;charspritesTilesLen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;memcpy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MEM_PALETTE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;charspritesPal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;charspritesPalLen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;REG_DISPLAYCONTROL&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;  &lt;span class=&quot;n&quot;&gt;VIDEOMODE_0&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;BACKGROUND_0&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ENABLE_OBJECTS&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MAPPINGMODE_1D&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;HeroSprite&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;InitializeHeroSprite&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;oam_object_backbuffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]);&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;vsync&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;key_poll&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;        
+
+        &lt;span class=&quot;n&quot;&gt;updateSpritePosition&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;MEM_OAM&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;oam_object_backbuffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;And with that, you should be able to move your sprite around using the dpad and A button to jump. He just won’t be animating yet:&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+&lt;img src=&quot;/images/post_images/2017-06-07/movingnoanim.gif&quot; style=&quot;width:240px;height:160px&quot; /&gt;
+&lt;br /&gt;
+&lt;/div&gt;
+
+&lt;h2 id=&quot;our-animation-function&quot;&gt;Our Animation function&lt;/h2&gt;
+
+&lt;p&gt;As the heading suggests, we’re going to be writing one more function today, which is going to implement our animation:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tickSpriteAnimation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;HeroSprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;We’re going to be choosing the tile to point our attr2 variable at by setting two separate values, the firstAnimCycleFrame and animFrame values in our HeroSprite struct:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;em&gt;firstAnimCycleFrame&lt;/em&gt; will hold the index to the first frame in that animation cycle. Our idle animation cycle is 4 frames long and starts at index 0, so for the idle animation cycle, this will be set to 0&lt;/li&gt;
+  &lt;li&gt;&lt;em&gt;animFrame&lt;/em&gt; will hold the current frame of animation we are at in our animation cycle. If we want the third frame of an animation, this would be set to two (since frames are zero indexed)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Knowing that, it’s probably useful for us to take another look at our sprite sheet, and figure out where our walk, run, and jump cycles start in the seet. I’ve oultined them below:&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+&lt;img src=&quot;/images/post_images/2017-06-07/charsprites_highlighted.bmp&quot; /&gt;
+&lt;br /&gt;
+&lt;/div&gt;
+
+&lt;p&gt;So that puts our idle cycle starting at index 0, our run cycle at index 4, and our jump cycle at index 7. Given that we use 4 tiles per sprite, and have 8bpp tiles, this means that the real indices we need are:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Idle starts at 0&lt;/li&gt;
+  &lt;li&gt;Run starts at 32&lt;/li&gt;
+  &lt;li&gt;Jump starts at 56&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Let’s start off by just writing the first and last line of our function:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;tickSpriteAnimation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;HeroSprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;ObjectAttributes&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;spriteAttribs&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;spriteAttribs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;//set firstAnimCycleFrame and animFrame in code here
+&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;spriteAttribs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;attr2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;firstAnimCycleFrame&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;animFrame&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;This is just to give you an idea of how this function works. Note that if you were using 8bpp sprites, you would only need to multiply animFrame by 4.&lt;/p&gt;
+
+&lt;p&gt;Alright, here’s our first, and easiest case: jumping. We only have 2 sprites for jumping, one when we’re on the way up, and one when we’re on the way down.&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;isMidAir&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;posY&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FLOOR_Y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;//update velocity for gravity
+&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;isMidAir&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;firstAnimCycleFrame&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;56&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;animFrame&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;velY&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;?&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;If we aren’t in the air, the only other two options are that we’re standing still, or that we’re walking around:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;k&quot;&gt;else&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;velX&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;firstAnimCycleFrame&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;animFrame&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;animFrame&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;firstAnimCycleFrame&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;animFrame&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;animFrame&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Obviously none of this code is very re-useable; we are hardcoding both the length of the anim cycles, and their start points in sprite sheets, but it works for our example.&lt;/p&gt;
+
+&lt;p&gt;With the above two chunk of code added to our animation function, all that’s left is to call the animation function from main:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;k&quot;&gt;while&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;vsync&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;key_poll&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;        
+
+    &lt;span class=&quot;n&quot;&gt;updateSpritePosition&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;tickSpriteAnimation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sprite&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;MEM_OAM&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;oam_object_backbuffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;And you should (finally) be in possession of your very on animated character!&lt;/p&gt;
+
+&lt;h2 id=&quot;wrapping-up&quot;&gt;Wrapping Up&lt;/h2&gt;
+
+&lt;p&gt;If you got stuck at any part of this, the code for the finished product can be found &lt;a href=&quot;https://github.com/khalladay/GBA-By-Example/tree/master/4-SpriteAnimation&quot;&gt;on github&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Finally, as always, I’m available &lt;a href=&quot;https://twitter.com/khalladay&quot;&gt;on Twitter&lt;/a&gt; to answer questions, say hi, etc. I’d love to hear if you’re building something for the GBA after reading these posts :)&lt;/p&gt;
+
+&lt;p&gt;Have a good one!&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
    <title>GBA By Example - Getting User Input</title>
-   <link href="http://kylehalladay.com/blog/tutorial/2017/04/18/GBA-By-Example-4.html"/>
+   <link href="http://kylehalladay.com/blog/tutorial/gba/2017/04/18/GBA-By-Example-4.html"/>
    <updated>2017-04-18T00:00:00-05:00</updated>
-   <id>http://kylehalladay.com/blog/tutorial/2017/04/18/GBA-By-Example-4</id>
-   <content type="html">&lt;p&gt;(Note: This is Part 4 of my GBA by Example series. A list of my GBA tutorials, and everything else I’ve written, can be found &lt;a href=&quot;http://kylehalladay.com/archive.html&quot;&gt;here&lt;/a&gt;)&lt;/p&gt;
+   <id>http://kylehalladay.com/blog/tutorial/gba/2017/04/18/GBA-By-Example-4</id>
+   <content type="html">&lt;p&gt;(Note: This is Part 5 of my GBA by Example series. A list of my other GBA tutorials can be found &lt;a href=&quot;http://kylehalladay.com/gba.html&quot;&gt;here&lt;/a&gt;)&lt;/p&gt;
 
 &lt;p&gt;We’ve covered an awful lot of drawing in these posts, but it takes a lot more than drawing code to make a game. One of the key parts of building something playable is letting users actually be able to interact with our code, so today I’m going to go over how to get user input on the GBA. It’s going to be short and sweet, because it’s really not that complicated on this platform, which is great, because it means that we can spend more time on building an example program this week.&lt;/p&gt;
 
@@ -25,7 +512,7 @@
 
 &lt;div align=&quot;center&quot;&gt;
 &lt;img src=&quot;/images/post_images/2017-04-18/input.gif&quot; /&gt;
-&lt;font size=&quot;2&quot;&gt; Initially this cleared the screen after each press so I could properly do the Konami code. The gif was reeeaalllyy annoying though&lt;/font&gt;
+&lt;font size=&quot;2&quot;&gt; Initially this cleared the screen after each press so I could properly do the Konami code.&lt;br /&gt;The gif was reeeaalllyy annoying though&lt;/font&gt;
 &lt;br /&gt;&lt;br /&gt;
 &lt;/div&gt;
 
@@ -499,10 +986,12 @@
  
  <entry>
    <title>GBA By Example - Drawing and Moving Backgrounds</title>
-   <link href="http://kylehalladay.com/blog/tutorial/2017/04/11/GBA-By-Example-3.html"/>
+   <link href="http://kylehalladay.com/blog/tutorial/gba/2017/04/11/GBA-By-Example-3.html"/>
    <updated>2017-04-11T00:00:00-05:00</updated>
-   <id>http://kylehalladay.com/blog/tutorial/2017/04/11/GBA-By-Example-3</id>
-   <content type="html">&lt;p&gt;It’s Tuesday, which means it’s the arbitrary day of the week I chose to post GBA stuff!&lt;/p&gt;
+   <id>http://kylehalladay.com/blog/tutorial/gba/2017/04/11/GBA-By-Example-3</id>
+   <content type="html">&lt;p&gt;(Note: This is Part 3 of my GBA by Example series. A list of my other GBA tutorials can be found &lt;a href=&quot;http://kylehalladay.com/gba.html&quot;&gt;here&lt;/a&gt;)&lt;/p&gt;
+
+&lt;p&gt;It’s Tuesday, which means it’s the arbitrary day of the week I chose to post GBA stuff!&lt;/p&gt;
 
 &lt;p&gt;&lt;a href=&quot;http://kylehalladay.com/blog/tutorial/2017/04/04/GBA-By-Example-2.html&quot;&gt;Last week&lt;/a&gt; we got a sprite on the screen and moving around in a tiled video mode, but it still left our screen looking a little bit bare. This week we’re going to rectify that, and figure out how to work with &lt;strong&gt;Backgrounds&lt;/strong&gt;! You can make really great looking stuff with backgrounds, or you can do what I did, and make something that looks like this:&lt;/p&gt;
 
@@ -1032,10 +1521,12 @@ Alright, let’s start putting this into practice!&lt;/p&gt;
  
  <entry>
    <title>GBA By Example - Drawing and Moving Sprites</title>
-   <link href="http://kylehalladay.com/blog/tutorial/2017/04/04/GBA-By-Example-2.html"/>
+   <link href="http://kylehalladay.com/blog/tutorial/gba/2017/04/04/GBA-By-Example-2.html"/>
    <updated>2017-04-04T00:00:00-05:00</updated>
-   <id>http://kylehalladay.com/blog/tutorial/2017/04/04/GBA-By-Example-2</id>
-   <content type="html">&lt;p&gt;&lt;a href=&quot;http://kylehalladay.com/blog/tutorial/2017/03/28/GBA-By-Example-1.html&quot;&gt;Last week&lt;/a&gt;, we were working in video mode 3, which is one of the “bitmap” video modes. These modes are named so because they use the GBA’s 96K of video memory (VRAM) to store a representation of the screen as an array of colour values. If you want to draw to pixel (0,0), you simply set the first element in the screen buffer array to the colour you want, and when the hardware draws, it reads the value at that location, and draws it to the screen.&lt;/p&gt;
+   <id>http://kylehalladay.com/blog/tutorial/gba/2017/04/04/GBA-By-Example-2</id>
+   <content type="html">&lt;p&gt;(Note: This is Part 2 of my GBA by Example series. A list of my other GBA tutorials can be found &lt;a href=&quot;http://kylehalladay.com/gba.html&quot;&gt;here&lt;/a&gt;)&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://kylehalladay.com/blog/tutorial/2017/03/28/GBA-By-Example-1.html&quot;&gt;Last week&lt;/a&gt;, we were working in video mode 3, which is one of the “bitmap” video modes. These modes are named so because they use the GBA’s 96K of video memory (VRAM) to store a representation of the screen as an array of colour values. If you want to draw to pixel (0,0), you simply set the first element in the screen buffer array to the colour you want, and when the hardware draws, it reads the value at that location, and draws it to the screen.&lt;/p&gt;
 
 &lt;p&gt;While some games did use the bitmap modes to do some pretty amazing stuff (like &lt;a href=&quot;http://www.ign.com/games/james-bond-007-nightfire/gba-497891&quot;&gt;James Bond 007: NightFire&lt;/a&gt; and &lt;a href=&quot;http://www.ign.com/games/stuntman/gba-550094&quot;&gt;Stuntman&lt;/a&gt;), they were the exception, not the rule. Most GBA games that were released were purely 2D, and used what are called Tiled Video Modes, which provide hardware level optimizations for 2D drawing tasks.&lt;/p&gt;
 
@@ -1503,9 +1994,9 @@ Hopefully that’s all relatively clear! Let’s start putting all of this toget
  
  <entry>
    <title>GBA By Example - Drawing and Moving Rectangles</title>
-   <link href="http://kylehalladay.com/blog/tutorial/2017/03/28/GBA-By-Example-1.html"/>
+   <link href="http://kylehalladay.com/blog/tutorial/gba/2017/03/28/GBA-By-Example-1.html"/>
    <updated>2017-03-28T00:00:00-05:00</updated>
-   <id>http://kylehalladay.com/blog/tutorial/2017/03/28/GBA-By-Example-1</id>
+   <id>http://kylehalladay.com/blog/tutorial/gba/2017/03/28/GBA-By-Example-1</id>
    <content type="html">&lt;p&gt;The idea of making something for GameBoy has always appealed to me. Not only was it my platform of choice when I was a little kid, but naively, it has always looked like the relaxing combination of hardware simple enough to really understand, an OS (or BIOS) that gets out of your way (no firmware updates), and a platform that’s open enough to not need to deal with jailbreaking the device, and the GBA could do 3D!&lt;/p&gt;
 
 &lt;p&gt;I’ve had a &lt;a href=&quot;http://krikzz.com/store/home/42-everdrive-gba-x5.html&quot;&gt;Kirkzz Everdrive&lt;/a&gt; sitting around for a few months that I’ve meant to play with, and I finally had some time during my vacation lask week to try it out. Behold the fruits of my labors:&lt;/p&gt;

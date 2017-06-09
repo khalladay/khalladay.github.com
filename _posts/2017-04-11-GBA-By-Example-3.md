@@ -4,9 +4,12 @@ title: GBA By Example - Drawing and Moving Backgrounds
 categories:
 - blog
 - tutorial
+- gba
 tags:
 - <span style="background-color:#DD6655;"><font color="white">&nbsp;&nbsp;GBA&nbsp;&nbsp;</font></span>
 ---
+
+(Note: This is Part 3 of my GBA by Example series. A list of my other GBA tutorials can be found [here](http://kylehalladay.com/gba.html))
 
 It's Tuesday, which means it's the arbitrary day of the week I chose to post GBA stuff!
 
