@@ -43,7 +43,7 @@ However, Breakout is really not a good test for a GTX 1060, and with 500 blocks 
 This produced much more stable results (ie/ could be reproduced in multiple runs), which I want to provide here to give context to the rest of this blog post.
 
 <div align="center">
-<img src="/images/post_images/2017-08-30/vkTest.PNG" />
+<img src="/images/post_images/2017-08-30/vktest.PNG" />
 <br>
 </div>
 

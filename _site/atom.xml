@@ -4,7 +4,7 @@
  <title>The blog of Kyle Halladay</title>
  <link href="http://kylehalladay.com/atom.xml" rel="self"/>
  <link href="http://kylehalladay.com"/>
- <updated>2017-08-13T08:56:51-05:00</updated>
+ <updated>2017-08-13T08:58:00-05:00</updated>
  <id>http://kylehalladay.com</id>
  <author>
    <name>Kyle Halladay</name>
@@ -53,7 +53,7 @@
 &lt;p&gt;This produced much more stable results (ie/ could be reproduced in multiple runs), which I want to provide here to give context to the rest of this blog post.&lt;/p&gt;
 
 &lt;div align=&quot;center&quot;&gt;
-&lt;img src=&quot;/images/post_images/2017-08-30/vkTest.PNG&quot; /&gt;
+&lt;img src=&quot;/images/post_images/2017-08-30/vktest.PNG&quot; /&gt;
 &lt;br /&gt;
 &lt;/div&gt;
 
