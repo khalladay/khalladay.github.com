@@ -6,10 +6,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Kyle Halladay - Home Page</title>
+  <title>Kyle Halladay - Comparing Uniform Data Transfer Methods in Vulkan</title>
   <meta name="author" content="Kyle Halladay" />
   <meta name="description" content="I build shaders, renderers, games, and other stuff that's fun to stare at." />
-  <link rel="canonical" href="http://kylehalladay.com/" />
+  <link rel="canonical" href="http://kylehalladay.com/blog/tutorial/vulkan/2017/08/30/Vulkan-Uniform-Buffers.html" />
   <meta name="keywords" content="life,code,software,development,games,graphics,shaders,indie" />
 
   <link href="//fonts.googleapis.com/css?family=Open+Sans:600,800" rel="stylesheet" type="text/css">
@@ -89,14 +89,13 @@
       <hr style="border-color:#000; margin:1em -0.25em;"></topbar>
 
       <p class="meta">
-   
-
+ 
 </p>
 
 <h1 class="title">Comparing Uniform Data Transfer Methods in Vulkan</h1>
 
 <div id="post">
- <p>Lately I’ve been trying to wrap my head around Vulkan. As part of that, I’ve been building a small Breakout clone (<a href="https://github.com/khalladay/VkBreakout">github</a>) as a way to see how the pieces of the API fit together in a “real” application.</p>
+  <p>Lately I’ve been trying to wrap my head around Vulkan. As part of that, I’ve been building a small Breakout clone (<a href="https://github.com/khalladay/VkBreakout">github</a>) as a way to see how the pieces of the API fit together in a “real” application.</p>
 
 <p>When I’m starting to learn a new graphics API, the thing that I try to focus on is getting used to all the different ways to send data from the CPU to the GPU. Since my Breakout clone didn’t have textures, or meshes (really) to speak of, that left the per frame uniform data for each object on screen.</p>
 
@@ -392,6 +391,7 @@ In case reviewing testing methods is your thing, here's how I got the numbers in
     
   </ul>
 </div>
+
 
       <div class="footer">
         <div class="disclaimer">

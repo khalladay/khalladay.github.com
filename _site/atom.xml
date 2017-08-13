@@ -4,13 +4,296 @@
  <title>The blog of Kyle Halladay</title>
  <link href="http://kylehalladay.com/atom.xml" rel="self"/>
  <link href="http://kylehalladay.com"/>
- <updated>2017-06-09T07:21:51-05:00</updated>
+ <updated>2017-08-13T08:54:06-05:00</updated>
  <id>http://kylehalladay.com</id>
  <author>
    <name>Kyle Halladay</name>
    <email>k.mj.halladay@gmail.com</email>
  </author>
 
+ 
+ <entry>
+   <title>Comparing Uniform Data Transfer Methods in Vulkan</title>
+   <link href="http://kylehalladay.com/blog/tutorial/vulkan/2017/08/30/Vulkan-Uniform-Buffers.html"/>
+   <updated>2017-08-30T00:00:00-05:00</updated>
+   <id>http://kylehalladay.com/blog/tutorial/vulkan/2017/08/30/Vulkan-Uniform-Buffers</id>
+   <content type="html">&lt;p&gt;Lately I’ve been trying to wrap my head around Vulkan. As part of that, I’ve been building a small Breakout clone (&lt;a href=&quot;https://github.com/khalladay/VkBreakout&quot;&gt;github&lt;/a&gt;) as a way to see how the pieces of the API fit together in a “real” application.&lt;/p&gt;
+
+&lt;p&gt;When I’m starting to learn a new graphics API, the thing that I try to focus on is getting used to all the different ways to send data from the CPU to the GPU. Since my Breakout clone didn’t have textures, or meshes (really) to speak of, that left the per frame uniform data for each object on screen.&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+&lt;img src=&quot;/images/post_images/2017-08-30/breakout.png&quot; /&gt;
+&lt;font size=&quot;2&quot;&gt;The &quot;Playable&quot; version of the Breakout Clone&lt;/font&gt;
+&lt;br /&gt;&lt;br /&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Looking at a few vulkan examples I could find, and taking a quick glance through the API, I settled on 5 different options for getting my uniform data sent to the card:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Using push-constants&lt;/li&gt;
+  &lt;li&gt;Using 1 VkBuffer and keeping it mapped all the time&lt;/li&gt;
+  &lt;li&gt;Using 1 VkBuffer and mapping/unmapping per frame&lt;/li&gt;
+  &lt;li&gt;Using multiple VkBuffers, and keeping them all mapped&lt;/li&gt;
+  &lt;li&gt;Using multiple VkBuffers, and mapping/unmapping every frame
+&lt;br /&gt;&lt;br /&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;All the guidelines out there are pretty clear when they say to use push-constants for data that has to change on a per-object basis every frame, but given that push constants have a size limit, it made sense to give each of the above approaches a whirl, since they conceivably all will have their place in a large application.&lt;/p&gt;
+
+&lt;p&gt;So, in the interest of whirling, I put a branch in my repo for each, and then tracked the average frame-time of each to see how much faster or slower each approach was.&lt;/p&gt;
+
+&lt;p&gt;However, Breakout is really not a good test for a GTX 1060, and with 500 blocks on screen, I was running every test at &amp;lt; 1 ms per frame. The times were so small, that even between runs of the exact same version of the program, the results were too varied to be much use (since even a change in measured time of 1/100th of an ms became significant). To make things a bit easier to work with, I added a mode to the game which rendered 5000 blocks at a time.&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+&lt;img src=&quot;/images/post_images/2017-08-30/stresstest.png&quot; /&gt;
+&lt;font size=&quot;2&quot;&gt;which admittedly looked sorta ridiculous&lt;/font&gt;
+&lt;br /&gt;&lt;br /&gt;
+&lt;/div&gt;
+
+&lt;p&gt;This produced much more stable results (ie/ could be reproduced in multiple runs), which I want to provide here to give context to the rest of this blog post.&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+&lt;img src=&quot;/images/post_images/2017-08-30/vkTest.png&quot; /&gt;
+&lt;br /&gt;
+&lt;/div&gt;
+
+&lt;p&gt;The big takeaway here is that mapping memory is a really slow process, so if you need something mapped, keep it that way for as long as you can. This is likely not news to anyone except me, since I’ve been living in mobile engine land for my whole career and really haven’t had to worry about that. Oh, and the guides were right, you should totally use push constants when you can. If you can’t use them, there’s a slight advantage to packing multiple objects worth of data into a single buffer, vs giving every object it’s own.&lt;/p&gt;
+
+&lt;p&gt;With that in mind, I want to walk through the implementation details of each approach, because I wish something like that had existed before I started down this rabbit hole. If you were only interested in the performance results, you can stop reading and go about your life :) If you’re scratching your head as to how to do one or more of these things, join me below!&lt;/p&gt;
+
+&lt;h2 id=&quot;preliminary-info&quot;&gt;Preliminary info&lt;/h2&gt;
+
+&lt;p&gt;In order to make much sense of the code I’m going to share, it will be helpful to understand that my code stores uniform data that will be sent to the GPU in a struct called PrimitiveUniformObject, which directly maps to the layout of the uniform data in the shader:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;c1&quot;&gt;//CPU
+&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PrimitiveUniformObject&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;glm&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mat4&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;model&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;glm&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;vec4&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;color&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;//glsl
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;layout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;set&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;binding&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;uniform&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PER_OBJECT&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;mat4&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mvp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;vec4&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;col&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;obj&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Hopefully that makes sense! I’m going to try to keep all the snippets I share abbreviated enough that you otherwise don’t need to care about how I structured things, but I couldn’t get around telling you about this tiny bit.&lt;/p&gt;
+
+&lt;p&gt;I’m also going to assume that you’re at least at the level I was when I started this project, that is, you’ve gone through &lt;a href=&quot;https://vulkan-tutorial.com/&quot;&gt;vulkan-tutorial.com&lt;/a&gt;, and therefore understand how to allocate a VkBuffer. If you aren’t there yet, click the link to the tutorial and come back in a few hours. Things will make much more sense.&lt;/p&gt;
+
+&lt;h2 id=&quot;multiple-unampped-buffers&quot;&gt;Multiple, Unampped Buffers&lt;/h2&gt;
+&lt;p&gt;Let’s start by talking about the approaches that felt most intuitive for me right off the bat, giving each drawable entity (which my code calls a Primitive) it’s own VkBuffer to store it’s own uniform data, and a VkDescriptorSet to know about that buffer:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PrimitiveInstance&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;vec3&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pos&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;vec3&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;scale&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;vec4&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;col&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;VkBuffer&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;uniformBuffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;VkDescriptorSet&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;descSet&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;VkDeviceMemory&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bufferMem&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;meshID&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;My project was simple enough (and my gpu forgiving enough) that I could get away with doing a VkDeviceMemory allocation for every primitive. On a larger project you’d have to do something smarter than that.&lt;/p&gt;
+
+&lt;p&gt;Since the entirety of the data stored in the VkBuffer is going to get updated every frame, and we’re going to update the data with a single write to the buffer data, I allocated the VkBuffers with host coherent memory, which makes things nice and easy when it’s time to update the data:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;c1&quot;&gt;//abbreviated code:
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;PrimitiveUniformObject&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;puo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;puo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;model&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;VIEW_PROJECTION&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;glm&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;translate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pos&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;glm&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;scale&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;scale&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;puo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;color&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;col&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;udata&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;nullptr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;vkMapMemory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;device&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bufferMem&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;sizeof&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;PrimitiveUniformObject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;udata&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;memcpy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;udata&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;puo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;sizeof&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;PrimitiveUniformObject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;vkUnmapMemory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;device&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bufferMem&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Since we’ve already taken a look at the performance graph, we know that mapping/unmapping the buffer for each Primitive, every frame, is a performance killer. We can work around that with the next approach and get much better results.&lt;/p&gt;
+
+&lt;h2 id=&quot;multiple-always-mapped-buffers&quot;&gt;Multiple, Always Mapped Buffers&lt;/h2&gt;
+
+&lt;p&gt;To make the multiple buffer approach faster, all we need to do is to add one more variable to the PrimitiveInstance struct:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PrimitiveInstance&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;vec3&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pos&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;vec3&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;scale&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;vec4&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;col&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;VkBuffer&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;uniformBuffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;VkDescriptorSet&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;descSet&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mapped&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;meshID&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;In this approach, when a primitive was created, the data for their buffer was immediately mapped, and the address stored in the mapped pointer above. Note that the PrimitiveInstance struct doesn’t contain a PrimitiveUniformObject, those get created per frame by combining the easier to work with variables we have here.&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;c1&quot;&gt;//abbreviated code:
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;PrimitiveUniformObject&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;puo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;puo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;model&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;VIEW_PROJECTION&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;glm&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;translate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pos&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;glm&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;scale&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;scale&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;puo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;color&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;col&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;memcpy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mapped&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;puo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;sizeof&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;PrimitiveUniformObject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Then, all that’s needed is to submit each object’s descriptorSet to the rendering function, and pass the right one to vkCmdBindDescriptorSets at the right time. As you saw in the graph earlier, this approach was the slowest of the three approaches that didn’t involve mapping/unmapping data every frame.&lt;/p&gt;
+
+&lt;p&gt;In the above code, I don’t need to call vkflushmappedmemoryranges or similar because the buffer memory was allocated with the VK_MEMORY_PROPERTY_HOST_COHERENT_BIT flag set. Without that, you’d have to manually tell vulkan when you changed the data at that pointer. Host coherent memory is very likely slower than not the alternative, but for buffers which are completely changed every frame, I’m not sure there’s much of a difference.&lt;/p&gt;
+
+&lt;p&gt;I haven’t tested out anything using non-host coherent memory though, so I reserve the right to be totally wrong about that.&lt;/p&gt;
+
+&lt;h2 id=&quot;single-dynamic-uniform-buffer&quot;&gt;Single Dynamic Uniform Buffer&lt;/h2&gt;
+
+&lt;p&gt;The second approach I tried was to allocate a single VkBuffer which was large enough to store the uniform data for every object inside it, treating the buffer’s contents as an array of uniform data. Since in my case, I was submitting an array of mesh ids alongside the uniform data, this meant that I didn’t need to store any extra info in the primitive instance struct. As long as both arrays were in the same order, the right mesh would get drawn with the right uniform data.&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PrimitiveInstance&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;vec3&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pos&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;vec3&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;scale&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;vec4&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;col&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;meshID&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;One caveat to this approach is that the data stored in the VkBuffer has to be memory aligned to your GPU. In my case, I was already getting my VkPhysicalDeviceProperties when I initialized everything, so that data was easily accessible. With that alignment data, you can then figure out exactly how big your VkBuffer has to be:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;deviceAlignment&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;deviceProps&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;limits&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;minUniformBufferOffsetAlignment&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;uniformBufferSize&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;sizeof&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;PrimitiveUniformObject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dynamicAlignment&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;uniformBufferSize&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;deviceAlignment&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;deviceAlignment&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;uniformBufferSize&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;deviceAlignment&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;?&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;deviceAlignment&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bufferSize&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;uniformBufferSize&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;primitiveCount&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dynamicAlignment&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Once you know the alignment you need, you can use Windows’ aligned_malloc function to actually get an aligned block of memory, which you can then memcpy into the vkbuffer’s mapped pointer.&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;n&quot;&gt;uniformData&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;PrimitiveUniformObject&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;_aligned_malloc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;bufferSize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dynamicAlignment&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Since the PrimitiveUniformObject struct itself has no notion of alignment, you have to space your writes into buffer memory accordingly:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;c1&quot;&gt;//abbreviated code
+&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;idx&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;uniformChar&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;uniformData&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;prim&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;primitives&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;PrimitiveUniformObject&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;puo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;puo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;model&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;VIEW_PROJECTION&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;glm&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;translate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;prim&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pos&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;glm&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;scale&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;prim&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;scale&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;puo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;color&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;prim&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;col&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;memcpy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;uniformChar&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;idx&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dynamicAlignment&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;puo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;sizeof&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;PrimitiveUniformObject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;idx&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Likewise, when you allocate your VkBuffer, you’re going to want to request a buffer of size dynamicAlignment * number of primitives, and you’ll want to make sure you get memory that comes from a descriptorPool of type VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC.&lt;/p&gt;
+
+&lt;p&gt;With all of that set up, you can then copy your frame data to the uniform buffer like so:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;udata&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;nullptr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;vkMapMemory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;device&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;buffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;deviceMemory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dynamicAlignment&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PRIM_COUNT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;udata&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;memcpy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;udata&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;uniformData&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;  &lt;span class=&quot;n&quot;&gt;dynamicAlignment&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PRIM_COUNT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;vkUnmapMemory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;device&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;buffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;deviceMemory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;And finally, you need to pass an offset in your calls to vkCmdBindDescriptorSets. This offset tells vulkan where in the single buffer’s data to grab each object’s individual uniform data. Since it’s a byte offset, you’ll need to have the dynamicAlignment value we calculated earlier handy:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PRIM_COUNT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dynamicOffset&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;static_cast&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dynamicAlignment&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;vkCmdBindDescriptorSets&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;commandBuffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                            &lt;span class=&quot;n&quot;&gt;VK_PIPELINE_BIND_POINT_GRAPHICS&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                            &lt;span class=&quot;n&quot;&gt;pipelineLayout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                            &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                            &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                            &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;descriptorSet&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                            &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                            &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dynamicOffset&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;// rest of per object draw code goes here
+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;That should be enough to get you going, but we can make this faster too.&lt;/p&gt;
+
+&lt;h2 id=&quot;always-mapped-single-buffer&quot;&gt;Always Mapped Single Buffer&lt;/h2&gt;
+
+&lt;p&gt;Just like the multi-buffer approach, we can speed up the single buffer solution by keeping that buffer always mapped. Since we only have one buffer, this is a trivial change to the code. If you wanted, you could even just do it inside your update function like this:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;udata&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;nullptr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;udata&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;vkMapMemory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;device&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;buffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;deviceMemory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dynamicAlignment&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PRIM_COUNT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;udata&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;memcpy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;udata&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;uniformData&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;  &lt;span class=&quot;n&quot;&gt;dynamicAlignment&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PRIM_COUNT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Of course, you probably shouldn’t do it like this, but there’s no performance reason not to, so I’m going to back away slowly from discussing code quality issues now.&lt;/p&gt;
+
+&lt;h2 id=&quot;push-constants&quot;&gt;Push Constants&lt;/h2&gt;
+
+&lt;p&gt;To finish things off, let’s take a look at our big winner from the performance tests. Push constants are great for data that updates this frequently because you don’t actually need to allocate any buffers for it. This also means that we need to do a few things differently from the previous 4 approaches we’ve looked at, like changing how we declare our uniform data struct in glsl:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;n&quot;&gt;layout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;push_constant&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;uniform&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PER_OBJECT&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;mat4&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mvp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;vec4&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;col&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;obj&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Next, instead of creating any VkBuffers, when we create our pipeline layout, we need to specify a push constant range:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;n&quot;&gt;VkPushConstantRange&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pushConstantRange&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{};&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;pushConstantRange&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;offset&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;pushConstantRange&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;size&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;sizeof&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;PrimitiveUniformObject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;pushConstantRange&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;stageFlags&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;VK_SHADER_STAGE_VERTEX_BIT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;VkPipelineLayoutCreateInfo&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pipelineLayoutInfo&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{};&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;//..other init code here
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pipelineLayoutInfo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pSetLayouts&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;descriptorSetLayout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// still need this
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pipelineLayoutInfo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pushConstantRangeCount&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;pipelineLayoutInfo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pPushConstantRanges&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pushConstantRange&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Like the comment above says, even when using push constants, you still need to provide a descriptorSetLayout to specify how the uniform data is going to be laid out in memory. You just don’t actually need to make any descriptorSets to actually pass that data to the shader.&lt;/p&gt;
+
+&lt;p&gt;Instead, where you might otherwise call vkCmdBindDescriptorSets, you do the following:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PRIM_COUNT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;vkCmdPushConstants&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;commandBuffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;pipelineLayout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;VK_SHADER_STAGE_VERTEX_BIT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;sizeof&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;PrimitiveUniformObject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;uniformData&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]);&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;// rest of per object draw code goes here
+&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;That should cover it (assuming I haven’t missed a step). Given the option, push constants feel a lot cleaner for passing small bits of data to shaders, which makes sense given that they’re tailor made for that purpose. It is nice to have the most performant option we have, also be the easiest to work with.&lt;/p&gt;
+
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;That wraps up the implementation details for everything. To get a sense of when to use each approach, I recommend you check out NVidia’s &lt;a href=&quot;https://developer.nvidia.com/vulkan-shader-resource-binding&quot;&gt;Vulkan Shader Resource Binding&lt;/a&gt; page.&lt;/p&gt;
+
+&lt;p&gt;I’m a complete beginner with Vulkan, so if you see anything weird or just plain wrong in this post, please send me a message &lt;a href=&quot;https://twitter.com/khalladay&quot;&gt;on Twitter&lt;/a&gt;, I would love to hear from you! Likewise, if there’s a resource out there that’s helped you get a handle on Vulkan, please pass it along.&lt;/p&gt;
+
+&lt;p&gt;Until next time!
+&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;font size=&quot;2&quot;&gt;&lt;div style=&quot;border-style:solid; background-color:#DDDDDD &quot;&gt;
+
+&lt;strong&gt;Appendix: Testing Methodology&lt;/strong&gt;&lt;br /&gt;
+
+In case reviewing testing methods is your thing, here&#39;s how I got the numbers in all the graphs in this post:&lt;br /&gt;&lt;br /&gt;
+&lt;li&gt;When testing, the time step of the game logic was set to 0 (rather than deltaTime), so that any variations in frame rate from things like removing bricks, or handling game restart logic were eliminated. Then, the game was run for 20k frames, reporting the average frametime after every 5k frames. This gave me 4 average frame time numbers. I discarded the highest and lowest of these numbers, and then averaged the two remaining values to produce an average frametime for the test.&lt;/li&gt;&lt;br /&gt;
+&lt;li&gt;I monitored my CPU and GPU temp with the &lt;a href=&quot;https://camwebapp.com/&quot;&gt;Cam Web App&lt;/a&gt;, and let both of them return to their resting temp between tests (61 and 66 C respectively), and made sure that the same applications (and only those applications) were running alongside the breakout program.&lt;/li&gt;&lt;br /&gt;
+&lt;li&gt;I repeated this test 2 more times, at different times of the day (after using the laptop to do other tasks), which gave me 3 frametime averages (1 per run of the test). I chose the median of the three to present in the graph above.&lt;/li&gt;&lt;br /&gt;
+&lt;li&gt;Finally, all tests were done in Release builds, without a debugger attached or any validation layers turned on, and connected to a wall outlet to prevent any kind of throttling on battery to interfere with anything.&lt;/li&gt;&lt;br /&gt;
+&lt;li&gt;All the source for everything is  &lt;a href=&quot;https://github.com/khalladay/VkBreakout&quot;&gt;on github&lt;/a&gt;, I would love for someone to compile everything and run a similar test to see if the results for my GPU can be replicated on someone else&#39;s hardware.&lt;/li&gt;
+
+&lt;/div&gt;
+&lt;/font&gt;
+</content>
+ </entry>
  
  <entry>
    <title>GBA By Example - Sprite Animation</title>
@@ -54,14 +337,14 @@
 &lt;p&gt;I’m going to use the GUI version of grit, which you can find in the program folder, titled “wingrit.” There’s a command line app as well, but I haven’t needed to use it yet (and if I can avoid memorizing more command line args, I will), so if you’re following along with me, open wingrit, and you should see the following:&lt;/p&gt;
 
 &lt;div align=&quot;center&quot;&gt;
-&lt;img src=&quot;/images/post_images/2017-06-07/wingrit.png&quot; /&gt;
+&lt;img src=&quot;/images/post_images/2017-06-07/wingrit.PNG&quot; /&gt;
 &lt;br /&gt;
 &lt;/div&gt;
 
 &lt;p&gt;Simply open our sprite sheet image (with File-&amp;gt;Open), and you should see it in the GUI window. Once you see the image, we need to open the export window, so go to View-&amp;gt;GBAExport, and you should see this rather intimidating window pop up:&lt;/p&gt;
 
 &lt;div align=&quot;center&quot;&gt;
-&lt;img src=&quot;/images/post_images/2017-06-07/exportwindow.png&quot; /&gt;
+&lt;img src=&quot;/images/post_images/2017-06-07/exportwindow.PNG&quot; /&gt;
 &lt;br /&gt;
 &lt;/div&gt;
 
@@ -1461,61 +1744,6 @@ Alright, let’s start putting this into practice!&lt;/p&gt;
 &lt;p&gt;I suppose I should link you to some tools that can be used to create backgrounds, but I do so only grudgingly, because I don’t think they’re great. Tonc suggests &lt;a href=&quot;http://www.tilemap.co.uk/mappy.php&quot;&gt;Mappy&lt;/a&gt; and &lt;a href=&quot;http://nessie.gbadev.org/&quot;&gt;MapEd&lt;/a&gt;. To be fair, I haven’t written a tile mapping tool so I don’t really have much of a leg to stand on when criticizing these, but I found them rather fiddly to use, which is why I ended up just hand building some really simple ones for this post.&lt;/p&gt;
 
 &lt;p&gt;I’d love to hear about better tools for doing this sort of work. I think &lt;a href=&quot;http://www.mapeditor.org/&quot;&gt;Tiled&lt;/a&gt; might be better, but I don’t know how set up it is for GBA style stuff. In any case, I’d love to hear about what tools might be better &lt;a href=&quot;https://twitter.com/khalladay&quot;&gt;on Twitter&lt;/a&gt;. See you next week!&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Loading Static Meshes With the FBX SDK</title>
-   <link href="http://kylehalladay.com/2017/04/07/Loading-Static-Meshes-FBX.html"/>
-   <updated>2017-04-07T00:00:00-05:00</updated>
-   <id>http://kylehalladay.com/2017/04/07/Loading-Static-Meshes-FBX</id>
-   <content type="html">&lt;p&gt;One of my goals for 2017 is to learn a new graphics api, and since this means working without an engine for the first time in years, this means that I’m also re-learning a bunch of things that I’ve long since forgotten, like loading meshes. I’ve been spoiled by big shiny game engines that have done this for me for so long that I forgot how to do it.&lt;/p&gt;
-
-&lt;p&gt;Since it seems that fbx has won the mesh file format wars for now, I figured it made the most sense to write an FBX importer. Googling around turned up a bunch of tutorials, which were handy when combined with the FBX SDK docs, but none of the tutorials by themselves really explained things in a way that made sense to me, so I thought I’d write my own. This is mostly for my own benefit, so that the next time I forget how to do this I have a reference to look back on, but I decided to post it publicly in case it helps someone else out to.&lt;/p&gt;
-
-&lt;p&gt;This post is just going to cover loading a static mesh with normals, multiple uv sets, and vertex colors. We’ll just be filling out a simple Mesh struct with this info; you’ll have to do the work of actually rendering it yourself.&lt;/p&gt;
-
-&lt;p&gt;If you need a mesh to work with for this tutorial, you can use the one that I’ve uploaded &lt;a href=&quot;&quot;&gt;here&lt;/a&gt;, it’s a super fun cube mesh, so be excited. Finally, This post was written assuming that you’re using the 2017 sdk, so if you’re from the future, things might be different for you.&lt;/p&gt;
-
-&lt;h2 id=&quot;setting-up-your-project&quot;&gt;Setting Up Your Project&lt;/h2&gt;
-
-&lt;p&gt;This section is assuming that you’re using Visual Studio. Skip it and do your own thing if that isn’t the case for you :)&lt;/p&gt;
-
-&lt;p&gt;The first thing that we need to do is get a project including/linking with the FBX SDK. You can grab the sdk off of &lt;a href=&quot;http://usa.autodesk.com/adsk/servlet/pc/item?siteID=123112&amp;amp;id=10775847&quot;&gt;Autodesk’s Site&lt;/a&gt;, and install it wherever you want it to be.&lt;/p&gt;
-
-&lt;p&gt;Next, create a project in VS, and open up the project properties window. We need to tell our project where to look to see the SDK we just installed. This part should mostly be familiar to you if you’ve ever worked with an external library before, but there’s some nuances to the FBX SDK that are worth mentioning.&lt;/p&gt;
-
-&lt;p&gt;In the Property window, navigate to the “VC++ Directories” tab. It should look something like this:&lt;/p&gt;
-
-&lt;div align=&quot;center&quot;&gt;
-&lt;img src=&quot;/images/post_images/2017-04-07/vcdirectories.PNG&quot; /&gt;&lt;br /&gt;
-&lt;/div&gt;
-
-&lt;p&gt;Just like any other library, you need to add the “include” directory of the FBX SDK to the “Include Directories” item, and the path to the SDK library folder to your “Library Directories” item. Make sure that you use the debug libraries for your debug project configuration, and the release libraries for your release config, otherwise you may run into issues when you try to build.&lt;/p&gt;
-
-&lt;p&gt;Next, we need to tell the linker which library file to use, so navigate to the Linker-&amp;gt;Input page:&lt;/p&gt;
-
-&lt;div align=&quot;center&quot;&gt;
-&lt;img src=&quot;/images/post_images/2017-04-07/linkerinput.PNG&quot; /&gt;&lt;br /&gt;
-&lt;/div&gt;
-
-&lt;p&gt;We need to add the library name to the “Additional Dependencies” item, but this is where we need to pay some special attention to what we’re doing. The FBX SDK ships with a number of libraries, a .DLL and two .lib files. To make things easier, I used one of the static libraries instead of the dll (so that I didn’t have to worry about where the DLL was located). This means that there were two options: libfbxsdk-md.lib and libfbxsdk-mt.lib (mt for multithreaded). You can choose to use either one, but both of them require one additional step.&lt;/p&gt;
-
-&lt;p&gt;Regardless of which one you entered, you will need to navigate to the code generation tab:&lt;/p&gt;
-
-&lt;div align=&quot;center&quot;&gt;
-&lt;img src=&quot;/images/post_images/2017-04-07/codegeneration.png&quot; /&gt;&lt;br /&gt;
-&lt;/div&gt;
-
-&lt;p&gt;If you chose to use the -MD variant, you will need to make sure that your “Runtime Library” setting is set to “/MD” in release and “/MDd” in debug. Predictably, if you choose the -MT variant (like I did), these need to be “/MT” and “/MTd” respectively.&lt;/p&gt;
-
-&lt;p&gt;Ok, that covers the set up, let’s import some meshes shall we?&lt;/p&gt;
-
-&lt;h2 id=&quot;setting-up-the-fbx-importer&quot;&gt;Setting up the FBX Importer&lt;/h2&gt;
-
-&lt;h2 id=&quot;getting-to-the-mesh&quot;&gt;Getting To The Mesh&lt;/h2&gt;
-
-&lt;p&gt;While they’re probably most commonly used to store meshes (at least in my experience), FBX files can be used to store entire 3D scenes, containing meshes, materials, lights, animation data, NURB curves, LOD Groups, and a whole bunch of other stuff. For the most part, if you’re importing a mesh from and FBX file, you hope that the file just has the mesh you want, but that isn’t always the case, which is why the first thing we need to do is traverse our imported FBX scene and find the mesh (or meshes!) contained in it.&lt;/p&gt;
 </content>
  </entry>
  
