@@ -4,7 +4,7 @@
  <title>The blog of Kyle Halladay</title>
  <link href="http://kylehalladay.com/atom.xml" rel="self"/>
  <link href="http://kylehalladay.com"/>
- <updated>2017-08-13T08:54:06-05:00</updated>
+ <updated>2017-08-13T08:56:51-05:00</updated>
  <id>http://kylehalladay.com</id>
  <author>
    <name>Kyle Halladay</name>
@@ -45,7 +45,7 @@
 &lt;p&gt;However, Breakout is really not a good test for a GTX 1060, and with 500 blocks on screen, I was running every test at &amp;lt; 1 ms per frame. The times were so small, that even between runs of the exact same version of the program, the results were too varied to be much use (since even a change in measured time of 1/100th of an ms became significant). To make things a bit easier to work with, I added a mode to the game which rendered 5000 blocks at a time.&lt;/p&gt;
 
 &lt;div align=&quot;center&quot;&gt;
-&lt;img src=&quot;/images/post_images/2017-08-30/stresstest.png&quot; /&gt;
+&lt;img src=&quot;/images/post_images/2017-08-30/stresstest.PNG&quot; /&gt;
 &lt;font size=&quot;2&quot;&gt;which admittedly looked sorta ridiculous&lt;/font&gt;
 &lt;br /&gt;&lt;br /&gt;
 &lt;/div&gt;
@@ -53,7 +53,7 @@
 &lt;p&gt;This produced much more stable results (ie/ could be reproduced in multiple runs), which I want to provide here to give context to the rest of this blog post.&lt;/p&gt;
 
 &lt;div align=&quot;center&quot;&gt;
-&lt;img src=&quot;/images/post_images/2017-08-30/vkTest.png&quot; /&gt;
+&lt;img src=&quot;/images/post_images/2017-08-30/vkTest.PNG&quot; /&gt;
 &lt;br /&gt;
 &lt;/div&gt;
 
