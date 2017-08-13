@@ -4,7 +4,7 @@
  <title>The blog of Kyle Halladay</title>
  <link href="http://kylehalladay.com/atom.xml" rel="self"/>
  <link href="http://kylehalladay.com"/>
- <updated>2017-08-13T08:58:00-05:00</updated>
+ <updated>2017-08-13T08:59:50-05:00</updated>
  <id>http://kylehalladay.com</id>
  <author>
    <name>Kyle Halladay</name>
@@ -289,6 +289,7 @@ In case reviewing testing methods is your thing, here&#39;s how I got the number
 &lt;li&gt;I repeated this test 2 more times, at different times of the day (after using the laptop to do other tasks), which gave me 3 frametime averages (1 per run of the test). I chose the median of the three to present in the graph above.&lt;/li&gt;&lt;br /&gt;
 &lt;li&gt;Finally, all tests were done in Release builds, without a debugger attached or any validation layers turned on, and connected to a wall outlet to prevent any kind of throttling on battery to interfere with anything.&lt;/li&gt;&lt;br /&gt;
 &lt;li&gt;All the source for everything is  &lt;a href=&quot;https://github.com/khalladay/VkBreakout&quot;&gt;on github&lt;/a&gt;, I would love for someone to compile everything and run a similar test to see if the results for my GPU can be replicated on someone else&#39;s hardware.&lt;/li&gt;
+
 
 &lt;/div&gt;
 &lt;/font&gt;
