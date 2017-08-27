@@ -14,7 +14,7 @@ Lately I’ve been trying to wrap my head around Vulkan. As part of that, I’ve
 When I’m starting to learn a new graphics API, the thing that I try to focus on is getting used to all the different ways to send data from the CPU to the GPU. Since my Breakout clone didn’t have textures, or meshes (really) to speak of, that left the per frame uniform data for each object on screen.
 
 <div align="center">
-<img src="/images/post_images/2017-08-30/breakout.png" />
+<img src="/images/post_images/2017-08-13/breakout.png" />
 <font size="2">The "Playable" version of the Breakout Clone</font>
 <br><br>
 </div>
@@ -35,7 +35,7 @@ So, in the interest of whirling, I put a branch in my repo for each, and then tr
 However, Breakout is really not a good test for a GTX 1060, and with 500 blocks on screen, I was running every test at < 1 ms per frame. The times were so small, that even between runs of the exact same version of the program, the results were too varied to be much use (since even a change in measured time of 1/100th of an ms became significant). To make things a bit easier to work with, I added a mode to the game which rendered 5000 blocks at a time.
 
 <div align="center">
-<img src="/images/post_images/2017-08-30/stresstest.PNG" />
+<img src="/images/post_images/2017-08-13/stresstest.PNG" />
 <font size="2">which admittedly looked sorta ridiculous</font>
 <br><br>
 </div>
@@ -43,7 +43,7 @@ However, Breakout is really not a good test for a GTX 1060, and with 500 blocks 
 This produced much more stable results (ie/ could be reproduced in multiple runs), which I want to provide here to give context to the rest of this blog post.
 
 <div align="center">
-<img src="/images/post_images/2017-08-30/vktest.PNG" />
+<img src="/images/post_images/2017-08-13/vktest.PNG" />
 <br>
 </div>
 
@@ -75,7 +75,7 @@ Hopefully that makes sense! I'm going to try to keep all the snippets I share ab
 
 I'm also going to assume that you're at least at the level I was when I started this project, that is, you've gone through [vulkan-tutorial.com](https://vulkan-tutorial.com/), and therefore understand how to allocate a VkBuffer. If you aren't there yet, click the link to the tutorial and come back in a few hours. Things will make much more sense.
 
-## Multiple, Unampped Buffers
+## Multiple, Unmapped Buffers
 Let's start by talking about the approaches that felt most intuitive for me right off the bat, giving each drawable entity (which my code calls a Primitive) it's own VkBuffer to store it's own uniform data, and a VkDescriptorSet to know about that buffer:
 
 {% highlight c %}

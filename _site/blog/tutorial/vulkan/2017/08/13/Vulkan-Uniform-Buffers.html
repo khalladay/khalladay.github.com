@@ -9,7 +9,7 @@
   <title>Kyle Halladay - Comparing Uniform Data Transfer Methods in Vulkan</title>
   <meta name="author" content="Kyle Halladay" />
   <meta name="description" content="I build shaders, renderers, games, and other stuff that's fun to stare at." />
-  <link rel="canonical" href="http://kylehalladay.com/blog/tutorial/vulkan/2017/08/30/Vulkan-Uniform-Buffers.html" />
+  <link rel="canonical" href="http://kylehalladay.com/blog/tutorial/vulkan/2017/08/13/Vulkan-Uniform-Buffers.html" />
   <meta name="keywords" content="life,code,software,development,games,graphics,shaders,indie" />
 
   <link href="//fonts.googleapis.com/css?family=Open+Sans:600,800" rel="stylesheet" type="text/css">
@@ -100,7 +100,7 @@
 <p>When I’m starting to learn a new graphics API, the thing that I try to focus on is getting used to all the different ways to send data from the CPU to the GPU. Since my Breakout clone didn’t have textures, or meshes (really) to speak of, that left the per frame uniform data for each object on screen.</p>
 
 <div align="center">
-<img src="/images/post_images/2017-08-30/breakout.png" />
+<img src="/images/post_images/2017-08-13/breakout.png" />
 <font size="2">The "Playable" version of the Breakout Clone</font>
 <br /><br />
 </div>
@@ -123,7 +123,7 @@
 <p>However, Breakout is really not a good test for a GTX 1060, and with 500 blocks on screen, I was running every test at &lt; 1 ms per frame. The times were so small, that even between runs of the exact same version of the program, the results were too varied to be much use (since even a change in measured time of 1/100th of an ms became significant). To make things a bit easier to work with, I added a mode to the game which rendered 5000 blocks at a time.</p>
 
 <div align="center">
-<img src="/images/post_images/2017-08-30/stresstest.PNG" />
+<img src="/images/post_images/2017-08-13/stresstest.PNG" />
 <font size="2">which admittedly looked sorta ridiculous</font>
 <br /><br />
 </div>
@@ -131,7 +131,7 @@
 <p>This produced much more stable results (ie/ could be reproduced in multiple runs), which I want to provide here to give context to the rest of this blog post.</p>
 
 <div align="center">
-<img src="/images/post_images/2017-08-30/vktest.PNG" />
+<img src="/images/post_images/2017-08-13/vktest.PNG" />
 <br />
 </div>
 
@@ -161,7 +161,7 @@
 
 <p>I’m also going to assume that you’re at least at the level I was when I started this project, that is, you’ve gone through <a href="https://vulkan-tutorial.com/">vulkan-tutorial.com</a>, and therefore understand how to allocate a VkBuffer. If you aren’t there yet, click the link to the tutorial and come back in a few hours. Things will make much more sense.</p>
 
-<h2 id="multiple-unampped-buffers">Multiple, Unampped Buffers</h2>
+<h2 id="multiple-unmapped-buffers">Multiple, Unmapped Buffers</h2>
 <p>Let’s start by talking about the approaches that felt most intuitive for me right off the bat, giving each drawable entity (which my code calls a Primitive) it’s own VkBuffer to store it’s own uniform data, and a VkDescriptorSet to know about that buffer:</p>
 
 <div class="highlight"><pre><code class="language-c" data-lang="c"><span class="k">struct</span> <span class="n">PrimitiveInstance</span>
@@ -367,7 +367,6 @@ In case reviewing testing methods is your thing, here's how I got the numbers in
 <li>I repeated this test 2 more times, at different times of the day (after using the laptop to do other tasks), which gave me 3 frametime averages (1 per run of the test). I chose the median of the three to present in the graph above.</li><br />
 <li>Finally, all tests were done in Release builds, without a debugger attached or any validation layers turned on, and connected to a wall outlet to prevent any kind of throttling on battery to interfere with anything.</li><br />
 <li>All the source for everything is  <a href="https://github.com/khalladay/VkBreakout">on github</a>, I would love for someone to compile everything and run a similar test to see if the results for my GPU can be replicated on someone else's hardware.</li>
-
 
 </div>
 </font>

@@ -4,7 +4,7 @@
  <title>The blog of Kyle Halladay</title>
  <link href="http://kylehalladay.com/atom.xml" rel="self"/>
  <link href="http://kylehalladay.com"/>
- <updated>2017-08-13T08:59:50-05:00</updated>
+ <updated>2017-08-27T08:18:55-05:00</updated>
  <id>http://kylehalladay.com</id>
  <author>
    <name>Kyle Halladay</name>
@@ -13,16 +13,257 @@
 
  
  <entry>
-   <title>Comparing Uniform Data Transfer Methods in Vulkan</title>
-   <link href="http://kylehalladay.com/blog/tutorial/vulkan/2017/08/30/Vulkan-Uniform-Buffers.html"/>
+   <title>Improving Vulkan Breakout</title>
+   <link href="http://kylehalladay.com/blog/tutorial/vulkan/2017/08/30/Vulkan-Uniform-Buffers-pt2.html"/>
    <updated>2017-08-30T00:00:00-05:00</updated>
-   <id>http://kylehalladay.com/blog/tutorial/vulkan/2017/08/30/Vulkan-Uniform-Buffers</id>
+   <id>http://kylehalladay.com/blog/tutorial/vulkan/2017/08/30/Vulkan-Uniform-Buffers-pt2</id>
+   <content type="html">&lt;p&gt;There are lots of reasons why I love the internet, but one of the big ones is that it gives me a way to learn from folks that I would never get to interact with in real life.&lt;/p&gt;
+
+&lt;p&gt;Two weeks ago I posted about &lt;a href=&quot;http://kylehalladay.com/blog/tutorial/vulkan/2017/08/13/Vulkan-Uniform-Buffers.html&quot;&gt;Comparing Uniform Data Transfer Methods In Vulkan&lt;/a&gt;, and immediately got a bunch of great suggestions from Twitter (thanks &lt;a href=&quot;https://twitter.com/SaschaWillems2&quot;&gt;@SaschaWillems2&lt;/a&gt;!), and &lt;a href=&quot;https://www.reddit.com/r/vulkan/comments/6tf9ut/trying_to_wrap_my_head_around_vulkan_wrote_a_blog/&quot;&gt;from reddit&lt;/a&gt; on how I could improve things. There was enough there that I thought it warranted revisiting my Breakout clone to test out some new ideas.&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+&lt;img src=&quot;/images/post_images/2017-08-30/learnding.PNG&quot; /&gt;
+&lt;font size=&quot;2&quot;&gt;Me irl&lt;/font&gt;
+&lt;br /&gt;&lt;br /&gt;
+&lt;/div&gt;
+
+&lt;p&gt;The main pieces of feedback were:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;vkCmdWriteTimestamp could be used to get more fine grained timing data&lt;/li&gt;
+  &lt;li&gt;I really didn’t need to be using _aligned_malloc with my dynamic uniform buffer approach&lt;/li&gt;
+  &lt;li&gt;It might be faster to use device-local memory&lt;/li&gt;
+  &lt;li&gt;With the approaches that don’t use push-constants, it might be faster to re-use command buffers instead of creating them every frame&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;It all sounded like great advice to me, so I decided to try out each point listed above, to see if the conclusions drawn in the first post are still valid.&lt;/p&gt;
+
+&lt;p&gt;Starting from the top:&lt;/p&gt;
+
+&lt;h2 id=&quot;use-vkcmdwritetimestamp&quot;&gt;Use vkCmdWriteTimestamp&lt;/h2&gt;
+
+&lt;p&gt;I loved this bit of feedback, because it gave me another tool to use to do performance testing! Especially because before hearing about this bit of the api, I had no idea how to profile the performance of a specific chunk of a command buffer.&lt;/p&gt;
+
+&lt;p&gt;vkCmdWriteTimestamp writes it’s timing data into a VkQuery object. VkQuery objects are stored in a VkQueryPool. So the first step to getting timing data from vulkan is to create one of those:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;n&quot;&gt;VkQueryPoolCreateInfo&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;createInfo&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{};&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;createInfo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sType&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;createInfo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pNext&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;nullptr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;createInfo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;queryType&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;VK_QUERY_TYPE_TIMESTAMP&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;createInfo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;queryCount&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;VkResult&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;res&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;vkCreateQueryPool&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;device&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;createInfo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;nullptr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;queryPool&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;assert&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;res&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;VK_SUCCESS&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Since I only want to time the part of the rendering pipeline that changes between each uniform data implementation, I only need to allocate 2 queries - one to store the timestamp immediately before the block I’m timing executes, and one to store the timestand after it’s done.&lt;/p&gt;
+
+&lt;p&gt;With that done, all that’s left is to add the appropriate calls to the draw function:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;c1&quot;&gt;//abbreviated code
+&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;vkBeginCommandBuffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;commandBuffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;beginInfo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;vkCmdResetQueryPool&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;commandBuffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;queryPool&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;//more set up code... (omitted for brevity)
+&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;//the block we want to time starts here
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;vkCmdWriteTimestamp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;commandBuffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;queryPool&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PRIM_COUNT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;//per primitive logic that we want to time
+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;vkCmdWriteTimestamp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;commandBuffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;queryPool&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;As you may have noticed, vkCmdWriteTimestamp takes a pipeline stage as one of it’s arguments. This was unintuitive for me, but here’s what the docs say about it:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;“vkCmdWriteTimestamp latches the value of the timer when all previous commands have completed executing as far as the specified pipeline stage, and writes the timestamp value to memory. When the timestamp value is written, the availability status of the query is set to available.”&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;What it seems like this means (correct me if I’m wrong, internet), is that if you pass VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT to this function, you get the timestamp of when all the commands submitted to the command buffer BEFORE you call vkCmdWriteTimestamp have completed executing, whereas if you pass, for instance VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, you’d get the timestamp of when the commands before the timestamp call started execution.&lt;/p&gt;
+
+&lt;p&gt;Assuming that’s the case, then in order to measure just the execution of our loop in the above example, both calls to vkCmdWriteTimestamp need to be passed the VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT to get just the timing info for the code between the two calls.&lt;/p&gt;
+
+&lt;p&gt;If you recall, the frame time of each approach was measured last week as the following:&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+&lt;img src=&quot;/images/post_images/2017-08-30/vkTest.PNG&quot; /&gt;
+&lt;br /&gt;&lt;br /&gt;
+&lt;/div&gt;
+
+&lt;p&gt;I re-ran this test, but this time used vkCmdWriteTimestamp to measure just the time it takes to add the primitives to the command queue and set up their uniform data:&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+&lt;img src=&quot;/images/post_images/2017-08-30/timestamp.PNG&quot; /&gt;
+&lt;br /&gt;&lt;br /&gt;
+&lt;/div&gt;
+
+&lt;p&gt;This data is likely of questionable usefulness because of how light the entire application is on the GPU, but it’s interesting nonetheless. It suggests that the push constant and single buffer approaches are equal in how fast they are to execute on the GPU. This might mean that the frametime difference between them was mostly due to the added time it took to memcpy data into the buffers for the single buffer approaches.&lt;/p&gt;
+
+&lt;p&gt;The multi-buffer approaches are slower than the others in this measure as well, which makes sense given that even when submitting to the command buffer, the multi-buffer branches have to change which buffers are bound all the time. However, because of how simple our frame is, all the approaches are almost exactly as fast. If the above timing code is accurate, it means that all the larger differences we’re seeing in the frametime of the application are due to the cost of memory mapping, and memcpying our uniform data around.&lt;/p&gt;
+
+&lt;h2 id=&quot;dont-use-alignedmalloc&quot;&gt;Don’t Use _aligned_malloc&lt;/h2&gt;
+
+&lt;p&gt;The next piece of feedback came from reddit user &lt;a href=&quot;https://www.reddit.com/user/rhynodegreat&quot;&gt;rhynodegreat&lt;/a&gt;, and it is directly related to the cost of memory mapping we just talked about. It was pointed out that since I was using memcpy to trasnfer data to a mapped buffer pointer, I didn’t need to be using _aligned_malloc for the original allocation. I admit this was a bit of cargo culting on my end. I originally figured out how to use dynamic uniform buffers from some example code I found online, and didn’t question the use of _aligned_malloc, since I had never used it before.&lt;/p&gt;
+
+&lt;p&gt;Luckily, removing it from my code was as simple as replacing any calls to it with a simple malloc call.&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;n&quot;&gt;uniformData&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;PrimitiveUniformObject&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;_aligned_malloc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;bufferSize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dynamicAlignment&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;becomes&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;n&quot;&gt;uniformData&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;PrimitiveUniformObject&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;malloc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;bufferSize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Everything still works with the above changes, but I was curious as to whether it had any performance implications, so I compared the DynamicUniformBuffer approach from earlier with the same approach using a regular malloc. I was going to show this in another graph, but I found no real performance difference between them, so it feels like (at least for this use case), whether to use _aligned_malloc or just malloc is a matter of preference / code portability.&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+&lt;img src=&quot;/images/post_images/2017-08-30/boring.PNG&quot; /&gt;
+&lt;font size=&quot;2&quot;&gt; How i felt when I saw a graph with all the bars the same height &lt;/font&gt;
+&lt;br /&gt;&lt;br /&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Howeveer, while testing this, I realized that (for the Single Buffer Approach), I could reduce the need for this allocation at all with a very small amount of effort. If I could get the mapped pointer to the buffer before I pass this data to the draw function, I could save myself a lot of effort. So I rearranged things a bit to try that out:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;c1&quot;&gt;//abbreviated code
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;uniformData&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;PrimitiveUniformObject&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;malloc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;bufferSize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;idx&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;uniformChar&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;uniformData&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;prim&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;primitives&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;PrimitiveUniformObject&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;puo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;puo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;model&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;VIEW_PROJECTION&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;glm&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;translate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;prim&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pos&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;glm&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;scale&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;prim&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;scale&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;puo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;color&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;prim&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;col&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;memcpy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;uniformChar&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;idx&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dynamicAlignment&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;puo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;sizeof&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;PrimitiveUniformObject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;idx&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;Renderer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;draw&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;uniformData&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;cm&quot;&gt;/* other args */&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Becomes:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;c1&quot;&gt;//abbreviated code
+&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;idx&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;uniformChar&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Renderer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mapBufferPtr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;prim&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;primitives&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;PrimitiveUniformObject&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;puo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;puo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;model&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;VIEW_PROJECTION&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;glm&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;translate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;prim&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pos&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;glm&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;scale&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;prim&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;scale&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;puo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;color&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;prim&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;col&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;memcpy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;uniformChar&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;idx&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dynamicAlignment&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;puo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;sizeof&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;PrimitiveUniformObject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;idx&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;Renderer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;unmapBufferPtr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;Renderer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;draw&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt; &lt;span class=&quot;cm&quot;&gt;/* other args */&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The unmapBufferPtr() call can simply be omitted in order to keep things mapped all the time.&lt;/p&gt;
+
+&lt;p&gt;I decided to compare the performance of the Single-Buffer approaches with these changes vs the timing data that I presented last time, and it appears that the above changes yield a modest speed up for all approaches except using push-constants, since they didn’t need the _aligned_alloc call in the first place.&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+&lt;img src=&quot;/images/post_images/2017-08-30/writingPerf.PNG&quot; /&gt;
+&lt;br /&gt;&lt;br /&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Assuming my methodology for these tests is correct (this is outlined at the end of the post), the data points to at least a small performance improvement from removing that unnecessary memcpy, and cleaner code, since it avoids an unnecessary allocation, and copy.&lt;/p&gt;
+
+&lt;h2 id=&quot;use-device-local-memory&quot;&gt;Use Device-Local Memory&lt;/h2&gt;
+
+&lt;p&gt;I liked this piece of feedback because it forced me to actually validate an assummption I made in the previous post: that data which gets 100% updated every frame likely doesn’t benefit from being device local. So I’m starting with that as my hypothesis.&lt;/p&gt;
+
+&lt;p&gt;For the most part, changing things to use device local memory was surprisingly easy. All it took was changing what buffer was getting mapped when I wanted to transfer uniform data, and then adding code to copy that data (now in a staging buffer) to the device local memory that the shaders ended up using. Given that the nuts and bolts of using a staging buffer are already excellently presented at &lt;a href=&quot;https://vulkan-tutorial.com/Vertex_buffers/Staging_buffer&quot;&gt;vulkan-tutorial.com&lt;/a&gt;, I’m going to skip talking about that here. You can always check out the &lt;a href=&quot;https://github.com/khalladay/VkBreakout&quot;&gt;repo&lt;/a&gt; if you’re curious.&lt;/p&gt;
+
+&lt;p&gt;I updated the performance graph from last week with timings using device local memory. I also included timings using vkTimestamps for the draw functions as well (again, only for the loop that created and submitted draw calls, since that’s what changed between different versions).&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+&lt;img src=&quot;/images/post_images/2017-08-30/memorytype.PNG&quot; /&gt;
+&lt;br /&gt;&lt;br /&gt;
+&lt;/div&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+&lt;img src=&quot;/images/post_images/2017-08-30/timestamp2.PNG&quot; /&gt;
+&lt;font size=&quot;2&quot;&gt;In 3D to show the really small values too&lt;/font&gt;
+&lt;br /&gt;&lt;br /&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Turns out my hypothesis was wrong. Spectacularly wrong.&lt;/p&gt;
+
+&lt;p&gt;The huuuggeee increase in frametime for the multi-buffer versions took me off guard. It’s so high that I’m wondering if I’m not making another weird mistake in my implementation (please, spot my mistake in &lt;a href=&quot;https://github.com/khalladay/VkBreakout/blob/02-Multi-Buffer-KeepMapped/Breakout/Renderer.cpp&quot;&gt;the renderer.cpp file&lt;/a&gt;), but I suppose it does make some sense, given that we’re asking the gpu to do 5000 copy buffer operations every frame in addition to everything else.&lt;/p&gt;
+
+&lt;p&gt;That being said, for the single buffer approach, using device-local memory pushed it’s average time per frame to the same speed as using push-constants, which is interesting, but I’m not sure I expect that to hold up given heavier loads (although I’m not sure which one would win in that case). Sounds like something to test in a later (more complex) project.&lt;/p&gt;
+
+&lt;p&gt;For now though, the message from this is test is clear: use device-local memory for data which doesn’t get updated frequently (or at least, which doesn’t require a lot of copy buffer operations per frame).&lt;/p&gt;
+
+&lt;p&gt;Last note - the two graphs were generated in different runs of testing, so the numbers don’t 100% add up between the two of them, but they’re close enough for me to feel comfortable drawing early conclusions about how to use Vulkan, so I’m not losing any sleep over it.&lt;/p&gt;
+
+&lt;h2 id=&quot;re-use-command-buffers&quot;&gt;Re-use Command Buffers&lt;/h2&gt;
+
+&lt;p&gt;The last bit of advice that I wanted to look into was that I am wasting time recreating command buffers that are mostly identical every frame. The only time the command buffer actually changes is when a brick gets removed. Since all the tests that I’m running involve a static scene anyway, I’m going to work around that here by just having logic move the hit bricks off-screen, instead of removing them. I definitely couldn’t get away with changes like this on a real project, but it works well enough to get some performance data in this case.&lt;/p&gt;
+
+&lt;p&gt;I made a few changes to the project so that the actual draw function doesn’t record any commands, it simply submits the pre-recorded command buffers that are generated at the beginning of the project. Unsurprisingly, this is pretty good for performance:&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+&lt;img src=&quot;/images/post_images/2017-08-30/reuse1.png&quot; /&gt;
+&lt;font size=&quot;2&quot;&gt;You can&#39;t reuse a command buffer with push constants (as far as I know)&lt;/font&gt;
+&lt;br /&gt;&lt;br /&gt;
+&lt;/div&gt;
+
+&lt;p&gt;From the graph, you can see how much this improves the performance of basically everything. In fact, compared to everything else that I tried, reusing command buffers was by far the single most impactful thing for the performance of the program. It literally made almost everything (except mapping a per object buffer every frame) faster than the push-constant approach, which so far has been the most performant way to do things in every test. I assume that even a less aggressive buffer re-use strategy would pay dividends in a more complex project, and I’m certainly going to be structuring future projects to take advantage of this as much as possible.&lt;/p&gt;
+
+&lt;p&gt;I also decided to test to see how these improvements fared when using device-local memory:&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+&lt;img src=&quot;/images/post_images/2017-08-30/reuse2.png&quot; /&gt;
+&lt;br /&gt;&lt;br /&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Maybe anticlimactically (since this is my last graph), for the single buffer approaches this did basically nothing. For the multi-buffer approaches, the overhead of doing a vkCmdCopyBuffer for each object every frame still hit performance so hard that reusing the command buffers really didn’t matter. The lesson to gain from all this: pay attention to how often you update a chunk of data before deciding to make it device-local, since that could be doing more harm than good.&lt;/p&gt;
+
+&lt;p&gt;I would have taken vulkan timestamp measurements of all of this, but I realized after taking data down the first time that I had changed the first timestamp call to VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT to test something out earlier and had forgotten to change it back, making any timestamp data I got here completely useless for comparing against previous data, and I’m sick to death of this Breakout clone, so I decided to just press on and omit those measurements.&lt;/p&gt;
+
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;That’s all for today! When I started making my little Breakout clone, I had no idea that it was going to turn out to be so informative! That being said, I need to move on now. There were some bits of advice that I got that I really liked, that I didn’t end up trying out here simply to save my sanity. This code was never written to be anything other than throwaway code, and it’s time to throw it all out and start fresh. Who knows, maybe my next foray into vulkan will even have textures!&lt;/p&gt;
+
+&lt;p&gt;If you spot any errors (there’s likely a ton) in the above code, or just want to say hi, I’m always around &lt;a href=&quot;https://twitter.com/khalladay&quot;&gt;on Twitter!&lt;/a&gt;. I’ve learned more from people pointing out my mistakes in the past week than I did actually building this thing from scratch, so keep the feedback coming!  &lt;/p&gt;
+
+&lt;font size=&quot;2&quot;&gt;&lt;div style=&quot;border-style:solid; background-color:#DDDDDD &quot;&gt;
+
+&lt;strong&gt;Appendix: Testing Methodology&lt;/strong&gt;&lt;br /&gt;
+
+In case reviewing testing methods is your thing, here&#39;s how I got the numbers in all the graphs in this post:&lt;br /&gt;&lt;br /&gt;
+&lt;li&gt;When testing, the time step of the game logic was set to 0 (rather than deltaTime), so that any variations in frame rate from things like removing bricks, or handling game restart logic were eliminated. Then, the game was run for 20k frames, reporting the average frametime after every 5k frames. This gave me 4 average frame time numbers. I discarded the highest and lowest of these numbers, and then averaged the two remaining values to produce an average frametime for the test.&lt;/li&gt;&lt;br /&gt;
+&lt;li&gt;I monitored my CPU and GPU temp with the &lt;a href=&quot;https://camwebapp.com/&quot;&gt;Cam Web App&lt;/a&gt;, and let both of them return to their resting temp between tests (61 and 66 C respectively), and made sure that the same applications (and only those applications) were running alongside the breakout program.&lt;/li&gt;&lt;br /&gt;
+&lt;li&gt;I repeated this test 2 more times, at different times of the day (after using the laptop to do other tasks), which gave me 3 frametime averages (1 per run of the test). I chose the median of the three to present in the graph above.&lt;/li&gt;&lt;br /&gt;
+&lt;li&gt;Unless vkCmdWriteTimestamp data was included in the graph, the calls to vkCmdWriteTimestamp were removed via an ifdef&lt;/li&gt;&lt;br /&gt;
+&lt;li&gt;Finally, all tests were done in Release builds, without a debugger attached or any validation layers turned on, and connected to a wall outlet to prevent any kind of throttling on battery to interfere with anything.&lt;/li&gt;&lt;br /&gt;
+&lt;li&gt;All the source for everything is  &lt;a href=&quot;https://github.com/khalladay/VkBreakout&quot;&gt;on github&lt;/a&gt;, I would love for someone to compile everything and run a similar test to see if the results for my GPU can be replicated on someone else&#39;s hardware.&lt;/li&gt;
+
+&lt;/div&gt;
+&lt;/font&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Comparing Uniform Data Transfer Methods in Vulkan</title>
+   <link href="http://kylehalladay.com/blog/tutorial/vulkan/2017/08/13/Vulkan-Uniform-Buffers.html"/>
+   <updated>2017-08-13T00:00:00-05:00</updated>
+   <id>http://kylehalladay.com/blog/tutorial/vulkan/2017/08/13/Vulkan-Uniform-Buffers</id>
    <content type="html">&lt;p&gt;Lately I’ve been trying to wrap my head around Vulkan. As part of that, I’ve been building a small Breakout clone (&lt;a href=&quot;https://github.com/khalladay/VkBreakout&quot;&gt;github&lt;/a&gt;) as a way to see how the pieces of the API fit together in a “real” application.&lt;/p&gt;
 
 &lt;p&gt;When I’m starting to learn a new graphics API, the thing that I try to focus on is getting used to all the different ways to send data from the CPU to the GPU. Since my Breakout clone didn’t have textures, or meshes (really) to speak of, that left the per frame uniform data for each object on screen.&lt;/p&gt;
 
 &lt;div align=&quot;center&quot;&gt;
-&lt;img src=&quot;/images/post_images/2017-08-30/breakout.png&quot; /&gt;
+&lt;img src=&quot;/images/post_images/2017-08-13/breakout.png&quot; /&gt;
 &lt;font size=&quot;2&quot;&gt;The &quot;Playable&quot; version of the Breakout Clone&lt;/font&gt;
 &lt;br /&gt;&lt;br /&gt;
 &lt;/div&gt;
@@ -45,7 +286,7 @@
 &lt;p&gt;However, Breakout is really not a good test for a GTX 1060, and with 500 blocks on screen, I was running every test at &amp;lt; 1 ms per frame. The times were so small, that even between runs of the exact same version of the program, the results were too varied to be much use (since even a change in measured time of 1/100th of an ms became significant). To make things a bit easier to work with, I added a mode to the game which rendered 5000 blocks at a time.&lt;/p&gt;
 
 &lt;div align=&quot;center&quot;&gt;
-&lt;img src=&quot;/images/post_images/2017-08-30/stresstest.PNG&quot; /&gt;
+&lt;img src=&quot;/images/post_images/2017-08-13/stresstest.PNG&quot; /&gt;
 &lt;font size=&quot;2&quot;&gt;which admittedly looked sorta ridiculous&lt;/font&gt;
 &lt;br /&gt;&lt;br /&gt;
 &lt;/div&gt;
@@ -53,7 +294,7 @@
 &lt;p&gt;This produced much more stable results (ie/ could be reproduced in multiple runs), which I want to provide here to give context to the rest of this blog post.&lt;/p&gt;
 
 &lt;div align=&quot;center&quot;&gt;
-&lt;img src=&quot;/images/post_images/2017-08-30/vktest.PNG&quot; /&gt;
+&lt;img src=&quot;/images/post_images/2017-08-13/vktest.PNG&quot; /&gt;
 &lt;br /&gt;
 &lt;/div&gt;
 
@@ -83,7 +324,7 @@
 
 &lt;p&gt;I’m also going to assume that you’re at least at the level I was when I started this project, that is, you’ve gone through &lt;a href=&quot;https://vulkan-tutorial.com/&quot;&gt;vulkan-tutorial.com&lt;/a&gt;, and therefore understand how to allocate a VkBuffer. If you aren’t there yet, click the link to the tutorial and come back in a few hours. Things will make much more sense.&lt;/p&gt;
 
-&lt;h2 id=&quot;multiple-unampped-buffers&quot;&gt;Multiple, Unampped Buffers&lt;/h2&gt;
+&lt;h2 id=&quot;multiple-unmapped-buffers&quot;&gt;Multiple, Unmapped Buffers&lt;/h2&gt;
 &lt;p&gt;Let’s start by talking about the approaches that felt most intuitive for me right off the bat, giving each drawable entity (which my code calls a Primitive) it’s own VkBuffer to store it’s own uniform data, and a VkDescriptorSet to know about that buffer:&lt;/p&gt;
 
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PrimitiveInstance&lt;/span&gt;
@@ -289,7 +530,6 @@ In case reviewing testing methods is your thing, here&#39;s how I got the number
 &lt;li&gt;I repeated this test 2 more times, at different times of the day (after using the laptop to do other tasks), which gave me 3 frametime averages (1 per run of the test). I chose the median of the three to present in the graph above.&lt;/li&gt;&lt;br /&gt;
 &lt;li&gt;Finally, all tests were done in Release builds, without a debugger attached or any validation layers turned on, and connected to a wall outlet to prevent any kind of throttling on battery to interfere with anything.&lt;/li&gt;&lt;br /&gt;
 &lt;li&gt;All the source for everything is  &lt;a href=&quot;https://github.com/khalladay/VkBreakout&quot;&gt;on github&lt;/a&gt;, I would love for someone to compile everything and run a similar test to see if the results for my GPU can be replicated on someone else&#39;s hardware.&lt;/li&gt;
-
 
 &lt;/div&gt;
 &lt;/font&gt;

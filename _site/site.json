@@ -3,8 +3,14 @@
 {"date": "2017-08-30 00:00:00 -0500",
 "categories": ["blog","tutorial","vulkan"],
 "tags": ["<span style=\"background-color:#AA2222;\"><font color=\"white\">&nbsp;Vulkan</font></span>"],
+"title": "Improving Vulkan Breakout",
+"url": "/blog/tutorial/vulkan/2017/08/30/Vulkan-Uniform-Buffers-pt2.html"},
+
+{"date": "2017-08-13 00:00:00 -0500",
+"categories": ["blog","tutorial","vulkan"],
+"tags": ["<span style=\"background-color:#AA2222;\"><font color=\"white\">&nbsp;Vulkan</font></span>"],
 "title": "Comparing Uniform Data Transfer Methods in Vulkan",
-"url": "/blog/tutorial/vulkan/2017/08/30/Vulkan-Uniform-Buffers.html"},
+"url": "/blog/tutorial/vulkan/2017/08/13/Vulkan-Uniform-Buffers.html"},
 
 {"date": "2017-06-02 00:00:00 -0500",
 "categories": ["blog","tutorial","gba"],
