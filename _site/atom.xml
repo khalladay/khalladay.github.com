@@ -4,7 +4,7 @@
  <title>The blog of Kyle Halladay</title>
  <link href="http://kylehalladay.com/atom.xml" rel="self"/>
  <link href="http://kylehalladay.com"/>
- <updated>2017-08-27T08:25:40-05:00</updated>
+ <updated>2017-08-27T11:41:14-05:00</updated>
  <id>http://kylehalladay.com</id>
  <author>
    <name>Kyle Halladay</name>
@@ -170,7 +170,7 @@
 &lt;p&gt;I decided to compare the performance of the Single-Buffer approaches with these changes vs the timing data that I presented last time, and it appears that the above changes yield a modest speed up for all approaches except using push-constants, since they didn’t need the _aligned_alloc call in the first place.&lt;/p&gt;
 
 &lt;div align=&quot;center&quot;&gt;
-&lt;img src=&quot;/images/post_images/2017-08-30/writingPerf.png&quot; /&gt;
+&lt;img src=&quot;/images/post_images/2017-08-30/writingperf.PNG&quot; /&gt;
 &lt;br /&gt;&lt;br /&gt;
 &lt;/div&gt;
 

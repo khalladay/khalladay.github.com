@@ -172,7 +172,7 @@ The unmapBufferPtr() call can simply be omitted in order to keep things mapped a
 I decided to compare the performance of the Single-Buffer approaches with these changes vs the timing data that I presented last time, and it appears that the above changes yield a modest speed up for all approaches except using push-constants, since they didn't need the _aligned_alloc call in the first place.
 
 <div align="center">
-<img src="/images/post_images/2017-08-30/writingPerf.png" />
+<img src="/images/post_images/2017-08-30/writingperf.PNG" />
 <br><br>
 </div>
 
