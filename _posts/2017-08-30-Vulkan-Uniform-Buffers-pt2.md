@@ -80,7 +80,7 @@ Assuming that's the case, then in order to measure just the execution of our loo
 If you recall, the frame time of each approach was measured last week as the following:
 
 <div align="center">
-<img src="/images/post_images/2017-08-30/vkTest.png" />
+<img src="/images/post_images/2017-08-30/vkTest.PNG" />
 <br><br>
 </div>
 
