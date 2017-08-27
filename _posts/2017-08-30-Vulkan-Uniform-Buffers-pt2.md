@@ -172,7 +172,7 @@ The unmapBufferPtr() call can simply be omitted in order to keep things mapped a
 I decided to compare the performance of the Single-Buffer approaches with these changes vs the timing data that I presented last time, and it appears that the above changes yield a modest speed up for all approaches except using push-constants, since they didn't need the _aligned_alloc call in the first place.
 
 <div align="center">
-<img src="/images/post_images/2017-08-30/writingPerf.PNG" />
+<img src="/images/post_images/2017-08-30/writingPerf.png" />
 <br><br>
 </div>
 
@@ -215,7 +215,7 @@ The last bit of advice that I wanted to look into was that I am wasting time rec
 I made a few changes to the project so that the actual draw function doesn't record any commands, it simply submits the pre-recorded command buffers that are generated at the beginning of the project. Unsurprisingly, this is pretty good for performance:
 
 <div align="center">
-<img src="/images/post_images/2017-08-30/reuse1.png" />
+<img src="/images/post_images/2017-08-30/reuse1.PNG" />
 <font size="2">You can't reuse a command buffer with push constants (as far as I know)</font>
 <br><br>
 </div>

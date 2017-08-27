@@ -4,7 +4,7 @@
  <title>The blog of Kyle Halladay</title>
  <link href="http://kylehalladay.com/atom.xml" rel="self"/>
  <link href="http://kylehalladay.com"/>
- <updated>2017-08-27T08:18:55-05:00</updated>
+ <updated>2017-08-27T08:21:40-05:00</updated>
  <id>http://kylehalladay.com</id>
  <author>
    <name>Kyle Halladay</name>
@@ -170,7 +170,7 @@
 &lt;p&gt;I decided to compare the performance of the Single-Buffer approaches with these changes vs the timing data that I presented last time, and it appears that the above changes yield a modest speed up for all approaches except using push-constants, since they didn’t need the _aligned_alloc call in the first place.&lt;/p&gt;
 
 &lt;div align=&quot;center&quot;&gt;
-&lt;img src=&quot;/images/post_images/2017-08-30/writingPerf.PNG&quot; /&gt;
+&lt;img src=&quot;/images/post_images/2017-08-30/writingPerf.png&quot; /&gt;
 &lt;br /&gt;&lt;br /&gt;
 &lt;/div&gt;
 
@@ -212,7 +212,7 @@
 &lt;p&gt;I made a few changes to the project so that the actual draw function doesn’t record any commands, it simply submits the pre-recorded command buffers that are generated at the beginning of the project. Unsurprisingly, this is pretty good for performance:&lt;/p&gt;
 
 &lt;div align=&quot;center&quot;&gt;
-&lt;img src=&quot;/images/post_images/2017-08-30/reuse1.png&quot; /&gt;
+&lt;img src=&quot;/images/post_images/2017-08-30/reuse1.PNG&quot; /&gt;
 &lt;font size=&quot;2&quot;&gt;You can&#39;t reuse a command buffer with push constants (as far as I know)&lt;/font&gt;
 &lt;br /&gt;&lt;br /&gt;
 &lt;/div&gt;
