@@ -133,7 +133,7 @@
 <span class="n">VkResult</span> <span class="n">res</span> <span class="o">=</span> <span class="n">vkCreateQueryPool</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">createInfo</span><span class="p">,</span> <span class="n">nullptr</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">queryPool</span><span class="p">);</span>
 <span class="n">assert</span><span class="p">(</span><span class="n">res</span> <span class="o">==</span> <span class="n">VK_SUCCESS</span><span class="p">);</span></code></pre></div>
 
-<p>Since I only want to time the part of the rendering pipeline that changes between each uniform data implementation, I only need to allocate 2 queries - one to store the timestamp immediately before the block I’m timing executes, and one to store the timestand after it’s done.</p>
+<p>Since I only want to time the part of the rendering pipeline that changes between each uniform data implementation, I only need to allocate 2 queries - one to store the timestamp immediately before the block I’m timing executes, and one to store the timestamp after it’s done.</p>
 
 <p>With that done, all that’s left is to add the appropriate calls to the draw function:</p>
 
@@ -183,7 +183,7 @@
 
 <h2 id="dont-use-alignedmalloc">Don’t Use _aligned_malloc</h2>
 
-<p>The next piece of feedback came from reddit user <a href="https://www.reddit.com/user/rhynodegreat">rhynodegreat</a>, and it is directly related to the cost of memory mapping we just talked about. It was pointed out that since I was using memcpy to trasnfer data to a mapped buffer pointer, I didn’t need to be using _aligned_malloc for the original allocation. I admit this was a bit of cargo culting on my end. I originally figured out how to use dynamic uniform buffers from some example code I found online, and didn’t question the use of _aligned_malloc, since I had never used it before.</p>
+<p>The next piece of feedback came from reddit user <a href="https://www.reddit.com/user/rhynodegreat">rhynodegreat</a>, and it is directly related to the cost of memory mapping we just talked about. It was pointed out that since I was using memcpy to transfer data to a mapped buffer pointer, I didn’t need to be using _aligned_malloc for the original allocation. I admit this was a bit of cargo culting on my end. I originally figured out how to use dynamic uniform buffers from some example code I found online, and didn’t question the use of _aligned_malloc, since I had never used it before.</p>
 
 <p>Luckily, removing it from my code was as simple as replacing any calls to it with a simple malloc call.</p>
 
@@ -201,7 +201,7 @@
 <br /><br />
 </div>
 
-<p>Howeveer, while testing this, I realized that (for the Single Buffer Approach), I could reduce the need for this allocation at all with a very small amount of effort. If I could get the mapped pointer to the buffer before I pass this data to the draw function, I could save myself a lot of effort. So I rearranged things a bit to try that out:</p>
+<p>However, while testing this, I realized that (for the Single Buffer Approach), I could reduce the need for this allocation at all with a very small amount of effort. If I could get the mapped pointer to the buffer before I pass this data to the draw function, I could save myself a lot of effort. So I rearranged things a bit to try that out:</p>
 
 <div class="highlight"><pre><code class="language-c" data-lang="c"><span class="c1">//abbreviated code
 </span><span class="n">uniformData</span> <span class="o">=</span> <span class="p">(</span><span class="n">PrimitiveUniformObject</span><span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="n">bufferSize</span><span class="p">);</span>
@@ -256,7 +256,7 @@
 
 <h2 id="use-device-local-memory">Use Device-Local Memory</h2>
 
-<p>I liked this piece of feedback because it forced me to actually validate an assummption I made in the previous post: that data which gets 100% updated every frame likely doesn’t benefit from being device local. So I’m starting with that as my hypothesis.</p>
+<p>I liked this piece of feedback because it forced me to actually validate an assumption I made in the previous post: that data which gets 100% updated every frame likely doesn’t benefit from being device local. So I’m starting with that as my hypothesis.</p>
 
 <p>For the most part, changing things to use device local memory was surprisingly easy. All it took was changing what buffer was getting mapped when I wanted to transfer uniform data, and then adding code to copy that data (now in a staging buffer) to the device local memory that the shaders ended up using. Given that the nuts and bolts of using a staging buffer are already excellently presented at <a href="https://vulkan-tutorial.com/Vertex_buffers/Staging_buffer">vulkan-tutorial.com</a>, I’m going to skip talking about that here. You can always check out the <a href="https://github.com/khalladay/VkBreakout">repo</a> if you’re curious.</p>
 

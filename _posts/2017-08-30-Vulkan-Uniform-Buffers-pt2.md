@@ -47,7 +47,7 @@ VkResult res = vkCreateQueryPool(device, &createInfo, nullptr, &queryPool);
 assert(res == VK_SUCCESS);
 {% endhighlight %}
 
-Since I only want to time the part of the rendering pipeline that changes between each uniform data implementation, I only need to allocate 2 queries - one to store the timestamp immediately before the block I'm timing executes, and one to store the timestand after it's done.
+Since I only want to time the part of the rendering pipeline that changes between each uniform data implementation, I only need to allocate 2 queries - one to store the timestamp immediately before the block I'm timing executes, and one to store the timestamp after it's done.
 
 With that done, all that's left is to add the appropriate calls to the draw function:
 
@@ -97,7 +97,7 @@ The multi-buffer approaches are slower than the others in this measure as well, 
 
 ## Don't Use _aligned_malloc
 
-The next piece of feedback came from reddit user [rhynodegreat](https://www.reddit.com/user/rhynodegreat), and it is directly related to the cost of memory mapping we just talked about. It was pointed out that since I was using memcpy to trasnfer data to a mapped buffer pointer, I didn't need to be using _aligned_malloc for the original allocation. I admit this was a bit of cargo culting on my end. I originally figured out how to use dynamic uniform buffers from some example code I found online, and didn't question the use of _aligned_malloc, since I had never used it before.
+The next piece of feedback came from reddit user [rhynodegreat](https://www.reddit.com/user/rhynodegreat), and it is directly related to the cost of memory mapping we just talked about. It was pointed out that since I was using memcpy to transfer data to a mapped buffer pointer, I didn't need to be using _aligned_malloc for the original allocation. I admit this was a bit of cargo culting on my end. I originally figured out how to use dynamic uniform buffers from some example code I found online, and didn't question the use of _aligned_malloc, since I had never used it before.
 
 Luckily, removing it from my code was as simple as replacing any calls to it with a simple malloc call.
 
@@ -119,7 +119,7 @@ Everything still works with the above changes, but I was curious as to whether i
 <br><br>
 </div>
 
-Howeveer, while testing this, I realized that (for the Single Buffer Approach), I could reduce the need for this allocation at all with a very small amount of effort. If I could get the mapped pointer to the buffer before I pass this data to the draw function, I could save myself a lot of effort. So I rearranged things a bit to try that out:
+However, while testing this, I realized that (for the Single Buffer Approach), I could reduce the need for this allocation at all with a very small amount of effort. If I could get the mapped pointer to the buffer before I pass this data to the draw function, I could save myself a lot of effort. So I rearranged things a bit to try that out:
 
 {% highlight c %}
 //abbreviated code
@@ -180,7 +180,7 @@ Assuming my methodology for these tests is correct (this is outlined at the end 
 
 ## Use Device-Local Memory
 
-I liked this piece of feedback because it forced me to actually validate an assummption I made in the previous post: that data which gets 100% updated every frame likely doesn't benefit from being device local. So I'm starting with that as my hypothesis.
+I liked this piece of feedback because it forced me to actually validate an assumption I made in the previous post: that data which gets 100% updated every frame likely doesn't benefit from being device local. So I'm starting with that as my hypothesis.
 
 For the most part, changing things to use device local memory was surprisingly easy. All it took was changing what buffer was getting mapped when I wanted to transfer uniform data, and then adding code to copy that data (now in a staging buffer) to the device local memory that the shaders ended up using. Given that the nuts and bolts of using a staging buffer are already excellently presented at [vulkan-tutorial.com](https://vulkan-tutorial.com/Vertex_buffers/Staging_buffer), I'm going to skip talking about that here. You can always check out the [repo](https://github.com/khalladay/VkBreakout) if you're curious.
 

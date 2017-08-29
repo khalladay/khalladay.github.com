@@ -4,7 +4,7 @@
  <title>The blog of Kyle Halladay</title>
  <link href="http://kylehalladay.com/atom.xml" rel="self"/>
  <link href="http://kylehalladay.com"/>
- <updated>2017-08-27T11:41:14-05:00</updated>
+ <updated>2017-08-28T21:59:01-05:00</updated>
  <id>http://kylehalladay.com</id>
  <author>
    <name>Kyle Halladay</name>
@@ -55,7 +55,7 @@
 &lt;span class=&quot;n&quot;&gt;VkResult&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;res&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;vkCreateQueryPool&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;device&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;createInfo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;nullptr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;queryPool&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 &lt;span class=&quot;n&quot;&gt;assert&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;res&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;VK_SUCCESS&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;Since I only want to time the part of the rendering pipeline that changes between each uniform data implementation, I only need to allocate 2 queries - one to store the timestamp immediately before the block I’m timing executes, and one to store the timestand after it’s done.&lt;/p&gt;
+&lt;p&gt;Since I only want to time the part of the rendering pipeline that changes between each uniform data implementation, I only need to allocate 2 queries - one to store the timestamp immediately before the block I’m timing executes, and one to store the timestamp after it’s done.&lt;/p&gt;
 
 &lt;p&gt;With that done, all that’s left is to add the appropriate calls to the draw function:&lt;/p&gt;
 
@@ -105,7 +105,7 @@
 
 &lt;h2 id=&quot;dont-use-alignedmalloc&quot;&gt;Don’t Use _aligned_malloc&lt;/h2&gt;
 
-&lt;p&gt;The next piece of feedback came from reddit user &lt;a href=&quot;https://www.reddit.com/user/rhynodegreat&quot;&gt;rhynodegreat&lt;/a&gt;, and it is directly related to the cost of memory mapping we just talked about. It was pointed out that since I was using memcpy to trasnfer data to a mapped buffer pointer, I didn’t need to be using _aligned_malloc for the original allocation. I admit this was a bit of cargo culting on my end. I originally figured out how to use dynamic uniform buffers from some example code I found online, and didn’t question the use of _aligned_malloc, since I had never used it before.&lt;/p&gt;
+&lt;p&gt;The next piece of feedback came from reddit user &lt;a href=&quot;https://www.reddit.com/user/rhynodegreat&quot;&gt;rhynodegreat&lt;/a&gt;, and it is directly related to the cost of memory mapping we just talked about. It was pointed out that since I was using memcpy to transfer data to a mapped buffer pointer, I didn’t need to be using _aligned_malloc for the original allocation. I admit this was a bit of cargo culting on my end. I originally figured out how to use dynamic uniform buffers from some example code I found online, and didn’t question the use of _aligned_malloc, since I had never used it before.&lt;/p&gt;
 
 &lt;p&gt;Luckily, removing it from my code was as simple as replacing any calls to it with a simple malloc call.&lt;/p&gt;
 
@@ -123,7 +123,7 @@
 &lt;br /&gt;&lt;br /&gt;
 &lt;/div&gt;
 
-&lt;p&gt;Howeveer, while testing this, I realized that (for the Single Buffer Approach), I could reduce the need for this allocation at all with a very small amount of effort. If I could get the mapped pointer to the buffer before I pass this data to the draw function, I could save myself a lot of effort. So I rearranged things a bit to try that out:&lt;/p&gt;
+&lt;p&gt;However, while testing this, I realized that (for the Single Buffer Approach), I could reduce the need for this allocation at all with a very small amount of effort. If I could get the mapped pointer to the buffer before I pass this data to the draw function, I could save myself a lot of effort. So I rearranged things a bit to try that out:&lt;/p&gt;
 
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;c1&quot;&gt;//abbreviated code
 &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;uniformData&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;PrimitiveUniformObject&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;malloc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;bufferSize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
@@ -178,7 +178,7 @@
 
 &lt;h2 id=&quot;use-device-local-memory&quot;&gt;Use Device-Local Memory&lt;/h2&gt;
 
-&lt;p&gt;I liked this piece of feedback because it forced me to actually validate an assummption I made in the previous post: that data which gets 100% updated every frame likely doesn’t benefit from being device local. So I’m starting with that as my hypothesis.&lt;/p&gt;
+&lt;p&gt;I liked this piece of feedback because it forced me to actually validate an assumption I made in the previous post: that data which gets 100% updated every frame likely doesn’t benefit from being device local. So I’m starting with that as my hypothesis.&lt;/p&gt;
 
 &lt;p&gt;For the most part, changing things to use device local memory was surprisingly easy. All it took was changing what buffer was getting mapped when I wanted to transfer uniform data, and then adding code to copy that data (now in a staging buffer) to the device local memory that the shaders ended up using. Given that the nuts and bolts of using a staging buffer are already excellently presented at &lt;a href=&quot;https://vulkan-tutorial.com/Vertex_buffers/Staging_buffer&quot;&gt;vulkan-tutorial.com&lt;/a&gt;, I’m going to skip talking about that here. You can always check out the &lt;a href=&quot;https://github.com/khalladay/VkBreakout&quot;&gt;repo&lt;/a&gt; if you’re curious.&lt;/p&gt;
 
