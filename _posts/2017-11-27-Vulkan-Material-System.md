@@ -330,7 +330,7 @@ These MaterialRenderData structs are stored in a map (boo!) that uses uint32_ts 
 
 ## Problems and Limitations With My System
 
-Oh boy, there's a lot of them. Probably the biggest being tbat none of it has actually survived being used in a real project, but I suppose there's some more specific things to point out.
+Oh boy, there's a lot of them. Probably the biggest being that none of it has actually survived being used in a real project, but I suppose there's some more specific things to point out.
 
 
 Number one is that storing the VkDeviceMemory directly in the material is probably bad, and should likely be replaced by an actual allocator doing actual allocator things.
