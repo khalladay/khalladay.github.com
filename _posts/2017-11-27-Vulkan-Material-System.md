@@ -16,7 +16,7 @@ The second phase will be to extend the system to handle material instances, and 
 
 
 <div align="center">
-<img src="/images/post_images/2017-11-28/output.PNG" />
+<img src="/images/post_images/2017-11-28/output.png" />
 <font size="2">One of my tests was Inigo Quilez's <a href="https://www.shadertoy.com/view/Xds3zN">raymarching primitives shader</a></font>
 <br><br>
 </div>
