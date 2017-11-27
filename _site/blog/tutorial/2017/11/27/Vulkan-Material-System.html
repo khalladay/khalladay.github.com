@@ -6,10 +6,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Kyle Halladay - Home Page</title>
+  <title>Kyle Halladay - Lessons Learned While Building a Vulkan Material System</title>
   <meta name="author" content="Kyle Halladay" />
   <meta name="description" content="I build shaders, renderers, games, and other stuff that's fun to stare at." />
-  <link rel="canonical" href="http://kylehalladay.com/" />
+  <link rel="canonical" href="http://kylehalladay.com/blog/tutorial/2017/11/27/Vulkan-Material-System.html" />
   <meta name="keywords" content="life,code,software,development,games,graphics,shaders,indie" />
 
   <link href="//fonts.googleapis.com/css?family=Open+Sans:600,800" rel="stylesheet" type="text/css">
@@ -89,14 +89,13 @@
       <hr style="border-color:#000; margin:1em -0.25em;"></topbar>
 
       <p class="meta">
-  
 
 </p>
 
 <h1 class="title">Lessons Learned While Building a Vulkan Material System</h1>
 
 <div id="post">
- <p>One of the things I’m noticing about learning Vulkan, is that there isn’t a lot of material out there to bridge the gap between being a complete beginner, and being able to build your own real applications.</p>
+  <p>One of the things I’m noticing about learning Vulkan, is that there isn’t a lot of material out there to bridge the gap between being a complete beginner, and being able to build your own real applications.</p>
 
 <p>I didn’t realize how big this gap was was until I decided to start my next Vulkan project by building a material system. It was supposed to just be the first step in something bigger, but I realized pretty quickly that I didn’t know nearly enough to even get this small piece done. So I scrapped my loftier plans, and decided to split building the material system up into two parts. The first phase (which is the part I have done) was to simply load materials from a file which specified which shaders to use, and which default values to use for their inputs. To keep things simple, I’ve so far always been loading the material onto a full screen quad.</p>
 

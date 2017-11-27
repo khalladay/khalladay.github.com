@@ -1,5 +1,11 @@
 [
 
+{"date": "2017-11-27 00:00:00 -0600",
+"categories": ["blog","tutorial"],
+"tags": ["<span style=\"background-color:#AA2222;\"><font color=\"white\">&nbsp;Vulkan</font></span>"],
+"title": "Lessons Learned While Building a Vulkan Material System",
+"url": "/blog/tutorial/2017/11/27/Vulkan-Material-System.html"},
+
 {"date": "2017-08-30 00:00:00 -0500",
 "categories": ["blog","tutorial","vulkan"],
 "tags": ["<span style=\"background-color:#AA2222;\"><font color=\"white\">&nbsp;Vulkan</font></span>"],

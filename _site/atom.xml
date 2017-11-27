@@ -4,13 +4,329 @@
  <title>The blog of Kyle Halladay</title>
  <link href="http://kylehalladay.com/atom.xml" rel="self"/>
  <link href="http://kylehalladay.com"/>
- <updated>2017-08-28T21:59:01-05:00</updated>
+ <updated>2017-11-27T14:15:28-06:00</updated>
  <id>http://kylehalladay.com</id>
  <author>
    <name>Kyle Halladay</name>
    <email>k.mj.halladay@gmail.com</email>
  </author>
 
+ 
+ <entry>
+   <title>Lessons Learned While Building a Vulkan Material System</title>
+   <link href="http://kylehalladay.com/blog/tutorial/2017/11/27/Vulkan-Material-System.html"/>
+   <updated>2017-11-27T00:00:00-06:00</updated>
+   <id>http://kylehalladay.com/blog/tutorial/2017/11/27/Vulkan-Material-System</id>
+   <content type="html">&lt;p&gt;One of the things I’m noticing about learning Vulkan, is that there isn’t a lot of material out there to bridge the gap between being a complete beginner, and being able to build your own real applications.&lt;/p&gt;
+
+&lt;p&gt;I didn’t realize how big this gap was was until I decided to start my next Vulkan project by building a material system. It was supposed to just be the first step in something bigger, but I realized pretty quickly that I didn’t know nearly enough to even get this small piece done. So I scrapped my loftier plans, and decided to split building the material system up into two parts. The first phase (which is the part I have done) was to simply load materials from a file which specified which shaders to use, and which default values to use for their inputs. To keep things simple, I’ve so far always been loading the material onto a full screen quad.&lt;/p&gt;
+
+&lt;p&gt;The second phase will be to extend the system to handle material instances, and thousands of objects, but before I dive into that, it felt like a good time to take a step back and write down some of the things I’ve had to figure out to get this far, in case someone else gets stuck in the same places.&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+&lt;img src=&quot;/images/post_images/2017-11-28/output.PNG&quot; /&gt;
+&lt;font size=&quot;2&quot;&gt;One of my tests was Inigo Quilez&#39;s &lt;a href=&quot;https://www.shadertoy.com/view/Xds3zN&quot;&gt;raymarching primitives shader&lt;/a&gt;&lt;/font&gt;
+&lt;br /&gt;&lt;br /&gt;
+&lt;/div&gt;
+
+&lt;p&gt;This post is going to jump around a little bit, as you’ll notice by the headings. Some things I want to share are just things I didn’t realize about how to use the Vulkan API, some are “good ideas” that are working out for me so far, and finally I want to write a bit about the high level structure of how my material system works.&lt;/p&gt;
+
+&lt;p&gt;All the code for everything is &lt;a href=&quot;https://github.com/khalladay/VkMaterialSystem&quot;&gt;on github&lt;/a&gt;, and I’ve tried to add helpful comments to &lt;a href=&quot;https://github.com/khalladay/VkMaterialSystem/blob/master/VkMaterialSystem/material_creation.cpp&quot;&gt;material_creation.cpp&lt;/a&gt;, which contains most of the stuff I’m talking about here. Standard caveats to everything: I barely know what I’m doing, there’s probably better ways to do this, I’m not a lawyer, yadda yadda yadda.  &lt;/p&gt;
+
+&lt;h2 id=&quot;how-descriptor-sets-and-bindings-work&quot;&gt;How Descriptor Sets (and Bindings!) Work&lt;/h2&gt;
+
+&lt;p&gt;The first thing that I really needed to get a handle on was how descriptor sets work in Vulkan GLSL. It’s easy enough to look at the syntax and realize that they’re a method for grouping shader inputs and move on, but there’s a bit more to them than that.&lt;/p&gt;
+
+&lt;p&gt;For one, Vulkan shaders aren’t namespaced, so Descriptor Set 0 in your vertex shader, is Descriptor Set 0 in your fragment shader (or any other stage you’re using in your material). This also means that a single descriptor set can have bindings that exist in different shader stages, but still all belong to the same set. Even more fun, since the SPIR-V compiler will (likely) remove any variables not in use by your shader, your shader stages may all have the same Descriptor Set Binding in them, and see different versions of that binding.&lt;/p&gt;
+
+&lt;p&gt;Let me show you what I mean. If you have a vertex shader that uses descriptor set 0, binding 0, to hold some global information:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;n&quot;&gt;layout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;binding&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;set&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;uniform&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;GLOBAL_DATA&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;time&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;vec2&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mouse&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;global&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;But your actual shader code only ever uses the time member of the GLOBAL_DATA uniform, the compiler will optimize away the mouse member var entirely. However, your fragment shader might also need access to global data, and if it uses the mouse data, and not the time data, it won’t even know that set 0, binding 0 has the time member in it.&lt;/p&gt;
+
+&lt;p&gt;To keep everyone on same page despite this, data about the size of the overall uniform is still there (that is, the size of the struct with ALL members, including compiled out ones, present), along with information about the offset into the struct that a member sits at. So your fragment shader, which only knows about mouse data, will still know that the GLOBAL_DATA uniform is 32 bytes large, and the mouse data is offset 16 bytes from the start of the uniform buffer. With this information, it doesn’t matter which member vars each stage sees.&lt;/p&gt;
+
+&lt;p&gt;Note that uniform members are 16 byte aligned in Vulkan, more on that later.&lt;/p&gt;
+
+&lt;h2 id=&quot;use-descriptor-sets-to-group-inputs-by-update-frequency&quot;&gt;Use Descriptor Sets To Group Inputs By Update Frequency&lt;/h2&gt;
+
+&lt;p&gt;You can’t bind an individual set binding in a command buffer, you have to bind an entire descriptor set at once, and binding a descriptor set is a performance heavy operation. What you should do (at least according to &lt;a href=&quot;https://developer.nvidia.com/vulkan-shader-resource-binding&quot;&gt;NVidia’s Article&lt;/a&gt;), is use your descriptor sets to group shader inputs by how frequently they need to be swapped out. Once a descriptor set is bound, it stays bound for the duration of that command buffer, until something else gets bound to that set index. So if everything uses the same set 0, you can bind it once and never pay the cost to bind that again (until next frame).&lt;/p&gt;
+
+&lt;p&gt;In my project, I chose set 0 to store Global data which all shaders can access, which will get bound at the beginning of a frame and stay bound while rendering everything, left set 1 alone for a future experiment, and used sets 2 and 3 for data which can change on a per material / per material instance basis. Set 2 is for data which will get set when a material or instance is first loaded and then never changed (like the albedo texture of a character), while set 3 is for shader inputs that can be manipulated at runtime.&lt;/p&gt;
+
+&lt;p&gt;An example of how this might play out:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;each&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;view&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;bind&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;global&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;resourcees&lt;/span&gt;          &lt;span class=&quot;c1&quot;&gt;// set 0
+&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;each&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;shader&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;bind&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;shader&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pipeline&lt;/span&gt;  
+    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;each&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;material&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;bind&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;material&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;resources&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;// sets 2,3
+&lt;/span&gt;    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Obviously this is a pretty simple rendering model, but it’s good enough for this stage of my material system’s life.&lt;/p&gt;
+
+&lt;p&gt;Technically speaking, sets 2 and 3 could be one set, but having a separation between static and dynamic data made sense to me, since I have to keep around a lot more information about the dynamic data to facilitate updating it later, but time will tell if this is a good idea or not. I think it largely depends on if theres a higher cost associated with binding multiple descriptor sets in one call to vkCmdBindDescriptorSets.&lt;/p&gt;
+
+&lt;h2 id=&quot;vkdescriptorpools-can-store-descriptors-of-different-types&quot;&gt;VkDescriptorPools Can Store Descriptors of Different Types&lt;/h2&gt;
+
+&lt;p&gt;This is pretty obvious if you’re reading the actual API docs, but when I started this, most of my information was coming from tutorials like &lt;a href=&quot;https://vulkan-tutorial.com/&quot;&gt;vulkan-tutorial.com&lt;/a&gt;, which never explicitly points out that your descriptor pools don’t have to be segregated by descriptor type. You can store uniform buffers, combined image samplers, dynamic buffers, the whole shebang in the same pool.&lt;/p&gt;
+
+&lt;h2 id=&quot;getting-arbitrary-descriptor-set-layouts&quot;&gt;Getting Arbitrary Descriptor Set Layouts&lt;/h2&gt;
+
+&lt;p&gt;The last three points were more about general Vulkan knowledge, but the rest are all about implementation details.&lt;/p&gt;
+
+&lt;p&gt;The most obvious problem with building a generic material loading system in Vulkan vs OpenGL is the lack of shader reflection available at runtime. In OpenGL all this functionality was there by default, but in Vulkan we need to use the wonderful &lt;a href=&quot;https://github.com/KhronosGroup/SPIRV-Cross&quot;&gt;SPIR-V Cross&lt;/a&gt; library to help us get at this information.&lt;/p&gt;
+
+&lt;p&gt;I didn’t want to embed SPIR-V Cross in my runtime application, since it felt like unnecessary bloat, so I wrote a separate application that I called the “ShaderPipeline” (also available &lt;a href=&quot;https://github.com/khalladay/VkMaterialSystem/tree/master/ShaderPipeline&quot;&gt;on github&lt;/a&gt;). This program runs whenever a shader has been edited, and handles compiling GLSL into SPIR-V, and creating json files (.refl files) that store reflection information about these shaders.  &lt;/p&gt;
+
+&lt;p&gt;One of these .refl files might look like the following:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;s&quot;&gt;&quot;descriptor_sets&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;s&quot;&gt;&quot;set&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;s&quot;&gt;&quot;binding&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;s&quot;&gt;&quot;name&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;GLOBAL_DATA&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;s&quot;&gt;&quot;size&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;s&quot;&gt;&quot;type&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;UNIFORM&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;s&quot;&gt;&quot;members&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;
+                &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                    &lt;span class=&quot;s&quot;&gt;&quot;name&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;mouse&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                    &lt;span class=&quot;s&quot;&gt;&quot;size&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;16&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                    &lt;span class=&quot;s&quot;&gt;&quot;offset&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;16&lt;/span&gt;
+                &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;],&lt;/span&gt;
+    &lt;span class=&quot;s&quot;&gt;&quot;global_sets&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;
+        &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;],&lt;/span&gt;
+    &lt;span class=&quot;s&quot;&gt;&quot;static_sets&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[],&lt;/span&gt;
+    &lt;span class=&quot;s&quot;&gt;&quot;dynamic_sets&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[],&lt;/span&gt;
+    &lt;span class=&quot;s&quot;&gt;&quot;static_set_size&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;s&quot;&gt;&quot;dynamic_set_size&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;s&quot;&gt;&quot;num_static_uniforms&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;s&quot;&gt;&quot;num_static_textures&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;s&quot;&gt;&quot;num_dynamic_uniforms&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;s&quot;&gt;&quot;num_dynamic_textures&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;You’ll notice that at the end I have some extra data about which descriptor sets are global, dynamic, or static, and how many of each type we have. This information is obviously not technically necessary, but this way I can decide to change which sets belong to which category at the ShaderPipeline level instead of the runtime application, and having the counts available was just handier than counting them later.&lt;/p&gt;
+
+&lt;h2 id=&quot;fill-gaps-in-your-vkdescriptorsetlayout-array-with-empty-elements&quot;&gt;Fill Gaps In Your VkDescriptorSetLayout Array With Empty Elements&lt;/h2&gt;
+
+&lt;p&gt;This one definitely threw me for awhile until I figured out what to do, since it’s not something that I saw in any tutorial or example code before trying this project out.&lt;/p&gt;
+
+&lt;p&gt;One of the first things you need to do when you’re creating your material is to make VkDescriptorSetLayouts for each descriptor set in use by the shaders in your material. Eventually, you use this array of DescriptorSetLayouts as part of your VkPipelineLayoutCreateInfo struct. One thing you may have noticed is that a VkDescriptorSetLayout struct doesn’t have any spot for specifying which set that layout is for. This means the api assumes that the array of VkDescriptorSetLayouts that you use is a continuous collection of sets - that is - if your array is 3 elements long, it is for sets 0, 1, and 2.&lt;/p&gt;
+
+&lt;p&gt;In practice, you’ll likely have gaps in the sets that your shaders use, especially if you assign each set number a specific use case, like I did above. In this case, you need to make a VkDescriptorSet for each set you aren’t using as well. These “empty” elements will have their binding count set to 0, and their pBindings array set to null, but still need to be in your final array of set layouts, or else nothing is going to work right.&lt;/p&gt;
+
+&lt;h2 id=&quot;if-youre-manually-specifying-a-struct-that-maps-to-a-set-alignment-matters&quot;&gt;If you’re manually specifying a struct that maps to a set, alignment matters&lt;/h2&gt;
+
+&lt;p&gt;To keep things simple, I’m keeping my global data as a mapped struct, since I’m assuming (hoping?) that because it’s not a lot of data, and it only gets updated once a frame, there won’t be much of a performance penalty (this is untested right now though, so… ymmv).&lt;/p&gt;
+
+&lt;p&gt;When I first set this up, I defined my struct like so:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;GlobalShaderData&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;glm&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;float32&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;time&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;glm&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;vec4&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mouse&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;glm&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;vec2&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;resolution&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;glm&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mat4&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;viewMatrix&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;glm&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;vec4&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;worldSpaceCameraPos&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;and this compiled and ran…sorta. Data was getting sent to the gpu, but the wrong data seemed to be filling the variables in the shader. Turns out, this is because (as mentioned earlier) uniform struct members are 16 byte aligned in Vulkan.&lt;/p&gt;
+
+&lt;p&gt;Awkwardly, fixing this problem in MSVC looks like this:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;GlobalShaderData&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;kr&quot;&gt;__declspec&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;align&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;16&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;glm&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;float32&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;time&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;kr&quot;&gt;__declspec&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;align&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;16&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;glm&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;vec4&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mouse&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;kr&quot;&gt;__declspec&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;align&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;16&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;glm&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;vec2&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;resolution&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;kr&quot;&gt;__declspec&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;align&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;16&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;glm&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mat4&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;viewMatrix&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;kr&quot;&gt;__declspec&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;align&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;16&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;glm&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;vec4&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;worldSpaceCameraPos&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;I’m about 110% positive there’s a less awful way of doing this, so please, please let me know what it is &lt;a href=&quot;https://twitter.com/khalladay&quot;&gt;on Twitter&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;That’s the end of the “potentially helpful to everyone” segment of the post, if you want to know more about the structure of my material systeem so far, read on!&lt;/p&gt;
+
+&lt;h2 id=&quot;my-ugly-little-material-system&quot;&gt;My Ugly Little Material System&lt;/h2&gt;
+
+&lt;p&gt;To preface: I’m going to include more information than anyone needs, because I wish implementation details about how someone else had approached this problem was readibly available to me before I started on this path.&lt;/p&gt;
+
+&lt;p&gt;As I mentioned earlier, my system works in two passes. The first pass, called the “ShaderPipeline”, is an application that gets run whenever a shader is modified. This handles compiling GLSL into SPIR-V, and generates the reflection files I talked about earlier.&lt;/p&gt;
+
+&lt;p&gt;Materials are defined in their own json files (I don’t love json, but &lt;a href=&quot;https://github.com/Tencent/rapidjson&quot;&gt;rapidjson&lt;/a&gt; is really easy to use), which specify which shaders to use for each stage, and default values for their inputs. A Simple material might look like this:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;s&quot;&gt;&quot;shaders&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+      &lt;span class=&quot;s&quot;&gt;&quot;stage&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;vertex&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+      &lt;span class=&quot;s&quot;&gt;&quot;shader&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;vertex_uvs&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+      &lt;span class=&quot;s&quot;&gt;&quot;defaults&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+          &lt;span class=&quot;s&quot;&gt;&quot;name&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Instance&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+          &lt;span class=&quot;s&quot;&gt;&quot;members&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;
+          &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+              &lt;span class=&quot;s&quot;&gt;&quot;name&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;tint&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+              &lt;span class=&quot;s&quot;&gt;&quot;value&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+          &lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+      &lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+      &lt;span class=&quot;s&quot;&gt;&quot;stage&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;fragment&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+      &lt;span class=&quot;s&quot;&gt;&quot;shader&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;fragment_passthrough&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+      &lt;span class=&quot;s&quot;&gt;&quot;defaults&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+          &lt;span class=&quot;s&quot;&gt;&quot;name&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;texSampler&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+          &lt;span class=&quot;s&quot;&gt;&quot;value&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;../data/textures/airplane.png&quot;&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+      &lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;When a material is loaded from a file, this material file is unpacked into a Material::Definition struct, which is formatted to make it easy to access the data we need when creating the vulkan material. Below is what that struct looks like, but if you want to know what the custom types inside it are (like PushConstantBlock), go check out &lt;a href=&quot;https://github.com/khalladay/VkMaterialSystem/blob/master/VkMaterialSystem/material_creation.h&quot;&gt;material_creation.h&lt;/a&gt;&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Definition&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;PushConstantBlock&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pcBlock&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;vector&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ShaderStageDefinition&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;stages&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;vector&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;DescriptorSetBinding&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;descSets&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+  &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;vector&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dynamicSets&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;vector&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;staticSets&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;vector&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;globalSets&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+  &lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;numStaticUniforms&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;numStaticTextures&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;numDynamicUniforms&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;numDynamicTextures&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;staticSetsSize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dynamicSetsSize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The Material::Definition struct is what gets passed to the material creation function. If you really wanted to, you could create a definition at runtime and make new materials on the fly. I’m sure at some point I’ll think of a clever reason to do that.&lt;/p&gt;
+
+&lt;p&gt;The advantage of this Material::Definition struct is that it’s trivial to add more information to it. If I wanted my material json files to specify blend mode, ZWrite behaviour, Culling Mode, Polygon Mode, or anything else, I can just add a field to this and grab it out of the json. For now, the creation method just assumes I want an opque, ZWriting, Cull Back, Polygon Filled material, but that will be made configurable pretty much as soon as I want to have a translucent material.&lt;/p&gt;
+
+&lt;p&gt;Once loaded, all the data needed to render a material is stored in a MaterialRenderData struct:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MaterialRenderData&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;//general material data
+&lt;/span&gt;  &lt;span class=&quot;n&quot;&gt;VkPipeline&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pipeline&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;VkPipelineLayout&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pipelineLayout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+  &lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;layoutCount&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;VkDescriptorSetLayout&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;descriptorSetLayouts&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+  &lt;span class=&quot;n&quot;&gt;VkDescriptorSet&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;descSets&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;numDescSets&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+  &lt;span class=&quot;n&quot;&gt;UniformBlockDef&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pushConstantLayout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pushConstantData&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+  &lt;span class=&quot;c1&quot;&gt;//we don&#39;t need a layout for static data since it cannot be
+&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;//changed after initialization
+&lt;/span&gt;  &lt;span class=&quot;n&quot;&gt;VkBuffer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;staticBuffers&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;VkDeviceMemory&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;staticUniformMem&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;numStaticBuffers&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+  &lt;span class=&quot;c1&quot;&gt;//for now, just add buffers here to modify. when this
+&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;//is modified to support material instances, we&#39;ll change it
+&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;//to something more sane.
+&lt;/span&gt;  &lt;span class=&quot;n&quot;&gt;MaterialDynamicData&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dynamic&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;There are a few things to talk about here. Firstly, I store the data used for a material’s push constants in the RenderData struct, so that if nothing has changed since the last time they were set, we have that data already sorted out. Rather than store each of the push constant members in a map, or other collection, I keep all the data for the entire push constant block in a char* buffer, and then store layout data about that char* in a UniformBlockDef struct, which looks like this:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;UniformBlockDef&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;//stride 2 - hashed name / member offset
+&lt;/span&gt;  &lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;layout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;blockSize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memberCount&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;VkShaderStageFlags&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;visibleStages&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;As the comment says, instead of storing string names for the member vars, I hash them and store them along with each member’s offset into the buffer.&lt;/p&gt;
+
+&lt;p&gt;Setting a push constant value on a material then becomes a simple matter of looping over this layout buffer until you find the member you want, and using the offset data located next to it:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;setPushConstantData&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;matId&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;var&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;MaterialRenderData&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rData&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Material&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;getRenderData&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;matId&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+  &lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;varHash&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;hash&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;var&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+  &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rData&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pushConstantLayout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memberCount&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rData&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pushConstantLayout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;layout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;varHash&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+      &lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;offset&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rData&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pushConstantLayout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;layout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;memcpy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rData&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pushConstantData&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rData&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pushConstantLayout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;layout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;break&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Then when it’s time for that material to be rendered, I can just grab the entire buffer of push constant data and send it on its way.&lt;/p&gt;
+
+&lt;p&gt;I like this approach to the problem because it makes Push Constant members (and other dynamic data, which uses a smiliar paradigm) “fire and forget” data, that is, nothing blows up if I try to set a push constant var on a material that doesn’t have that member, the function just doesn’t find the member in the layout buffer and does nothing. It ends up working very much like the functions for setting shader inputs on Unity’s Material class.&lt;/p&gt;
+
+&lt;p&gt;I use this same paradigm to handle setting dynamic uniform data, although in that case I have to call vkCmdUpdateBuffer instead of just memcpying, since I have to update device local memory. This could probably be sped up by collecting all the updates for a frame and then doing the vulkan update once, but I’ll worry about that in phase 2. Dynamic uniforms also need a bit more information stored about them, so I have a separate struct, called MaterialDynamicData to store that:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MaterialDynamicData&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;numInputs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+  &lt;span class=&quot;c1&quot;&gt;// stride: 4 - hashed name / buffer index / member size / member offset
+&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;// for images- hasehd name / textureViewPtr index / desc set write idx / padding
+&lt;/span&gt;  &lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;layout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;VkBuffer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;buffers&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;VkDeviceMemory&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;uniformMem&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+  &lt;span class=&quot;n&quot;&gt;VkWriteDescriptorSet&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;descriptorSetWrites&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The big difference between this and the push constant data is that I’m also keeping the VkWriteDescriptorSet structs around, so that I can change what textures are being used at runtime, and the layout buffer is storing more information per member, but it’s all pretty much working the same way as the push constants.&lt;/p&gt;
+
+&lt;p&gt;These MaterialRenderData structs are stored in a map (boo!) that uses uint32_ts as keys. When the renderer wants to get the information about a mesh’s material, it uses the integer material name to get the corresponding struct, and Bob’s your uncle.&lt;/p&gt;
+
+&lt;h2 id=&quot;problems-and-limitations-with-my-system&quot;&gt;Problems and Limitations With My System&lt;/h2&gt;
+
+&lt;p&gt;Oh boy, there’s a lot of them. Probably the biggest being tbat none of it has actually survived being used in a real project, but I suppose there’s some more specific things to point out.&lt;/p&gt;
+
+&lt;p&gt;Number one is that storing the VkDeviceMemory directly in the material is probably bad, and should likely be replaced by an actual allocator doing actual allocator things.&lt;/p&gt;
+
+&lt;p&gt;Secondly, as mentioned before, this doesn’t handle material instances at all yet, so if you want two materials, using the same shaders but a different texture, you need two whole materials to do it. Phase 2 of this project will remedy that, and add some more customization options to the Material::Definition struct.&lt;/p&gt;
+
+&lt;p&gt;All my materials are stored in maps, and setting any data on them requires a map lookup to get the MaterialRenderData struct for that material. This results in a LOT of unnecessary map lookups. Looking up materials by id is going to happen an awful lot, and I’m not thrilled about using a map at all (but it was easy!). Instead, this should probably do something like store materials in an array, use the integer id to store an index into the array and some additional data to handle when an array slot gets re-used (like &lt;a href=&quot;http://bitsquid.blogspot.com/2014/08/building-data-oriented-entity-system.html&quot;&gt;Bitsquid does with their ECS&lt;/a&gt;)&lt;/p&gt;
+
+&lt;p&gt;It also should probably support hot reloading of shaders to make editing easier, maybe I should add a phase 3?&lt;/p&gt;
+
+&lt;p&gt;Regardless, hopefully this article was helpful to someone! If you want to say hi / want to point out something dumb I’m doing. give me a shout &lt;a href=&quot;https://twitter.com/khalladay&quot;&gt;on Twitter&lt;/a&gt;, or @Khalladay on &lt;a href=&quot;gamedev.mastodon.place&quot;&gt;Mastodon&lt;/a&gt;.&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Improving Vulkan Breakout</title>
