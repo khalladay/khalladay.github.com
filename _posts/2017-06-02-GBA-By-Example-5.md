@@ -13,7 +13,7 @@ tags:
 
 Whew, it's been awhile! I know I said I'd put up another tutorial in 2 weeks...but that didn't happen. Between shipping a game at work, and diving into Vulkan, my interest for GBA stuff definitely took a back seat. Lesson learned, don't put a deadline on blog posts :)
 
-So far, I've gotten by with doing the bare minimum for anything art related, but our end products have never been too exciting. So this article is going to fix that. First, we're going to walk through the process of grabbing some (public domain) sprites off of [OpenGameArt.com](), importing those into our game, and then using them to animate a character as we move them around the screen.
+So far, I've gotten by with doing the bare minimum for anything art related, but our end products have never been too exciting. So this article is going to fix that. First, we're going to walk through the process of grabbing some (public domain) sprites off of [OpenGameArt.org](https://opengameart.org/), importing those into our game, and then using them to animate a character as we move them around the screen.
 
 At the end of the article, we should have something that looks like this:
 
