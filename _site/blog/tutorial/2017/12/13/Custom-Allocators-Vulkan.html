@@ -6,10 +6,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Kyle Halladay - Home Page</title>
+  <title>Kyle Halladay - A Simple Device Memory Allocator For Vulkan</title>
   <meta name="author" content="Kyle Halladay" />
   <meta name="description" content="I build shaders, renderers, games, and other stuff that's fun to stare at." />
-  <link rel="canonical" href="http://kylehalladay.com/" />
+  <link rel="canonical" href="http://kylehalladay.com/blog/tutorial/2017/12/13/Custom-Allocators-Vulkan.html" />
   <meta name="keywords" content="life,code,software,development,games,graphics,shaders,indie" />
 
   <link href="//fonts.googleapis.com/css?family=Open+Sans:600,800" rel="stylesheet" type="text/css">
@@ -89,14 +89,13 @@
       <hr style="border-color:#000; margin:1em -0.25em;"></topbar>
 
       <p class="meta">
-  
 
 </p>
 
 <h1 class="title">A Simple Device Memory Allocator For Vulkan</h1>
 
 <div id="post">
- <p>Last month, I posted about the <a href="http://kylehalladay.com/blog/tutorial/2017/11/27/Vulkan-Material-System.html">material system</a> that I’ve been trying to piece together, and talked about how the next step for that system was going to be to extend it to handle material instances. This sounded like a great next step until I started building it and realized that in order for this to work with arbitrary data, I needed to sort out how I wanted to manage allocating arbitrary amounts of Vulkan device memory.</p>
+  <p>Last month, I posted about the <a href="http://kylehalladay.com/blog/tutorial/2017/11/27/Vulkan-Material-System.html">material system</a> that I’ve been trying to piece together, and talked about how the next step for that system was going to be to extend it to handle material instances. This sounded like a great next step until I started building it and realized that in order for this to work with arbitrary data, I needed to sort out how I wanted to manage allocating arbitrary amounts of Vulkan device memory.</p>
 
 <p>Vulkan only gives you a limited amount of allocations that you’re allowed to have active at one time (set by your gpu), so I can’t keep creating new allocations for every new material, and I definitely can’t for material instances. So instead of pressing forward with the material system, I took a quick detour to figure out how to write a memory allocator that would solve this problem for me.</p>
 

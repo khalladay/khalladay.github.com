@@ -102,7 +102,7 @@
 <p>The second phase will be to extend the system to handle material instances, and thousands of objects, but before I dive into that, it felt like a good time to take a step back and write down some of the things I’ve had to figure out to get this far, in case someone else gets stuck in the same places.</p>
 
 <div align="center">
-<img src="/images/post_images/2017-11-28/output.PNG" />
+<img src="/images/post_images/2017-11-28/output.png" />
 <font size="2">One of my tests was Inigo Quilez's <a href="https://www.shadertoy.com/view/Xds3zN">raymarching primitives shader</a></font>
 <br /><br />
 </div>
@@ -392,7 +392,7 @@
 
 <h2 id="problems-and-limitations-with-my-system">Problems and Limitations With My System</h2>
 
-<p>Oh boy, there’s a lot of them. Probably the biggest being tbat none of it has actually survived being used in a real project, but I suppose there’s some more specific things to point out.</p>
+<p>Oh boy, there’s a lot of them. Probably the biggest being that none of it has actually survived being used in a real project, but I suppose there’s some more specific things to point out.</p>
 
 <p>Number one is that storing the VkDeviceMemory directly in the material is probably bad, and should likely be replaced by an actual allocator doing actual allocator things.</p>
 
@@ -411,6 +411,10 @@
   <ul class="posts">
     
     <li>
+      <span>13 Dec 2017 &raquo;</span> <a href="/blog/tutorial/2017/12/13/Custom-Allocators-Vulkan.html">A Simple Device Memory Allocator For Vulkan</a>
+    </li>
+    
+    <li>
       <span>27 Nov 2017 &raquo;</span> <a href="/blog/tutorial/2017/11/27/Vulkan-Material-System.html">Lessons Learned While Building a Vulkan Material System</a>
     </li>
     
@@ -420,10 +424,6 @@
     
     <li>
       <span>13 Aug 2017 &raquo;</span> <a href="/blog/tutorial/vulkan/2017/08/13/Vulkan-Uniform-Buffers.html">Comparing Uniform Data Transfer Methods in Vulkan</a>
-    </li>
-    
-    <li>
-      <span>02 Jun 2017 &raquo;</span> <a href="/blog/tutorial/gba/2017/06/02/GBA-By-Example-5.html">GBA By Example - Sprite Animation</a>
     </li>
     
   </ul>

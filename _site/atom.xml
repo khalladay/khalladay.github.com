@@ -4,13 +4,482 @@
  <title>The blog of Kyle Halladay</title>
  <link href="http://kylehalladay.com/atom.xml" rel="self"/>
  <link href="http://kylehalladay.com"/>
- <updated>2017-11-27T14:15:28-06:00</updated>
+ <updated>2017-12-13T07:19:50-06:00</updated>
  <id>http://kylehalladay.com</id>
  <author>
    <name>Kyle Halladay</name>
    <email>k.mj.halladay@gmail.com</email>
  </author>
 
+ 
+ <entry>
+   <title>A Simple Device Memory Allocator For Vulkan</title>
+   <link href="http://kylehalladay.com/blog/tutorial/2017/12/13/Custom-Allocators-Vulkan.html"/>
+   <updated>2017-12-13T00:00:00-06:00</updated>
+   <id>http://kylehalladay.com/blog/tutorial/2017/12/13/Custom-Allocators-Vulkan</id>
+   <content type="html">&lt;p&gt;Last month, I posted about the &lt;a href=&quot;http://kylehalladay.com/blog/tutorial/2017/11/27/Vulkan-Material-System.html&quot;&gt;material system&lt;/a&gt; that I’ve been trying to piece together, and talked about how the next step for that system was going to be to extend it to handle material instances. This sounded like a great next step until I started building it and realized that in order for this to work with arbitrary data, I needed to sort out how I wanted to manage allocating arbitrary amounts of Vulkan device memory.&lt;/p&gt;
+
+&lt;p&gt;Vulkan only gives you a limited amount of allocations that you’re allowed to have active at one time (set by your gpu), so I can’t keep creating new allocations for every new material, and I definitely can’t for material instances. So instead of pressing forward with the material system, I took a quick detour to figure out how to write a memory allocator that would solve this problem for me.&lt;/p&gt;
+
+&lt;p&gt;If you’re not interested in the implementation details, GPUOpen already has a very capable memory allocator that’s open source and ready to use, and is way better than what I’ve put together (you can get it &lt;a href=&quot;https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator&quot;&gt;here&lt;/a&gt;) but I wanted to figure out how to write my own, which is what I’m going to talk about for the rest of this post.&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+&lt;img src=&quot;/images/post_images/2017-12-14/duck.jpg&quot; /&gt;
+&lt;font size=&quot;2&quot;&gt;I have no idea how to take a picture of an allocator&lt;/font&gt;
+&lt;br /&gt;&lt;br /&gt;
+&lt;/div&gt;
+
+&lt;h2 id=&quot;understanding-vulkan-memory&quot;&gt;Understanding Vulkan Memory&lt;/h2&gt;
+
+&lt;p&gt;The first thing I needed to take a look at was how exactly Vulkan memory worked, and there wasn’t a better spot than the output of &lt;a href=&quot;https://www.khronos.org/registry/vulkan/specs/1.0/man/html/vkGetPhysicalDeviceMemoryProperties.html&quot;&gt;vkGetPhysicalDeviceMemoryProperties&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;On my GPU (GTX 1060), this reported that my device had 2 memory heaps, one that was 6 GB, and one that was 16 GB, this was interesting because according to NVidia’s system stats, my gpu only has 14.2 GB of total graphics memory (and I never really figured out what this discrepancy was all about). However, the 6GB number made sense, since that’s how much dedicated video memory I have on my card.&lt;/p&gt;
+
+&lt;p&gt;The only other information given about these heaps was a “flags” variable. A quick look at the Vulkan docs reveals that there’s only one flag defined right now:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;k&quot;&gt;typedef&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;enum&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;VkMemoryHeapFlagBits&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;VK_MEMORY_HEAP_DEVICE_LOCAL_BIT&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x00000001&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;VkMemoryHeapFlagBits&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Which makes sense because my 6 GB heap is listed with a flags value of 1, making it the device local memory (which is what I’d expect, given that it’s my dedicated memory), and the other heap has a flags value of 0, which I assume just means that anything goes with that heap.&lt;/p&gt;
+
+&lt;p&gt;The other thing returned by vkGetPhysicalDeviceMemoryProperties is an array of memory types. These are important because when you’re allocating memory pools, you can’t mix memory types, so unlike on the CPU where you can malloc up as much as you want and parcel it out to anything, in Vulkan, you need multiple large allocations that you parcel out from based on type.&lt;/p&gt;
+
+&lt;p&gt;Vulkan memory types are identified by what heap they belong to, and which of the following property bits they have set:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;k&quot;&gt;typedef&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;enum&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;VkMemoryPropertyFlagBits&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x00000001&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x00000002&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;VK_MEMORY_PROPERTY_HOST_COHERENT_BIT&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x00000004&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;VK_MEMORY_PROPERTY_HOST_CACHED_BIT&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x00000008&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x00000010&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;VkMemoryPropertyFlagBits&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;On my machine, using the above information, I could determine the following about the memory types I have available:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;7 memory types that use Heap 1 (all graphics memory), but have none of the above properties (wtf?)&lt;/li&gt;
+  &lt;li&gt;2 memory types which have the VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT property, and are located in heap 0 (dedicated memory)&lt;/li&gt;
+  &lt;li&gt;1 memory type which have the VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT and VK_MEMORY_PROPERTY_HOST_COHERENT_BITproperties, located in heap 1&lt;/li&gt;
+  &lt;li&gt;1 memory type which have the VK_MEMORY_PROPERTY_HOST_CACHED_BIT, VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, and VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT properties, in heap 1&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Some of this makes sense, but wtf is going on with the duplicate memory types? Quick, REACT WITH BLAME!&lt;/p&gt;
+
+&lt;h2 id=&quot;this-is-nvidias-fault&quot;&gt;This is NVidia’s Fault!&lt;/h2&gt;
+
+&lt;p&gt;A quick jaunt over to the &lt;a href=&quot;&quot;&gt;Vulkan Hardware Database&lt;/a&gt; shows that it’s only NVidia cards that have these extra memory types, and a quick trip to google turns up &lt;a href=&quot;https://developer.nvidia.com/what%E2%80%99s-your-vulkan-memory-type&quot;&gt;this article&lt;/a&gt;, which says that in additional to the memory types that Vulkan gives you, NVidia cards have additional types which are specialized for certain kinds of data. Fair enough, the problem is figuring out which of our mystery memory types are for what data.&lt;/p&gt;
+
+&lt;p&gt;Here’s where you really hope the article has an enum definition or something, but instead we get this:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;A memory allocator that follows the rules and guidance of the Vulkan specification should be able to handle all these memory types gracefully by properly interpreting the VkMemoryRequirements::memoryTypeBits member when selecting an allocation for a specific resource.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Gee… thanks. Turns out, even when you’re working with Vulkan, you have to accept some amount of vendor specific magic behind the scenes.&lt;/p&gt;
+
+&lt;p&gt;Thankfully, the &lt;a href=&quot;https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#memory-device&quot;&gt;Vulkan spec&lt;/a&gt; gives us the exact bit of code we need to follow its “rules and guidance” when determining what memory type to use:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;c1&quot;&gt;// Find a memory in `memoryTypeBitsRequirement` that includes all of `requiredProperties`
+&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int32_t&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;findProperties&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;VkPhysicalDeviceMemoryProperties&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pMemoryProperties&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                       &lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memoryTypeBitsRequirement&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                       &lt;span class=&quot;n&quot;&gt;VkMemoryPropertyFlags&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;requiredProperties&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memoryCount&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pMemoryProperties&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memoryTypeCount&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memoryIndex&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memoryIndex&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memoryCount&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memoryIndex&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memoryTypeBits&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memoryIndex&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bool&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;isRequiredMemoryType&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memoryTypeBitsRequirement&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memoryTypeBits&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+        &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;VkMemoryPropertyFlags&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;properties&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pMemoryProperties&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memoryTypes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memoryIndex&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;propertyFlags&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bool&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;hasRequiredProperties&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;properties&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;requiredProperties&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;requiredProperties&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;isRequiredMemoryType&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;hasRequiredProperties&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;static_cast&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int32_t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memoryIndex&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;// failed to find memory type
+&lt;/span&gt;    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;So until I find a good reason to not use the above code exactly, I’m going to copy/paste the crap out of it.&lt;/p&gt;
+
+&lt;h2 id=&quot;allocating-device-memory&quot;&gt;Allocating Device Memory&lt;/h2&gt;
+
+&lt;p&gt;The next thing I looked into was how to allocate device memory. I almost skipped this step, given that I’ve built a few projects already, and figured that calling vkAllocateMemory was about all there was to it. Turns out I was wrong and there were few things that I didn’t realize I needed to keep in mind. All this information comes from the &lt;a href=&quot;https://www.khronos.org/registry/vulkan/specs/1.0/man/html/vkAllocateMemory.html&quot;&gt;vulkan spec page&lt;/a&gt; for vkAllocateMemory, so if you want to go straight to the source, there it is.&lt;/p&gt;
+
+&lt;p&gt;Here are all the things I didn’t know about allocating device memory before I looked there:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;vkAllocateMemory is guaranteed to return an allocation that is aligned to the largest alignment requirement for your Vulkan implementation (ie: if one resource type needs to be 16 byte aligned, and another type 128 byte aligned, all vkAllocateMemory calls will be 128 bit aligned), so you never have to worry about the alignment of these allocs.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Some platforms limit the maximum size a single allocation can be, and this limit can be different for each memory type. So if you’re getting VK_ERROR_OUT_OF_DEVICE_MEMORY errors but don’t see an obvious cause, that may be it.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;There is a limit to the amount of memory available in each memory heap your implementation provides (found in vkGetPhysicalDeviceMemoryProperties).&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;The vkAllocateMemory call has a parameter for a VkAllocationCallbacks structure, which can be used to provide custom allocators for host memory. I’m ignoring this today, but it’s good to know what that argument for.&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Finally, as mentioned earlier, Vulkan limits the number of vkDeviceMemory allocations you can have active at one time. You can grab the limit from VkPhysicalDeviceLimits (on my gpu, the limit was 4096). If you try to exceed this limit, you get VK_ERROR_TOO_MANY_OBJECTS.  This allocation count limit is the reason for all of this work: I don’t want to write a material instancing system that bogarts all my allocations.&lt;/p&gt;
+
+&lt;h2 id=&quot;binding-memory-and-freeing-resources&quot;&gt;Binding Memory And Freeing Resources&lt;/h2&gt;
+
+&lt;p&gt;Assuming that all of the nuances of allocating memory have been properly handled, there’s still the matter of actually using that memory. In Vulkan, this means “binding” a buffer to some region of a vkDeviceMemory allocation. Luckily this is much more straightforward than allocating the memory: all you need to do is call a binding function, like one of these:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;n&quot;&gt;VkResult&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;vkBindBufferMemory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;VkDevice&lt;/span&gt;                                    &lt;span class=&quot;n&quot;&gt;device&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;VkBuffer&lt;/span&gt;                                    &lt;span class=&quot;n&quot;&gt;buffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;VkDeviceMemory&lt;/span&gt;                              &lt;span class=&quot;n&quot;&gt;memory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;VkDeviceSize&lt;/span&gt;                                &lt;span class=&quot;n&quot;&gt;memoryOffset&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;VkResult&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;vkBindImageMemory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;VkDevice&lt;/span&gt;                                    &lt;span class=&quot;n&quot;&gt;device&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;VkImage&lt;/span&gt;                                     &lt;span class=&quot;n&quot;&gt;image&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;VkDeviceMemory&lt;/span&gt;                              &lt;span class=&quot;n&quot;&gt;memory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;VkDeviceSize&lt;/span&gt;                                &lt;span class=&quot;n&quot;&gt;memoryOffset&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Unlike vkAllocateMemory, which I brought up specifically to talk about all the gotchas, the functions used to bind memory are really simple. Instead, I’m mentioning this one to provide some info about how I decided on the structure of my allocator. Since any allocator that will solve the allocation count limit problem is going to be subdividing up large allocations, any call to allocate memory needs to return both the VkDeviceMemory handle for the large allocation we’re subdividing, and the offset into that allocation used for this specific resource so that the allocation can be bound correctly.&lt;/p&gt;
+
+&lt;p&gt;I ended up settling on this:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Allocation&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;VkDeviceMemory&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;handle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;type&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;VkDeviceSize&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;VkDeviceSize&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;offset&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The only thing that may not be readily apparent is the id variable, which I’m adding since I’m assuming at some point I’ll need some extra bits to help find the allocation inside a memory pool.&lt;/p&gt;
+
+&lt;p&gt;It’s worth noting that once you bind memory to a Vulkan resource, the only way you can unbind that memory is to destroy the buffer, image, or whatever else that memory is bound too. If you try to free memory that’s currently bound to a resource, bad things will happen (probably a crash but I’m assuming some edge case involves a close encounter between the fire department and my graphics card).&lt;/p&gt;
+
+&lt;p&gt;Whew, all that theory is finally out of the way! It’s time to actually build something.&lt;/p&gt;
+
+&lt;h2 id=&quot;a-basic-allocator-structure&quot;&gt;A Basic Allocator Structure&lt;/h2&gt;
+
+&lt;p&gt;For my project, all I did was define some function pointers for allocating things, and then have whatever allocator I wanted to use write to those pointers with its own functions. Sure, this means that I can’t have multiple allocators in use at once, but I think I’m having the right amount of fun just worrying about 1 allocator right now. I already have a global struct called vkh::Context (vkh is the namespace for my “vulkan helper” code), so I just added another member to this struct that looks like so:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;AllocatorInterface&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;//setup the allocator
+&lt;/span&gt;    &lt;span class=&quot;c1&quot;&gt;//args: vkh context structure
+&lt;/span&gt;    &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;activate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;VkhContext&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;//args: mem handle, size of alloc, mem type
+&lt;/span&gt;    &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;alloc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Allocation&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;VkDeviceSize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;//args: mem handle
+&lt;/span&gt;    &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;free&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Allocation&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;//args: memory type
+&lt;/span&gt;    &lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;allocatedSize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;//returns total number of active vulkan allocs
+&lt;/span&gt;    &lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;numAllocs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The VkhContext structure can be found on github in &lt;a href=&quot;https://github.com/khalladay/VkMaterialSystem/blob/master/VkMaterialSystem/vkh.h&quot;&gt;vkh.h&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;a-passthrough-allocator&quot;&gt;A Passthrough Allocator&lt;/h2&gt;
+
+&lt;p&gt;To start things off, I decided that I wanted to build an allocator that did nothing, or rather, that just made the exact same calls that my program code was making otherwise, but routed through this “passthrough” allocator. This gave me a starting place for defining the interface I needed, and was pretty simple, since all my code already routed calls to allocate memory through two functions.&lt;/p&gt;
+
+&lt;p&gt;I’ll leave out the activate function because it’s specific to my program, and boring. Instead I want to start by showing off the allocate function:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;alloc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Allocation&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;outAlloc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;VkDeviceSize&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memoryType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;totalAllocs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memTypeAllocSizes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memoryType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;VkMemoryAllocateInfo&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;allocInfo&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;vkh&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memoryAllocateInfo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memoryType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;VkResult&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;res&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;vkAllocateMemory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;context&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;device&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;allocInfo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;nullptr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;outAlloc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;handle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;outAlloc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;size&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;outAlloc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memoryType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;outAlloc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;offset&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;checkf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;res&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;VK_ERROR_OUT_OF_DEVICE_MEMORY&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;Out of device memory&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;checkf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;res&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;VK_ERROR_TOO_MANY_OBJECTS&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;Attempting to create too many allocations&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;checkf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;res&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;VK_SUCCESS&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;Error allocating memory in passthrough allocator&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Ok, so this function is also pretty boring in the passthrough allocator, but there’s a couple of key things to note:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;All the errors I mentioned earlier are checked for. The checkf function essentially a macro for an assert that prints a log message and pops up a message window if it fails.&lt;/li&gt;
+  &lt;li&gt;Even though we aren’t using it in this allocator, the Allocation structure we’re returning gets it’s offset set to 0 so that we can pass the offset to bind calls later.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;With the allocation code out of the way, the rest of the allocator interface is pretty boring to looks at:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;free&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Allocation&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;allocation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;totalAllocs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;--&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memTypeAllocSizes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;allocation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;type&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;allocation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;vkFreeMemory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;context&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;device&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;allocation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;handle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;nullptr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;allocatedSize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memoryType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memTypeAllocSizes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memoryType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;numAllocs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;totalAllocs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The entire source for this class is available &lt;a href=&quot;https://github.com/khalladay/VkMaterialSystem/blob/material-instances/VkMaterialSystem/vkh_allocator_passthrough.cpp&quot;&gt;on github&lt;/a&gt;, but the above is the part that matters for what I’m talking about right now.&lt;/p&gt;
+
+&lt;p&gt;What’s nice about this is that even though it really isn’t doing anything interesting, it at least gives us a bit more insight into our memory use, which is certainly useful by itself. For example I know that the &lt;a href=&quot;https://github.com/khalladay/VkMaterialSystem&quot;&gt;material system demo app&lt;/a&gt; I posted last month needs 11 active allocations to render the frame, which is more than I knew last month when I wrote the thing.&lt;/p&gt;
+
+&lt;h2 id=&quot;a-better-allocator-structure&quot;&gt;A Better Allocator Structure&lt;/h2&gt;
+
+&lt;p&gt;Despite being pretty useful, the passthrough allocator didn’t solve the allocation count problem that I needed solve. I needed to do something a bit more interesting.&lt;/p&gt;
+
+&lt;p&gt;So here’s what I ended up resolving to build (remember, I just wanted something functional, so don’t take any of this as a great idea):&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;The allocator needs separate memory pools, one for each type of vulkan memory (this is required by the spec anyway)&lt;/li&gt;
+  &lt;li&gt;Each pool is made up of an array of large VkDeviceMeemory allocations and associated usage data about those allocations&lt;/li&gt;
+  &lt;li&gt;When something needs memory, I’ll go through each large allocation, looking for the first large enough memory chunk in an allocation’s usage data&lt;/li&gt;
+  &lt;li&gt;If no gap is found, I’ll create a new large allocation to use, and add it to that pool’s array.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;There are lots of details that real allocators worry about that the above doesn’t begin to cover, but I’m already down this rabbit hole far enough for my liking right now, and this minimal allocator suits my current needs just fine.&lt;/p&gt;
+
+&lt;h2 id=&quot;how-subdividing-device-memory-works&quot;&gt;How Subdividing Device Memory Works&lt;/h2&gt;
+
+&lt;p&gt;The basics of subdividing device memory are simple - call vkBindDeviceMemory with a VkDeviceMemory to the allocation you’re subdividing, and use the offset argument to select where in that allocation to go, but I figured there had to be more to it than that. One of the things I was sure that I needed to figure out was how to decide how big to make my large allocations, or heck, even how big a memory page is on the gpu.&lt;/p&gt;
+
+&lt;p&gt;Reading through the spec (&lt;a href=&quot;https://vulkan.lunarg.com/doc/view/1.0.26.0/linux/vkspec.chunked/ch11s06.html&quot;&gt;11.6. Resource Memory Association&lt;/a&gt;), I noticed the concept of “buffer-image granularity.” The description in the spec was fairly confusing, but what I took away from it is that in addition to alignment concerns when sub allocating from a larger device memory allocation, if you’re going to be using the same alloc for buffers and images, you also need to space them far enough apart within the alloc to satisfy this implementation defined value. If you screw this up, your validation layer let you know with the message:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Linear buffer 0xXX is aliased with non-linear image 0xXX which may indicate a bug. For further info refer to the Buffer-Image Granularity section of the Vulkan specification. &amp;gt;(https://www.khronos.org/registry/vulkan/specs/1.0-extensions/xhtml/vkspec.html#resources-bufferimagegranularity)&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;So I’m using this buffer-image granularity number as my page size for allocations, and only ever allocating large blocks which are a multiple of that size for simplicity.&lt;/p&gt;
+
+&lt;p&gt;Another thing to keep in mind is that different memory types can’t share the same VkDeviceMemory allocation, so we’ll need a memory pool for each memoryType returned for our GPU (on my card, this meant that I’d need up to 11 memory pools).&lt;/p&gt;
+
+&lt;h2 id=&quot;the-pool-allocator&quot;&gt;The Pool Allocator&lt;/h2&gt;
+
+&lt;p&gt;Finally, we get to the good stuff. The Pool Allocator is what I ended up with after cramming all of the above into my head. I’ve talked about it enough already, so let’s actually get to the code. To start off, I want to talk about the couple of structs that I’m using to track allocators, and allocator state data:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;OffsetSize&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;uint64_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;offset&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;uint64_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;BlockSpanIndexPair&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;blockIdx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;spanIdx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;DeviceMemoryBlock&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;Allocation&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mem&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;vector&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;OffsetSize&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;layout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MemoryPool&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;vector&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;DeviceMemoryBlock&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;blocks&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;AllocatorState&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;VkhContext&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;context&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;vector&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memTypeAllocSizes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;totalAllocs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pageSize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;VkDeviceSize&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memoryBlockMinSize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;vector&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MemoryPool&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memPools&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;So yeah… that’s a lot of nested vectors, but it works and that’s good enough for me right now. I’m sure someone reading this has strong opinions about a better way to structure this and I’d actually really love to hear about it &lt;a href=&quot;https://twitter.com/khalladay&quot;&gt;on Twitter&lt;/a&gt;, but for this article, I’m going with the above.&lt;/p&gt;
+
+&lt;p&gt;The first two structs at the beginning are really just more convenient std::pairs, I hate pairs because .first and .second get really hard to read really fast, these just give me more useful member names.&lt;/p&gt;
+
+&lt;p&gt;The AllocatorState structure is the real meat of the above snippet. For the most part it’s probably pretty explanatory, but the few variables that aren’t probably make more sense in the context of the activate function, which is less boring than the passthrough allocator:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;activate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;VkhContext&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;context&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;context&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;allocator&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;allocImpl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;context&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;context&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;VkPhysicalDeviceMemoryProperties&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memProperties&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;vkGetPhysicalDeviceMemoryProperties&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;context&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;gpu&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;device&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memProperties&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memTypeAllocSizes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;resize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memProperties&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memoryTypeCount&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memPools&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;resize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memProperties&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memoryTypeCount&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pageSize&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;context&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;gpu&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;deviceProps&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;limits&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;bufferImageGranularity&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memoryBlockMinSize&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pageSize&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;I chose the minimum block size at random, and in practice that number is probably the most important one for making sure this allocator performs the best it can (ideally large enough that every large allocation will be able to be broken up by multiple requests). My app is so simple that I’m not worrying about using up all my graphics memory, so I probably could have made this 10x larger than it is, but that seemed like an even dumber idea than what I did.&lt;/p&gt;
+
+&lt;p&gt;The rest of that function pretty much documents itself, but without it, the allocate function would have made a lot less sense:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;alloc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Allocation&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;outAlloc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;VkDeviceSize&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memoryType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;MemoryPool&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pool&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memPools&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memoryType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;//make sure we always alloc a multiple of pageSize
+&lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;VkDeviceSize&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;requestedAllocSize&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;size&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pageSize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pageSize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memTypeAllocSizes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memoryType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;requestedAllocSize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;BlockSpanIndexPair&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;location&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;bool&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;found&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;findFreeChunkForAllocation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;location&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memoryType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;requestedAllocSize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;found&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;location&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;addBlockToPool&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;requestedAllocSize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memoryType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;outAlloc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;handle&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pool&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;blocks&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;location&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;blockIdx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mem&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;handle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;outAlloc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;size&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;outAlloc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;offset&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pool&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;blocks&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;location&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;blockIdx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;layout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;location&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;spanIdx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;offset&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;outAlloc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memoryType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;outAlloc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;id&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;location&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;blockIdx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;markChunkOfMemoryBlockUsed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memoryType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;location&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;requestedAllocSize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The most important thing to note in this function is that no matter how big the allocation we need is, the allocator rounds it up to the nearest multiple of our page size and uses that. The only thing that needs the originally asked for allocation size is the structure we’re returning to the caller (since it needs the correct size for the bind function).&lt;/p&gt;
+
+&lt;p&gt;This function itself is pretty straightforward, as are the couple of functions I haven’t pasted here. findFreeChunkForAllocation returns a location inside our target MemoryPool that can fit the allocation we want to make. If it can’t find space, we have to make space by adding a new block to the pool (that function returns the new block’s index in the memory pool), which is what addBlockToPool does.&lt;/p&gt;
+
+&lt;p&gt;Finally, after we build our allocation structure, we have to update the usage data for the DeviceMemoryBlock we’re using to make sure we know what regions of memory are already in use.&lt;/p&gt;
+
+&lt;p&gt;The code for all of these functions is on &lt;a href=&quot;https://github.com/khalladay/VkMaterialSystem/blob/material-instances/VkMaterialSystem/vkh_allocator_pool.cpp&quot;&gt;the github repo&lt;/a&gt;, (i’ve linked directly to the allocator’s .cpp file), so click through if you’re interested, I’m going to omit them here for brevity.&lt;/p&gt;
+
+&lt;p&gt;One function I’m not going to omit is the free function:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;free&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Allocation&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;allocation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;VkDeviceSize&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;requestedAllocSize&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;allocation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;size&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pageSize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pageSize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;OffsetSize&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;span&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;allocation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;offset&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;requestedAllocSize&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;MemoryPool&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pool&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memPools&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;allocation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;type&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;bool&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;found&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;j&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;j&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pool&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;blocks&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;allocation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;layout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;j&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pool&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;blocks&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;allocation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;layout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;j&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;offset&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;requestedAllocSize&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;allocation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;offset&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;pool&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;blocks&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;allocation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;layout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;j&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;offset&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;allocation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;offset&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;pool&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;blocks&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;allocation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;layout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;j&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;size&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;requestedAllocSize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;found&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;break&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;found&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memPools&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;allocation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;type&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;blocks&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;allocation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;layout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;push_back&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;span&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memTypeAllocSizes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;allocation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;type&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;requestedAllocSize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Remember that the Allocation struct needed to have the non rounded-up size so it could bind properly, so the first thing we need to do is get the size of the memory chunk it will take up in one of our pools. After that, it’s just a matter of updating the usage data for the pool the allocation was from (which I store in the id variable of the struct). The logic I’m using to update the layout for the blocks is really simple, and is almost certainly unoptimal in a lot of scenarios, but it works for now and is short enough to paste into a blog post, so I’m going to go with it.&lt;/p&gt;
+
+&lt;p&gt;Also important to note: I’m not actually ever freeing memory right now, just reusing pages. In a big kid app, I’d probably need to change that.&lt;/p&gt;
+
+&lt;p&gt;The remaining parts of the AllocatorInterface that the pool allocator implements are as follows:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;allocatedSize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memoryType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+	&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memTypeAllocSizes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memoryType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;numAllocs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+	&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;totalAllocs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;I’m going to go out on a limb and assume these don’t need explanation.&lt;/p&gt;
+
+&lt;p&gt;Putting all of this together and re running the MaterialDemo app shows that now I’m only using 4 active allocations to render the frame! That’s a big improvement over the 11 that I needed earlier. Mission success! Mostly…&lt;/p&gt;
+
+&lt;h2 id=&quot;the-problem-of-mapping-memory&quot;&gt;The Problem Of Mapping Memory&lt;/h2&gt;
+
+&lt;p&gt;Unfortunately, using the above code, I ended up with the following in my output log:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;VkMapMemory: Attempting to map memory on an already-mapped object 0x1a&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;It appears to be incorrect to map the same vkDeviceMemory block more than once at the same time, even if you’re mapping different regions of the block of memory. This means that the pool allocator needs a bit more information about how we plan to use the memory that we get out of it, to decide whether it needs to put that allocation into it’s own chunk of memory, or if it can reuse an old one like I did above.&lt;/p&gt;
+
+&lt;p&gt;Any allocation that isn’t device local &lt;em&gt;might&lt;/em&gt; be mapped at some point, so I decided to simply assume that if an allocation’s memory properties weren’t exactly VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, I would give it its own allocation. Since the usage flags aren’t part of a standard VkMemoryAllocateInfo, this meant I had to define my own AllocateCreateInfo struct, and modify my AllocatorInterface a bit:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;AllocationCreateInfo&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;VkMemoryPropertyFlags&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;usage&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memoryTypeIndex&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;VkDeviceSize&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;AllocatorInterface&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;//this was the only function that changed
+&lt;/span&gt;    &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;alloc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Allocation&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;AllocationCreateInfo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;This is probably better long term anyway, because at some point it will likely be handy to be able to pass even more data about how the allocation will be used to the alloc function, and now I have the place to do that.&lt;/p&gt;
+
+&lt;p&gt;The changes to the allocator itself are very minimal. First, I added a flag to the DeviceMemoryBlock struct to flag it as “reserved,” that is, not eligible for new allocations even if there is room:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;DeviceMemoryBlock&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;Allocation&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mem&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;vector&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;OffsetSize&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;layout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;bool&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pageReserved&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Next, the allocation function needed to be modified to check if an allocation needed a whole page to itself, and to pass that info to the findFreeChunkForAllocation function. This flag forced the find function to return a totally DeviceMemoryBlock that will fit the allocation.&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;alloc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Allocation&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;outAlloc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;AllocationCreateInfo&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;createInfo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;//rest of code omitted for brevity
+&lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;bool&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;needsOwnPage&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;createInfo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;usage&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;bool&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;found&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;findFreeChunkForAllocation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;location&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memoryType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;requestedAllocSize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;needsOwnPage&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;//...
+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The after either finding or creating a memory block to use, the allocation function marks that DeviceMemoryBlock as reserved:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;n&quot;&gt;pool&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;blocks&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;location&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;blockIdx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pageReserved&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;needsOwnPage&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Finally, the free function had to be modified to mark any DeviceMemoryBlock that it’s freeing memory from as not reserved:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;free&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Allocation&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;allocation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;//rest of code omitted for brevity
+&lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;MemoryPool&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pool&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memPools&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;allocation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;type&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;pool&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;blocks&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;allocation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pageReserved&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;//...
+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;With all that in place, I ran the MaterialDemo again, and at long last, got the thing to run with no errors, and only 4 allocations, which means I’m calling work on this done for now.&lt;/p&gt;
+
+&lt;h2 id=&quot;wrap-up&quot;&gt;Wrap Up&lt;/h2&gt;
+
+&lt;p&gt;I’m really glad that I decided to dig into this rather than just grab GPUOpen’s allocator. I learned a ton about Vulkan memory that I’m quite positive I never would have learned otherwise. As mentioned many times, all the code for this is available &lt;a href=&quot;https://github.com/khalladay/VkMaterialSystem/tree/material-instances&quot;&gt;on github&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;As per usual, I’m sure I’m doing a hundred different dumb things in this article, and I’d love you to send me a message &lt;a href=&quot;https://twitter.com/khalladay&quot;&gt;on Twitter&lt;/a&gt;, or @Khalladay on &lt;a href=&quot;gamedev.mastodon.place&quot;&gt;Mastodon&lt;/a&gt; if you spot on of them (or want to say hi).&lt;/p&gt;
+
+&lt;p&gt;Tune in next time when I try to finally add instances to the material system!&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Lessons Learned While Building a Vulkan Material System</title>
@@ -24,7 +493,7 @@
 &lt;p&gt;The second phase will be to extend the system to handle material instances, and thousands of objects, but before I dive into that, it felt like a good time to take a step back and write down some of the things I’ve had to figure out to get this far, in case someone else gets stuck in the same places.&lt;/p&gt;
 
 &lt;div align=&quot;center&quot;&gt;
-&lt;img src=&quot;/images/post_images/2017-11-28/output.PNG&quot; /&gt;
+&lt;img src=&quot;/images/post_images/2017-11-28/output.png&quot; /&gt;
 &lt;font size=&quot;2&quot;&gt;One of my tests was Inigo Quilez&#39;s &lt;a href=&quot;https://www.shadertoy.com/view/Xds3zN&quot;&gt;raymarching primitives shader&lt;/a&gt;&lt;/font&gt;
 &lt;br /&gt;&lt;br /&gt;
 &lt;/div&gt;
@@ -314,7 +783,7 @@
 
 &lt;h2 id=&quot;problems-and-limitations-with-my-system&quot;&gt;Problems and Limitations With My System&lt;/h2&gt;
 
-&lt;p&gt;Oh boy, there’s a lot of them. Probably the biggest being tbat none of it has actually survived being used in a real project, but I suppose there’s some more specific things to point out.&lt;/p&gt;
+&lt;p&gt;Oh boy, there’s a lot of them. Probably the biggest being that none of it has actually survived being used in a real project, but I suppose there’s some more specific things to point out.&lt;/p&gt;
 
 &lt;p&gt;Number one is that storing the VkDeviceMemory directly in the material is probably bad, and should likely be replaced by an actual allocator doing actual allocator things.&lt;/p&gt;
 
@@ -861,7 +1330,7 @@ In case reviewing testing methods is your thing, here&#39;s how I got the number
 
 &lt;p&gt;Whew, it’s been awhile! I know I said I’d put up another tutorial in 2 weeks…but that didn’t happen. Between shipping a game at work, and diving into Vulkan, my interest for GBA stuff definitely took a back seat. Lesson learned, don’t put a deadline on blog posts :)&lt;/p&gt;
 
-&lt;p&gt;So far, I’ve gotten by with doing the bare minimum for anything art related, but our end products have never been too exciting. So this article is going to fix that. First, we’re going to walk through the process of grabbing some (public domain) sprites off of &lt;a href=&quot;&quot;&gt;OpenGameArt.com&lt;/a&gt;, importing those into our game, and then using them to animate a character as we move them around the screen.&lt;/p&gt;
+&lt;p&gt;So far, I’ve gotten by with doing the bare minimum for anything art related, but our end products have never been too exciting. So this article is going to fix that. First, we’re going to walk through the process of grabbing some (public domain) sprites off of &lt;a href=&quot;https://opengameart.org/&quot;&gt;OpenGameArt.org&lt;/a&gt;, importing those into our game, and then using them to animate a character as we move them around the screen.&lt;/p&gt;
 
 &lt;p&gt;At the end of the article, we should have something that looks like this:&lt;/p&gt;
 
@@ -5825,10 +6294,10 @@ $ open -a &quot;Xcode&quot;
 
 &lt;p&gt;I love the simplicity of vert/frag shaders; they only do one thing (push verts and colors to the screen), and they do it exceptionally well, but sometimes, that simplicity feels limiting and you find yourself staring at a loop of matrix calculations happening on your CPU trying desperately to figure out how you could store them in a texture…&lt;/p&gt;
 
-&lt;p&gt;…Or maybe that’s just me, but regardless, compute shaders solve that problem, and it turns out that they’re dead simple to use, so I’m going to explain the basics of them today. First I’ll go through the example compute shader that unity auto creates for you, and then I’ll finish off with an example of a compute shader working with a structured buffer of data. &lt;/p&gt;
+&lt;p&gt;…Or maybe that’s just me, but regardless, compute shaders solve that problem, and it turns out that they’re dead simple to use, so I’m going to explain the basics of them today. First I’ll go through the example compute shader that unity auto creates for you, and then I’ll finish off with an example of a compute shader working with a structured buffer of data.&lt;/p&gt;
 
 &lt;div align=&quot;center&quot;&gt;
-	 	
+
 &lt;img src=&quot;/images/post_images/2014-06-30/particlesystem.png&quot; /&gt;
 &lt;br /&gt;
 &lt;font size=&quot;2&quot;&gt;Compute shaders can be used to control the positions of particles&lt;/font&gt;
@@ -5839,25 +6308,25 @@ $ open -a &quot;Xcode&quot;
 &lt;p&gt;&lt;br /&gt;&lt;/p&gt;
 
 &lt;h2&gt;What the Heck is a Compute Shader?&lt;/h2&gt;
-&lt;p&gt;Simply put, a compute shader is a is a program executed on the GPU that doesn’t need to operate on mesh or texture data, works inside the OpenGL or DirectX memory space (unlike OpenCL which has its own memory space), and can output buffers of data or textures and share memory across threads of execution. &lt;/p&gt;
+&lt;p&gt;Simply put, a compute shader is a is a program executed on the GPU that doesn’t need to operate on mesh or texture data, works inside the OpenGL or DirectX memory space (unlike OpenCL which has its own memory space), and can output buffers of data or textures and share memory across threads of execution.&lt;/p&gt;
 
 &lt;p&gt;Right now Unity only supports DirectX11 compute shaders, but once everyone catches up to OpenGL 4.3, hopefully us mac lovers will get them too :D&lt;/p&gt;
 
-&lt;p&gt;This means that this will be my first ever WINDOWS ONLY tutorial. So if you don’t have access to a windows machine, the rest of this probably won’t be helpful. &lt;/p&gt;
+&lt;p&gt;This means that this will be my first ever WINDOWS ONLY tutorial. So if you don’t have access to a windows machine, the rest of this probably won’t be helpful.&lt;/p&gt;
 
 &lt;h2&gt;What are they good for? (and what do they suck at?)&lt;/h2&gt;
 
 &lt;p&gt;Two words: math and parallelization. Any problem which involves applying the same (no conditional branching) set of calculations to every element in a data set is perfect. The larger the set of calculations, the more you’ll reap the rewards of doing things on your GPU.&lt;/p&gt;
 
-&lt;p&gt;Conditional branching really kills your performance because GPUs aren’t optimized to do that, but this is no different from writing vertex and fragment shaders so if you have some experience with them this will be old hat. &lt;/p&gt;
+&lt;p&gt;Conditional branching really kills your performance because GPUs aren’t optimized to do that, but this is no different from writing vertex and fragment shaders so if you have some experience with them this will be old hat.&lt;/p&gt;
 
-&lt;p&gt;There’s also the issue of latency. Getting memory from the GPU back to your CPU takes time, and will likely be your bottleneck when working with compute shaders. This can be somewhat mitigated by ensuring that you optimize your kernels to work on the smallest buffers possible but it will never be totally avoided. &lt;/p&gt;
+&lt;p&gt;There’s also the issue of latency. Getting memory from the GPU back to your CPU takes time, and will likely be your bottleneck when working with compute shaders. This can be somewhat mitigated by ensuring that you optimize your kernels to work on the smallest buffers possible but it will never be totally avoided.&lt;/p&gt;
 
 &lt;h2&gt;Got it? Good. Let&#39;s get started.&lt;/h2&gt;
 
 &lt;p&gt;Since we’re working with DirectX, Unity’s compute shaders need to be written in HLSL, but it’s pretty much indistinguishable from the other shader languages so if you can write Cg or GLSL you’ll be fine (this was my first time writing HLSL too).&lt;/p&gt;
 
-&lt;p&gt;The first thing you need to do is create a new compute shader. Unity’s project panel already has an option for this, so this step is easy. If you open up that file, you’ll see the following auto generated code (i’ve removed the comments for brevity): &lt;/p&gt;
+&lt;p&gt;The first thing you need to do is create a new compute shader. Unity’s project panel already has an option for this, so this step is easy. If you open up that file, you’ll see the following auto generated code (i’ve removed the comments for brevity):&lt;/p&gt;
 
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c--&quot; data-lang=&quot;c++&quot;&gt;&lt;span class=&quot;cp&quot;&gt;#pragma kernel CSMain
 &lt;/span&gt;
@@ -5873,23 +6342,23 @@ $ open -a &quot;Xcode&quot;
 
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c--&quot; data-lang=&quot;c++&quot;&gt;&lt;span class=&quot;cp&quot;&gt;#pragma kernel CSMain&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;This specifies the entry point to the program (essentially the compute shader’s “main”). A single compute shader file can have a number of these functions defined, and you can call whichever one you need from script. &lt;/p&gt;
+&lt;p&gt;This specifies the entry point to the program (essentially the compute shader’s “main”). A single compute shader file can have a number of these functions defined, and you can call whichever one you need from script.&lt;/p&gt;
 
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c--&quot; data-lang=&quot;c++&quot;&gt;&lt;span class=&quot;n&quot;&gt;RWTexture2D&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;float4&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Result&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;This declares a variable that contains data the shader program will work wth. Since we aren’t working with mesh data, you have to explicitly declare what data your compute shader will read and write to. The “RW” in front of the datatype specifies that the shader will both read and write to that variable. &lt;/p&gt;
+&lt;p&gt;This declares a variable that contains data the shader program will work wth. Since we aren’t working with mesh data, you have to explicitly declare what data your compute shader will read and write to. The “RW” in front of the datatype specifies that the shader will both read and write to that variable.&lt;/p&gt;
 
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c--&quot; data-lang=&quot;c++&quot;&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;numthreads&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)]&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;This line specifies the dimensions of the thread groups being spawned by our compute shader. GPUs take advantage of the massive parallel processing powers of the GPU by creating threads that run simultaneously. Thread groups specify how to organize these spawned threads. In the code above, we are specifying that we want each group of threads to contain 64 threads, which can be accessed like a 2D array.&lt;/p&gt;
 
-&lt;p&gt;Determining the optimum size of your thread groups is a complicated issue, and is largely related to your target hardware. In general, think of your gpu as a collection of stream processors, each of which is capable of executing X threads simultaneously. Each processor runs 1 thread group at a time, so ideally you want your thread group to contain X threads to take best advantage of the processor. I’m still at the point where I’m playing with these values to really get a handle on them, so rather than dispense advice on how best to set these values, I’ll leave it up to you to google (and then share &lt;a href=&quot;http://twitter.com/khalladay&quot;&gt;on twitter&lt;/a&gt; :D ). &lt;/p&gt;
+&lt;p&gt;Determining the optimum size of your thread groups is a complicated issue, and is largely related to your target hardware. In general, think of your gpu as a collection of stream processors, each of which is capable of executing X threads simultaneously. Each processor runs 1 thread group at a time, so ideally you want your thread group to contain X threads to take best advantage of the processor. I’m still at the point where I’m playing with these values to really get a handle on them, so rather than dispense advice on how best to set these values, I’ll leave it up to you to google (and then share &lt;a href=&quot;http://twitter.com/khalladay&quot;&gt;on twitter&lt;/a&gt; :D ).&lt;/p&gt;
 
-&lt;p&gt;The rest of the shader is pretty much regular code. The kernel function determines what pixel it should be working on based on the id of the thread running the function, and writes some data to the Result buffer. Easy right? &lt;/p&gt;
+&lt;p&gt;The rest of the shader is pretty much regular code. The kernel function determines what pixel it should be working on based on the id of the thread running the function, and writes some data to the Result buffer. Easy right?&lt;/p&gt;
 
 &lt;h2&gt;Actually Running The Shader&lt;/h2&gt;
 
-&lt;p&gt;Obviously we can’t attach a compute shader to a mesh and expect it to run, especially since it isn’t working with mesh data. Compute shaders actually need to be set up and called from scripts, which looks like this: &lt;/p&gt;
+&lt;p&gt;Obviously we can’t attach a compute shader to a mesh and expect it to run, especially since it isn’t working with mesh data. Compute shaders actually need to be set up and called from scripts, which looks like this:&lt;/p&gt;
 
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c--&quot; data-lang=&quot;c++&quot;&gt;&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ComputeShader&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;shader&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 
@@ -5905,21 +6374,21 @@ $ open -a &quot;Xcode&quot;
 &lt;span class=&quot;n&quot;&gt;shader&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Dispatch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;kernelHandle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;256&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;256&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;There are a few things to note here. First is setting the enableRandomWrite flag of your render texture BEFORE you create it. This gives your compute shaders access to write to the texture. If you don’t set this flag you won’t be able to use the texture as a write target for the shader. &lt;/p&gt;
+&lt;p&gt;There are a few things to note here. First is setting the enableRandomWrite flag of your render texture BEFORE you create it. This gives your compute shaders access to write to the texture. If you don’t set this flag you won’t be able to use the texture as a write target for the shader.&lt;/p&gt;
 
-&lt;p&gt;Next we need a way to identify what function we want to call in our compute shader. The FindKernel function takes a string name, which corresponds to one of the kernel names we set up at the beginning of our compute shader. Remember, a Compute Shader can have multiple kernels (functions) in a single file. &lt;/p&gt;
+&lt;p&gt;Next we need a way to identify what function we want to call in our compute shader. The FindKernel function takes a string name, which corresponds to one of the kernel names we set up at the beginning of our compute shader. Remember, a Compute Shader can have multiple kernels (functions) in a single file.&lt;/p&gt;
 
-&lt;p&gt;The ComputeShader.SetTexture call lets us move the data we want to work with from CPU memory to GPU memory. Moving data between memory spaces is what will introduce latency to your program, and the amount of slowdown you see is proportional to the amount of data that you are transferring. For this reason, if you plan on running a compute shader every frame you’ll need to aggressively optimize how much data is actually get operated on. &lt;/p&gt;
+&lt;p&gt;The ComputeShader.SetTexture call lets us move the data we want to work with from CPU memory to GPU memory. Moving data between memory spaces is what will introduce latency to your program, and the amount of slowdown you see is proportional to the amount of data that you are transferring. For this reason, if you plan on running a compute shader every frame you’ll need to aggressively optimize how much data is actually get operated on.&lt;/p&gt;
 
-&lt;p&gt;The three integers passed to the Dispatch call specify the number of thread groups we want to spawn. Recall that each thread group’s size is specified in the numthreads block of the compute shader, so in the above example, the number of total threads we’re spawning is as follows: &lt;/p&gt;
+&lt;p&gt;The three integers passed to the Dispatch call specify the number of thread groups we want to spawn. Recall that each thread group’s size is specified in the numthreads block of the compute shader, so in the above example, the number of total threads we’re spawning is as follows:&lt;/p&gt;
 
 &lt;div align=&quot;center&quot;&gt;&lt;i&gt;32*32 thread groups * 64 threads per group = 65536 threads total.&lt;/i&gt;&lt;/div&gt;
-&lt;p&gt;This ends up equating to 1 thread per pixel in the render texture, which makes sense given that the kernel function can only operate on 1 pixel per call. &lt;/p&gt;
+&lt;p&gt;This ends up equating to 1 thread per pixel in the render texture, which makes sense given that the kernel function can only operate on 1 pixel per call.&lt;/p&gt;
 
-&lt;p&gt;So now that we know how to write a compute shader that can operate on texture memory, let’s see what else we can get these things to do. &lt;/p&gt;
+&lt;p&gt;So now that we know how to write a compute shader that can operate on texture memory, let’s see what else we can get these things to do.&lt;/p&gt;
 
 &lt;div align=&quot;center&quot;&gt;
-	 	
+
 &lt;img src=&quot;/images/post_images/2014-06-30/gpgpu.jpg&quot; /&gt;
 &lt;br /&gt;
 &lt;br /&gt;
@@ -5928,16 +6397,16 @@ $ open -a &quot;Xcode&quot;
 
 &lt;h2&gt;Structured Buffers Are Freaking Sweet&lt;/h2&gt;
 
-&lt;p&gt;Modifying texture data is a bit too much like vert/frag shaders for me to get too excited; it’s time to unshackle our GPU and get it working on arbitrary data. Yes it’s possible, and it’s as awesome as it sounds. &lt;/p&gt;
+&lt;p&gt;Modifying texture data is a bit too much like vert/frag shaders for me to get too excited; it’s time to unshackle our GPU and get it working on arbitrary data. Yes it’s possible, and it’s as awesome as it sounds.&lt;/p&gt;
 
-&lt;p&gt;A structured buffer is just an array of data consisting of a single data type. You can make a structured buffer of floats, or one of integers, but not one of floats and integers. You declare a structured buffer in a compute shader like this: &lt;/p&gt;
+&lt;p&gt;A structured buffer is just an array of data consisting of a single data type. You can make a structured buffer of floats, or one of integers, but not one of floats and integers. You declare a structured buffer in a compute shader like this:&lt;/p&gt;
 
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c--&quot; data-lang=&quot;c++&quot;&gt;&lt;span class=&quot;n&quot;&gt;StructuctedBuffer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;floatBuffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 &lt;span class=&quot;n&quot;&gt;RWStructuredBuffer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;readWriteIntBuffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;What makes these buffers more interesting though, is the ability for that data type to be a struct, which is what we’ll do for the second (and last) example in this article.&lt;/p&gt;
 
-&lt;p&gt;For our example, we’re going to be passing our compute shader a set of points, each of which has a matrix that we want to transform it by. We could accomplish this with 2 separate buffers (one of Vector3s and one of Matrix4x4s), but it’s easier to conceptualize a point/matrix pair if they’re together in a struct, so let’s do that. &lt;/p&gt;
+&lt;p&gt;For our example, we’re going to be passing our compute shader a set of points, each of which has a matrix that we want to transform it by. We could accomplish this with 2 separate buffers (one of Vector3s and one of Matrix4x4s), but it’s easier to conceptualize a point/matrix pair if they’re together in a struct, so let’s do that.&lt;/p&gt;
 
 &lt;p&gt;In our c# script, we’ll define the data type as follows:&lt;/p&gt;
 
@@ -5947,7 +6416,7 @@ $ open -a &quot;Xcode&quot;
 &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Matrix4x4&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;matrix&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;We also need to define this data type inside our shader, but HLSL doesn’t have a Matrix4x4 or Vector3 type. However, it does have data types which map to the same memory layout. Our shader might end up looking like this: &lt;/p&gt;
+&lt;p&gt;We also need to define this data type inside our shader, but HLSL doesn’t have a Matrix4x4 or Vector3 type. However, it does have data types which map to the same memory layout. Our shader might end up looking like this:&lt;/p&gt;
 
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c--&quot; data-lang=&quot;c++&quot;&gt;&lt;span class=&quot;cp&quot;&gt;#pragma kernel Multiply
 &lt;/span&gt;
@@ -5962,22 +6431,23 @@ $ open -a &quot;Xcode&quot;
 &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;numthreads&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;16&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)]&lt;/span&gt;
 &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Multiply&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;uint3&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;id&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SV_DispatchThreadID&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;dataBuffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pos&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mul&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dataBuffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mat&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+    &lt;span class=&quot;n&quot;&gt;dataBuffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pos&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mul&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dataBuffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mat&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
     				&lt;span class=&quot;n&quot;&gt;float4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dataBuffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pos&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;1.0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;Notice that our thread group is now organized as a 1 dimensional array. There is no performance impact regarding the dimensionality of the thread group, so you’re free to choose whatever makes the most sense for your program. &lt;/p&gt;
+&lt;p&gt;Notice that our thread group is now organized as a 1 dimensional array. There is no performance impact regarding the dimensionality of the thread group, so you’re free to choose whatever makes the most sense for your program.&lt;/p&gt;
 
-&lt;p&gt;Setting up a structured buffer in a script is a bit different from the texture example we did earlier. For a buffer, you need to specify how many bytes a single element in the buffer is, and store that information along with the data itself inside a compute buffer object. For our example struct, the size in bytes is simply the number of float values we are storing (3 for the vector, 16 for the matrix) multiplied by the size of a float (4 bytes), for a total of 76 bytes in a struct. Setting this up in a compute buffer looks like this: &lt;/p&gt;
+&lt;p&gt;Setting up a structured buffer in a script is a bit different from the texture example we did earlier. For a buffer, you need to specify how many bytes a single element in the buffer is, and store that information along with the data itself inside a compute buffer object. For our example struct, the size in bytes is simply the number of float values we are storing (3 for the vector, 16 for the matrix) multiplied by the size of a float (4 bytes), for a total of 76 bytes in a struct. Setting this up in a compute buffer looks like this:&lt;/p&gt;
 
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c--&quot; data-lang=&quot;c++&quot;&gt;&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ComputeShader&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;shader&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-	
+
 &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;RunShader&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
 	&lt;span class=&quot;n&quot;&gt;VecMatPair&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[]&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;VecMatPair&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
 	&lt;span class=&quot;c1&quot;&gt;//INITIALIZE DATA HERE
-&lt;/span&gt;	
+&lt;/span&gt;
 	&lt;span class=&quot;n&quot;&gt;ComputeBuffer&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;buffer&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ComputeBuffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;76&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;buffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SetData&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 	&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;kernel&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;shader&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;FindKernel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Multiply&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 	&lt;span class=&quot;n&quot;&gt;shader&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SetBuffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;kernel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;dataBuffer&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;buffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 	&lt;span class=&quot;n&quot;&gt;shader&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Dispatch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;kernel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
@@ -5997,13 +6467,16 @@ $ open -a &quot;Xcode&quot;
 &lt;span class=&quot;c1&quot;&gt;//INITIALIZE DATA HERE
 &lt;/span&gt;
 &lt;span class=&quot;n&quot;&gt;ComputeBuffer&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;buffer&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ComputeBuffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;76&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;buffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SetData&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;kernel&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;shader&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;FindKernel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Multiply&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 &lt;span class=&quot;n&quot;&gt;shader&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SetBuffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;kernel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;dataBuffer&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;buffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 &lt;span class=&quot;n&quot;&gt;shader&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Dispatch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;kernel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 &lt;span class=&quot;n&quot;&gt;buffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;GetData&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;output&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;That’s really all there is to it. You may need to watch the profiler for a bit to get a sense of exactly how much time you’re burning transferring data to and from the cpu, but I’ve found that once you’re operating on a big enough data set compute shaders really pay dividends. &lt;/p&gt;
+&lt;p&gt;That’s really all there is to it. You may need to watch the profiler for a bit to get a sense of exactly how much time you’re burning transferring data to and from the cpu, but I’ve found that once you’re operating on a big enough data set compute shaders really pay dividends.&lt;/p&gt;
+
+&lt;p&gt;One last thing - once you’re done working with your buffer, you should call buffer.Dispose() to make sure the buffer can be GC’ed. (Thanks to Andreas S for e-mailing me with this addition, and a few other corrections!).&lt;/p&gt;
 
 &lt;p&gt;If you have any questions about this (or spot a mistake in what’s here), send me a send me a message &lt;a href=&quot;http://twitter.com/khalladay&quot;&gt;on twitter&lt;/a&gt;. I won’t write shaders for you, but I’m happy to point you in the right direction for your specific use case. Happy shading!&lt;/p&gt;
 </content>
