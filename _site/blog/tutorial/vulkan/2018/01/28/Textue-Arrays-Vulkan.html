@@ -99,6 +99,8 @@
 
 <p>The AMD presentation doesn’t actually cover how to set up an array of textures in Vulkan, and I couldn’t find a good explanation of how to do that anywhere online, so now that I’ve figured it out I want to post a quick tutorial on here about it for the next person who gets stuck. I’ll go more in depth about how this array fits into my material system in a later post, but for now I just want to cover the nuts and bolts of setting up a shader to use an array of texture.</p>
 
+<p>One more thing to note before I get started: If you’re looking for a way to work with images of the same size, Sascha Willems has a great example of using a sampler2DArray in his <a href="https://github.com/SaschaWillems/Vulkan">Vulkan Examples Project</a>. The advantage of using an array of textures instead of something like a sampler2DArray is that the array of textures approach supports storing multiple image sizes in the same array by default. I don’t know how much (if any) of a performance penalty you pay for using an array of textures over a sampler2DArray. </p>
+
 <p>With all that said, the goal of this post is going to be to walk through how to set up a Vulkan app so that you can use a shader like this one:</p>
 
 <div class="highlight"><pre><code class="language-c" data-lang="c"><span class="cp">#version 450 core

@@ -4,7 +4,7 @@
  <title>The blog of Kyle Halladay</title>
  <link href="http://kylehalladay.com/atom.xml" rel="self"/>
  <link href="http://kylehalladay.com"/>
- <updated>2018-01-28T06:55:21-06:00</updated>
+ <updated>2018-01-30T06:07:29-06:00</updated>
  <id>http://kylehalladay.com</id>
  <author>
    <name>Kyle Halladay</name>
@@ -20,6 +20,8 @@
    <content type="html">&lt;p&gt;Lately I’ve been trying to wrap my head how to effectively deal with textures in Vulkan. I don’t want any descriptor sets that need to be bound on a per object basis, which means that just sticking each texture into it’s own set binding isn’t going to work. Instead, thanks to the &lt;a href=&quot;http://32ipi028l5q82yhj72224m8j-wpengine.netdna-ssl.com/wp-content/uploads/2016/03/VulkanFastPaths.pdf&quot;&gt;Vulkan Fast Paths&lt;/a&gt; presentation from AMD, I’ve been looking into using a global array of textures that stores all my textures in a descriptor set that I can bind at the beginning of the frame.&lt;/p&gt;
 
 &lt;p&gt;The AMD presentation doesn’t actually cover how to set up an array of textures in Vulkan, and I couldn’t find a good explanation of how to do that anywhere online, so now that I’ve figured it out I want to post a quick tutorial on here about it for the next person who gets stuck. I’ll go more in depth about how this array fits into my material system in a later post, but for now I just want to cover the nuts and bolts of setting up a shader to use an array of texture.&lt;/p&gt;
+
+&lt;p&gt;One more thing to note before I get started: If you’re looking for a way to work with images of the same size, Sascha Willems has a great example of using a sampler2DArray in his &lt;a href=&quot;https://github.com/SaschaWillems/Vulkan&quot;&gt;Vulkan Examples Project&lt;/a&gt;. The advantage of using an array of textures instead of something like a sampler2DArray is that the array of textures approach supports storing multiple image sizes in the same array by default. I don’t know how much (if any) of a performance penalty you pay for using an array of textures over a sampler2DArray. &lt;/p&gt;
 
 &lt;p&gt;With all that said, the goal of this post is going to be to walk through how to set up a Vulkan app so that you can use a shader like this one:&lt;/p&gt;
 
