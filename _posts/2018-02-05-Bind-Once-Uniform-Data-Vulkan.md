@@ -9,7 +9,7 @@ tags:
 - <span style="background-color:#AA2222;"><font color="white">&nbsp;Vulkan</font></span>
 ---
 
-After figuring out how to use a global [array of textures](http://127.0.0.1:4000/blog/tutorial/vulkan/2018/01/28/Textue-Arrays-Vulkan.html) to store all the textures that are in use for a frame in a single descriptor set, I returned to my [material system project](https://github.com/khalladay/VkMaterialSystem) and realized how much easier life would be if I could do all my descriptor set binding at the beginning of a frame, both because I'd avoid any performance overhead from doing lots of binding, and because it greatly simplifies anything related to descriptor set versioning (or dealing with updating buffers that are in flight).
+After figuring out how to use a global [array of textures](http://kylehalladay.com/blog/tutorial/vulkan/2018/01/28/Textue-Arrays-Vulkan.html) to store all the textures that are in use for a frame in a single descriptor set, I returned to my [material system project](https://github.com/khalladay/VkMaterialSystem) and realized how much easier life would be if I could do all my descriptor set binding at the beginning of a frame, both because I'd avoid any performance overhead from doing lots of binding, and because it greatly simplifies anything related to descriptor set versioning (or dealing with updating buffers that are in flight).
 
 As it turns out, this is totally possible and really easy to do, although I have no idea if it's a good idea in the grand scheme of things. Also, just like using an array of textures, I couldn't find anyone else writing about, so I guess that means it's on me to share.
 
