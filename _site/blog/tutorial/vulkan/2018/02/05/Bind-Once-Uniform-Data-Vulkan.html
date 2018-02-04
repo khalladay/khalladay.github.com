@@ -6,10 +6,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Kyle Halladay - Home Page</title>
+  <title>Kyle Halladay - A "Bind Once" Approach to Uniform Data</title>
   <meta name="author" content="Kyle Halladay" />
   <meta name="description" content="I build shaders, renderers, games, and other stuff that's fun to stare at." />
-  <link rel="canonical" href="http://kylehalladay.com/" />
+  <link rel="canonical" href="http://kylehalladay.com/blog/tutorial/vulkan/2018/02/05/Bind-Once-Uniform-Data-Vulkan.html" />
   <meta name="keywords" content="life,code,software,development,games,graphics,shaders,indie" />
 
   <link href="//fonts.googleapis.com/css?family=Open+Sans:600,800" rel="stylesheet" type="text/css">
@@ -89,14 +89,13 @@
       <hr style="border-color:#000; margin:1em -0.25em;"></topbar>
 
       <p class="meta">
-  
 
 </p>
 
 <h1 class="title">A "Bind Once" Approach to Uniform Data</h1>
 
 <div id="post">
- <p>After figuring out how to use a global <a href="http://127.0.0.1:4000/blog/tutorial/vulkan/2018/01/28/Textue-Arrays-Vulkan.html">array of textures</a> to store all the textures that are in use for a frame in a single descriptor set, I returned to my <a href="https://github.com/khalladay/VkMaterialSystem">material system project</a> and realized how much easier life would be if I could do all my descriptor set binding at the beginning of a frame, both because I’d avoid any performance overhead from doing lots of binding, and because it greatly simplifies anything related to descriptor set versioning (or dealing with updating buffers that are in flight).</p>
+  <p>After figuring out how to use a global <a href="http://127.0.0.1:4000/blog/tutorial/vulkan/2018/01/28/Textue-Arrays-Vulkan.html">array of textures</a> to store all the textures that are in use for a frame in a single descriptor set, I returned to my <a href="https://github.com/khalladay/VkMaterialSystem">material system project</a> and realized how much easier life would be if I could do all my descriptor set binding at the beginning of a frame, both because I’d avoid any performance overhead from doing lots of binding, and because it greatly simplifies anything related to descriptor set versioning (or dealing with updating buffers that are in flight).</p>
 
 <p>As it turns out, this is totally possible and really easy to do, although I have no idea if it’s a good idea in the grand scheme of things. Also, just like using an array of textures, I couldn’t find anyone else writing about, so I guess that means it’s on me to share.</p>
 
