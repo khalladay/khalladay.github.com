@@ -239,7 +239,7 @@
 
 <p>The only thing that may not be readily apparent is the id variable, which I’m adding since I’m assuming at some point I’ll need some extra bits to help find the allocation inside a memory pool.</p>
 
-<p>It’s worth noting that once you bind memory to a Vulkan resource, the only way you can unbind that memory is to destroy the buffer, image, or whatever else that memory is bound too. If you try to free memory that’s currently bound to a resource, bad things will happen (probably a crash but I’m assuming some edge case involves a close encounter between the fire department and my graphics card).</p>
+<p>It’s worth noting that once you bind memory to a Vulkan resource, the only way you can unbind that memory is to destroy the buffer, image, or whatever else that memory is bound too. You can free memory that’s currently bound to something (as long as you make sure to stop using whatever it was bound to), but you can’t decide to bind an allocated chunk of memory to something new until the original binding has been destroyed. </p>
 
 <p>Whew, all that theory is finally out of the way! It’s time to actually build something.</p>
 
