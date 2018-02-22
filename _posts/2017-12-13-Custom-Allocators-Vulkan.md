@@ -153,7 +153,7 @@ struct Allocation
 
 The only thing that may not be readily apparent is the id variable, which I'm adding since I'm assuming at some point I'll need some extra bits to help find the allocation inside a memory pool.
 
-It's worth noting that once you bind memory to a Vulkan resource, the only way you can unbind that memory is to destroy the buffer, image, or whatever else that memory is bound too. You can free memory that's currently bound to something (as long as you make sure to stop using whatever it was bound to), but you can't decide to bind an allocated chunk of memory to something new until the original binding has been destroyed. 
+It's worth noting that once you bind memory to a Vulkan resource, the only way you can unbind that memory is to destroy the buffer, image, or whatever else that memory is bound too. You can free memory that's currently bound to something (as long as you make sure to stop using whatever it was bound to), but you can't decide to bind an allocated chunk of memory to something new until the original binding has been destroyed.
 
 Whew, all that theory is finally out of the way! It's time to actually build something.
 
@@ -214,7 +214,7 @@ Ok, so this function is also pretty boring in the passthrough allocator, but the
 * All the errors I mentioned earlier are checked for. The checkf function essentially a macro for an assert that prints a log message and pops up a message window if it fails.
 * Even though we aren't using it in this allocator, the Allocation structure we're returning gets it's offset set to 0 so that we can pass the offset to bind calls later.
 
-With the allocation code out of the way, the rest of the allocator interface is pretty boring to looks at:
+With the allocation code out of the way, the rest of the allocator interface is pretty boring to look at:
 
 {% highlight c %}
 void free(Allocation& allocation)
