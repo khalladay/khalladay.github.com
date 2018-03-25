@@ -4,7 +4,7 @@
  <title>The blog of Kyle Halladay</title>
  <link href="http://kylehalladay.com/atom.xml" rel="self"/>
  <link href="http://kylehalladay.com"/>
- <updated>2018-03-25T18:18:55-05:00</updated>
+ <updated>2018-03-25T18:26:56-05:00</updated>
  <id>http://kylehalladay.com</id>
  <author>
    <name>Kyle Halladay</name>
@@ -263,7 +263,7 @@ Beauty isn&#39;t everything, right?
 
 &lt;p&gt;It’s a bit hard to read for the Sponza results, but basically everything rendered that in around 0.8 ms on my GPU, so you aren’t really missing much.&lt;/p&gt;
 
-&lt;p&gt;I think I’m going to go with HOST_CACHED UBO pages for my transform data until I run into a performance problem with that approach and need to optimize further. However, what’s striking is that every buffer based approach I tested out-performed Push Constants at scale. I’m not entirely sure what this means, since I was under the impression Push Constants were supposed to always be the fastest option if you weren’t pre-recording command buffers. Perhaps I’m doing something dumb (if so - please e-mail me or send me a message &lt;a href=&quot;https://twitter.com/khalladay&quot;&gt;on Twitter&lt;/a&gt;)&lt;/p&gt;
+&lt;p&gt;I think I’m going to go with 1 big SSBO for my transform data until I run into a performance problem with that approach and need to optimize further. However, what’s striking is that every buffer based approach I tested out-performed Push Constants at scale. I’m not entirely sure what this means, since I was under the impression Push Constants were supposed to always be the fastest option if you weren’t pre-recording command buffers. Perhaps I’m doing something dumb (if so - please e-mail me or send me a message &lt;a href=&quot;https://twitter.com/khalladay&quot;&gt;on Twitter&lt;/a&gt;)&lt;/p&gt;
 
 &lt;p&gt;Speaking of optimizing this further:&lt;/p&gt;
 

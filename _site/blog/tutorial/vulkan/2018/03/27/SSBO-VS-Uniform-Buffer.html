@@ -341,7 +341,7 @@ Beauty isn't everything, right?
 
 <p>It’s a bit hard to read for the Sponza results, but basically everything rendered that in around 0.8 ms on my GPU, so you aren’t really missing much.</p>
 
-<p>I think I’m going to go with HOST_CACHED UBO pages for my transform data until I run into a performance problem with that approach and need to optimize further. However, what’s striking is that every buffer based approach I tested out-performed Push Constants at scale. I’m not entirely sure what this means, since I was under the impression Push Constants were supposed to always be the fastest option if you weren’t pre-recording command buffers. Perhaps I’m doing something dumb (if so - please e-mail me or send me a message <a href="https://twitter.com/khalladay">on Twitter</a>)</p>
+<p>I think I’m going to go with 1 big SSBO for my transform data until I run into a performance problem with that approach and need to optimize further. However, what’s striking is that every buffer based approach I tested out-performed Push Constants at scale. I’m not entirely sure what this means, since I was under the impression Push Constants were supposed to always be the fastest option if you weren’t pre-recording command buffers. Perhaps I’m doing something dumb (if so - please e-mail me or send me a message <a href="https://twitter.com/khalladay">on Twitter</a>)</p>
 
 <p>Speaking of optimizing this further:</p>
 
