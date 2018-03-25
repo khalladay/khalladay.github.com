@@ -215,7 +215,7 @@ Finally, all code is available [on github](https://github.com/khalladay/VkBindin
 I want to talk about the results for Push Constants first, since there's really only 1 way to use them (which makes the results very easy to understand):
 
 <div align="left">
-<img src="/images/post_images/2018-03-27/push_constant.png" />
+<img src="/images/post_images/2018-03-27/push_constant.PNG" />
 </div>
 
 Yes folks, it turns out that doing more work does in fact take longer. While the push constant numbers are useful as a basis for comparison with the other techniques I tried, they're really boring on their own. Ok. moving on.
