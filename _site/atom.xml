@@ -4,7 +4,7 @@
  <title>The blog of Kyle Halladay</title>
  <link href="http://kylehalladay.com/atom.xml" rel="self"/>
  <link href="http://kylehalladay.com"/>
- <updated>2018-03-25T09:52:32-05:00</updated>
+ <updated>2018-03-25T09:55:53-05:00</updated>
  <id>http://kylehalladay.com</id>
  <author>
    <name>Kyle Halladay</name>
@@ -24,7 +24,7 @@
 &lt;p&gt;I started out by asking Twitter for how other people were handling transform data in their projects, and noticed right away that it seemed like there were a lot of approaches that people were using:&lt;/p&gt;
 
 &lt;div align=&quot;left&quot; style=&quot;border-style:dashed;border-width:1px;&quot;&gt;
-&lt;img src=&quot;/images/post_images/2018-03-27/twitter1.png&quot; /&gt;
+&lt;img src=&quot;/images/post_images/2018-03-27/twitter1.PNG&quot; /&gt;
 &lt;/div&gt;
 &lt;div align=&quot;left&quot; style=&quot;border-style:dashed;border-width:1px;&quot;&gt;
 &lt;img src=&quot;/images/post_images/2018-03-27/twitter3.png&quot; /&gt;
@@ -43,7 +43,7 @@
 
 &lt;h2 id=&quot;handling-transforms-with-push-constants&quot;&gt;Handling Transforms With Push Constants&lt;/h2&gt;
 
-&lt;p&gt;I want to start by talking about Push Constants, because it’s really easy to set them up since you don’t need to allocate any buffers or memory for them. All you need to do is set up your material’s VkPipeline to expect a certain number of bytes of push constnat data:&lt;/p&gt;
+&lt;p&gt;I want to start by talking about Push Constants, because it’s really easy to set them up since you don’t need to allocate any buffers or memory for them. All you need to do is set up your material’s VkPipeline to expect a certain number of bytes of push constant data:&lt;/p&gt;
 
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;n&quot;&gt;VkPipelineLayoutCreateInfo&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pipelineLayoutInfo&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{};&lt;/span&gt;
     &lt;span class=&quot;c1&quot;&gt;//other pipelineCreateInfo filling out code here
@@ -84,7 +84,7 @@
 
 &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;Finally, instead of specifying a decsriptor set or binding for this data in your shader, you just use the push_constant specifier:&lt;/p&gt;
+&lt;p&gt;Finally, instead of specifying a descriptor set or binding for this data in your shader, you just use the push_constant specifier:&lt;/p&gt;
 
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;n&quot;&gt;layout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;push_constant&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;uniform&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;transformData&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
@@ -192,7 +192,7 @@
 &lt;p&gt;Since all I really cared about was vertex shader performance, I skipped loaded materials for the models and instead just had the fragment shader output normals. This meant that when the project was running, it looked like this:&lt;/p&gt;
 
 &lt;div align=&quot;center&quot;&gt;
-&lt;img src=&quot;/images/post_images/2018-03-27/Capture.png&quot; /&gt;
+&lt;img src=&quot;/images/post_images/2018-03-27/Capture.PNG&quot; /&gt;
 Beauty isn&#39;t everything, right?
 &lt;br /&gt;&lt;br /&gt;
 &lt;/div&gt;
@@ -247,7 +247,7 @@ Beauty isn&#39;t everything, right?
 
 &lt;h2 id=&quot;ssbo-tests&quot;&gt;SSBO tests&lt;/h2&gt;
 
-&lt;p&gt;SSBOs are a different story from UBOs. You really really really don’t want to use anything but DEVICE_LOCAL memory for them:&lt;/p&gt;
+&lt;p&gt;SSBOs are a different story from UBOs. You really don’t want to use anything but DEVICE_LOCAL memory for them:&lt;/p&gt;
 
 &lt;div align=&quot;left&quot;&gt;
 &lt;img src=&quot;/images/post_images/2018-03-27/ssbo_1.PNG&quot; /&gt;

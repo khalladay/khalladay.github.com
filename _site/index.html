@@ -103,7 +103,7 @@
 <p>I started out by asking Twitter for how other people were handling transform data in their projects, and noticed right away that it seemed like there were a lot of approaches that people were using:</p>
 
 <div align="left" style="border-style:dashed;border-width:1px;">
-<img src="/images/post_images/2018-03-27/twitter1.png" />
+<img src="/images/post_images/2018-03-27/twitter1.PNG" />
 </div>
 <div align="left" style="border-style:dashed;border-width:1px;">
 <img src="/images/post_images/2018-03-27/twitter3.png" />
@@ -122,7 +122,7 @@
 
 <h2 id="handling-transforms-with-push-constants">Handling Transforms With Push Constants</h2>
 
-<p>I want to start by talking about Push Constants, because it’s really easy to set them up since you don’t need to allocate any buffers or memory for them. All you need to do is set up your material’s VkPipeline to expect a certain number of bytes of push constnat data:</p>
+<p>I want to start by talking about Push Constants, because it’s really easy to set them up since you don’t need to allocate any buffers or memory for them. All you need to do is set up your material’s VkPipeline to expect a certain number of bytes of push constant data:</p>
 
 <div class="highlight"><pre><code class="language-c" data-lang="c"><span class="n">VkPipelineLayoutCreateInfo</span> <span class="n">pipelineLayoutInfo</span> <span class="o">=</span> <span class="p">{};</span>
     <span class="c1">//other pipelineCreateInfo filling out code here
@@ -163,7 +163,7 @@
 
 <span class="p">}</span></code></pre></div>
 
-<p>Finally, instead of specifying a decsriptor set or binding for this data in your shader, you just use the push_constant specifier:</p>
+<p>Finally, instead of specifying a descriptor set or binding for this data in your shader, you just use the push_constant specifier:</p>
 
 <div class="highlight"><pre><code class="language-c" data-lang="c"><span class="n">layout</span><span class="p">(</span><span class="n">push_constant</span><span class="p">)</span> <span class="n">uniform</span> <span class="n">transformData</span>
 <span class="p">{</span>
@@ -271,7 +271,7 @@
 <p>Since all I really cared about was vertex shader performance, I skipped loaded materials for the models and instead just had the fragment shader output normals. This meant that when the project was running, it looked like this:</p>
 
 <div align="center">
-<img src="/images/post_images/2018-03-27/Capture.png" />
+<img src="/images/post_images/2018-03-27/Capture.PNG" />
 Beauty isn't everything, right?
 <br /><br />
 </div>
@@ -326,7 +326,7 @@ Beauty isn't everything, right?
 
 <h2 id="ssbo-tests">SSBO tests</h2>
 
-<p>SSBOs are a different story from UBOs. You really really really don’t want to use anything but DEVICE_LOCAL memory for them:</p>
+<p>SSBOs are a different story from UBOs. You really don’t want to use anything but DEVICE_LOCAL memory for them:</p>
 
 <div align="left">
 <img src="/images/post_images/2018-03-27/ssbo_1.PNG" />

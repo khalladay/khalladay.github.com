@@ -16,7 +16,7 @@ This is unfortunate, because the beauty of Vulkan is all the choices that it giv
 I started out by asking Twitter for how other people were handling transform data in their projects, and noticed right away that it seemed like there were a lot of approaches that people were using:
 
 <div align="left" style="border-style:dashed;border-width:1px;">
-<img src="/images/post_images/2018-03-27/twitter1.png" />
+<img src="/images/post_images/2018-03-27/twitter1.PNG" />
 </div>
 <div align="left" style="border-style:dashed;border-width:1px;">
 <img src="/images/post_images/2018-03-27/twitter3.png" />
@@ -35,7 +35,7 @@ So this post is going to walk through how each of the above approaches works, an
 
 ## Handling Transforms With Push Constants
 
-I want to start by talking about Push Constants, because it's really easy to set them up since you don't need to allocate any buffers or memory for them. All you need to do is set up your material's VkPipeline to expect a certain number of bytes of push constnat data:
+I want to start by talking about Push Constants, because it's really easy to set them up since you don't need to allocate any buffers or memory for them. All you need to do is set up your material's VkPipeline to expect a certain number of bytes of push constant data:
 
 {% highlight c %}
 VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
@@ -80,7 +80,7 @@ for (uint32_t i = 0; i < drawCalls.size(); ++i)
 }
 {% endhighlight %}
 
-Finally, instead of specifying a decsriptor set or binding for this data in your shader, you just use the push_constant specifier:
+Finally, instead of specifying a descriptor set or binding for this data in your shader, you just use the push_constant specifier:
 
 {% highlight c %}
 layout(push_constant) uniform transformData
@@ -197,7 +197,7 @@ It's time to talk about performance! To test all of these approaches, I built a 
 Since all I really cared about was vertex shader performance, I skipped loaded materials for the models and instead just had the fragment shader output normals. This meant that when the project was running, it looked like this:
 
 <div align="center">
-<img src="/images/post_images/2018-03-27/Capture.png" />
+<img src="/images/post_images/2018-03-27/Capture.PNG" />
 Beauty isn't everything, right?
 <br><br>
 </div>
@@ -253,7 +253,7 @@ Ok, so we know that using an UBO is faster than push constants when you scale up
 
 ## SSBO tests
 
-SSBOs are a different story from UBOs. You really really really don't want to use anything but DEVICE_LOCAL memory for them:
+SSBOs are a different story from UBOs. You really don't want to use anything but DEVICE_LOCAL memory for them:
 
 <div align="left">
 <img src="/images/post_images/2018-03-27/ssbo_1.PNG" />
