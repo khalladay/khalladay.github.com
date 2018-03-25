@@ -186,9 +186,9 @@ void main()
 
 You'll notice the only difference in the shader is that the TRANSFORM_DATA input is declared with a type of "buffer" instead of "uniform." You may have also noticed that the SSBO is really, really big. This is because the [Amazon Bistro](http://casual-effects.com/data/) scene that I used as my second test has a whopping 24777 meshes in it, so I rounded up a little and got to the above.
 
-The major disadvantage of using 1 large SSBO is that you need to pick the size of the buffer up front, and if you guess wrong, it has major performance penalties. If you guess too small, you either have to allocate a second SSBO (in which case...why not just use the paged UBO approach from the last section?), or you have to create a bigger SSBO, copy the current contents in, and go from there. If you guess too big, you pay the cost of binding a much larger buffer than you need (which is actually pretty costly if you're binding WAY more than you need).
+The major disadvantage of using 1 large SSBO is that you need to pick the size of the buffer up front, <s> and if you guess wrong, it has major performance penalties. If you guess too small, you either have to allocate a second SSBO (in which case...why not just use the paged UBO approach from the last section?), or you have to create a bigger SSBO, copy the current contents in, and go from there. If you guess too big, you pay the cost of binding a much larger buffer than you need (which is actually pretty costly if you're binding WAY more than you need). </s>
 
-This information requirement makes me think that this approach might be better left for specific instances when you know exactly how many things you want to draw (a specific effect, or group of NPCs or something), rather than your go to general purpose solution.
+*It turns out that I messed up my tests when trying to evaluate the performance cost of a too large SSBO. As long as you only update / flush the data you actually need, it appears that there's not really any problem with allocating a really large SSBO up front, other than the memory cost of course  :)*
 
 ## Bechmark Project Set Up
 
@@ -259,9 +259,6 @@ SSBOs are a different story from UBOs. You really don't want to use anything but
 <img src="/images/post_images/2018-03-27/ssbo_1.PNG" />
 </div>
 
-Since SSBO performance is largely dependent on the size of the SSBO you're using, the Sponza test used an SSBO that could hold 512 items, and the Bistro test used the one from the code sample earlier, that could hold 25000. To test the performance cost of picking the wrong SSBO size, I ran the Sponza test again, using the 25000 slot SSBO, and it ended up taking **3.58 ms** to render, which is worse than the HOST_CACHED version of the smaller one.
-
-Key Takeaway: if you don't know how big your data will be, don't use SSBOs.
 
 ## Final Results
 

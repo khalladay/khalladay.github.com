@@ -4,7 +4,7 @@
  <title>The blog of Kyle Halladay</title>
  <link href="http://kylehalladay.com/atom.xml" rel="self"/>
  <link href="http://kylehalladay.com"/>
- <updated>2018-03-25T09:55:53-05:00</updated>
+ <updated>2018-03-25T18:18:55-05:00</updated>
  <id>http://kylehalladay.com</id>
  <author>
    <name>Kyle Halladay</name>
@@ -181,9 +181,9 @@
 
 &lt;p&gt;You’ll notice the only difference in the shader is that the TRANSFORM_DATA input is declared with a type of “buffer” instead of “uniform.” You may have also noticed that the SSBO is really, really big. This is because the &lt;a href=&quot;http://casual-effects.com/data/&quot;&gt;Amazon Bistro&lt;/a&gt; scene that I used as my second test has a whopping 24777 meshes in it, so I rounded up a little and got to the above.&lt;/p&gt;
 
-&lt;p&gt;The major disadvantage of using 1 large SSBO is that you need to pick the size of the buffer up front, and if you guess wrong, it has major performance penalties. If you guess too small, you either have to allocate a second SSBO (in which case…why not just use the paged UBO approach from the last section?), or you have to create a bigger SSBO, copy the current contents in, and go from there. If you guess too big, you pay the cost of binding a much larger buffer than you need (which is actually pretty costly if you’re binding WAY more than you need).&lt;/p&gt;
+&lt;p&gt;The major disadvantage of using 1 large SSBO is that you need to pick the size of the buffer up front, &lt;s&gt; and if you guess wrong, it has major performance penalties. If you guess too small, you either have to allocate a second SSBO (in which case...why not just use the paged UBO approach from the last section?), or you have to create a bigger SSBO, copy the current contents in, and go from there. If you guess too big, you pay the cost of binding a much larger buffer than you need (which is actually pretty costly if you&#39;re binding WAY more than you need). &lt;/s&gt;&lt;/p&gt;
 
-&lt;p&gt;This information requirement makes me think that this approach might be better left for specific instances when you know exactly how many things you want to draw (a specific effect, or group of NPCs or something), rather than your go to general purpose solution.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;It turns out that I messed up my tests when trying to evaluate the performance cost of a too large SSBO. As long as you only update / flush the data you actually need, it appears that there’s not really any problem with allocating a really large SSBO up front, other than the memory cost of course  :)&lt;/em&gt;&lt;/p&gt;
 
 &lt;h2 id=&quot;bechmark-project-set-up&quot;&gt;Bechmark Project Set Up&lt;/h2&gt;
 
@@ -210,7 +210,7 @@ Beauty isn&#39;t everything, right?
 &lt;p&gt;I want to talk about the results for Push Constants first, since there’s really only 1 way to use them (which makes the results very easy to understand):&lt;/p&gt;
 
 &lt;div align=&quot;left&quot;&gt;
-&lt;img src=&quot;/images/post_images/2018-03-27/push_constant.png&quot; /&gt;
+&lt;img src=&quot;/images/post_images/2018-03-27/push_constant.PNG&quot; /&gt;
 &lt;/div&gt;
 
 &lt;p&gt;Yes folks, it turns out that doing more work does in fact take longer. While the push constant numbers are useful as a basis for comparison with the other techniques I tried, they’re really boring on their own. Ok. moving on.&lt;/p&gt;
@@ -252,10 +252,6 @@ Beauty isn&#39;t everything, right?
 &lt;div align=&quot;left&quot;&gt;
 &lt;img src=&quot;/images/post_images/2018-03-27/ssbo_1.PNG&quot; /&gt;
 &lt;/div&gt;
-
-&lt;p&gt;Since SSBO performance is largely dependent on the size of the SSBO you’re using, the Sponza test used an SSBO that could hold 512 items, and the Bistro test used the one from the code sample earlier, that could hold 25000. To test the performance cost of picking the wrong SSBO size, I ran the Sponza test again, using the 25000 slot SSBO, and it ended up taking &lt;strong&gt;3.58 ms&lt;/strong&gt; to render, which is worse than the HOST_CACHED version of the smaller one.&lt;/p&gt;
-
-&lt;p&gt;Key Takeaway: if you don’t know how big your data will be, don’t use SSBOs.&lt;/p&gt;
 
 &lt;h2 id=&quot;final-results&quot;&gt;Final Results&lt;/h2&gt;
 
