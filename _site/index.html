@@ -93,230 +93,299 @@
 
 </p>
 
-<h1 class="title">A "Bind Once" Approach to Uniform Data</h1>
+<h1 class="title">Handling Transform Data in Vulkan</h1>
 
 <div id="post">
- <p>After figuring out how to use a global <a href="http://127.0.0.1:4000/blog/tutorial/vulkan/2018/01/28/Textue-Arrays-Vulkan.html">array of textures</a> to store all the textures that are in use for a frame in a single descriptor set, I returned to my <a href="https://github.com/khalladay/VkMaterialSystem">material system project</a> and realized how much easier life would be if I could do all my descriptor set binding at the beginning of a frame, both because I’d avoid any performance overhead from doing lots of binding, and because it greatly simplifies anything related to descriptor set versioning (or dealing with updating buffers that are in flight).</p>
+ <p>Once you progress past getting a mesh on screen, the learning material out there for Vulkan is in a weird state right now, especially if you’re looking for content that bridges the gap between noob and pro. Articles talking about different approaches to common rendering tasks, and the tradeoffs you make when choosing one solution over another are few and far between.</p>
 
-<p>As it turns out, this is totally possible and really easy to do, although I have no idea if it’s a good idea in the grand scheme of things. Also, just like using an array of textures, I couldn’t find anyone else writing about, so I guess that means it’s on me to share.</p>
+<p>This is unfortunate, because the beauty of Vulkan is all the choices that it gives you! So today, I want to share the results of a performance test I did to try to figure out a good, scalable way to handle transform data.</p>
+
+<p>I started out by asking Twitter for how other people were handling transform data in their projects, and noticed right away that it seemed like there were a lot of approaches that people were using:</p>
+
+<div align="left" style="border-style:dashed;border-width:1px;">
+<img src="/images/post_images/2018-03-27/twitter1.png" />
+</div>
+<div align="left" style="border-style:dashed;border-width:1px;">
+<img src="/images/post_images/2018-03-27/twitter3.png" />
+</div>
+
+<div align="left" style="padding-bottom:15px;">
+</div>
+
+<p>So I decided to build a test project and try a few approaches out for myself.</p>
+
+<p>I knew right away that I didn’t want a new UBO for each mesh, since that seemed unwieldy and obviously not the best idea for performance, but that still left me with push constants, large UBOs, and a single large SSBO to try out.</p>
+
+<p>This felt a little bit like repeating my previous post about <a href="http://kylehalladay.com/blog/tutorial/vulkan/2017/08/30/Vulkan-Uniform-Buffers-pt2.html">comparing data transfer methods in vulkan</a>, except this time I actually managed to throw enough data at the problem to get meaningful results, and I’ve had some more time with Vulkan since then, so I’d like to think that I’ve approached things a bit smarter this time around.</p>
+
+<p>So this post is going to walk through how each of the above approaches works, and then present the results of the performance tests I did for each.</p>
+
+<h2 id="handling-transforms-with-push-constants">Handling Transforms With Push Constants</h2>
+
+<p>I want to start by talking about Push Constants, because it’s really easy to set them up since you don’t need to allocate any buffers or memory for them. All you need to do is set up your material’s VkPipeline to expect a certain number of bytes of push constnat data:</p>
+
+<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="n">VkPipelineLayoutCreateInfo</span> <span class="n">pipelineLayoutInfo</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="c1">//other pipelineCreateInfo filling out code here
+</span>
+<span class="n">VkPushConstantRange</span> <span class="n">pushConstantRange</span> <span class="o">=</span> <span class="p">{};</span>
+<span class="n">pushConstantRange</span><span class="p">.</span><span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="n">pushConstantRange</span><span class="p">.</span><span class="n">size</span> <span class="o">=</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">glm</span><span class="o">::</span><span class="n">mat4</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="p">;</span>
+<span class="n">pushConstantRange</span><span class="p">.</span><span class="n">stageFlags</span> <span class="o">=</span> <span class="n">VK_SHADER_STAGE_VERTEX_BIT</span><span class="p">;</span>
+
+<span class="n">pipelineLayoutInfo</span><span class="p">.</span><span class="n">pPushConstantRanges</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">pushConstantRange</span><span class="p">;</span>
+<span class="n">pipelineLayoutInfo</span><span class="p">.</span><span class="n">pushConstantRangeCount</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span></code></pre></div>
+
+<p>That being said, I really want to keep my push constants free so I can use them to pass in other data as needed, so I went into this hoping that they didn’t turn out to be the fastest option. Yay bias!</p>
+
+<p>With your VkPipeline set up, passing push constant data to your shader just requires a call to vkCmdPushConstants before you issue a draw call:</p>
+
+<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="k">for</span> <span class="p">(</span><span class="kt">uint32_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">drawCalls</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="c1">//0 is MVP, 1 is normal
+</span>    <span class="n">glm</span><span class="o">::</span><span class="n">mat4</span> <span class="n">frameData</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+
+    <span class="n">frameData</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">vulkanCorrection</span> <span class="o">*</span> <span class="n">p</span> <span class="o">*</span> <span class="n">view</span><span class="p">;</span>
+    <span class="n">frameData</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">glm</span><span class="o">::</span><span class="n">transpose</span><span class="p">(</span><span class="n">glm</span><span class="o">::</span><span class="n">inverse</span><span class="p">(</span><span class="n">view</span><span class="p">));</span>
+
+    <span class="n">vkCmdPushConstants</span><span class="p">(</span>
+        <span class="n">appData</span><span class="p">.</span><span class="n">commandBuffers</span><span class="p">[</span><span class="n">imageIndex</span><span class="p">],</span>
+        <span class="n">appMaterial</span><span class="p">.</span><span class="n">pipelineLayout</span><span class="p">,</span>
+        <span class="n">VK_SHADER_STAGE_VERTEX_BIT</span><span class="p">,</span>
+        <span class="mi">0</span><span class="p">,</span>
+        <span class="k">sizeof</span><span class="p">(</span><span class="n">glm</span><span class="o">::</span><span class="n">mat4</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span>
+        <span class="p">(</span><span class="kt">void</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">frameData</span><span class="p">);</span>
+
+    <span class="n">VkBuffer</span> <span class="n">vertexBuffers</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span> <span class="n">drawCalls</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">buffer</span> <span class="p">};</span>
+    <span class="n">VkDeviceSize</span> <span class="n">vertexOffsets</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span> <span class="mi">0</span> <span class="p">};</span>
+    <span class="n">vkCmdBindVertexBuffers</span><span class="p">(</span><span class="n">appData</span><span class="p">.</span><span class="n">commandBuffers</span><span class="p">[</span><span class="n">imageIndex</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">vertexBuffers</span><span class="p">,</span> <span class="n">vertexOffsets</span><span class="p">);</span>
+    <span class="n">vkCmdBindIndexBuffer</span><span class="p">(</span><span class="n">appData</span><span class="p">.</span><span class="n">commandBuffers</span><span class="p">[</span><span class="n">imageIndex</span><span class="p">],</span> <span class="n">drawCalls</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">buffer</span><span class="p">,</span> <span class="n">drawCalls</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">iOffset</span><span class="p">,</span> <span class="n">VK_INDEX_TYPE_UINT32</span><span class="p">);</span>
+    <span class="n">vkCmdDrawIndexed</span><span class="p">(</span><span class="n">appData</span><span class="p">.</span><span class="n">commandBuffers</span><span class="p">[</span><span class="n">imageIndex</span><span class="p">],</span> <span class="n">static_cast</span><span class="o">&lt;</span><span class="kt">uint32_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">drawCalls</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">iCount</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+
+<span class="p">}</span></code></pre></div>
+
+<p>Finally, instead of specifying a decsriptor set or binding for this data in your shader, you just use the push_constant specifier:</p>
+
+<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="n">layout</span><span class="p">(</span><span class="n">push_constant</span><span class="p">)</span> <span class="n">uniform</span> <span class="n">transformData</span>
+<span class="p">{</span>
+  <span class="n">mat4</span> <span class="n">mvp</span><span class="p">;</span>
+  <span class="n">mat4</span> <span class="n">it_mv</span><span class="p">;</span>
+<span class="p">}</span><span class="n">global</span><span class="p">;</span></code></pre></div>
+
+<p>Note that in the above code, all the objects I was testing with used an identity model matrix, so I just omitted that from the creation of my MVP matrix. The “vulkanCorrection” matrix you see in the code block above is taken from <a href="https://matthewwellings.com/blog/the-new-vulkan-coordinate-system/">The New Vulkan Coordinate System</a>, and is being used to flip the Y and make sure depth is in the 0-1 range.</p>
+
+<p>Push constants have a maximum amount of data that they can hold. This differs by device, and is accessible in the “maxPushConstantsSize” property of your device limits. For a lot of devices, this value is 128 bytes, so you have to plan how you’re going to use push constants carefully, otherwise you’ll run out of room.</p>
+
+<p>The general advice I’ve been given is that push constants are a great option for passing data on a per object basis, and as you’ll see later in the performance tests, however it’s worth noting that in cases where you want to pre-record your command buffers, push constants are a no go. For almost everything except static geo, this isn’t a problem, but I’m mentioning it to flag that even if you have space available in your push constants, it’s still worth knowing how fast the other options are.</p>
+
+<p>…and speaking of other options:</p>
+
+<h2 id="using-large-ubos">Using Large UBOs</h2>
+
+<p>(note: If you’re not sure how to set up an UBO, I recommend checking out the <a href="https://vulkan-tutorial.com/Uniform_buffers">Uniform Buffer Object</a> section on <a href="https://vulkan-tutorial.com/Uniform_buffers">vulkan-tutorial.com</a>
+)</p>
+
+<p>As I mentioned before, I knew I didn’t want to go down the “1 UBO per object” approach, so every method I’m going to discuss here involves packing a number of objects’ data into a single buffer. There are two ways to this. Probably the most common way is to use a Dynamic Uniform Buffer, and then have each object keep track of it’s offset in the buffer, and then set that buffer before every draw call with vkCmdBindDescriptorSets. Dynamic Uniform buffers are well covered elsewhere, so I’m going to omit implementation details in this post for brevity.</p>
+
+<p>The other option is to approach it the way I outlined in my <a href="http://kylehalladay.com/blog/tutorial/vulkan/2018/02/05/Bind-Once-Uniform-Data-Vulkan.html">last post</a>, by creating a single buffer that stores an array of data structs in it, and passing the index into that array via a push constant. That means setting up your vertex shader like so:</p>
+
+<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="k">struct</span> <span class="n">tdata</span>
+<span class="p">{</span>
+  <span class="n">mat4</span> <span class="n">mvp</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="n">layout</span><span class="p">(</span><span class="n">binding</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">set</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="n">uniform</span> <span class="n">TRANSFORM_DATA</span>
+<span class="p">{</span>
+  <span class="n">tdata</span> <span class="n">d</span><span class="p">[</span><span class="mi">256</span><span class="p">];</span>
+<span class="p">}</span><span class="n">transform</span><span class="p">;</span>
+
+<span class="n">layout</span><span class="p">(</span><span class="n">push_constant</span><span class="p">)</span> <span class="n">uniform</span> <span class="n">transformData</span>
+<span class="p">{</span>
+  <span class="n">uint</span> <span class="n">tform</span><span class="p">;</span>
+<span class="p">}</span><span class="n">idx</span><span class="p">;</span>
+
+<span class="n">layout</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="n">in</span> <span class="n">vec3</span> <span class="n">vertex</span><span class="p">;</span>
+
+<span class="kt">void</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="n">gl_Position</span> <span class="o">=</span> <span class="n">transform</span><span class="p">.</span><span class="n">d</span><span class="p">[</span><span class="n">idx</span><span class="p">.</span><span class="n">tform</span><span class="p">].</span><span class="n">mvp</span> <span class="o">*</span> <span class="n">vec4</span><span class="p">(</span><span class="n">vertex</span><span class="p">,</span> <span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">);</span>
+<span class="p">}</span></code></pre></div>
+
+<p>One big advantage of this approach is that you don’t have to worry about making sure that your elements are packed into your UBO according to the minUniformBufferOffsetAlignment of your gpu. On my laptop, the minUniformBufferOffsetAlignment is 256 bytes, which means that if the struct I want to pack into it is smaller than that, I have to waste a ton of space making sure that each struct is located at the right spot in the buffer. You don’t have to worry about that restriction if you’re packing everything into an array in the shader itself.</p>
+
+<p>The other big win is that you don’t need to call vkCmdBindDescriptorSets for each object to pass in an offset; you can do that with push constants. Instead, you only have to issue a new bind call if the object you’re about to create a draw call for uses a different large UBO. You can see that in the <a href="https://github.com/khalladay/VkBindingBenchmark/blob/master/VkBindingBenchmark/rendering.cpp">rendering.cpp</a> file on github, but I ended up writing a function like this to handle that switch:</p>
+
+<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="kt">int</span> <span class="nf">bindDescriptorSets</span><span class="p">(</span><span class="kt">int</span> <span class="n">currentlyBound</span><span class="p">,</span> <span class="kt">int</span> <span class="n">page</span><span class="p">,</span> <span class="kt">int</span> <span class="n">slot</span><span class="p">,</span> <span class="n">VkCommandBuffer</span><span class="o">&amp;</span> <span class="n">cmd</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">uint32_t</span> <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">currentlyBound</span> <span class="o">!=</span> <span class="n">page</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">vkCmdBindDescriptorSets</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">VK_PIPELINE_BIND_POINT_GRAPHICS</span><span class="p">,</span> <span class="n">pipelineLayout</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">descSets</span><span class="p">[</span><span class="n">page</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">offset</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="n">page</span><span class="p">;</span>
+<span class="p">}</span></code></pre></div>
+
+<p>My draw loop kept track of the last bound “page” (large UBO), and while iterating over each object, would call this function with the current object’s page, and the page that was currently bound. This kept vkCmdBindDescriptorSets to a minimum.</p>
+
+<p>The downside to this approach is that all your shaders need to be aware of how you’re handling transform data, and if you decide to change how many elements are stored in your large UBO pages, you need to update all the vertex shaders with the new array size.</p>
+
+<p>In the end, I tested both the Dynamic UBO and “Bind Once” UBO, and as you’ll see later the Bind Once UBO came out on top in all my tests, but not by a whole lot (and there’s a chance that I’m doing something dumb that might influence that value). So if you hate the “bind once” approach that I’m outlining, it’s not like you’re shooting yourself in the foot if you do with a dynamic UBO.</p>
+
+<p>Alright, bring forth the next type of buffer!</p>
+
+<h2 id="using-1-big-ssbo">Using 1 Big SSBO</h2>
+
+<p>This is the technique I was most excited about when I started this benchmarking project, because it’s by far the simplest. Instead of worrying about the size limits for UBOs (and needing multiple UBOs as a result), you just make 1 really big SSBO that can hold all of your transform data at once. Then you index into it exactly like we did with the “Bind Once” UBO:</p>
+
+<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="k">struct</span> <span class="n">tData</span>
+<span class="p">{</span>
+  <span class="n">mat4</span> <span class="n">mvp</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="n">layout</span><span class="p">(</span><span class="n">binding</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">set</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="n">buffer</span> <span class="n">TRANSFORM_DATA</span>
+<span class="p">{</span>
+  <span class="n">tData</span> <span class="n">d</span><span class="p">[</span><span class="mi">25000</span><span class="p">];</span>
+<span class="p">}</span><span class="n">transform</span><span class="p">;</span>
+
+<span class="n">layout</span><span class="p">(</span><span class="n">push_constant</span><span class="p">)</span> <span class="n">uniform</span> <span class="n">transformData</span>
+<span class="p">{</span>
+  <span class="n">uint</span> <span class="n">tform</span><span class="p">;</span>
+<span class="p">}</span><span class="n">idx</span><span class="p">;</span>
+
+<span class="n">layout</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="n">in</span> <span class="n">vec3</span> <span class="n">vertex</span><span class="p">;</span>
+
+<span class="kt">void</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="n">gl_Position</span> <span class="o">=</span> <span class="n">transform</span><span class="p">.</span><span class="n">d</span><span class="p">[</span><span class="n">idx</span><span class="p">.</span><span class="n">tform</span><span class="p">].</span><span class="n">mvp</span> <span class="o">*</span> <span class="n">vec4</span><span class="p">(</span><span class="n">vertex</span><span class="p">,</span> <span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">);</span>
+<span class="p">}</span></code></pre></div>
+
+<p>You’ll notice the only difference in the shader is that the TRANSFORM_DATA input is declared with a type of “buffer” instead of “uniform.” You may have also noticed that the SSBO is really, really big. This is because the <a href="http://casual-effects.com/data/">Amazon Bistro</a> scene that I used as my second test has a whopping 24777 meshes in it, so I rounded up a little and got to the above.</p>
+
+<p>The major disadvantage of using 1 large SSBO is that you need to pick the size of the buffer up front, and if you guess wrong, it has major performance penalties. If you guess too small, you either have to allocate a second SSBO (in which case…why not just use the paged UBO approach from the last section?), or you have to create a bigger SSBO, copy the current contents in, and go from there. If you guess too big, you pay the cost of binding a much larger buffer than you need (which is actually pretty costly if you’re binding WAY more than you need).</p>
+
+<p>This information requirement makes me think that this approach might be better left for specific instances when you know exactly how many things you want to draw (a specific effect, or group of NPCs or something), rather than your go to general purpose solution.</p>
+
+<h2 id="bechmark-project-set-up">Bechmark Project Set Up</h2>
+
+<p>It’s time to talk about performance! To test all of these approaches, I built a simple <a href="https://github.com/khalladay/VkBindingBenchmark">benchmarking project</a> that loaded either the <a href="http://www.crytek.com/cryengine/cryengine3/downloads">CryTek Sponza</a> or the <a href="http://casual-effects.com/data/">Amazon Bistro</a> models.</p>
+
+<p>Since all I really cared about was vertex shader performance, I skipped loaded materials for the models and instead just had the fragment shader output normals. This meant that when the project was running, it looked like this:</p>
 
 <div align="center">
-<img src="/images/post_images/2018-02-05/badideas.jpg" />
+<img src="/images/post_images/2018-03-27/Capture.png" />
+Beauty isn't everything, right?
 <br /><br />
 </div>
-<p>So with all that said, this post is going to show off how to use a single, globally bound descriptor set (and a single VkBuffer!) to store all the uniform data needed for multiple objects that are using different shaders.</p>
 
-<p>I’ve set all this up in a demo project (<a href="https://github.com/khalladay/VulkanDemoProjects/tree/master/VulkanDemoProjects/UniformBufferArrays">on github</a>) if you just want the code. The fragment shaders I used in that demo are:</p>
+<p>I didn’t do any mesh combining, or much in the way of <a href="http://www.assimp.org/">Assimp</a> post processing, so the Sponza test ended up using 379 meshes (which didn’t do much in the way of taxing my gpu), and the Bistro test was 24777 meshes. In a real game, you’d want to pre-transform these vertices to their final position so you wouldn’t have to store model matrices for all these meshes. However, that wasn’t what I wanted to test today, so for our purposes, each one of these meshes is a fully dynamic mesh that can move at any time.</p>
 
-<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="cp">#version 450 core
-#extension GL_ARB_separate_shader_objects : enable
-</span>
-<span class="k">struct</span> <span class="n">Data48</span>
-<span class="p">{</span>
-    <span class="n">vec4</span> <span class="n">colorA</span><span class="p">;</span>
-    <span class="n">vec4</span> <span class="n">colorB</span><span class="p">;</span>
-    <span class="n">vec4</span> <span class="n">colorC</span><span class="p">;</span>
-<span class="p">};</span>
+<p>I also made sure to shuffle the order of the meshes that I was using before beginning to render anything, so that data wasn’t skewed by one approach working better with perfectly sorted data.</p>
 
-<span class="n">layout</span><span class="p">(</span><span class="n">binding</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">set</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="n">uniform</span> <span class="n">DATA_48</span>
-<span class="p">{</span>
-    <span class="n">Data48</span> <span class="n">testing</span><span class="p">[</span><span class="mi">8</span><span class="p">];</span>
-<span class="p">}</span><span class="n">data</span><span class="p">;</span>
+<p>I didn’t end up using vkTimestamps when gathering data for the tests…mostly because I had already spent more time than I wanted to just running the frame time tests, and because the code paths for every SSBO / UBO test case are so close to identical that I didn’t really care to drill into exactly where in the process time was being spent. I’ll leave that for a future post, if I ever run into a case where I need more specific performance info.</p>
 
-<span class="n">layout</span><span class="p">(</span><span class="n">push_constant</span><span class="p">)</span> <span class="n">uniform</span> <span class="n">PER_OBJECT</span>
-<span class="p">{</span>
-    <span class="kt">int</span> <span class="n">dataIdx</span><span class="p">;</span>
-<span class="p">}</span><span class="n">pc</span><span class="p">;</span>
+<p>Finally, all code is available <a href="https://github.com/khalladay/VkBindingBenchmark">on github</a>, and there is more information about testing methodology at the end of the post.</p>
 
-<span class="n">layout</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="n">out</span> <span class="n">vec4</span> <span class="n">outColor</span><span class="p">;</span>
+<h2 id="push-constant-tests">Push Constant Tests</h2>
 
-<span class="kt">void</span> <span class="nf">main</span><span class="p">()</span>
-<span class="p">{</span>
-    <span class="n">outColor</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="n">testing</span><span class="p">[</span><span class="n">pc</span><span class="p">.</span><span class="n">dataIdx</span><span class="p">].</span><span class="n">colorA</span>
-            <span class="o">+</span> <span class="n">data</span><span class="p">.</span><span class="n">testing</span><span class="p">[</span><span class="n">pc</span><span class="p">.</span><span class="n">dataIdx</span><span class="p">].</span><span class="n">colorB</span>
-            <span class="o">+</span> <span class="n">data</span><span class="p">.</span><span class="n">testing</span><span class="p">[</span><span class="n">pc</span><span class="p">.</span><span class="n">dataIdx</span><span class="p">].</span><span class="n">colorC</span><span class="p">;</span>
-<span class="p">}</span></code></pre></div>
+<p>I want to talk about the results for Push Constants first, since there’s really only 1 way to use them (which makes the results very easy to understand):</p>
 
-<p>and</p>
+<div align="left">
+<img src="/images/post_images/2018-03-27/push_constant.png" />
+</div>
 
-<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="cp">#version 450 core
-#extension GL_ARB_separate_shader_objects : enable
-</span>
-<span class="k">struct</span> <span class="n">Data48</span>
-<span class="p">{</span>
-    <span class="kt">float</span> <span class="n">r</span><span class="p">;</span>
-    <span class="n">vec4</span> <span class="n">colorB</span><span class="p">;</span>
-    <span class="kt">int</span> <span class="n">x</span><span class="p">;</span>
-<span class="p">};</span>
+<p>Yes folks, it turns out that doing more work does in fact take longer. While the push constant numbers are useful as a basis for comparison with the other techniques I tried, they’re really boring on their own. Ok. moving on.</p>
 
-<span class="n">layout</span><span class="p">(</span><span class="n">binding</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">set</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="n">uniform</span> <span class="n">DATA_48</span>
-<span class="p">{</span>
-    <span class="n">Data48</span> <span class="n">data</span><span class="p">[</span><span class="mi">8</span><span class="p">];</span>
-<span class="p">}</span><span class="n">data</span><span class="p">;</span>
+<h2 id="ubo-tests">UBO Tests</h2>
 
-<span class="n">layout</span><span class="p">(</span><span class="n">push_constant</span><span class="p">)</span> <span class="n">uniform</span> <span class="n">PER_OBJECT</span>
-<span class="p">{</span>
-    <span class="kt">int</span> <span class="n">dataIdx</span><span class="p">;</span>
-<span class="p">}</span><span class="n">pc</span><span class="p">;</span>
+<p>In addition to testing out transform data strategies, this project gave me a good chance to re-validate a conclusion I made <a href="http://kylehalladay.com/blog/tutorial/vulkan/2017/08/30/Vulkan-Uniform-Buffers-pt2.html">in my last vulkan benchmarking post</a>, namely, that device-local memory wasn’t suited for data that needed to be updated every frame. My initial data confirmed this finding:</p>
 
-<span class="n">layout</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="n">out</span> <span class="n">vec4</span> <span class="n">outColor</span><span class="p">;</span>
+<div align="left">
+<img src="/images/post_images/2018-03-27/ubo_1.PNG" />
+</div>
 
-<span class="kt">void</span> <span class="nf">main</span><span class="p">()</span>
-<span class="p">{</span>
-    <span class="kt">float</span> <span class="n">red</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">pc</span><span class="p">.</span><span class="n">dataIdx</span><span class="p">].</span><span class="n">r</span><span class="p">;</span>
-    <span class="kt">float</span> <span class="n">intCast</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">pc</span><span class="p">.</span><span class="n">dataIdx</span><span class="p">].</span><span class="n">x</span><span class="p">;</span>
-    <span class="n">vec4</span> <span class="n">colorA</span> <span class="o">=</span>  <span class="n">vec4</span><span class="p">(</span><span class="n">red</span><span class="p">,</span> <span class="n">intCast</span><span class="p">,</span> <span class="n">intCast</span><span class="p">,</span> <span class="n">intCast</span><span class="p">);</span>
-    <span class="n">outColor</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">pc</span><span class="p">.</span><span class="n">dataIdx</span><span class="p">].</span><span class="n">colorB</span> <span class="o">*</span> <span class="n">colorA</span><span class="p">;</span>
-<span class="p">}</span></code></pre></div>
+<p>Wow! Not only does a HOST_CACHED Uniform Buffer beat Push Constants for speed when the mesh count increases, but look at how crappy a DEVICE_LOCAL buffer does!</p>
 
-<p>I’ll omit the vert shader because it just passes through uv coords and does nothing fancy. The stars of our show are the ones above.</p>
+<p>As it turns out, that’s not really the whole story, and now that I’ve got some more experience with Vulkan, I can say that, as I feared in my previous post, I was probably doing something really stupid last time. Yes, the numbers look bad at first glance, but this DEVICE_LOCAL test was creating new staging buffers every frame, and then creating a command buffer just for copying data to the DEVICE_LOCAL buffer (and submitting those commands!), before rendering the frame.</p>
 
-<h2 id="how-this-all-works">How This All Works</h2>
+<p>When I fixed those issues (used a persistent staging buffer, and added my copy commands to the main command buffer), things got a lot more reasonable:</p>
 
-<p>The trick, which you may have already guessed from the shader code, is to keep all the uniform buffer objects the same size. VkDescriptorSets, and VkBuffers don’t actually care about the contents of your uniform buffers, otherwise we’d have to provide a lot more information when setting up a descriptor set binding. All they care about is how big the buffer needs to be.</p>
+<div align="left">
+<img src="/images/post_images/2018-03-27/ubo_2.PNG" />
+</div>
 
-<p>Knowing that, it follows that if all our shaders are using buffers of the same size, they should all be able to use the same descriptor set, and that’s exactly how things work in practice. It’s almost embarrassing how easy it is to set up the descriptor set layout to do this:</p>
+<p>However, just because it looks more reasonable doesn’t mean it isn’t interesting. The best case DEVICE_LOCAL tests performed about as well as just having a HOST_CACHED buffer to begin with. Given how much simpler it is to not worry about staging buffers, I’m still of the opinion that for data that updates every frame, you shouldn’t use DEVICE_LOCAL memory.</p>
 
-<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="n">VkDescriptorSetLayoutBinding</span> <span class="n">layoutBinding</span><span class="p">;</span>
-<span class="n">layoutBinding</span><span class="p">.</span><span class="n">descriptorCount</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
-<span class="n">layoutBinding</span><span class="p">.</span><span class="n">binding</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-<span class="n">layoutBinding</span><span class="p">.</span><span class="n">stageFlags</span> <span class="o">=</span> <span class="n">VK_SHADER_STAGE_FRAGMENT_BIT</span><span class="p">;</span>
-<span class="n">layoutBinding</span><span class="p">.</span><span class="n">descriptorType</span> <span class="o">=</span> <span class="n">VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER</span><span class="p">;</span>
-<span class="n">layoutBinding</span><span class="p">.</span><span class="n">pImmutableSamplers</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<p>I’ve avoided talking about Dynamic UBOs so far because the results weren’t very interesting:</p>
 
-<span class="n">VkDescriptorSetLayoutCreateInfo</span> <span class="n">layoutInfo</span> <span class="o">=</span> <span class="p">{};</span>
-<span class="n">layoutInfo</span><span class="p">.</span><span class="n">sType</span> <span class="o">=</span> <span class="n">VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO</span><span class="p">;</span>
-<span class="n">layoutInfo</span><span class="p">.</span><span class="n">bindingCount</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
-<span class="n">layoutInfo</span><span class="p">.</span><span class="n">pBindings</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">layoutBinding</span><span class="p">;</span>
+<div align="left">
+<img src="/images/post_images/2018-03-27/ubo_3.PNG" />
+</div>
 
-<span class="n">vkCreateDescriptorSetLayout</span><span class="p">(...)</span></code></pre></div>
+<p>Basically, while I totally expect that a Dynamic UBO would outperform a single UBO per object, it doesn’t match the “Large UBO” method for performance. However, if you go with the Dynamic UBO approach, your shaders get more straightforward to read / write, and you don’t have to worry about updating vertex shaders if you decide to change the size of your UBO arrays, so it’s a performance/complexity tradeoff.</p>
 
-<p>You don’t even need to worry about specifying the number of elements in the array, since it’s all stored in a uniform block. As far as the descriptor set is concerned, we’re not even using an array.  </p>
+<p>Ok, so we know that using an UBO is faster than push constants when you scale up to ridiculous mesh counts, but how did the SSBO fare?</p>
 
-<p>Once you’ve set up your Descriptor Set Layout, allocating the buffer to store the data is similarly easy. I’m going to just copy + paste the utility function call from my demo project, because allocating a buffer and memory associated with it in vulkan has a lot of boiler plate, but in reality, all you do is create a buffer large enough to hold the array you declared. So if you have an array of length 8, that stores 48 byte structures, you’re buffer needs to be 8 * 48 (384) bytes large.</p>
+<h2 id="ssbo-tests">SSBO tests</h2>
 
-<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="n">vkh</span><span class="o">::</span><span class="n">createBuffer</span><span class="p">(</span><span class="n">demoData</span><span class="p">.</span><span class="n">sharedBuffer</span><span class="p">,</span>
-    <span class="n">demoData</span><span class="p">.</span><span class="n">bufferMemory</span><span class="p">,</span>
-    <span class="n">SHARED_UNIFORM_SIZE</span> <span class="o">*</span> <span class="n">BUFFER_ARRAY_SIZE</span><span class="p">,</span>
-    <span class="n">VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT</span> <span class="o">|</span> <span class="n">VK_BUFFER_USAGE_TRANSFER_DST_BIT</span><span class="p">,</span>
-    <span class="n">VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT</span><span class="p">,</span>
-    <span class="n">appContext</span><span class="p">);</span></code></pre></div>
+<p>SSBOs are a different story from UBOs. You really really really don’t want to use anything but DEVICE_LOCAL memory for them:</p>
 
-<p>And finally, once you’ve put the data into that buffer writing the descriptor set is also about as straightforward as possible.</p>
+<div align="left">
+<img src="/images/post_images/2018-03-27/ssbo_1.PNG" />
+</div>
 
-<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">VkDescriptorBufferInfo</span> <span class="n">bufferInfo</span> <span class="o">=</span> <span class="p">{};</span>
-<span class="n">bufferInfo</span><span class="p">.</span><span class="n">buffer</span> <span class="o">=</span> <span class="n">demoData</span><span class="p">.</span><span class="n">sharedBuffer</span><span class="p">;</span>
-<span class="n">bufferInfo</span><span class="p">.</span><span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-<span class="n">bufferInfo</span><span class="p">.</span><span class="n">range</span> <span class="o">=</span> <span class="n">VK_WHOLE_SIZE</span><span class="p">;</span>
+<p>Since SSBO performance is largely dependent on the size of the SSBO you’re using, the Sponza test used an SSBO that could hold 512 items, and the Bistro test used the one from the code sample earlier, that could hold 25000. To test the performance cost of picking the wrong SSBO size, I ran the Sponza test again, using the 25000 slot SSBO, and it ended up taking <strong>3.58 ms</strong> to render, which is worse than the HOST_CACHED version of the smaller one.</p>
 
-<span class="n">VkWriteDescriptorSet</span> <span class="n">setWrite</span> <span class="o">=</span> <span class="p">{};</span>
-<span class="n">setWrite</span><span class="p">.</span><span class="n">sType</span> <span class="o">=</span> <span class="n">VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET</span><span class="p">;</span>
-<span class="n">setWrite</span><span class="p">.</span><span class="n">dstBinding</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-<span class="n">setWrite</span><span class="p">.</span><span class="n">dstArrayElement</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-<span class="n">setWrite</span><span class="p">.</span><span class="n">descriptorType</span> <span class="o">=</span> <span class="n">VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER</span><span class="p">;</span>
-<span class="n">setWrite</span><span class="p">.</span><span class="n">descriptorCount</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
-<span class="n">setWrite</span><span class="p">.</span><span class="n">dstSet</span> <span class="o">=</span> <span class="n">demoData</span><span class="p">.</span><span class="n">descriptorSet</span><span class="p">;</span>
-<span class="n">setWrite</span><span class="p">.</span><span class="n">pBufferInfo</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">bufferInfo</span><span class="p">;</span>
-<span class="n">setWrite</span><span class="p">.</span><span class="n">pImageInfo</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<p>Key Takeaway: if you don’t know how big your data will be, don’t use SSBOs.</p>
 
-<span class="n">vkUpdateDescriptorSets</span><span class="p">(</span><span class="n">appContext</span><span class="p">.</span><span class="n">device</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">setWrite</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">nullptr</span><span class="p">);</span></code></pre></div>
+<h2 id="final-results">Final Results</h2>
 
-<p>This up is completely identical to setting up a single uniform buffer object, because in practice, that’s exactly what’s going on. The only difference is that to make this work you have to keep a few more things in mind:</p>
+<p>Here are the results of every test presented in a single graph:</p>
 
-<h2 id="ensuring-buffers-are-the-same-size">Ensuring Buffers Are The Same Size</h2>
+<div align="left">
+<img src="/images/post_images/2018-03-27/final_results.PNG" />
+</div>
 
-<p>I’ve already covered that you need to keep the uniform objects the same size, but how to do that is a bit different for Vulkan than it might be if you were working with solely cpu side structs. This is because struct members in Vulkan shaders are 16 byte aligned, which means that if you’re trying to manually specify the structs in your c++ code (like I do in my example project), you need to add some additional syntax to make sure if all adds up properly:</p>
+<p>It’s a bit hard to read for the Sponza results, but basically everything rendered that in around 0.8 ms on my GPU, so you aren’t really missing much.</p>
 
-<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="k">struct</span> <span class="n">LayoutA</span>
-<span class="p">{</span>
-    <span class="kr">__declspec</span><span class="p">(</span><span class="n">align</span><span class="p">(</span><span class="mi">16</span><span class="p">))</span> <span class="n">glm</span><span class="o">::</span><span class="n">vec4</span> <span class="n">colorA</span><span class="p">;</span>
-    <span class="kr">__declspec</span><span class="p">(</span><span class="n">align</span><span class="p">(</span><span class="mi">16</span><span class="p">))</span> <span class="n">glm</span><span class="o">::</span><span class="n">vec4</span> <span class="n">colorB</span><span class="p">;</span>
-    <span class="kr">__declspec</span><span class="p">(</span><span class="n">align</span><span class="p">(</span><span class="mi">16</span><span class="p">))</span> <span class="n">glm</span><span class="o">::</span><span class="n">vec4</span> <span class="n">colorC</span><span class="p">;</span>
-<span class="p">};</span>
+<p>I think I’m going to go with HOST_CACHED UBO pages for my transform data until I run into a performance problem with that approach and need to optimize further. However, what’s striking is that every buffer based approach I tested out-performed Push Constants at scale. I’m not entirely sure what this means, since I was under the impression Push Constants were supposed to always be the fastest option if you weren’t pre-recording command buffers. Perhaps I’m doing something dumb (if so - please e-mail me or send me a message <a href="https://twitter.com/khalladay">on Twitter</a>)</p>
 
-<span class="k">struct</span> <span class="n">LayoutB</span>
-<span class="p">{</span>
-    <span class="kr">__declspec</span><span class="p">(</span><span class="n">align</span><span class="p">(</span><span class="mi">16</span><span class="p">))</span> <span class="kt">float</span> <span class="n">r</span><span class="p">;</span>
-    <span class="kr">__declspec</span><span class="p">(</span><span class="n">align</span><span class="p">(</span><span class="mi">16</span><span class="p">))</span> <span class="n">glm</span><span class="o">::</span><span class="n">vec4</span> <span class="n">colorA</span><span class="p">;</span>
-    <span class="kr">__declspec</span><span class="p">(</span><span class="n">align</span><span class="p">(</span><span class="mi">16</span><span class="p">))</span> <span class="kt">int</span> <span class="n">x</span><span class="p">;</span>
-<span class="p">};</span></code></pre></div>
+<p>Speaking of optimizing this further:</p>
 
-<p>Unless you’re working with matrices, this actually ends up making your life easier, because any data type equal to or smaller than the size of a vec4 will fit inside 16 bytes, meaning that rather than worrying about the size of the struct members, you just worry about keeping the count the same. Once you add matrices, you have to start looking at sizes again.</p>
+<h2 id="improving-on-these-results">Improving On These Results</h2>
 
-<p>Once the structs are set up, you just need some quick pointer math to get them into one buffer:</p>
+<p>For the purposes of the tests, I updated every transform matrix every frame. Clearly that’s not going to be the case in a real application, especially with static geo. As I mentioned earlier, you’d see a huge increase in performance if you pre-transformed your static geo so they has an identity model matrix, set the ViewProjection matrix in a globally bound UBO, and then pre-recorded all the commands for rendering those objects.</p>
 
-<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="kt">char</span><span class="o">*</span> <span class="n">sharedData</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">LayoutA</span><span class="p">)</span> <span class="o">*</span> <span class="n">BUFFER_ARRAY_SIZE</span><span class="p">);</span>
-<span class="n">LayoutA</span> <span class="n">first</span> <span class="o">=</span> <span class="p">{</span><span class="n">glm</span><span class="o">::</span><span class="n">vec4</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">glm</span><span class="o">::</span><span class="n">vec4</span><span class="p">(</span><span class="mf">0.25</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">glm</span><span class="o">::</span><span class="n">vec4</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.25</span><span class="p">,</span><span class="mf">0.25</span><span class="p">,</span><span class="mi">1</span><span class="p">)};</span>
-<span class="n">LayoutB</span> <span class="n">second</span> <span class="o">=</span>  <span class="mf">1.0</span><span class="p">,</span> <span class="n">glm</span><span class="o">::</span><span class="n">vec4</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="mi">1</span><span class="p">};</span>
+<p>For dynamic meshes, you might also be able to get some wins by moving the ViewProjection matrix to a globally bound UBO. If you didn’t have to update the MVP every frame, you might be able build a system where objects “register” into an UBO slot every frame, or some other re-ordering of the buffer data takes place so that you could avoid flushing the entire buffer range each frame, and only transfer the model matrices that changed.</p>
 
-<span class="kt">char</span><span class="o">*</span> <span class="n">writeLocation</span> <span class="o">=</span> <span class="n">sharedData</span><span class="p">;</span>
-<span class="n">memcpy</span><span class="p">(</span><span class="n">writeLocation</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">first</span><span class="p">,</span> <span class="n">SHARED_UNIFORM_SIZE</span><span class="p">);</span>
-<span class="n">memcpy</span><span class="p">((</span><span class="n">writeLocation</span> <span class="o">+=</span> <span class="n">SHARED_UNIFORM_SIZE</span><span class="p">),</span> <span class="o">&amp;</span><span class="n">second</span><span class="p">,</span> <span class="n">SHARED_UNIFORM_SIZE</span><span class="p">);</span></code></pre></div>
+<p>This is all conjecture, and I haven’t thought too hard about any of it, or tried it out, but they seem like reasonable ways to approach speeding this up if you wanted to.</p>
 
-<p>This works, but If you’re like me, you likely don’t want to have to recompile your c++ code every time a shader changes. In the past, I got around this by using a program I wrote for my <a href="https://github.com/khalladay/VkMaterialSystem">material system</a> (called the “ShaderPipeline”) that uses <a href="https://github.com/KhronosGroup/SPIRV-Cross">SPIR-V Cross</a> to generate json descriptions of the shaders that I use. One part of this description are the sizes and offsets of each member of a uniform buffer object, but with the array of structs approach here, SpirV-Cross ends up just telling you details about the size of the entire array:</p>
+<h2 id="conclusion">Conclusion</h2>
 
-<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="s">"descriptor_sets"</span><span class="o">:</span> <span class="p">[</span>
-<span class="p">{</span>
-   <span class="s">"set"</span><span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
-   <span class="s">"binding"</span><span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
-   <span class="s">"name"</span><span class="o">:</span> <span class="s">"DATA_48"</span><span class="p">,</span>
-   <span class="s">"size"</span><span class="o">:</span> <span class="mi">384</span><span class="p">,</span>
-   <span class="s">"arrayLen"</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
-   <span class="s">"type"</span><span class="o">:</span> <span class="s">"UNIFORM"</span><span class="p">,</span>
-   <span class="s">"members"</span><span class="o">:</span> <span class="p">[</span>
-       <span class="p">{</span>
-           <span class="s">"name"</span><span class="o">:</span> <span class="s">"data"</span><span class="p">,</span>
-           <span class="s">"size"</span><span class="o">:</span> <span class="mi">384</span><span class="p">,</span>
-           <span class="s">"offset"</span><span class="o">:</span> <span class="mi">0</span>
-       <span class="p">}</span>
-   <span class="p">]</span>
-<span class="p">}]</span></code></pre></div>
+<p>Thanks for sticking with me this far! As mentioned before, I’m probably doing a thousand different dumb things in my code, or while interpreting the results. If you spot one of these dumb things, I would love to hear about it <a href="https://twitter.com/khalladay">on Twitter</a>, <a href="https://mastodon.gamedev.place/@khalladay">Mastodon</a>, or via e-mail (button is on the side bar).</p>
 
-<p>This isn’t super helpful, which I think means that I’m going to have to add some support for glsl comment annotations to let this tool spit out more information about the “DATA48” struct. However, my main point here is that this “array of structs” approach does not require you to recompile your c++ code to make shader changes. Once you know the offsets for each variable, you can just do some quick pointer math and write things where they need to go in a generic way.</p>
+<p>I feel like these performance benchmarking posts sound like a much better idea before I get into them and realize how much time they take to do right. So perhaps my next post will be about something a bit lighter. In any case - I hope this info was helpful to someone!</p>
 
-<p>Side Note: this ShaderPipeline tool is turning out to be way more useful than the material system demo. I think it’s soon going to need it’s own github repo.</p>
+<font size="2"><div style="border-style:solid; background-color:#DDDDDD ">
 
-<h2 id="a-potential-implementation-idea">A Potential Implementation Idea</h2>
+<strong>Appendix: Testing Methodology</strong><br />
 
-<p>I haven’t tried this out yet, so take it with a grain of salt, but it seems like this technique would make it possible to keep uniform data centralized in a few different memory pools, one for each size of uniform buffer object (ie: a pool for 48 byte buffers, a pool for 128 byte, etc). Whenever a material instance gets created, it just gets assigned a slot in the appropriate pool for it’s data. Then when it comes time to actually use the material, it just needs to know enough to pass the index (or indices in the case of multiple uniforms) via push constants to select the right data.</p>
-
-<p>It might even be possible to use this separation of materials to figure out which thread should build the commands for drawing each object, so that each command list that gets built doesn’t necessarily even need to bind every one of these uniform arrays.</p>
-
-<p>I think this is the approach I’m going to try first in the next non-demo project that I make with Vulkan (whatever/whenever that is), but as simple as it sounds on paper, there’s already at least one more factor that needs to be mentioned:</p>
-
-<h2 id="handling-large-buffer-updates">Handling Large Buffer Updates</h2>
-
-<p>This approach to uniform data runs into problems pretty quickly as you add more entries to the arrays of data. The <a href="https://www.khronos.org/registry/vulkan/specs/1.0/man/html/vkCmdUpdateBuffer.html">vulkan spec</a> states that:</p>
-
-<blockquote>
-  <p>Buffer updates performed with vkCmdUpdateBuffer first copy the data into command buffer memory when the command is recorded (which requires additional storage and may incur an additional allocation), and then copy the data from the command buffer into dstBuffer when the command is executed on a device.</p>
-</blockquote>
-
-<blockquote>
-  <p>The additional cost of this functionality compared to buffer to buffer copies means it is only recommended for very small amounts of data, and is why it is limited to only 65536 bytes.</p>
-</blockquote>
-
-<blockquote>
-  <p>Applications can work around this by issuing multiple vkCmdUpdateBuffer commands to different ranges of the same buffer, but it is strongly recommended that they should not.</p>
-</blockquote>
-
-<p>So once we exceed 65536 bytes in one of our buffer pools, we need to find a different way to update the data there. With the 48 byte buffers we’re using above, we won’t hit that limit for a while, but a hypothetical 128 byte uniform buffer array would exceed the limit with only 512 entries.</p>
-
-<p>It seems like the right way to address this is to limit the size of any vkBuffer that stores data that needs to be modified, and then just before the renderer begins assembling command lists, copy those buffers into a larger buffer that exceeds the 65536 limit. This approach will add some additional complexity to setting up material data / managing those buffer pools, but wouldn’t increase any complexity as far as our actual rendering logic is concerned… which I like.</p>
-
-<h2 id="wrap-up">Wrap Up</h2>
-
-<p>I’ll mention again that I haven’t actually tried this out in a real application, and it could be that there are performance costs associated with binding really large buffers, or some other performance gotcha that I’m going to run into with this approach (in fast, there’s almost certainly at least 10 things I’m not considering), but I really like this approach to working with uniform data, so I’m going to start giving it a shot in larger projects.</p>
-
-<p>This was a really fun post to write and fun project to put together. Between my last post about texture arrays, and this one, I feel like I”m starting to get a good grip on how Vulkan handles Descriptor Sets, and how things map from GLSL to Vulkan.</p>
-
-<p>As always, if you want to say hi, or point out something that I got wrong (or didn’t think about), send a message to @khalladay <a href="https://twitter.com/khalladay">on Twitter</a> or <a href="https://mastodon.gamedev.place/@khalladay">on Mastodon</a>. Have a good one!</p>
+In case reviewing testing methods is your thing, here's how I got the numbers in all the graphs in this post:<br /><br />
+<li>All tests were run for at least 5120 frames, reporting the average frametime after every 1024 frames. I took the average of the last 4096 of these frames (to avoid any hitches on startup) to use as my numbers in the tests.</li><br />
+<li>I monitored my CPU and GPU temp with <a href="http://openhardwaremonitor.org/">Open Hardware Monitor</a>, and let both of them return to their resting temp between tests (61 and 66 C respectively), and made sure that the same applications (and only those applications) were running alongside the test program.</li><br />
+<li>I repeated this test 2 more times, at different times of the day (after using the laptop to do other tasks), which gave me 3 frametime averages (1 per run of the test). I chose the median of the three to present in the graph above.</li><br />
+<li>Finally, all tests were done in Release builds, without a debugger attached or any validation layers turned on, and connected to a wall outlet to prevent any kind of throttling on battery to interfere with anything.</li><br />
+<li>All the source for everything is  <a href="https://github.com/khalladay/VkBindingBenchmark">on github</a>, I would love for someone to compile everything and run a similar test to see if the results for my GPU can be replicated on someone else's hardware.</li>
+</div>
+</font>
 
 </div>
 
 <div id="related">
   <h3>Recent Posts</h3>
   <ul class="posts">
+    
+    <li>
+      <span>27 Mar 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/03/27/SSBO-VS-Uniform-Buffer.html">Handling Transform Data in Vulkan</a>
+    </li>
     
     <li>
       <span>05 Feb 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/02/05/Bind-Once-Uniform-Data-Vulkan.html">A "Bind Once" Approach to Uniform Data</a>
@@ -328,10 +397,6 @@
     
     <li>
       <span>13 Dec 2017 &raquo;</span> <a href="/blog/tutorial/2017/12/13/Custom-Allocators-Vulkan.html">A Simple Device Memory Allocator For Vulkan</a>
-    </li>
-    
-    <li>
-      <span>27 Nov 2017 &raquo;</span> <a href="/blog/tutorial/2017/11/27/Vulkan-Material-System.html">Lessons Learned While Building a Vulkan Material System</a>
     </li>
     
   </ul>

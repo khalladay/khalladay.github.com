@@ -239,7 +239,7 @@
 
 <p>The only thing that may not be readily apparent is the id variable, which I’m adding since I’m assuming at some point I’ll need some extra bits to help find the allocation inside a memory pool.</p>
 
-<p>It’s worth noting that once you bind memory to a Vulkan resource, the only way you can unbind that memory is to destroy the buffer, image, or whatever else that memory is bound too. You can free memory that’s currently bound to something (as long as you make sure to stop using whatever it was bound to), but you can’t decide to bind an allocated chunk of memory to something new until the original binding has been destroyed. </p>
+<p>It’s worth noting that once you bind memory to a Vulkan resource, the only way you can unbind that memory is to destroy the buffer, image, or whatever else that memory is bound too. You can free memory that’s currently bound to something (as long as you make sure to stop using whatever it was bound to), but you can’t decide to bind an allocated chunk of memory to something new until the original binding has been destroyed.</p>
 
 <p>Whew, all that theory is finally out of the way! It’s time to actually build something.</p>
 
@@ -298,7 +298,7 @@
   <li>Even though we aren’t using it in this allocator, the Allocation structure we’re returning gets it’s offset set to 0 so that we can pass the offset to bind calls later.</li>
 </ul>
 
-<p>With the allocation code out of the way, the rest of the allocator interface is pretty boring to looks at:</p>
+<p>With the allocation code out of the way, the rest of the allocator interface is pretty boring to look at:</p>
 
 <div class="highlight"><pre><code class="language-c" data-lang="c"><span class="kt">void</span> <span class="nf">free</span><span class="p">(</span><span class="n">Allocation</span><span class="o">&amp;</span> <span class="n">allocation</span><span class="p">)</span>
 <span class="p">{</span>
@@ -564,6 +564,10 @@
   <ul class="posts">
     
     <li>
+      <span>27 Mar 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/03/27/SSBO-VS-Uniform-Buffer.html">Handling Transform Data in Vulkan</a>
+    </li>
+    
+    <li>
       <span>05 Feb 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/02/05/Bind-Once-Uniform-Data-Vulkan.html">A "Bind Once" Approach to Uniform Data</a>
     </li>
     
@@ -573,10 +577,6 @@
     
     <li>
       <span>13 Dec 2017 &raquo;</span> <a href="/blog/tutorial/2017/12/13/Custom-Allocators-Vulkan.html">A Simple Device Memory Allocator For Vulkan</a>
-    </li>
-    
-    <li>
-      <span>27 Nov 2017 &raquo;</span> <a href="/blog/tutorial/2017/11/27/Vulkan-Material-System.html">Lessons Learned While Building a Vulkan Material System</a>
     </li>
     
   </ul>

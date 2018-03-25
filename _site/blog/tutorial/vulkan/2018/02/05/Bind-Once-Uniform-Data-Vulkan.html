@@ -95,7 +95,7 @@
 <h1 class="title">A "Bind Once" Approach to Uniform Data</h1>
 
 <div id="post">
-  <p>After figuring out how to use a global <a href="http://127.0.0.1:4000/blog/tutorial/vulkan/2018/01/28/Textue-Arrays-Vulkan.html">array of textures</a> to store all the textures that are in use for a frame in a single descriptor set, I returned to my <a href="https://github.com/khalladay/VkMaterialSystem">material system project</a> and realized how much easier life would be if I could do all my descriptor set binding at the beginning of a frame, both because I’d avoid any performance overhead from doing lots of binding, and because it greatly simplifies anything related to descriptor set versioning (or dealing with updating buffers that are in flight).</p>
+  <p>After figuring out how to use a global <a href="http://kylehalladay.com/blog/tutorial/vulkan/2018/01/28/Textue-Arrays-Vulkan.html">array of textures</a> to store all the textures that are in use for a frame in a single descriptor set, I returned to my <a href="https://github.com/khalladay/VkMaterialSystem">material system project</a> and realized how much easier life would be if I could do all my descriptor set binding at the beginning of a frame, both because I’d avoid any performance overhead from doing lots of binding, and because it greatly simplifies anything related to descriptor set versioning (or dealing with updating buffers that are in flight).</p>
 
 <p>As it turns out, this is totally possible and really easy to do, although I have no idea if it’s a good idea in the grand scheme of things. Also, just like using an array of textures, I couldn’t find anyone else writing about, so I guess that means it’s on me to share.</p>
 
@@ -318,6 +318,10 @@
   <ul class="posts">
     
     <li>
+      <span>27 Mar 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/03/27/SSBO-VS-Uniform-Buffer.html">Handling Transform Data in Vulkan</a>
+    </li>
+    
+    <li>
       <span>05 Feb 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/02/05/Bind-Once-Uniform-Data-Vulkan.html">A "Bind Once" Approach to Uniform Data</a>
     </li>
     
@@ -327,10 +331,6 @@
     
     <li>
       <span>13 Dec 2017 &raquo;</span> <a href="/blog/tutorial/2017/12/13/Custom-Allocators-Vulkan.html">A Simple Device Memory Allocator For Vulkan</a>
-    </li>
-    
-    <li>
-      <span>27 Nov 2017 &raquo;</span> <a href="/blog/tutorial/2017/11/27/Vulkan-Material-System.html">Lessons Learned While Building a Vulkan Material System</a>
     </li>
     
   </ul>
