@@ -4,7 +4,7 @@
  <title>The blog of Kyle Halladay</title>
  <link href="http://kylehalladay.com/atom.xml" rel="self"/>
  <link href="http://kylehalladay.com"/>
- <updated>2018-03-26T16:05:10-05:00</updated>
+ <updated>2018-03-26T16:07:56-05:00</updated>
  <id>http://kylehalladay.com</id>
  <author>
    <name>Kyle Halladay</name>
@@ -32,7 +32,7 @@
 &lt;p&gt;If that feedback was correct, the problem was that my shaders were so simple that my gpu was burning through frames so fast that it didn’t matter if there was a performance difference in my transform data approaches, I was hitting a different performance bottleneck first. Sadly, I’ve spent a lot of time fixing graphics pipeline bottlenecks on different projects… I just didn’t think about them when collecting my data last time.&lt;/p&gt;
 
 &lt;div align=&quot;center&quot;&gt;
-&lt;img src=&quot;/images/post_images/2018-03-28/stan.PNG&quot; /&gt;
+&lt;img src=&quot;/images/post_images/2018-03-28/stan.png&quot; /&gt;
 &lt;br /&gt;&lt;br /&gt;
 &lt;/div&gt;
 

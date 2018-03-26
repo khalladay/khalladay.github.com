@@ -24,7 +24,7 @@ Suffice to say, the person giving me this feedback has much more experience than
 If that feedback was correct, the problem was that my shaders were so simple that my gpu was burning through frames so fast that it didn't matter if there was a performance difference in my transform data approaches, I was hitting a different performance bottleneck first. Sadly, I've spent a lot of time fixing graphics pipeline bottlenecks on different projects... I just didn't think about them when collecting my data last time.
 
 <div align="center">
-<img src="/images/post_images/2018-03-28/stan.PNG" />
+<img src="/images/post_images/2018-03-28/stan.png" />
 <br><br>
 </div>
 
