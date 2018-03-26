@@ -283,6 +283,11 @@ Beauty isn't everything, right?
 
 <p>Finally, all code is available <a href="https://github.com/khalladay/VkBindingBenchmark">on github</a>, and there is more information about testing methodology at the end of the post.</p>
 
+<h2 id="warning">WARNING</h2>
+<div style="border-style:solid;border-width:1px; background-color:#FFAAAA ">
+Edit: I made a pretty sizeable error when constructing these performance tests, and the numbers that I presented in the rest of this post aren't really all that useful. If you're interested in the performance of each of these approaches, please check out <a href="http://kylehalladay.com/blog/tutorial/vulkan/2018/03/28/SSBO-VS-Uniform-Buffer-2.html">this post</a>, where I talk about the problems with this test, and present more accurate numbers. Thanks!
+</div>
+
 <h2 id="push-constant-tests">Push Constant Tests</h2>
 
 <p>I want to talk about the results for Push Constants first, since there’s really only 1 way to use them (which makes the results very easy to understand):</p>
@@ -357,6 +362,11 @@ Beauty isn't everything, right?
 
 <p>Thanks for sticking with me this far! As mentioned before, I’m probably doing a thousand different dumb things in my code, or while interpreting the results. If you spot one of these dumb things, I would love to hear about it <a href="https://twitter.com/khalladay">on Twitter</a>, <a href="https://mastodon.gamedev.place/@khalladay">Mastodon</a>, or via e-mail (button is on the side bar).</p>
 
+<div style="border-style:solid;border-width:1px; background-color:#FFAAAA ">
+Edit: Again, to re-iterate, I WAS in fact doing something dumb in my code, and it made these performance numbers basically meaningless, please check out <a href="http://kylehalladay.com/blog/tutorial/vulkan/2018/03/28/SSBO-VS-Uniform-Buffer-2.html">this post</a> where I talk about this mistake and re-run these tests. Thanks!
+</div>
+<p><br /></p>
+
 <p>I feel like these performance benchmarking posts sound like a much better idea before I get into them and realize how much time they take to do right. So perhaps my next post will be about something a bit lighter. In any case - I hope this info was helpful to someone!</p>
 
 <font size="2"><div style="border-style:solid; background-color:#DDDDDD ">
@@ -379,6 +389,10 @@ In case reviewing testing methods is your thing, here's how I got the numbers in
   <ul class="posts">
     
     <li>
+      <span>28 Mar 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/03/28/SSBO-VS-Uniform-Buffer-2.html">Re-Testing Vulkan Transform Data Handling Strategies</a>
+    </li>
+    
+    <li>
       <span>27 Mar 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/03/27/SSBO-VS-Uniform-Buffer.html">Handling Transform Data in Vulkan</a>
     </li>
     
@@ -388,10 +402,6 @@ In case reviewing testing methods is your thing, here's how I got the numbers in
     
     <li>
       <span>28 Jan 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/01/28/Textue-Arrays-Vulkan.html">Using Arrays of Textures in Vulkan Shaders</a>
-    </li>
-    
-    <li>
-      <span>13 Dec 2017 &raquo;</span> <a href="/blog/tutorial/2017/12/13/Custom-Allocators-Vulkan.html">A Simple Device Memory Allocator For Vulkan</a>
     </li>
     
   </ul>

@@ -6,10 +6,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Kyle Halladay - Home Page</title>
+  <title>Kyle Halladay - Re-Testing Vulkan Transform Data Handling Strategies</title>
   <meta name="author" content="Kyle Halladay" />
   <meta name="description" content="I build shaders, renderers, games, and other stuff that's fun to stare at." />
-  <link rel="canonical" href="http://kylehalladay.com/" />
+  <link rel="canonical" href="http://kylehalladay.com/blog/tutorial/vulkan/2018/03/28/SSBO-VS-Uniform-Buffer-2.html" />
   <meta name="keywords" content="life,code,software,development,games,graphics,shaders,indie" />
 
   <link href="//fonts.googleapis.com/css?family=Open+Sans:600,800" rel="stylesheet" type="text/css">
@@ -89,14 +89,13 @@
       <hr style="border-color:#000; margin:1em -0.25em;"></topbar>
 
       <p class="meta">
-  
 
 </p>
 
 <h1 class="title">Re-Testing Vulkan Transform Data Handling Strategies</h1>
 
 <div id="post">
- <p>Yesterday I posted <a href="http://kylehalladay.com/blog/tutorial/vulkan/2018/03/27/SSBO-VS-Uniform-Buffer.html">Handling Transform Data in Vulkan</a>, and it generally seemed well received by everyone, but as it turns out, <strong>I was doing something dumb</strong>. I was pretty sure that SSBOs <em>should</em> have been slower than UBOs on my (NVidia) graphics card, but none of the data I had showed that. In fact, all the data I had showed that all three buffer-based approaches to handling transform data performed about the same.</p>
+  <p>Yesterday I posted <a href="http://kylehalladay.com/blog/tutorial/vulkan/2018/03/27/SSBO-VS-Uniform-Buffer.html">Handling Transform Data in Vulkan</a>, and it generally seemed well received by everyone, but as it turns out, <strong>I was doing something dumb</strong>. I was pretty sure that SSBOs <em>should</em> have been slower than UBOs on my (NVidia) graphics card, but none of the data I had showed that. In fact, all the data I had showed that all three buffer-based approaches to handling transform data performed about the same.</p>
 
 <p>As weird as that was, I didn’t have any data to suggest otherwise, so I posted what I had. Luckily, someone (who I won’t name in case they’d prefer not to be forever immortalized on my blog) spotted my mistake:</p>
 

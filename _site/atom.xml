@@ -4,13 +4,142 @@
  <title>The blog of Kyle Halladay</title>
  <link href="http://kylehalladay.com/atom.xml" rel="self"/>
  <link href="http://kylehalladay.com"/>
- <updated>2018-03-25T18:28:53-05:00</updated>
+ <updated>2018-03-26T16:05:10-05:00</updated>
  <id>http://kylehalladay.com</id>
  <author>
    <name>Kyle Halladay</name>
    <email>k.mj.halladay@gmail.com</email>
  </author>
 
+ 
+ <entry>
+   <title>Re-Testing Vulkan Transform Data Handling Strategies</title>
+   <link href="http://kylehalladay.com/blog/tutorial/vulkan/2018/03/28/SSBO-VS-Uniform-Buffer-2.html"/>
+   <updated>2018-03-28T00:00:00-05:00</updated>
+   <id>http://kylehalladay.com/blog/tutorial/vulkan/2018/03/28/SSBO-VS-Uniform-Buffer-2</id>
+   <content type="html">&lt;p&gt;Yesterday I posted &lt;a href=&quot;http://kylehalladay.com/blog/tutorial/vulkan/2018/03/27/SSBO-VS-Uniform-Buffer.html&quot;&gt;Handling Transform Data in Vulkan&lt;/a&gt;, and it generally seemed well received by everyone, but as it turns out, &lt;strong&gt;I was doing something dumb&lt;/strong&gt;. I was pretty sure that SSBOs &lt;em&gt;should&lt;/em&gt; have been slower than UBOs on my (NVidia) graphics card, but none of the data I had showed that. In fact, all the data I had showed that all three buffer-based approaches to handling transform data performed about the same.&lt;/p&gt;
+
+&lt;p&gt;As weird as that was, I didn’t have any data to suggest otherwise, so I posted what I had. Luckily, someone (who I won’t name in case they’d prefer not to be forever immortalized on my blog) spotted my mistake:&lt;/p&gt;
+
+&lt;div align=&quot;left&quot; style=&quot;border-style:dashed;border-width:1px;&quot;&gt;
+&lt;img src=&quot;/images/post_images/2018-03-28/twitter.PNG&quot; /&gt;
+&lt;/div&gt;
+&lt;div align=&quot;left&quot; style=&quot;padding-bottom:15px;&quot;&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Suffice to say, the person giving me this feedback has much more experience than I do, so I figured I needed to take a look at my tests and see if I could improve things. Luckily, today was my day off, so I had some time to kill.&lt;/p&gt;
+
+&lt;p&gt;If that feedback was correct, the problem was that my shaders were so simple that my gpu was burning through frames so fast that it didn’t matter if there was a performance difference in my transform data approaches, I was hitting a different performance bottleneck first. Sadly, I’ve spent a lot of time fixing graphics pipeline bottlenecks on different projects… I just didn’t think about them when collecting my data last time.&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+&lt;img src=&quot;/images/post_images/2018-03-28/stan.PNG&quot; /&gt;
+&lt;br /&gt;&lt;br /&gt;
+&lt;/div&gt;
+
+&lt;h2 id=&quot;the-new-test-setup&quot;&gt;The New Test Setup&lt;/h2&gt;
+
+&lt;p&gt;I kept almost everything the same as last time, since I’m pretty sure my test setup was mostly sound. However, I changed my fragment shader. You might recall that I was just outputting normals in my first attempt at benchmarking this. This seemed plausible because I only cared about vertex shader performance, but was also probably where I went wrong. So to re-test everything, I changed my fragment shader to the following:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;n&quot;&gt;layout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;location&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;vec2&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fragUV&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;layout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;location&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;vec3&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fragNormal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;layout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;location&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;out&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;vec4&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;outColor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;rand&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;vec2&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;co&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fract&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dot&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;co&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;xy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;vec2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;12&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;9898&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;78&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;233&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;43758&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;5453&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;vec3&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;norm&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;normalize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fragNormal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+	&lt;span class=&quot;n&quot;&gt;outColor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rand&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;vec2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;norm&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cos&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;norm&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)));&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;outColor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rand&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;vec2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;norm&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tan&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;norm&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;z&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)));&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;outColor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;z&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rand&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;vec2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;norm&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;z&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cos&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;norm&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)));&lt;/span&gt;
+
+	&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;24&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+	&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+		&lt;span class=&quot;n&quot;&gt;outColor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rand&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;vec2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;outColor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cos&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;outColor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)));&lt;/span&gt;
+		&lt;span class=&quot;n&quot;&gt;outColor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rand&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;vec2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;outColor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tan&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;outColor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;z&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)));&lt;/span&gt;
+		&lt;span class=&quot;n&quot;&gt;outColor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;z&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rand&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;vec2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;outColor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;z&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cos&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;outColor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)));&lt;/span&gt;
+	&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+	&lt;span class=&quot;n&quot;&gt;outColor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;This seemed like a reasonable way to try to avoid hitting the same bottlenecks as before, since it was easy to adjust how many useless operations I wanted to do in order to control how much time I wanted to be spent in fragment processing. Also, since every test case already used the same fragment shader, this was an easy spot to add instructions too that I knew would be applied uniformly to every test, so that the only variable between them was still transform data handling.&lt;/p&gt;
+
+&lt;p&gt;Now, my scene looked like this:&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+&lt;img src=&quot;/images/post_images/2018-03-28/output.PNG&quot; /&gt;
+Yep, uglier than last time&lt;br /&gt;&lt;br /&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Also - one things to note with these tests is that they seem to be consistent to within about 0.5 ms (when testing the Bistro Scene). That is, if I re-run the same test multiple times, all my results for that test are within about a half millisecond of each other. The Sponza tests were much more consistent (but the values were also much smaller). I’ve included detailed testing methodology notes at the end of this blog post, but the short version is that each test result is the average of 4096 frames, and I re ran each test 3 times. The number you see in the graphs is the median of these three test runs.&lt;/p&gt;
+
+&lt;h2 id=&quot;shiny-new-push-constant-tests&quot;&gt;Shiny New Push Constant Tests&lt;/h2&gt;
+
+&lt;p&gt;Ok, let’s start with Push Constants again. I’ve included my results from last time in this graph to showcase the differences made by the new test.&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+&lt;img src=&quot;/images/post_images/2018-03-28/push_constant.PNG&quot; /&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Similar to last time, there’s not really much interesting to say about these results other than that you can see the impact that the new fragment shader had on frame time pretty clearly in that graph.&lt;/p&gt;
+
+&lt;h2 id=&quot;ubo-tests-jr&quot;&gt;UBO Tests Jr.&lt;/h2&gt;
+
+&lt;p&gt;Ok, here’s where things get interesting. Last time I ran this test, the data showed that Dynamic UBOs and the UBOs containing an array of structs performed pretty much evenly, however, I wasn’t sure whether or not the difference was enough to suggest a real performance difference or just issues with my tests’ accuracy.&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+&lt;img src=&quot;/images/post_images/2018-03-28/ubo_1.PNG&quot; /&gt;
+&lt;/div&gt;
+
+&lt;p&gt;These new results don’t mean that there aren’t issues with the accuracy of my tests, but what it helps to confirm is that this performance difference exists to some extent (at least at scale). An obvious criticism of this is that the Sponza test was still reporting the same values for everything, and that’s fair, there’s likely more I could be doing to benchmark the smaller scene, but I’m happy with the results from the Bistro scene, and I’ve now spent way, way too much time on this benchmark.&lt;/p&gt;
+
+&lt;p&gt;The other thing this helps confirm is that there is indeed a noticeable performance difference between using HOST_CACHED UBOs and DEVICE_LOCAL ones. I stand by the old conclusion that for data that updates on a per frame basis, you should just stick to HOST_CACHED.&lt;/p&gt;
+
+&lt;h2 id=&quot;ssbo-tests-20&quot;&gt;SSBO Tests 2.0&lt;/h2&gt;
+
+&lt;p&gt;And finally, the moment we’ve all been waiting for! Here’s what the UBO test results look like alongside the new test results for SSBOs&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+&lt;img src=&quot;/images/post_images/2018-03-28/buffers.PNG&quot; /&gt;
+&lt;/div&gt;
+
+&lt;p&gt;As expected, with the new test, we can now actually see a real performance difference between using SSBOs and using UBOs on my NVidia GTX 1060. All is well with the universe, things look how they should.&lt;/p&gt;
+
+&lt;h2 id=&quot;final-results&quot;&gt;Final Results&lt;/h2&gt;
+
+&lt;p&gt;Here’s all the results put into a single graph.&lt;/p&gt;
+
+&lt;div align=&quot;center&quot;&gt;
+&lt;img src=&quot;/images/post_images/2018-03-28/final.PNG&quot; /&gt;
+&lt;/div&gt;
+
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;With this new data, I’m going to walk back my previous assertion that I’m going to go with a single large SSBO for my transform data, and I think will place my bets firmly in the large UBO pages camp. At least until I get an AMD card to play with. They seem fun.&lt;/p&gt;
+
+&lt;p&gt;It’s interesting to note that even with the change in test methodology, Push Constants still come out the loser in the larger scenes. I don’t know for sure what that means, but it’s definitely still a surprise. Hopefully that doesn’t point to a new problem with this benchmark, but you know, if it does and you can see what I’m doing wrong, send me a message &lt;a href=&quot;https://twitter.com/khalladay&quot;&gt;on Twitter&lt;/a&gt;, &lt;a href=&quot;https://mastodon.gamedev.place/@khalladay&quot;&gt;Mastodon&lt;/a&gt;, or via e-mail and I’ll write up yet another one of these posts. Next time with an even bigger facepalm meme photo.&lt;/p&gt;
+
+&lt;p&gt;Until next time!&lt;/p&gt;
+
+&lt;font size=&quot;2&quot;&gt;&lt;div style=&quot;border-style:solid; background-color:#DDDDDD &quot;&gt;
+
+&lt;strong&gt;Appendix: Testing Methodology&lt;/strong&gt;&lt;br /&gt;
+
+In case reviewing testing methods is your thing, here&#39;s how I got the numbers in all the graphs in this post:&lt;br /&gt;&lt;br /&gt;
+&lt;li&gt;All tests were run for at least 5120 frames, reporting the average frametime after every 1024 frames. I took the average of the last 4096 of these frames (to avoid any hitches on startup) to use as my numbers in the tests.&lt;/li&gt;&lt;br /&gt;
+&lt;li&gt;I monitored my CPU and GPU temp with &lt;a href=&quot;http://openhardwaremonitor.org/&quot;&gt;Open Hardware Monitor&lt;/a&gt;, and let both of them return to their resting temp between tests (61 and 66 C respectively), and made sure that the same applications (and only those applications) were running alongside the test program.&lt;/li&gt;&lt;br /&gt;
+&lt;li&gt;I repeated this test 2 more times, at different times of the day (after using the laptop to do other tasks), which gave me 3 frametime averages (1 per run of the test). I chose the median of the three to present in the graph above.&lt;/li&gt;&lt;br /&gt;
+&lt;li&gt;Finally, all tests were done in Release builds, without a debugger attached or any validation layers turned on, and connected to a wall outlet to prevent any kind of throttling on battery to interfere with anything.&lt;/li&gt;&lt;br /&gt;
+&lt;li&gt;All the source for everything is  &lt;a href=&quot;https://github.com/khalladay/VkBindingBenchmark&quot;&gt;on github&lt;/a&gt;, I would love for someone to compile everything and run a similar test to see if the results for my GPU can be replicated on someone else&#39;s hardware.&lt;/li&gt;
+&lt;/div&gt;
+&lt;/font&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Handling Transform Data in Vulkan</title>
@@ -205,6 +334,11 @@ Beauty isn&#39;t everything, right?
 
 &lt;p&gt;Finally, all code is available &lt;a href=&quot;https://github.com/khalladay/VkBindingBenchmark&quot;&gt;on github&lt;/a&gt;, and there is more information about testing methodology at the end of the post.&lt;/p&gt;
 
+&lt;h2 id=&quot;warning&quot;&gt;WARNING&lt;/h2&gt;
+&lt;div style=&quot;border-style:solid;border-width:1px; background-color:#FFAAAA &quot;&gt;
+Edit: I made a pretty sizeable error when constructing these performance tests, and the numbers that I presented in the rest of this post aren&#39;t really all that useful. If you&#39;re interested in the performance of each of these approaches, please check out &lt;a href=&quot;http://kylehalladay.com/blog/tutorial/vulkan/2018/03/28/SSBO-VS-Uniform-Buffer-2.html&quot;&gt;this post&lt;/a&gt;, where I talk about the problems with this test, and present more accurate numbers. Thanks!
+&lt;/div&gt;
+
 &lt;h2 id=&quot;push-constant-tests&quot;&gt;Push Constant Tests&lt;/h2&gt;
 
 &lt;p&gt;I want to talk about the results for Push Constants first, since there’s really only 1 way to use them (which makes the results very easy to understand):&lt;/p&gt;
@@ -278,6 +412,11 @@ Beauty isn&#39;t everything, right?
 &lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
 
 &lt;p&gt;Thanks for sticking with me this far! As mentioned before, I’m probably doing a thousand different dumb things in my code, or while interpreting the results. If you spot one of these dumb things, I would love to hear about it &lt;a href=&quot;https://twitter.com/khalladay&quot;&gt;on Twitter&lt;/a&gt;, &lt;a href=&quot;https://mastodon.gamedev.place/@khalladay&quot;&gt;Mastodon&lt;/a&gt;, or via e-mail (button is on the side bar).&lt;/p&gt;
+
+&lt;div style=&quot;border-style:solid;border-width:1px; background-color:#FFAAAA &quot;&gt;
+Edit: Again, to re-iterate, I WAS in fact doing something dumb in my code, and it made these performance numbers basically meaningless, please check out &lt;a href=&quot;http://kylehalladay.com/blog/tutorial/vulkan/2018/03/28/SSBO-VS-Uniform-Buffer-2.html&quot;&gt;this post&lt;/a&gt; where I talk about this mistake and re-run these tests. Thanks!
+&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
 
 &lt;p&gt;I feel like these performance benchmarking posts sound like a much better idea before I get into them and realize how much time they take to do right. So perhaps my next post will be about something a bit lighter. In any case - I hope this info was helpful to someone!&lt;/p&gt;
 

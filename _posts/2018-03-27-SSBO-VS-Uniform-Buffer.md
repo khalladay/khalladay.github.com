@@ -210,6 +210,11 @@ I didn't end up using vkTimestamps when gathering data for the tests...mostly be
 
 Finally, all code is available [on github](https://github.com/khalladay/VkBindingBenchmark), and there is more information about testing methodology at the end of the post.
 
+## WARNING
+<div style="border-style:solid;border-width:1px; background-color:#FFAAAA ">
+Edit: I made a pretty sizeable error when constructing these performance tests, and the numbers that I presented in the rest of this post aren't really all that useful. If you're interested in the performance of each of these approaches, please check out <a href="http://kylehalladay.com/blog/tutorial/vulkan/2018/03/28/SSBO-VS-Uniform-Buffer-2.html">this post</a>, where I talk about the problems with this test, and present more accurate numbers. Thanks!
+</div>
+
 ## Push Constant Tests
 
 I want to talk about the results for Push Constants first, since there's really only 1 way to use them (which makes the results very easy to understand):
@@ -285,6 +290,10 @@ This is all conjecture, and I haven't thought too hard about any of it, or tried
 ## Conclusion
 
 Thanks for sticking with me this far! As mentioned before, I'm probably doing a thousand different dumb things in my code, or while interpreting the results. If you spot one of these dumb things, I would love to hear about it [on Twitter](https://twitter.com/khalladay), [Mastodon](https://mastodon.gamedev.place/@khalladay), or via e-mail (button is on the side bar).
+
+<div style="border-style:solid;border-width:1px; background-color:#FFAAAA ">
+Edit: Again, to re-iterate, I WAS in fact doing something dumb in my code, and it made these performance numbers basically meaningless, please check out <a href="http://kylehalladay.com/blog/tutorial/vulkan/2018/03/28/SSBO-VS-Uniform-Buffer-2.html">this post</a> where I talk about this mistake and re-run these tests. Thanks!
+</div><br>
 
 I feel like these performance benchmarking posts sound like a much better idea before I get into them and realize how much time they take to do right. So perhaps my next post will be about something a bit lighter. In any case - I hope this info was helpful to someone!
 
