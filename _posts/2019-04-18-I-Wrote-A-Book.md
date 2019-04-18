@@ -15,7 +15,7 @@ From the looks of my blog archive, it's been 13 months since I dropped off the m
 So I replied to the e-mail, and pretty quickly I decided that I wanted to write a book with them, and now you can purchase that book ([Amazon link](https://www.amazon.com/Practical-Shader-Development-Fragment-Developers/dp/1484244567))! The schtick of it is that it's an example based approach to learning shaders. If you've never written a shader before, and want to get your feet wet and learn a few things without necessarily needing to learn a ton of math or graphics api details, this is the book for you. It's not super technical, it's really more about having some fun and building a bunch of different things. 
 
 <div align="center">
-<img src="/images/post_images/2019-04-18/book_cover.jpg" />
+<img src="/images/post_images/2019-04-18/book_cover.JPG" />
 Here's what it looks like!
 <br><br>
 </div>
