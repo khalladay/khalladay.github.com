@@ -37,7 +37,7 @@ Just like making games, having a final deadline where you have to ship the thing
 ## Apress Was Pretty Great To Work With
 There are lots of horror stories floating around about working with publishers like Packt or Apress, but I have a lot of good things to say about them. The folks that I talked to day to day were professional, easy to work with, and always accommodating when I needed to move a chapter deadline because work was going crazy (I'm a stickler for schedules and deadlines, so they may have been flexible because this only happened a couple of times). They also paid me on time, which seems to be a common thing that other people complain about with technical book publishers. 
 
-I was a bit surprised at how little the copy editing team there corrected my grammar and sentence structure, but given how many other mistakes they caught that would have been disastrous to actually print in a book, I can't say I'm too upset about it. It's not like I was writing the next great Canadian novel. 
+I was a bit surprised at how little the copy editing team there corrected my grammar and sentence structure, but given how many other mistakes they caught that would have been disastrous to actually print in a book, I can't say I'm too upset about it. It's not like I was writing the next great Canadian novel. I also didn't express this concern to Apress during the copy editing phase of the book, so this is also on me.
 
 
 ## I Don't Want To Write For A While
