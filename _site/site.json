@@ -1,5 +1,11 @@
 [
 
+{"date": "2019-04-18 00:00:00 -0500",
+"categories": ["blog"],
+"tags": ["<span style=\"background-color:#111111;\"><font color=\"#00FF00\">&nbsp;Blog&nbsp;&nbsp;</font></span>"],
+"title": "I Wrote A Book About Shaders!",
+"url": "/blog/2019/04/18/I-Wrote-A-Book.html"},
+
 {"date": "2018-02-05 00:00:00 -0600",
 "categories": ["blog","tutorial","vulkan"],
 "tags": ["<span style=\"background-color:#AA2222;\"><font color=\"white\">&nbsp;Vulkan</font></span>"],

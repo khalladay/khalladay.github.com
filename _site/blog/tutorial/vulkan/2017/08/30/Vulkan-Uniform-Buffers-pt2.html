@@ -24,11 +24,12 @@
     <div class="four columns sidebar">
       <nav>
   <a href="/">
-    <img src="/logo.jpg" id="logo" alt="Blog logo"/>
+    <img src="/logo.jpg" id="logo" alt="Blog logo" width="200" height="200"/>
   </a>
   <h2>I'm <a href="/">Kyle Halladay</a>.</h2>
   <div id="bio">
-    <p>I build shaders, graphics tech, and art pipelines for games. </p>
+    <p>I do graphics and engine programming for games. </p>
+    <p>I'm the author of <a href="https://www.amazon.com/Practical-Shader-Development-Fragment-Developers/dp/1484244567">Practical Shader Development</a>, which is all about learning to write shaders.
     <p>I also dabble in GBA dev, you can find my tutorials <a href="/gba.html">here.</a>
     <p>Check out <a href="/archive.html">some other stuff I've written</a></p>
   </div>
@@ -137,20 +138,20 @@
 
 <p>With that done, all that’s left is to add the appropriate calls to the draw function:</p>
 
-<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="c1">//abbreviated code
-</span>
+<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="c1">//abbreviated code</span>
+
 <span class="n">vkBeginCommandBuffer</span><span class="p">(</span><span class="n">commandBuffer</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">beginInfo</span><span class="p">);</span>
 <span class="n">vkCmdResetQueryPool</span><span class="p">(</span><span class="n">commandBuffer</span><span class="p">,</span> <span class="n">queryPool</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
 
-<span class="c1">//more set up code... (omitted for brevity)
-</span>
-<span class="c1">//the block we want to time starts here
-</span><span class="n">vkCmdWriteTimestamp</span><span class="p">(</span><span class="n">commandBuffer</span><span class="p">,</span> <span class="n">VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT</span><span class="p">,</span> <span class="n">queryPool</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+<span class="c1">//more set up code... (omitted for brevity)</span>
+
+<span class="c1">//the block we want to time starts here</span>
+<span class="n">vkCmdWriteTimestamp</span><span class="p">(</span><span class="n">commandBuffer</span><span class="p">,</span> <span class="n">VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT</span><span class="p">,</span> <span class="n">queryPool</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
 
 <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">PRIM_COUNT</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
 <span class="p">{</span>
-    <span class="c1">//per primitive logic that we want to time
-</span><span class="p">}</span>
+    <span class="c1">//per primitive logic that we want to time</span>
+<span class="p">}</span>
 <span class="n">vkCmdWriteTimestamp</span><span class="p">(</span><span class="n">commandBuffer</span><span class="p">,</span> <span class="n">VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT</span><span class="p">,</span> <span class="n">queryPool</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span></code></pre></div>
 
 <p>As you may have noticed, vkCmdWriteTimestamp takes a pipeline stage as one of it’s arguments. This was unintuitive for me, but here’s what the docs say about it:</p>
@@ -203,8 +204,8 @@
 
 <p>However, while testing this, I realized that (for the Single Buffer Approach), I could reduce the need for this allocation at all with a very small amount of effort. If I could get the mapped pointer to the buffer before I pass this data to the draw function, I could save myself a lot of effort. So I rearranged things a bit to try that out:</p>
 
-<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="c1">//abbreviated code
-</span><span class="n">uniformData</span> <span class="o">=</span> <span class="p">(</span><span class="n">PrimitiveUniformObject</span><span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="n">bufferSize</span><span class="p">);</span>
+<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="c1">//abbreviated code</span>
+<span class="n">uniformData</span> <span class="o">=</span> <span class="p">(</span><span class="n">PrimitiveUniformObject</span><span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="n">bufferSize</span><span class="p">);</span>
 
 <span class="kt">int</span> <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 <span class="kt">char</span><span class="o">*</span> <span class="n">uniformChar</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">uniformData</span><span class="p">;</span>
@@ -223,8 +224,8 @@
 
 <p>Becomes:</p>
 
-<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="c1">//abbreviated code
-</span>
+<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="c1">//abbreviated code</span>
+
 <span class="kt">int</span> <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 
 <span class="kt">char</span><span class="o">*</span> <span class="n">uniformChar</span> <span class="o">=</span> <span class="n">Renderer</span><span class="o">::</span><span class="n">mapBufferPtr</span><span class="p">();</span>
@@ -336,6 +337,10 @@ In case reviewing testing methods is your thing, here's how I got the numbers in
   <ul class="posts">
     
     <li>
+      <span>18 Apr 2019 &raquo;</span> <a href="/blog/2019/04/18/I-Wrote-A-Book.html">I Wrote A Book About Shaders!</a>
+    </li>
+    
+    <li>
       <span>05 Feb 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/02/05/Bind-Once-Uniform-Data-Vulkan.html">A "Bind Once" Approach to Uniform Data</a>
     </li>
     
@@ -345,10 +350,6 @@ In case reviewing testing methods is your thing, here's how I got the numbers in
     
     <li>
       <span>13 Dec 2017 &raquo;</span> <a href="/blog/tutorial/2017/12/13/Custom-Allocators-Vulkan.html">A Simple Device Memory Allocator For Vulkan</a>
-    </li>
-    
-    <li>
-      <span>27 Nov 2017 &raquo;</span> <a href="/blog/tutorial/2017/11/27/Vulkan-Material-System.html">Lessons Learned While Building a Vulkan Material System</a>
     </li>
     
   </ul>
