@@ -4,7 +4,7 @@
  <title>The blog of Kyle Halladay</title>
  <link href="http://kylehalladay.com/atom.xml" rel="self"/>
  <link href="http://kylehalladay.com"/>
- <updated>2019-04-18T09:14:11-05:00</updated>
+ <updated>2019-04-18T21:17:07-05:00</updated>
  <id>http://kylehalladay.com</id>
  <author>
    <name>Kyle Halladay</name>
@@ -27,7 +27,7 @@
 &lt;p&gt;So I replied to the e-mail, and pretty quickly I decided that I wanted to write a book with them, and now you can purchase that book (&lt;a href=&quot;https://www.amazon.com/Practical-Shader-Development-Fragment-Developers/dp/1484244567&quot;&gt;Amazon link&lt;/a&gt;)! The schtick of it is that it’s an example based approach to learning shaders. If you’ve never written a shader before, and want to get your feet wet and learn a few things without necessarily needing to learn a ton of math or graphics api details, this is the book for you. It’s not super technical, it’s really more about having some fun and building a bunch of different things. &lt;/p&gt;
 
 &lt;div align=&quot;center&quot;&gt;
-&lt;img src=&quot;/images/post_images/2019-04-18/book_cover.jpg&quot; /&gt;
+&lt;img src=&quot;/images/post_images/2019-04-18/book_cover.JPG&quot; /&gt;
 Here&#39;s what it looks like!
 &lt;br /&gt;&lt;br /&gt;
 &lt;/div&gt;
@@ -44,10 +44,13 @@ Here&#39;s what it looks like!
 
 &lt;p&gt;Just like making games, having a final deadline where you have to ship the thing is probably the only way that a lot of books ever see the light of day. Without that, by the time I felt ready to publish we’d all be rendering things with quantum computers that path trace on the blockchain, and the book wouldn’t be relevant any more. So instead, I’ve just had to come to grips with the fact that the book isn’t perfect, but it’s &lt;strong&gt;done&lt;/strong&gt;, and that’s ok.&lt;/p&gt;
 
+&lt;h2 id=&quot;finishing-a-book-is-pretty-great-too&quot;&gt;Finishing A Book Is Pretty Great Too&lt;/h2&gt;
+&lt;p&gt;Despite all my complaining, getting the copies of my book in the mail was pretty amazing. Actually finishing the project and seeing the end result has been hugely rewarding, and I’m really glad that I stuck with things until the end. Hopefully people like the book, but even just knowing that I can follow through on large-ish personal projects is a great feeling :) &lt;/p&gt;
+
 &lt;h2 id=&quot;apress-was-pretty-great-to-work-with&quot;&gt;Apress Was Pretty Great To Work With&lt;/h2&gt;
 &lt;p&gt;There are lots of horror stories floating around about working with publishers like Packt or Apress, but I have a lot of good things to say about them. The folks that I talked to day to day were professional, easy to work with, and always accommodating when I needed to move a chapter deadline because work was going crazy (I’m a stickler for schedules and deadlines, so they may have been flexible because this only happened a couple of times). They also paid me on time, which seems to be a common thing that other people complain about with technical book publishers. &lt;/p&gt;
 
-&lt;p&gt;I was a bit surprised at how little the copy editing team there corrected my grammar and sentence structure, but given how many other mistakes they caught that would have been disastrous to actually print in a book, I can’t say I’m too upset about it. It’s not like I was writing the next great Canadian novel. &lt;/p&gt;
+&lt;p&gt;I was a bit surprised at how little the copy editing team there corrected my grammar and sentence structure, but given how many other mistakes they caught that would have been disastrous to actually print in a book, I can’t say I’m too upset about it. It’s not like I was writing the next great Canadian novel. I also didn’t express this concern to Apress during the copy editing phase of the book, so this is also on me.&lt;/p&gt;
 
 &lt;h2 id=&quot;i-dont-want-to-write-for-a-while&quot;&gt;I Don’t Want To Write For A While&lt;/h2&gt;
 &lt;p&gt;I think it’s fair to say that I’m a burnt out on writing right now. Even though it’s been a few months since I’ve had to do a lot of writing for the book, I still don’t have much desire to start writing blog posts again, and I think I’m going to write a lot less this year in general. Instead, I want to spend more time learning new things and working on things that don’t necessarily translate into a good blog post. Hopefully by the time I feel like writing again, I’ll have some new, interesting things to share. &lt;/p&gt;

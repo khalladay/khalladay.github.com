@@ -33,6 +33,8 @@ Speaking of finishing a book, that's a scary proposition in itself. By the time 
 
 Just like making games, having a final deadline where you have to ship the thing is probably the only way that a lot of books ever see the light of day. Without that, by the time I felt ready to publish we'd all be rendering things with quantum computers that path trace on the blockchain, and the book wouldn't be relevant any more. So instead, I've just had to come to grips with the fact that the book isn't perfect, but it's **done**, and that's ok.
 
+## Finishing A Book Is Pretty Great Too
+Despite all my complaining, getting the copies of my book in the mail was pretty amazing. Actually finishing the project and seeing the end result has been hugely rewarding, and I'm really glad that I stuck with things until the end. Hopefully people like the book, but even just knowing that I can follow through on large-ish personal projects is a great feeling :) 
 
 ## Apress Was Pretty Great To Work With
 There are lots of horror stories floating around about working with publishers like Packt or Apress, but I have a lot of good things to say about them. The folks that I talked to day to day were professional, easy to work with, and always accommodating when I needed to move a chapter deadline because work was going crazy (I'm a stickler for schedules and deadlines, so they may have been flexible because this only happened a couple of times). They also paid me on time, which seems to be a common thing that other people complain about with technical book publishers. 
