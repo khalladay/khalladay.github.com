@@ -238,8 +238,8 @@
 		<span class="n">texturesToPlace</span><span class="p">.</span><span class="n">Remove</span><span class="p">(</span><span class="n">bestTex</span><span class="p">);</span>
 
 	<span class="p">}</span>
-	<span class="k">else</span> <span class="k">break</span><span class="p">;</span> <span class="c1">//no room left</span>
-<span class="p">}</span>
+	<span class="k">else</span> <span class="k">break</span><span class="p">;</span> <span class="c1">//no room left
+</span><span class="p">}</span>
 <span class="k">return</span> <span class="n">results</span><span class="p">;</span>
 <span class="p">}</span></code></pre></div>
 
@@ -272,12 +272,12 @@
 	<span class="p">{</span>
 		<span class="k">if</span> <span class="p">(</span><span class="n">freeRects</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">width</span> <span class="o">&gt;=</span> <span class="n">width</span> <span class="o">&amp;&amp;</span> <span class="n">freeRects</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">height</span> <span class="o">&gt;=</span> <span class="n">height</span><span class="p">)</span>
 		<span class="p">{</span>
-			<span class="c1">// score the rect here</span>
-
-			<span class="c1">// if score is the best, replace bestNode with this rect,</span>
-			<span class="c1">// and set bestShortSideFit and bestLongSideFit to new</span>
-			<span class="c1">// values</span>
-		<span class="p">}</span>
+			<span class="c1">// score the rect here
+</span>
+			<span class="c1">// if score is the best, replace bestNode with this rect,
+</span>			<span class="c1">// and set bestShortSideFit and bestLongSideFit to new
+</span>			<span class="c1">// values
+</span>		<span class="p">}</span>
 	<span class="p">}</span>
 
 	<span class="k">return</span> <span class="n">bestNode</span><span class="p">;</span>
@@ -287,21 +287,21 @@
 
 <p>Let’s look at the scoring code next. Remember all we care about is how much space is left over in the freeRectangle once we place our texture rect into it:</p>
 
-<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="c1">//score the rect here</span>
-<span class="kt">int</span> <span class="n">remainingX</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span><span class="p">)(</span><span class="n">freeRects</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">width</span> <span class="o">-</span> <span class="n">width</span><span class="p">);</span>
+<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="c1">//score the rect here
+</span><span class="kt">int</span> <span class="n">remainingX</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span><span class="p">)(</span><span class="n">freeRects</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">width</span> <span class="o">-</span> <span class="n">width</span><span class="p">);</span>
 <span class="kt">int</span> <span class="n">remainingY</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span><span class="p">)(</span><span class="n">freeRects</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">height</span> <span class="o">-</span> <span class="n">height</span><span class="p">);</span>
 
 <span class="kt">int</span> <span class="n">shortSideFit</span> <span class="o">=</span> <span class="n">Mathf</span><span class="p">.</span><span class="n">Min</span><span class="p">(</span><span class="n">remainingX</span><span class="p">,</span> <span class="n">remainingY</span><span class="p">);</span>
 <span class="kt">int</span> <span class="n">longSideFit</span> <span class="o">=</span> <span class="n">Mathf</span><span class="p">.</span><span class="n">Max</span><span class="p">(</span><span class="n">remainingX</span><span class="p">,</span> <span class="n">remainingY</span><span class="p">);</span>
 
-<span class="c1">// if score is the best...</span></code></pre></div>
+<span class="o">//</span> <span class="k">if</span> <span class="n">score</span> <span class="n">is</span> <span class="n">the</span> <span class="n">best</span><span class="p">...</span></code></pre></div>
 
 <p>Once we know our score values, all that’s left is to see if these are the best scores we have, and do something if they are:</p>
 
-<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="c1">// if score is the best, replace bestNode with this rect,</span>
-<span class="c1">// and set bestShortSideFit and bestLongSideFit to new</span>
-<span class="c1">// values</span>
-
+<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="c1">// if score is the best, replace bestNode with this rect,
+// and set bestShortSideFit and bestLongSideFit to new
+// values
+</span>
 <span class="k">if</span> <span class="p">(</span><span class="n">shortSideFit</span> <span class="o">&lt;</span> <span class="n">bestShortSideFit</span> <span class="o">||</span>
    <span class="p">(</span><span class="n">shortSideFit</span> <span class="o">==</span> <span class="n">bestShortSideFit</span> <span class="o">&amp;&amp;</span> <span class="n">longSideFit</span> <span class="o">&lt;</span> <span class="n">bestLongSideFit</span><span class="p">))</span>
 <span class="p">{</span>
@@ -343,13 +343,13 @@
 
     	<span class="k">if</span> <span class="p">(</span><span class="n">freeRect</span><span class="p">.</span><span class="n">Overlaps</span><span class="p">(</span><span class="n">rectToRemove</span><span class="p">))</span>
     	<span class="p">{</span>
-    	    <span class="c1">//subdivide rectangle here</span>
-    	    <span class="n">freeRects</span><span class="p">.</span><span class="n">RemoveAt</span><span class="p">(</span><span class="n">i</span><span class="o">--</span><span class="p">);</span>
+    	    <span class="c1">//subdivide rectangle here
+</span>    	    <span class="n">freeRects</span><span class="p">.</span><span class="n">RemoveAt</span><span class="p">(</span><span class="n">i</span><span class="o">--</span><span class="p">);</span>
     	<span class="p">}</span>
     <span class="p">}</span>
 
-    <span class="c1">//remove free rects that are wholly contained by others</span>
-<span class="p">}</span></code></pre></div>
+    <span class="c1">//remove free rects that are wholly contained by others
+</span><span class="p">}</span></code></pre></div>
 
 <p>As discussed, there’s only really two interesting parts to this function, the subdivision of affected rectangles, and the removal of ones that are wholly overlapped by larger ones.</p>
 
@@ -361,17 +361,17 @@
 <br />
 </div>
 
-<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="c1">//subdivide rectangle here</span>
-<span class="k">if</span> <span class="p">(</span><span class="n">rectToRemove</span><span class="p">.</span><span class="n">x</span> <span class="o">&lt;</span> <span class="n">freeRect</span><span class="p">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">freeRect</span><span class="p">.</span><span class="n">width</span> <span class="o">&amp;&amp;</span> <span class="n">rectToRemove</span><span class="p">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">rectToRemove</span><span class="p">.</span><span class="n">width</span> <span class="o">&gt;</span> <span class="n">freeRect</span><span class="p">.</span><span class="n">x</span><span class="p">)</span> <span class="p">{</span>
-	<span class="c1">// New node at the top side of the used node.</span>
-	<span class="k">if</span> <span class="p">(</span><span class="n">rectToRemove</span><span class="p">.</span><span class="n">y</span> <span class="o">&gt;</span> <span class="n">freeRect</span><span class="p">.</span><span class="n">y</span> <span class="o">&amp;&amp;</span> <span class="n">rectToRemove</span><span class="p">.</span><span class="n">y</span> <span class="o">&lt;</span> <span class="n">freeRect</span><span class="p">.</span><span class="n">y</span> <span class="o">+</span> <span class="n">freeRect</span><span class="p">.</span><span class="n">height</span><span class="p">)</span> <span class="p">{</span>
+<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="c1">//subdivide rectangle here
+</span><span class="k">if</span> <span class="p">(</span><span class="n">rectToRemove</span><span class="p">.</span><span class="n">x</span> <span class="o">&lt;</span> <span class="n">freeRect</span><span class="p">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">freeRect</span><span class="p">.</span><span class="n">width</span> <span class="o">&amp;&amp;</span> <span class="n">rectToRemove</span><span class="p">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">rectToRemove</span><span class="p">.</span><span class="n">width</span> <span class="o">&gt;</span> <span class="n">freeRect</span><span class="p">.</span><span class="n">x</span><span class="p">)</span> <span class="p">{</span>
+	<span class="c1">// New node at the top side of the used node.
+</span>	<span class="k">if</span> <span class="p">(</span><span class="n">rectToRemove</span><span class="p">.</span><span class="n">y</span> <span class="o">&gt;</span> <span class="n">freeRect</span><span class="p">.</span><span class="n">y</span> <span class="o">&amp;&amp;</span> <span class="n">rectToRemove</span><span class="p">.</span><span class="n">y</span> <span class="o">&lt;</span> <span class="n">freeRect</span><span class="p">.</span><span class="n">y</span> <span class="o">+</span> <span class="n">freeRect</span><span class="p">.</span><span class="n">height</span><span class="p">)</span> <span class="p">{</span>
 		<span class="n">Rect</span> <span class="n">newNode</span> <span class="o">=</span> <span class="n">freeRect</span><span class="p">;</span>
 		<span class="n">newNode</span><span class="p">.</span><span class="n">height</span> <span class="o">=</span> <span class="n">rectToRemove</span><span class="p">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">newNode</span><span class="p">.</span><span class="n">y</span><span class="p">;</span>
 		<span class="n">freeRects</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span><span class="n">newNode</span><span class="p">);</span>
 	<span class="p">}</span>
 
-	<span class="c1">// New node at the bottom side of the used node.</span>
-	<span class="k">if</span> <span class="p">(</span><span class="n">rectToRemove</span><span class="p">.</span><span class="n">y</span> <span class="o">+</span> <span class="n">rectToRemove</span><span class="p">.</span><span class="n">height</span> <span class="o">&lt;</span> <span class="n">freeRect</span><span class="p">.</span><span class="n">y</span> <span class="o">+</span> <span class="n">freeRect</span><span class="p">.</span><span class="n">height</span><span class="p">)</span> <span class="p">{</span>
+	<span class="c1">// New node at the bottom side of the used node.
+</span>	<span class="k">if</span> <span class="p">(</span><span class="n">rectToRemove</span><span class="p">.</span><span class="n">y</span> <span class="o">+</span> <span class="n">rectToRemove</span><span class="p">.</span><span class="n">height</span> <span class="o">&lt;</span> <span class="n">freeRect</span><span class="p">.</span><span class="n">y</span> <span class="o">+</span> <span class="n">freeRect</span><span class="p">.</span><span class="n">height</span><span class="p">)</span> <span class="p">{</span>
 		<span class="n">Rect</span> <span class="n">newNode</span> <span class="o">=</span> <span class="n">freeRect</span><span class="p">;</span>
 		<span class="n">newNode</span><span class="p">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">rectToRemove</span><span class="p">.</span><span class="n">y</span> <span class="o">+</span> <span class="n">rectToRemove</span><span class="p">.</span><span class="n">height</span><span class="p">;</span>
 		<span class="n">newNode</span><span class="p">.</span><span class="n">height</span> <span class="o">=</span> <span class="n">freeRect</span><span class="p">.</span><span class="n">y</span> <span class="o">+</span> <span class="n">freeRect</span><span class="p">.</span><span class="n">height</span> <span class="o">-</span> <span class="p">(</span><span class="n">rectToRemove</span><span class="p">.</span><span class="n">y</span> <span class="o">+</span> <span class="n">rectToRemove</span><span class="p">.</span><span class="n">height</span><span class="p">);</span>
@@ -380,15 +380,15 @@
 <span class="p">}</span>
 
 <span class="k">if</span> <span class="p">(</span><span class="n">rectToRemove</span><span class="p">.</span><span class="n">y</span> <span class="o">&lt;</span> <span class="n">freeRect</span><span class="p">.</span><span class="n">y</span> <span class="o">+</span> <span class="n">freeRect</span><span class="p">.</span><span class="n">height</span> <span class="o">&amp;&amp;</span> <span class="n">rectToRemove</span><span class="p">.</span><span class="n">y</span> <span class="o">+</span> <span class="n">rectToRemove</span><span class="p">.</span><span class="n">height</span> <span class="o">&gt;</span> <span class="n">freeRect</span><span class="p">.</span><span class="n">y</span><span class="p">)</span> <span class="p">{</span>
-	<span class="c1">// New node at the left side of the used node.</span>
-	<span class="k">if</span> <span class="p">(</span><span class="n">rectToRemove</span><span class="p">.</span><span class="n">x</span> <span class="o">&gt;</span> <span class="n">freeRect</span><span class="p">.</span><span class="n">x</span> <span class="o">&amp;&amp;</span> <span class="n">rectToRemove</span><span class="p">.</span><span class="n">x</span> <span class="o">&lt;</span> <span class="n">freeRect</span><span class="p">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">freeRect</span><span class="p">.</span><span class="n">width</span><span class="p">)</span> <span class="p">{</span>
+	<span class="c1">// New node at the left side of the used node.
+</span>	<span class="k">if</span> <span class="p">(</span><span class="n">rectToRemove</span><span class="p">.</span><span class="n">x</span> <span class="o">&gt;</span> <span class="n">freeRect</span><span class="p">.</span><span class="n">x</span> <span class="o">&amp;&amp;</span> <span class="n">rectToRemove</span><span class="p">.</span><span class="n">x</span> <span class="o">&lt;</span> <span class="n">freeRect</span><span class="p">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">freeRect</span><span class="p">.</span><span class="n">width</span><span class="p">)</span> <span class="p">{</span>
 		<span class="n">Rect</span> <span class="n">newNode</span> <span class="o">=</span> <span class="n">freeRect</span><span class="p">;</span>
 		<span class="n">newNode</span><span class="p">.</span><span class="n">width</span> <span class="o">=</span> <span class="n">rectToRemove</span><span class="p">.</span><span class="n">x</span> <span class="o">-</span> <span class="n">newNode</span><span class="p">.</span><span class="n">x</span><span class="p">;</span>
 		<span class="n">freeRects</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span><span class="n">newNode</span><span class="p">);</span>
 	<span class="p">}</span>
 
-	<span class="c1">// New node at the right side of the used node.</span>
-	<span class="k">if</span> <span class="p">(</span><span class="n">rectToRemove</span><span class="p">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">rectToRemove</span><span class="p">.</span><span class="n">width</span> <span class="o">&lt;</span> <span class="n">freeRect</span><span class="p">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">freeRect</span><span class="p">.</span><span class="n">width</span><span class="p">)</span> <span class="p">{</span>
+	<span class="c1">// New node at the right side of the used node.
+</span>	<span class="k">if</span> <span class="p">(</span><span class="n">rectToRemove</span><span class="p">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">rectToRemove</span><span class="p">.</span><span class="n">width</span> <span class="o">&lt;</span> <span class="n">freeRect</span><span class="p">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">freeRect</span><span class="p">.</span><span class="n">width</span><span class="p">)</span> <span class="p">{</span>
 		<span class="n">Rect</span> <span class="n">newNode</span> <span class="o">=</span> <span class="n">freeRect</span><span class="p">;</span>
 		<span class="n">newNode</span><span class="p">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">rectToRemove</span><span class="p">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">rectToRemove</span><span class="p">.</span><span class="n">width</span><span class="p">;</span>
 		<span class="n">newNode</span><span class="p">.</span><span class="n">width</span> <span class="o">=</span> <span class="n">freeRect</span><span class="p">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">freeRect</span><span class="p">.</span><span class="n">width</span> <span class="o">-</span> <span class="p">(</span><span class="n">rectToRemove</span><span class="p">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">rectToRemove</span><span class="p">.</span><span class="n">width</span><span class="p">);</span>
@@ -403,8 +403,8 @@
 
 <p>Finally, all that’s left is to prune our freeList of tiny rectangles:</p>
 
-<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="c1">//remove free rects that are wholly contained by others</span>
-<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">freeRects</span><span class="p">.</span><span class="n">Count</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="c1">//remove free rects that are wholly contained by others
+</span><span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">freeRects</span><span class="p">.</span><span class="n">Count</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
 <span class="p">{</span>
 	<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">freeRects</span><span class="p">.</span><span class="n">Count</span><span class="p">;</span> <span class="o">++</span><span class="n">j</span><span class="p">)</span>
 	<span class="p">{</span>
@@ -455,8 +455,8 @@
 		<span class="n">Rect</span> <span class="n">rect</span> <span class="o">=</span> <span class="n">packResults</span><span class="p">.</span><span class="n">rects</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
 		<span class="n">Texture2D</span> <span class="n">readableTex</span> <span class="o">=</span> <span class="n">null</span><span class="p">;</span>
 
-		<span class="c1">//load the image uncompressed</span>
-		<span class="n">string</span> <span class="n">fileURL</span> <span class="o">=</span> <span class="n">AssetDatabase</span><span class="p">.</span><span class="n">GetAssetPath</span><span class="p">(</span><span class="n">packResults</span><span class="p">.</span><span class="n">textures</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+		<span class="c1">//load the image uncompressed
+</span>		<span class="n">string</span> <span class="n">fileURL</span> <span class="o">=</span> <span class="n">AssetDatabase</span><span class="p">.</span><span class="n">GetAssetPath</span><span class="p">(</span><span class="n">packResults</span><span class="p">.</span><span class="n">textures</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
 		<span class="n">byte</span><span class="p">[]</span> <span class="n">imgByes</span> <span class="o">=</span> <span class="n">File</span><span class="p">.</span><span class="n">ReadAllBytes</span><span class="p">(</span><span class="n">fileURL</span><span class="p">);</span>
 		<span class="n">readableTex</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Texture2D</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">TextureFormat</span><span class="p">.</span><span class="n">ARGB32</span><span class="p">,</span><span class="nb">false</span><span class="p">);</span>
 		<span class="n">readableTex</span><span class="p">.</span><span class="n">LoadImage</span><span class="p">(</span><span class="n">imgByes</span><span class="p">);</span>
@@ -514,8 +514,8 @@
 	<span class="n">Rect</span> <span class="n">rect</span> <span class="o">=</span> <span class="n">packResults</span><span class="p">.</span><span class="n">rects</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
 	<span class="n">Texture2D</span> <span class="n">readableTex</span> <span class="o">=</span> <span class="n">null</span><span class="p">;</span>
 
-	<span class="c1">//load the image uncompressed</span>
-	<span class="n">string</span> <span class="n">fileURL</span> <span class="o">=</span> <span class="n">AssetDatabase</span><span class="p">.</span><span class="n">GetAssetPath</span><span class="p">(</span><span class="n">packResults</span><span class="p">.</span><span class="n">textures</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+	<span class="c1">//load the image uncompressed
+</span>	<span class="n">string</span> <span class="n">fileURL</span> <span class="o">=</span> <span class="n">AssetDatabase</span><span class="p">.</span><span class="n">GetAssetPath</span><span class="p">(</span><span class="n">packResults</span><span class="p">.</span><span class="n">textures</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
 	<span class="n">byte</span><span class="p">[]</span> <span class="n">imgByes</span> <span class="o">=</span> <span class="n">File</span><span class="p">.</span><span class="n">ReadAllBytes</span><span class="p">(</span><span class="n">fileURL</span><span class="p">);</span>
 	<span class="n">readableTex</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Texture2D</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">TextureFormat</span><span class="p">.</span><span class="n">ARGB32</span><span class="p">,</span><span class="nb">false</span><span class="p">);</span>
 	<span class="n">readableTex</span><span class="p">.</span><span class="n">LoadImage</span><span class="p">(</span><span class="n">imgByes</span><span class="p">);</span>
@@ -557,8 +557,8 @@
 
 <div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">packResults</span><span class="p">.</span><span class="n">textures</span><span class="p">.</span><span class="n">Count</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
 <span class="p">{</span>
-    <span class="c1">//Some Code Omitted For Brevity</span>
-
+    <span class="c1">//Some Code Omitted For Brevity
+</span>
     <span class="n">readableTex</span><span class="p">.</span><span class="n">wrapMode</span> <span class="o">=</span> <span class="n">TextureWrapMode</span><span class="p">.</span><span class="n">Clamp</span><span class="p">;</span>
     <span class="n">readableTex</span><span class="p">.</span><span class="n">LoadImage</span><span class="p">(</span><span class="n">imgByes</span><span class="p">);</span>
 
@@ -715,6 +715,10 @@
   <ul class="posts">
     
     <li>
+      <span>04 Dec 2019 &raquo;</span> <a href="/blog/2019/12/04/Recreating-A-Dirty-Gamedev-Hack.html">Recreating An Old "Dirty Gamedev Trick"</a>
+    </li>
+    
+    <li>
       <span>18 Apr 2019 &raquo;</span> <a href="/blog/2019/04/18/I-Wrote-A-Book.html">I Wrote A Book About Shaders!</a>
     </li>
     
@@ -724,10 +728,6 @@
     
     <li>
       <span>28 Jan 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/01/28/Textue-Arrays-Vulkan.html">Using Arrays of Textures in Vulkan Shaders</a>
-    </li>
-    
-    <li>
-      <span>13 Dec 2017 &raquo;</span> <a href="/blog/tutorial/2017/12/13/Custom-Allocators-Vulkan.html">A Simple Device Memory Allocator For Vulkan</a>
     </li>
     
   </ul>

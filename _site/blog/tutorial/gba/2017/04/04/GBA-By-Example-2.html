@@ -119,8 +119,8 @@
 </span>
 <span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
 <span class="p">{</span>
-    <span class="n">REG_DISPLAYCONTROL</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">//mode 0, no background enabled</span>
-
+    <span class="n">REG_DISPLAYCONTROL</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">//mode 0, no background enabled
+</span>
     <span class="k">while</span><span class="p">(</span><span class="mi">1</span><span class="p">){}</span>
     <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
 <span class="p">}</span></code></pre></div>
@@ -426,8 +426,8 @@ Hopefully that’s all relatively clear! Let’s start putting all of this toget
 
 <div class="highlight"><pre><code class="language-c" data-lang="c"><span class="k">volatile</span> <span class="n">ObjectAttributes</span> <span class="o">*</span><span class="n">spriteAttribs</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">MEM_OAM</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
 
-<span class="n">spriteAttribs</span><span class="o">-&gt;</span><span class="n">attr0</span> <span class="o">=</span> <span class="mh">0x2032</span><span class="p">;</span> <span class="c1">// 8bpp tiles, SQUARE shape</span>
-<span class="n">spriteAttribs</span><span class="o">-&gt;</span><span class="n">attr1</span> <span class="o">=</span> <span class="mh">0x4064</span><span class="p">;</span></code></pre></div>
+<span class="n">spriteAttribs</span><span class="o">-&gt;</span><span class="n">attr0</span> <span class="o">=</span> <span class="mh">0x2032</span><span class="p">;</span> <span class="c1">// 8bpp tiles, SQUARE shape
+</span><span class="n">spriteAttribs</span><span class="o">-&gt;</span><span class="n">attr1</span> <span class="o">=</span> <span class="mh">0x4064</span><span class="p">;</span></code></pre></div>
 
 <p>The last attribute we need to define is maybe the most important, since it tells the hardware where to look for the tiles in VRAM:</p>
 
@@ -467,9 +467,9 @@ Hopefully that’s all relatively clear! Let’s start putting all of this toget
 
 <div class="highlight"><pre><code class="language-c" data-lang="c"><span class="k">volatile</span> <span class="n">ObjectAttributes</span> <span class="o">*</span><span class="n">spriteAttribs</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">MEM_OAM</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
 
-<span class="n">spriteAttribs</span><span class="o">-&gt;</span><span class="n">attr0</span> <span class="o">=</span> <span class="mh">0x2032</span><span class="p">;</span> <span class="c1">// 8bpp tiles, SQUARE shape</span>
-<span class="n">spriteAttribs</span><span class="o">-&gt;</span><span class="n">attr1</span> <span class="o">=</span> <span class="mh">0x4064</span><span class="p">;</span> <span class="c1">// 16x16 size when using the SQUARE shape</span>
-<span class="n">spriteAttribs</span><span class="o">-&gt;</span><span class="n">attr2</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>      <span class="c1">// Start at [4][1]</span></code></pre></div>
+<span class="n">spriteAttribs</span><span class="o">-&gt;</span><span class="n">attr0</span> <span class="o">=</span> <span class="mh">0x2032</span><span class="p">;</span> <span class="c1">// 8bpp tiles, SQUARE shape
+</span><span class="n">spriteAttribs</span><span class="o">-&gt;</span><span class="n">attr1</span> <span class="o">=</span> <span class="mh">0x4064</span><span class="p">;</span> <span class="c1">// 16x16 size when using the SQUARE shape
+</span><span class="n">spriteAttribs</span><span class="o">-&gt;</span><span class="n">attr2</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>      <span class="o">//</span> <span class="n">Start</span> <span class="n">at</span> <span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span></code></pre></div>
 
 <p>You’ll notice that the index we pass to attr2 isn’t 1, which is what you’d expect to see passed there since we’re at element 1 of the array. However, the index stored in attr2 assumes that you’re using 4bpp sprites. If you’re using 8bpp like us, you need to go up by 2 indices every time you want to access the next tile.</p>
 
@@ -539,10 +539,10 @@ Hopefully that’s all relatively clear! Let’s start putting all of this toget
 
     <span class="k">volatile</span> <span class="n">ObjectAttributes</span> <span class="o">*</span><span class="n">spriteAttribs</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">MEM_OAM</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
 
-    <span class="n">spriteAttribs</span><span class="o">-&gt;</span><span class="n">attr0</span> <span class="o">=</span> <span class="mh">0x2032</span><span class="p">;</span> <span class="c1">// 8bpp tiles, SQUARE shape, at y coord 50</span>
-    <span class="n">spriteAttribs</span><span class="o">-&gt;</span><span class="n">attr1</span> <span class="o">=</span> <span class="mh">0x4064</span><span class="p">;</span> <span class="c1">// 16x16 size when using the SQUARE shape</span>
-    <span class="n">spriteAttribs</span><span class="o">-&gt;</span><span class="n">attr2</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>      <span class="c1">// Start at the first tile in tile</span>
-
+    <span class="n">spriteAttribs</span><span class="o">-&gt;</span><span class="n">attr0</span> <span class="o">=</span> <span class="mh">0x2032</span><span class="p">;</span> <span class="c1">// 8bpp tiles, SQUARE shape, at y coord 50
+</span>    <span class="n">spriteAttribs</span><span class="o">-&gt;</span><span class="n">attr1</span> <span class="o">=</span> <span class="mh">0x4064</span><span class="p">;</span> <span class="c1">// 16x16 size when using the SQUARE shape
+</span>    <span class="n">spriteAttribs</span><span class="o">-&gt;</span><span class="n">attr2</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>      <span class="c1">// Start at the first tile in tile
+</span>
     <span class="n">REG_DISPLAYCONTROL</span> <span class="o">=</span>  <span class="n">VIDEOMODE_0</span> <span class="o">|</span> <span class="n">ENABLE_OBJECTS</span> <span class="o">|</span> <span class="n">MAPPINGMODE_1D</span><span class="p">;</span>
 
     <span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
@@ -569,6 +569,10 @@ Hopefully that’s all relatively clear! Let’s start putting all of this toget
   <ul class="posts">
     
     <li>
+      <span>04 Dec 2019 &raquo;</span> <a href="/blog/2019/12/04/Recreating-A-Dirty-Gamedev-Hack.html">Recreating An Old "Dirty Gamedev Trick"</a>
+    </li>
+    
+    <li>
       <span>18 Apr 2019 &raquo;</span> <a href="/blog/2019/04/18/I-Wrote-A-Book.html">I Wrote A Book About Shaders!</a>
     </li>
     
@@ -578,10 +582,6 @@ Hopefully that’s all relatively clear! Let’s start putting all of this toget
     
     <li>
       <span>28 Jan 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/01/28/Textue-Arrays-Vulkan.html">Using Arrays of Textures in Vulkan Shaders</a>
-    </li>
-    
-    <li>
-      <span>13 Dec 2017 &raquo;</span> <a href="/blog/tutorial/2017/12/13/Custom-Allocators-Vulkan.html">A Simple Device Memory Allocator For Vulkan</a>
     </li>
     
   </ul>

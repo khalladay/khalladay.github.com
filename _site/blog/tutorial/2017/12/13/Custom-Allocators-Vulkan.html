@@ -159,8 +159,8 @@
 
 <p>Thankfully, the <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#memory-device">Vulkan spec</a> gives us the exact bit of code we need to follow its “rules and guidance” when determining what memory type to use:</p>
 
-<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="c1">// Find a memory in `memoryTypeBitsRequirement` that includes all of `requiredProperties`</span>
-<span class="kt">int32_t</span> <span class="nf">findProperties</span><span class="p">(</span><span class="k">const</span> <span class="n">VkPhysicalDeviceMemoryProperties</span><span class="o">*</span> <span class="n">pMemoryProperties</span><span class="p">,</span>
+<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="c1">// Find a memory in `memoryTypeBitsRequirement` that includes all of `requiredProperties`
+</span><span class="kt">int32_t</span> <span class="nf">findProperties</span><span class="p">(</span><span class="k">const</span> <span class="n">VkPhysicalDeviceMemoryProperties</span><span class="o">*</span> <span class="n">pMemoryProperties</span><span class="p">,</span>
                        <span class="kt">uint32_t</span> <span class="n">memoryTypeBitsRequirement</span><span class="p">,</span>
                        <span class="n">VkMemoryPropertyFlags</span> <span class="n">requiredProperties</span><span class="p">)</span>
 <span class="p">{</span>
@@ -180,8 +180,8 @@
         <span class="p">}</span>
     <span class="p">}</span>
 
-    <span class="c1">// failed to find memory type</span>
-    <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+    <span class="c1">// failed to find memory type
+</span>    <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
 <span class="p">}</span></code></pre></div>
 
 <p>So until I find a good reason to not use the above code exactly, I’m going to copy/paste the crap out of it.</p>
@@ -250,21 +250,21 @@
 
 <div class="highlight"><pre><code class="language-c" data-lang="c"><span class="k">struct</span> <span class="n">AllocatorInterface</span>
 <span class="p">{</span>
-    <span class="c1">//setup the allocator</span>
-    <span class="c1">//args: vkh context structure</span>
-    <span class="kt">void</span><span class="p">(</span><span class="o">*</span><span class="n">activate</span><span class="p">)(</span><span class="n">VkhContext</span><span class="o">*</span><span class="p">);</span>
+    <span class="c1">//setup the allocator
+</span>    <span class="c1">//args: vkh context structure
+</span>    <span class="kt">void</span><span class="p">(</span><span class="o">*</span><span class="n">activate</span><span class="p">)(</span><span class="n">VkhContext</span><span class="o">*</span><span class="p">);</span>
 
-    <span class="c1">//args: mem handle, size of alloc, mem type</span>
-    <span class="kt">void</span><span class="p">(</span><span class="o">*</span><span class="n">alloc</span><span class="p">)(</span><span class="n">Allocation</span><span class="o">&amp;</span><span class="p">,</span> <span class="n">VkDeviceSize</span><span class="p">,</span> <span class="kt">uint32_t</span><span class="p">);</span>
+    <span class="c1">//args: mem handle, size of alloc, mem type
+</span>    <span class="kt">void</span><span class="p">(</span><span class="o">*</span><span class="n">alloc</span><span class="p">)(</span><span class="n">Allocation</span><span class="o">&amp;</span><span class="p">,</span> <span class="n">VkDeviceSize</span><span class="p">,</span> <span class="kt">uint32_t</span><span class="p">);</span>
 
-    <span class="c1">//args: mem handle</span>
-    <span class="kt">void</span><span class="p">(</span><span class="o">*</span><span class="n">free</span><span class="p">)(</span><span class="n">Allocation</span><span class="o">&amp;</span><span class="p">);</span>
+    <span class="c1">//args: mem handle
+</span>    <span class="kt">void</span><span class="p">(</span><span class="o">*</span><span class="n">free</span><span class="p">)(</span><span class="n">Allocation</span><span class="o">&amp;</span><span class="p">);</span>
 
-    <span class="c1">//args: memory type</span>
-    <span class="kt">size_t</span><span class="p">(</span><span class="o">*</span><span class="n">allocatedSize</span><span class="p">)(</span><span class="kt">uint32_t</span><span class="p">);</span>
+    <span class="c1">//args: memory type
+</span>    <span class="kt">size_t</span><span class="p">(</span><span class="o">*</span><span class="n">allocatedSize</span><span class="p">)(</span><span class="kt">uint32_t</span><span class="p">);</span>
 
-    <span class="c1">//returns total number of active vulkan allocs</span>
-    <span class="kt">uint32_t</span><span class="p">(</span><span class="o">*</span><span class="n">numAllocs</span><span class="p">);</span>
+    <span class="c1">//returns total number of active vulkan allocs
+</span>    <span class="kt">uint32_t</span><span class="p">(</span><span class="o">*</span><span class="n">numAllocs</span><span class="p">);</span>
 <span class="p">};</span></code></pre></div>
 
 <p>The VkhContext structure can be found on github in <a href="https://github.com/khalladay/VkMaterialSystem/blob/master/VkMaterialSystem/vkh.h">vkh.h</a>.</p>
@@ -411,8 +411,8 @@
 <span class="p">{</span>
     <span class="n">MemoryPool</span><span class="o">&amp;</span> <span class="n">pool</span> <span class="o">=</span> <span class="n">state</span><span class="p">.</span><span class="n">memPools</span><span class="p">[</span><span class="n">memoryType</span><span class="p">];</span>
 
-    <span class="c1">//make sure we always alloc a multiple of pageSize</span>
-    <span class="n">VkDeviceSize</span> <span class="n">requestedAllocSize</span> <span class="o">=</span> <span class="p">((</span><span class="n">size</span> <span class="o">/</span> <span class="n">state</span><span class="p">.</span><span class="n">pageSize</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">state</span><span class="p">.</span><span class="n">pageSize</span><span class="p">;</span>
+    <span class="c1">//make sure we always alloc a multiple of pageSize
+</span>    <span class="n">VkDeviceSize</span> <span class="n">requestedAllocSize</span> <span class="o">=</span> <span class="p">((</span><span class="n">size</span> <span class="o">/</span> <span class="n">state</span><span class="p">.</span><span class="n">pageSize</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">state</span><span class="p">.</span><span class="n">pageSize</span><span class="p">;</span>
     <span class="n">state</span><span class="p">.</span><span class="n">memTypeAllocSizes</span><span class="p">[</span><span class="n">memoryType</span><span class="p">]</span> <span class="o">+=</span> <span class="n">requestedAllocSize</span><span class="p">;</span>
 
     <span class="n">BlockSpanIndexPair</span> <span class="n">location</span><span class="p">;</span>
@@ -509,8 +509,8 @@
 
 <span class="k">struct</span> <span class="n">AllocatorInterface</span>
 <span class="p">{</span>
-    <span class="c1">//this was the only function that changed</span>
-    <span class="kt">void</span><span class="p">(</span><span class="o">*</span><span class="n">alloc</span><span class="p">)(</span><span class="n">Allocation</span><span class="o">&amp;</span><span class="p">,</span> <span class="n">AllocationCreateInfo</span><span class="p">);</span>
+    <span class="c1">//this was the only function that changed
+</span>    <span class="kt">void</span><span class="p">(</span><span class="o">*</span><span class="n">alloc</span><span class="p">)(</span><span class="n">Allocation</span><span class="o">&amp;</span><span class="p">,</span> <span class="n">AllocationCreateInfo</span><span class="p">);</span>
 <span class="p">};</span></code></pre></div>
 
 <p>This is probably better long term anyway, because at some point it will likely be handy to be able to pass even more data about how the allocation will be used to the alloc function, and now I have the place to do that.</p>
@@ -528,11 +528,11 @@
 
 <div class="highlight"><pre><code class="language-c" data-lang="c"><span class="kt">void</span> <span class="nf">alloc</span><span class="p">(</span><span class="n">Allocation</span><span class="o">&amp;</span> <span class="n">outAlloc</span><span class="p">,</span> <span class="n">AllocationCreateInfo</span> <span class="n">createInfo</span><span class="p">)</span>
 <span class="p">{</span>
-    <span class="c1">//rest of code omitted for brevity</span>
-    <span class="n">bool</span> <span class="n">needsOwnPage</span> <span class="o">=</span> <span class="n">createInfo</span><span class="p">.</span><span class="n">usage</span> <span class="o">!=</span> <span class="n">VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT</span><span class="p">;</span>
+    <span class="c1">//rest of code omitted for brevity
+</span>    <span class="n">bool</span> <span class="n">needsOwnPage</span> <span class="o">=</span> <span class="n">createInfo</span><span class="p">.</span><span class="n">usage</span> <span class="o">!=</span> <span class="n">VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT</span><span class="p">;</span>
     <span class="n">bool</span> <span class="n">found</span> <span class="o">=</span> <span class="n">findFreeChunkForAllocation</span><span class="p">(</span><span class="n">location</span><span class="p">,</span> <span class="n">memoryType</span><span class="p">,</span> <span class="n">requestedAllocSize</span><span class="p">,</span> <span class="n">needsOwnPage</span><span class="p">);</span>
-    <span class="c1">//...</span>
-<span class="p">}</span></code></pre></div>
+    <span class="c1">//...
+</span><span class="p">}</span></code></pre></div>
 
 <p>The after either finding or creating a memory block to use, the allocation function marks that DeviceMemoryBlock as reserved:</p>
 
@@ -542,11 +542,11 @@
 
 <div class="highlight"><pre><code class="language-c" data-lang="c"><span class="kt">void</span> <span class="nf">free</span><span class="p">(</span><span class="n">Allocation</span><span class="o">&amp;</span> <span class="n">allocation</span><span class="p">)</span>
 <span class="p">{</span>
-    <span class="c1">//rest of code omitted for brevity</span>
-    <span class="n">MemoryPool</span><span class="o">&amp;</span> <span class="n">pool</span> <span class="o">=</span> <span class="n">state</span><span class="p">.</span><span class="n">memPools</span><span class="p">[</span><span class="n">allocation</span><span class="p">.</span><span class="n">type</span><span class="p">];</span>
+    <span class="c1">//rest of code omitted for brevity
+</span>    <span class="n">MemoryPool</span><span class="o">&amp;</span> <span class="n">pool</span> <span class="o">=</span> <span class="n">state</span><span class="p">.</span><span class="n">memPools</span><span class="p">[</span><span class="n">allocation</span><span class="p">.</span><span class="n">type</span><span class="p">];</span>
     <span class="n">pool</span><span class="p">.</span><span class="n">blocks</span><span class="p">[</span><span class="n">allocation</span><span class="p">.</span><span class="n">id</span><span class="p">].</span><span class="n">pageReserved</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
-    <span class="c1">//...</span>
-<span class="p">}</span></code></pre></div>
+    <span class="c1">//...
+</span><span class="p">}</span></code></pre></div>
 
 <p>With all that in place, I ran the MaterialDemo again, and at long last, got the thing to run with no errors, and only 4 allocations, which means I’m calling work on this done for now.</p>
 
@@ -565,6 +565,10 @@
   <ul class="posts">
     
     <li>
+      <span>04 Dec 2019 &raquo;</span> <a href="/blog/2019/12/04/Recreating-A-Dirty-Gamedev-Hack.html">Recreating An Old "Dirty Gamedev Trick"</a>
+    </li>
+    
+    <li>
       <span>18 Apr 2019 &raquo;</span> <a href="/blog/2019/04/18/I-Wrote-A-Book.html">I Wrote A Book About Shaders!</a>
     </li>
     
@@ -574,10 +578,6 @@
     
     <li>
       <span>28 Jan 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/01/28/Textue-Arrays-Vulkan.html">Using Arrays of Textures in Vulkan Shaders</a>
-    </li>
-    
-    <li>
-      <span>13 Dec 2017 &raquo;</span> <a href="/blog/tutorial/2017/12/13/Custom-Allocators-Vulkan.html">A Simple Device Memory Allocator For Vulkan</a>
     </li>
     
   </ul>

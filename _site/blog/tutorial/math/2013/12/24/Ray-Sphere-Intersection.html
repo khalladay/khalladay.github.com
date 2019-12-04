@@ -351,19 +351,19 @@ Congratulations on getting this far! Now that we have all that theory out of the
 
 <div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="kt">bool</span> <span class="n">intersec</span><span class="o">++</span><span class="p">(</span><span class="n">Ray</span><span class="o">*</span> <span class="n">r</span><span class="p">,</span> <span class="n">Sphere</span><span class="o">*</span> <span class="n">s</span><span class="p">)</span>
 <span class="p">{</span>
-	<span class="c1">//solve for tc</span>
-	<span class="kt">float</span> <span class="n">L</span> <span class="o">=</span> <span class="n">s</span><span class="o">-&gt;</span><span class="n">center</span> <span class="o">-</span> <span class="n">r</span><span class="o">-&gt;</span><span class="n">origin</span><span class="p">;</span>
+	<span class="c1">//solve for tc
+</span>	<span class="kt">float</span> <span class="n">L</span> <span class="o">=</span> <span class="n">s</span><span class="o">-&gt;</span><span class="n">center</span> <span class="o">-</span> <span class="n">r</span><span class="o">-&gt;</span><span class="n">origin</span><span class="p">;</span>
 	<span class="kt">float</span> <span class="n">tc</span> <span class="o">=</span> <span class="n">dot</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">r</span><span class="o">-&gt;</span><span class="n">direction</span><span class="p">);</span>
 	<span class="k">if</span> <span class="p">(</span> <span class="n">tc</span> <span class="o">&lt;</span> <span class="mf">0.0</span> <span class="p">)</span> <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
 	
 	<span class="kt">float</span> <span class="n">d</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">((</span><span class="n">tc</span><span class="o">*</span><span class="n">tc</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">L</span><span class="o">*</span><span class="n">L</span><span class="p">));</span>
 	<span class="k">if</span> <span class="p">(</span> <span class="n">d</span> <span class="o">&gt;</span> <span class="n">s</span><span class="o">-&gt;</span><span class="n">radius</span><span class="p">)</span> <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
 	
-	<span class="c1">//solve for t1c</span>
-	<span class="kt">float</span> <span class="n">t1c</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span> <span class="p">(</span><span class="n">s</span><span class="o">-&gt;</span><span class="n">radius</span> <span class="o">*</span> <span class="n">s</span><span class="o">-&gt;</span><span class="n">radius</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">d</span><span class="o">*</span><span class="n">d</span><span class="p">)</span> <span class="p">);</span>
+	<span class="c1">//solve for t1c
+</span>	<span class="kt">float</span> <span class="n">t1c</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span> <span class="p">(</span><span class="n">s</span><span class="o">-&gt;</span><span class="n">radius</span> <span class="o">*</span> <span class="n">s</span><span class="o">-&gt;</span><span class="n">radius</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">d</span><span class="o">*</span><span class="n">d</span><span class="p">)</span> <span class="p">);</span>
 	
-	<span class="c1">//solve for intersection points</span>
-	<span class="kt">float</span> <span class="n">t1</span> <span class="o">=</span> <span class="n">tc</span> <span class="o">-</span> <span class="n">t1c</span><span class="p">;</span>
+	<span class="c1">//solve for intersection points
+</span>	<span class="kt">float</span> <span class="n">t1</span> <span class="o">=</span> <span class="n">tc</span> <span class="o">-</span> <span class="n">t1c</span><span class="p">;</span>
 	<span class="kt">float</span> <span class="n">t2</span> <span class="o">=</span> <span class="n">tc</span> <span class="o">+</span> <span class="n">t1c</span><span class="p">;</span>
 	
 	<span class="k">return</span> <span class="nb">true</span><span class="p">;</span>
@@ -375,8 +375,8 @@ Congratulations on getting this far! Now that we have all that theory out of the
 
 <div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="kt">bool</span> <span class="nf">intersect</span><span class="p">(</span><span class="n">Ray</span><span class="o">*</span> <span class="n">r</span><span class="p">,</span> <span class="n">Sphere</span><span class="o">*</span> <span class="n">s</span><span class="p">,</span> <span class="kt">float</span><span class="o">*</span> <span class="n">t1</span><span class="p">,</span> <span class="kt">float</span> <span class="o">*</span><span class="n">t2</span><span class="p">)</span>
 <span class="p">{</span>
-	<span class="c1">//solve for tc</span>
-	<span class="kt">float</span> <span class="n">L</span> <span class="o">=</span> <span class="n">s</span><span class="o">-&gt;</span><span class="n">center</span> <span class="o">-</span> <span class="n">r</span><span class="o">-&gt;</span><span class="n">origin</span><span class="p">;</span>
+	<span class="c1">//solve for tc
+</span>	<span class="kt">float</span> <span class="n">L</span> <span class="o">=</span> <span class="n">s</span><span class="o">-&gt;</span><span class="n">center</span> <span class="o">-</span> <span class="n">r</span><span class="o">-&gt;</span><span class="n">origin</span><span class="p">;</span>
 	<span class="kt">float</span> <span class="n">tc</span> <span class="o">=</span> <span class="n">dot</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">r</span><span class="o">-&gt;</span><span class="n">direction</span><span class="p">);</span>
 	
 	<span class="k">if</span> <span class="p">(</span> <span class="n">tc</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="mf">0.0</span> <span class="p">)</span> <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
@@ -385,11 +385,11 @@ Congratulations on getting this far! Now that we have all that theory out of the
 	<span class="kt">float</span> <span class="n">radius2</span> <span class="o">=</span> <span class="n">s</span><span class="o">-&gt;</span><span class="n">radius</span> <span class="o">*</span> <span class="n">s</span><span class="o">-&gt;</span><span class="n">radius</span><span class="p">;</span>
 	<span class="k">if</span> <span class="p">(</span> <span class="n">d2</span> <span class="o">&gt;</span> <span class="n">radius2</span><span class="p">)</span> <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
 
-	<span class="c1">//solve for t1c</span>
-	<span class="kt">float</span> <span class="n">t1c</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span> <span class="n">radius2</span> <span class="o">-</span> <span class="n">d2</span> <span class="p">);</span>
+	<span class="c1">//solve for t1c
+</span>	<span class="kt">float</span> <span class="n">t1c</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span> <span class="n">radius2</span> <span class="o">-</span> <span class="n">d2</span> <span class="p">);</span>
 
-	<span class="c1">//solve for intersection points</span>
-	<span class="o">*</span><span class="n">t1</span> <span class="o">=</span> <span class="n">tc</span> <span class="o">-</span> <span class="n">t1c</span><span class="p">;</span>
+	<span class="c1">//solve for intersection points
+</span>	<span class="o">*</span><span class="n">t1</span> <span class="o">=</span> <span class="n">tc</span> <span class="o">-</span> <span class="n">t1c</span><span class="p">;</span>
 	<span class="o">*</span><span class="n">t2</span> <span class="o">=</span> <span class="n">tc</span> <span class="o">+</span> <span class="n">t1c</span><span class="p">;</span>
 	
 	<span class="k">return</span> <span class="nb">true</span><span class="p">;</span>
@@ -408,6 +408,10 @@ Congratulations on getting this far! Now that we have all that theory out of the
   <ul class="posts">
     
     <li>
+      <span>04 Dec 2019 &raquo;</span> <a href="/blog/2019/12/04/Recreating-A-Dirty-Gamedev-Hack.html">Recreating An Old "Dirty Gamedev Trick"</a>
+    </li>
+    
+    <li>
       <span>18 Apr 2019 &raquo;</span> <a href="/blog/2019/04/18/I-Wrote-A-Book.html">I Wrote A Book About Shaders!</a>
     </li>
     
@@ -417,10 +421,6 @@ Congratulations on getting this far! Now that we have all that theory out of the
     
     <li>
       <span>28 Jan 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/01/28/Textue-Arrays-Vulkan.html">Using Arrays of Textures in Vulkan Shaders</a>
-    </li>
-    
-    <li>
-      <span>13 Dec 2017 &raquo;</span> <a href="/blog/tutorial/2017/12/13/Custom-Allocators-Vulkan.html">A Simple Device Memory Allocator For Vulkan</a>
     </li>
     
   </ul>

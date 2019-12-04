@@ -144,15 +144,15 @@
 
 <p>In order to make much sense of the code I’m going to share, it will be helpful to understand that my code stores uniform data that will be sent to the GPU in a struct called PrimitiveUniformObject, which directly maps to the layout of the uniform data in the shader:</p>
 
-<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="c1">//CPU</span>
-<span class="k">struct</span> <span class="n">PrimitiveUniformObject</span>
+<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="c1">//CPU
+</span><span class="k">struct</span> <span class="n">PrimitiveUniformObject</span>
 <span class="p">{</span>
     <span class="n">glm</span><span class="o">::</span><span class="n">mat4</span> <span class="n">model</span><span class="p">;</span>
     <span class="n">glm</span><span class="o">::</span><span class="n">vec4</span> <span class="n">color</span><span class="p">;</span>
 <span class="p">};</span>
 
-<span class="c1">//glsl</span>
-<span class="n">layout</span><span class="p">(</span><span class="n">set</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">binding</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="n">uniform</span> <span class="n">PER_OBJECT</span>
+<span class="c1">//glsl
+</span><span class="n">layout</span><span class="p">(</span><span class="n">set</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">binding</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="n">uniform</span> <span class="n">PER_OBJECT</span>
 <span class="p">{</span>
     <span class="n">mat4</span> <span class="n">mvp</span><span class="p">;</span>
     <span class="n">vec4</span> <span class="n">col</span><span class="p">;</span>
@@ -181,8 +181,8 @@
 
 <p>Since the entirety of the data stored in the VkBuffer is going to get updated every frame, and we’re going to update the data with a single write to the buffer data, I allocated the VkBuffers with host coherent memory, which makes things nice and easy when it’s time to update the data:</p>
 
-<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="c1">//abbreviated code:</span>
-<span class="n">PrimitiveUniformObject</span> <span class="n">puo</span><span class="p">;</span>
+<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="c1">//abbreviated code:
+</span><span class="n">PrimitiveUniformObject</span> <span class="n">puo</span><span class="p">;</span>
 <span class="n">puo</span><span class="p">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">VIEW_PROJECTION</span> <span class="o">*</span> <span class="p">(</span><span class="n">glm</span><span class="o">::</span><span class="n">translate</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span> <span class="o">*</span> <span class="n">glm</span><span class="o">::</span><span class="n">scale</span><span class="p">(</span><span class="n">scale</span><span class="p">));</span>
 <span class="n">puo</span><span class="p">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">col</span><span class="p">;</span>
 
@@ -211,8 +211,8 @@
 
 <p>In this approach, when a primitive was created, the data for their buffer was immediately mapped, and the address stored in the mapped pointer above. Note that the PrimitiveInstance struct doesn’t contain a PrimitiveUniformObject, those get created per frame by combining the easier to work with variables we have here.</p>
 
-<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="c1">//abbreviated code:</span>
-<span class="n">PrimitiveUniformObject</span> <span class="n">puo</span><span class="p">;</span>
+<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="c1">//abbreviated code:
+</span><span class="n">PrimitiveUniformObject</span> <span class="n">puo</span><span class="p">;</span>
 <span class="n">puo</span><span class="p">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">VIEW_PROJECTION</span> <span class="o">*</span> <span class="p">(</span><span class="n">glm</span><span class="o">::</span><span class="n">translate</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span> <span class="o">*</span> <span class="n">glm</span><span class="o">::</span><span class="n">scale</span><span class="p">(</span><span class="n">scale</span><span class="p">));</span>
 <span class="n">puo</span><span class="p">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">col</span><span class="p">;</span>
 <span class="n">memcpy</span><span class="p">(</span><span class="n">mapped</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">puo</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">PrimitiveUniformObject</span><span class="p">));</span></code></pre></div>
@@ -249,8 +249,8 @@
 
 <p>Since the PrimitiveUniformObject struct itself has no notion of alignment, you have to space your writes into buffer memory accordingly:</p>
 
-<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="c1">//abbreviated code</span>
-
+<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="c1">//abbreviated code
+</span>
 <span class="kt">int</span> <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 <span class="kt">char</span><span class="o">*</span> <span class="n">uniformChar</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">uniformData</span><span class="p">;</span>
 
@@ -287,8 +287,8 @@
                             <span class="mi">1</span><span class="p">,</span>
                             <span class="o">&amp;</span><span class="n">dynamicOffset</span><span class="p">);</span>
 
-    <span class="c1">// rest of per object draw code goes here</span>
-<span class="p">}</span></code></pre></div>
+    <span class="c1">// rest of per object draw code goes here
+</span><span class="p">}</span></code></pre></div>
 
 <p>That should be enough to get you going, but we can make this faster too.</p>
 
@@ -324,9 +324,9 @@
 <span class="n">pushConstantRange</span><span class="p">.</span><span class="n">stageFlags</span> <span class="o">=</span> <span class="n">VK_SHADER_STAGE_VERTEX_BIT</span><span class="p">;</span>
 
 <span class="n">VkPipelineLayoutCreateInfo</span> <span class="n">pipelineLayoutInfo</span> <span class="o">=</span> <span class="p">{};</span>
-<span class="c1">//..other init code here</span>
-<span class="n">pipelineLayoutInfo</span><span class="p">.</span><span class="n">pSetLayouts</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">descriptorSetLayout</span><span class="p">;</span> <span class="c1">// still need this</span>
-<span class="n">pipelineLayoutInfo</span><span class="p">.</span><span class="n">pushConstantRangeCount</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="c1">//..other init code here
+</span><span class="n">pipelineLayoutInfo</span><span class="p">.</span><span class="n">pSetLayouts</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">descriptorSetLayout</span><span class="p">;</span> <span class="c1">// still need this
+</span><span class="n">pipelineLayoutInfo</span><span class="p">.</span><span class="n">pushConstantRangeCount</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
 <span class="n">pipelineLayoutInfo</span><span class="p">.</span><span class="n">pPushConstantRanges</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">pushConstantRange</span><span class="p">;</span></code></pre></div>
 
 <p>Like the comment above says, even when using push constants, you still need to provide a descriptorSetLayout to specify how the uniform data is going to be laid out in memory. You just don’t actually need to make any descriptorSets to actually pass that data to the shader.</p>
@@ -343,8 +343,8 @@
     <span class="k">sizeof</span><span class="p">(</span><span class="n">PrimitiveUniformObject</span><span class="p">),</span>
     <span class="o">&amp;</span><span class="n">uniformData</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
 
-    <span class="c1">// rest of per object draw code goes here</span>
-
+    <span class="c1">// rest of per object draw code goes here
+</span>
 <span class="p">}</span></code></pre></div>
 
 <p>That should cover it (assuming I haven’t missed a step). Given the option, push constants feel a lot cleaner for passing small bits of data to shaders, which makes sense given that they’re tailor made for that purpose. It is nice to have the most performant option we have, also be the easiest to work with.</p>
@@ -379,6 +379,10 @@ In case reviewing testing methods is your thing, here's how I got the numbers in
   <ul class="posts">
     
     <li>
+      <span>04 Dec 2019 &raquo;</span> <a href="/blog/2019/12/04/Recreating-A-Dirty-Gamedev-Hack.html">Recreating An Old "Dirty Gamedev Trick"</a>
+    </li>
+    
+    <li>
       <span>18 Apr 2019 &raquo;</span> <a href="/blog/2019/04/18/I-Wrote-A-Book.html">I Wrote A Book About Shaders!</a>
     </li>
     
@@ -388,10 +392,6 @@ In case reviewing testing methods is your thing, here's how I got the numbers in
     
     <li>
       <span>28 Jan 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/01/28/Textue-Arrays-Vulkan.html">Using Arrays of Textures in Vulkan Shaders</a>
-    </li>
-    
-    <li>
-      <span>13 Dec 2017 &raquo;</span> <a href="/blog/tutorial/2017/12/13/Custom-Allocators-Vulkan.html">A Simple Device Memory Allocator For Vulkan</a>
     </li>
     
   </ul>

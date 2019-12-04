@@ -419,8 +419,8 @@
 
 <div class="highlight"><pre><code class="language-c" data-lang="c"><span class="kt">void</span> <span class="nf">updateSpritePosition</span><span class="p">(</span><span class="n">HeroSprite</span><span class="o">*</span> <span class="n">sprite</span><span class="p">)</span>
 <span class="p">{</span>
-    <span class="c1">//previous code omitted for brevity</span>
-
+    <span class="c1">//previous code omitted for brevity
+</span>
     <span class="kt">int</span> <span class="n">isMidAir</span> <span class="o">=</span> <span class="n">sprite</span><span class="o">-&gt;</span><span class="n">posY</span> <span class="o">!=</span> <span class="n">FLOOR_Y</span><span class="p">;</span>
 
     <span class="k">if</span> <span class="p">(</span><span class="n">getKeyState</span><span class="p">(</span><span class="n">KEY_A</span><span class="p">))</span>
@@ -517,8 +517,8 @@
 <span class="p">{</span>
     <span class="n">ObjectAttributes</span><span class="o">*</span> <span class="n">spriteAttribs</span> <span class="o">=</span> <span class="n">sprite</span><span class="o">-&gt;</span><span class="n">spriteAttribs</span><span class="p">;</span>
 
-    <span class="c1">//set firstAnimCycleFrame and animFrame in code here</span>
-
+    <span class="c1">//set firstAnimCycleFrame and animFrame in code here
+</span>
     <span class="n">spriteAttribs</span><span class="o">-&gt;</span><span class="n">attr2</span> <span class="o">=</span> <span class="n">sprite</span><span class="o">-&gt;</span><span class="n">firstAnimCycleFrame</span> <span class="o">+</span> <span class="p">(</span><span class="n">sprite</span><span class="o">-&gt;</span><span class="n">animFrame</span> <span class="o">*</span> <span class="mi">8</span><span class="p">);</span>
 <span class="p">}</span></code></pre></div>
 
@@ -528,8 +528,8 @@
 
 <div class="highlight"><pre><code class="language-c" data-lang="c"><span class="kt">int</span> <span class="n">isMidAir</span> <span class="o">=</span> <span class="n">sprite</span><span class="o">-&gt;</span><span class="n">posY</span> <span class="o">!=</span> <span class="n">FLOOR_Y</span><span class="p">;</span>
 
-<span class="c1">//update velocity for gravity</span>
-<span class="k">if</span> <span class="p">(</span><span class="n">isMidAir</span><span class="p">)</span>
+<span class="c1">//update velocity for gravity
+</span><span class="k">if</span> <span class="p">(</span><span class="n">isMidAir</span><span class="p">)</span>
 <span class="p">{</span>
     <span class="n">sprite</span><span class="o">-&gt;</span><span class="n">firstAnimCycleFrame</span> <span class="o">=</span> <span class="mi">56</span><span class="p">;</span>
     <span class="n">sprite</span><span class="o">-&gt;</span><span class="n">animFrame</span> <span class="o">=</span> <span class="n">sprite</span><span class="o">-&gt;</span><span class="n">velY</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">?</span> <span class="mi">1</span> <span class="o">:</span> <span class="mi">0</span><span class="p">;</span>
@@ -583,6 +583,10 @@
   <ul class="posts">
     
     <li>
+      <span>04 Dec 2019 &raquo;</span> <a href="/blog/2019/12/04/Recreating-A-Dirty-Gamedev-Hack.html">Recreating An Old "Dirty Gamedev Trick"</a>
+    </li>
+    
+    <li>
       <span>18 Apr 2019 &raquo;</span> <a href="/blog/2019/04/18/I-Wrote-A-Book.html">I Wrote A Book About Shaders!</a>
     </li>
     
@@ -592,10 +596,6 @@
     
     <li>
       <span>28 Jan 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/01/28/Textue-Arrays-Vulkan.html">Using Arrays of Textures in Vulkan Shaders</a>
-    </li>
-    
-    <li>
-      <span>13 Dec 2017 &raquo;</span> <a href="/blog/tutorial/2017/12/13/Custom-Allocators-Vulkan.html">A Simple Device Memory Allocator For Vulkan</a>
     </li>
     
   </ul>

@@ -141,13 +141,13 @@
 <p>An example of how this might play out:</p>
 
 <div class="highlight"><pre><code class="language-c" data-lang="c"><span class="k">for</span> <span class="n">each</span> <span class="n">view</span> <span class="p">{</span>
-  <span class="n">bind</span> <span class="n">global</span> <span class="n">resourcees</span>          <span class="c1">// set 0</span>
-
+  <span class="n">bind</span> <span class="n">global</span> <span class="n">resourcees</span>          <span class="c1">// set 0
+</span>
   <span class="k">for</span> <span class="n">each</span> <span class="n">shader</span> <span class="p">{</span>
     <span class="n">bind</span> <span class="n">shader</span> <span class="n">pipeline</span>  
     <span class="k">for</span> <span class="n">each</span> <span class="n">material</span> <span class="p">{</span>
-      <span class="n">bind</span> <span class="n">material</span> <span class="n">resources</span>  <span class="c1">// sets 2,3</span>
-    <span class="p">}</span>
+      <span class="n">bind</span> <span class="n">material</span> <span class="n">resources</span>  <span class="c1">// sets 2,3
+</span>    <span class="p">}</span>
   <span class="p">}</span>
 <span class="p">}</span></code></pre></div>
 
@@ -311,8 +311,8 @@
 
 <div class="highlight"><pre><code class="language-c" data-lang="c"><span class="k">struct</span> <span class="n">MaterialRenderData</span>
 <span class="p">{</span>
-  <span class="c1">//general material data</span>
-  <span class="n">VkPipeline</span> <span class="n">pipeline</span><span class="p">;</span>
+  <span class="c1">//general material data
+</span>  <span class="n">VkPipeline</span> <span class="n">pipeline</span><span class="p">;</span>
   <span class="n">VkPipelineLayout</span> <span class="n">pipelineLayout</span><span class="p">;</span>
 
   <span class="kt">uint32_t</span> <span class="n">layoutCount</span><span class="p">;</span>
@@ -324,24 +324,24 @@
   <span class="n">UniformBlockDef</span> <span class="n">pushConstantLayout</span><span class="p">;</span>
   <span class="kt">char</span><span class="o">*</span> <span class="n">pushConstantData</span><span class="p">;</span>
 
-  <span class="c1">//we don't need a layout for static data since it cannot be</span>
-  <span class="c1">//changed after initialization</span>
-  <span class="n">VkBuffer</span><span class="o">*</span> <span class="n">staticBuffers</span><span class="p">;</span>
+  <span class="c1">//we don't need a layout for static data since it cannot be
+</span>  <span class="c1">//changed after initialization
+</span>  <span class="n">VkBuffer</span><span class="o">*</span> <span class="n">staticBuffers</span><span class="p">;</span>
   <span class="n">VkDeviceMemory</span> <span class="n">staticUniformMem</span><span class="p">;</span>
     <span class="kt">uint32_t</span> <span class="n">numStaticBuffers</span><span class="p">;</span>
 
-  <span class="c1">//for now, just add buffers here to modify. when this</span>
-  <span class="c1">//is modified to support material instances, we'll change it</span>
-  <span class="c1">//to something more sane.</span>
-  <span class="n">MaterialDynamicData</span> <span class="n">dynamic</span><span class="p">;</span>
+  <span class="c1">//for now, just add buffers here to modify. when this
+</span>  <span class="c1">//is modified to support material instances, we'll change it
+</span>  <span class="c1">//to something more sane.
+</span>  <span class="n">MaterialDynamicData</span> <span class="n">dynamic</span><span class="p">;</span>
 <span class="p">};</span></code></pre></div>
 
 <p>There are a few things to talk about here. Firstly, I store the data used for a material’s push constants in the RenderData struct, so that if nothing has changed since the last time they were set, we have that data already sorted out. Rather than store each of the push constant members in a map, or other collection, I keep all the data for the entire push constant block in a char* buffer, and then store layout data about that char* in a UniformBlockDef struct, which looks like this:</p>
 
 <div class="highlight"><pre><code class="language-c" data-lang="c"><span class="k">struct</span> <span class="n">UniformBlockDef</span>
 <span class="p">{</span>
-  <span class="c1">//stride 2 - hashed name / member offset</span>
-  <span class="kt">uint32_t</span><span class="o">*</span> <span class="n">layout</span><span class="p">;</span>
+  <span class="c1">//stride 2 - hashed name / member offset
+</span>  <span class="kt">uint32_t</span><span class="o">*</span> <span class="n">layout</span><span class="p">;</span>
   <span class="kt">uint32_t</span> <span class="n">blockSize</span><span class="p">;</span>
   <span class="kt">uint32_t</span> <span class="n">memberCount</span><span class="p">;</span>
   <span class="n">VkShaderStageFlags</span> <span class="n">visibleStages</span><span class="p">;</span>
@@ -378,9 +378,9 @@
 <span class="p">{</span>
   <span class="kt">uint32_t</span> <span class="n">numInputs</span><span class="p">;</span>
 
-  <span class="c1">// stride: 4 - hashed name / buffer index / member size / member offset</span>
-  <span class="c1">// for images- hasehd name / textureViewPtr index / desc set write idx / padding</span>
-  <span class="kt">uint32_t</span><span class="o">*</span> <span class="n">layout</span><span class="p">;</span>
+  <span class="c1">// stride: 4 - hashed name / buffer index / member size / member offset
+</span>  <span class="c1">// for images- hasehd name / textureViewPtr index / desc set write idx / padding
+</span>  <span class="kt">uint32_t</span><span class="o">*</span> <span class="n">layout</span><span class="p">;</span>
   <span class="n">VkBuffer</span><span class="o">*</span> <span class="n">buffers</span><span class="p">;</span>
   <span class="n">VkDeviceMemory</span> <span class="n">uniformMem</span><span class="p">;</span>
 
@@ -412,6 +412,10 @@
   <ul class="posts">
     
     <li>
+      <span>04 Dec 2019 &raquo;</span> <a href="/blog/2019/12/04/Recreating-A-Dirty-Gamedev-Hack.html">Recreating An Old "Dirty Gamedev Trick"</a>
+    </li>
+    
+    <li>
       <span>18 Apr 2019 &raquo;</span> <a href="/blog/2019/04/18/I-Wrote-A-Book.html">I Wrote A Book About Shaders!</a>
     </li>
     
@@ -421,10 +425,6 @@
     
     <li>
       <span>28 Jan 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/01/28/Textue-Arrays-Vulkan.html">Using Arrays of Textures in Vulkan Shaders</a>
-    </li>
-    
-    <li>
-      <span>13 Dec 2017 &raquo;</span> <a href="/blog/tutorial/2017/12/13/Custom-Allocators-Vulkan.html">A Simple Device Memory Allocator For Vulkan</a>
     </li>
     
   </ul>
