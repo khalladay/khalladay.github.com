@@ -4,7 +4,7 @@
  <title>The blog of Kyle Halladay</title>
  <link href="http://kylehalladay.com/atom.xml" rel="self"/>
  <link href="http://kylehalladay.com"/>
- <updated>2019-12-04T09:19:11-06:00</updated>
+ <updated>2019-12-04T20:41:54-06:00</updated>
  <id>http://kylehalladay.com</id>
  <author>
    <name>Kyle Halladay</name>
@@ -482,7 +482,7 @@ _main:
         syscall
         ret&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;If you’re curious, the entire source for this payload is both &lt;a href=&quot;/images/post_images/2019-12-04/payloadv1.txt&quot;&gt;here&lt;/a&gt; and on the &lt;a href=&quot;https://github.com/khalladay/InsecureSnake&quot;&gt;github project&lt;/a&gt; that accompanies this blog post. Note that the payload code doesn’t exactly match the code string in the final python server script, since I was manually adding padding and replacing some NOPs with 0xCD, as described earlier.&lt;/p&gt;
+&lt;p&gt;If you’re curious, the entire source for this payload is both &lt;a href=&quot;/images/post_images/2019-12-04/payload_final.txt&quot;&gt;here&lt;/a&gt; and on the &lt;a href=&quot;https://github.com/khalladay/InsecureSnake&quot;&gt;github project&lt;/a&gt; that accompanies this blog post. Note that the payload code doesn’t exactly match the code string in the final python server script, since I was manually adding padding and replacing some NOPs with 0xCD, as described earlier.&lt;/p&gt;
 
 &lt;p&gt;With this payload in place, getting a proper EULA was just a matter of adding a few more lines to the server script to listen for a connection on port 100005 and send back the string when it received that connection. You can see the final server script &lt;a href=&quot;/images/post_images/2019-12-04/ServerV3.txt&quot;&gt;here&lt;/a&gt; if you’re curious. Once that was working, I could send a EULA that was human readable to the client in time to hide the fact that anything nefarious was going on, and my server was able to modify compiled code using a buffer overflow. Woohoo!&lt;/p&gt;
 
