@@ -179,7 +179,7 @@ Luckily all it takes is a bit of subtraction to fix everything up:
 {% highlight c# %}
 weights0.xy -= weights0.yz;
 weights0.z -= weights1.x;
-weights1.xy -= weights1.zy;
+weights1.xy -= weights1.yz;
 {% endhighlight %}
 
 Nifty right? Using our example value of 0.75, this would give us two weight vectors: (0,0,0) and (0.5, 0.5, 0.0), which means that an input of 4.5 is a 50% blend of our 4th and 5th texture samples, which is exactly what we want to do!
@@ -228,7 +228,7 @@ fixed3 Hatching(float2 _uv, half _intensity)
 
     weightsA.xy -= weightsA.yz;
     weightsA.z -= weightsB.x;
-    weightsB.xy -= weightsB.zy;
+    weightsB.xy -= weightsB.yz;
 
     hatch0 = hatch0 * weightsA;
     hatch1 = hatch1 * weightsB;
@@ -389,3 +389,5 @@ There are lots of potential issues you'll run into with this effect if you use i
 In reality though, the effect as presented here is likely not going to make your art team very happy. I think you'd likely run into artists wanting to author custom TAMs with different types of strokes, and maps for each object to control which type of stroke was used where.
 
 That about wraps things up, this was a lot of fun! If you have any questions, shoot me a message [on twitter](https://twitter.com/khalladay), I'd love to see more projects using this type of effect, so send me screenshots of anything you build with it!
+
+[Update: 5/18/2020: Thanks to @__seb for pointing out a typo in the hatching shader]
