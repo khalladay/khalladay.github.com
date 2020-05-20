@@ -295,7 +295,7 @@ But for the remainder of this post, and all future posts, I'm going to put the i
 
 ## Sprite and BG Data
 
-All the sprites that I'm using for the example project can be found [on github](https://github.com/khalladay/GBAInput/tree/master/code). It isn't super compact, but for such a simple program, that's not really that important. If you want to follow along as I build this, grab the data from there. If you just want the final product, you can find the whole thing [on github here](https://github.com/khalladay/GBAInput).
+All the sprites that I'm using for the example project can be found [on github](https://github.com/khalladay/GBA-By-Example/tree/master/3-UserInput/data). It isn't super compact, but for such a simple program, that's not really that important. If you want to follow along as I build this, grab the data from there. If you just want the final product, you can find the whole thing [on github here](https://github.com/khalladay/GBA-By-Example/tree/master/3-UserInput).
 
 The function to load the sprite data is as follows:
 
@@ -508,7 +508,7 @@ int main()
 
 {% endhighlight %}
 
-If you want to grab a fully put-together, runnable version of the code, you can find it [here](https://github.com/khalladay/GBAInput), I'm going to omit it here because all the code is already available on this page, and I think a github repo is a far better delivery mechanism for that much code than pasting it here.
+If you want to grab a fully put-together, runnable version of the code, you can find it [here](https://github.com/khalladay/GBA-By-Example/tree/master/3-UserInput), I'm going to omit it here because all the code is already available on this page, and I think a github repo is a far better delivery mechanism for that much code than pasting it here.
 
 This has the disadvantage of only showing one key press at a time (and prioritizing some keys over others), but I'm ok with that, I just wanted a fun example program to show off input handling, and to provide more examples of how to use stuff we've done in articles past. I suppose modifying the above to show all the buttons that are currently pressed instead of one is left as an exercise to the reader?  ;)
 
