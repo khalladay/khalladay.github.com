@@ -172,6 +172,16 @@ nav h1, nav h2 {
   min-height: 400px;
 }
 
+.date {
+  font: 400 14px/22px "open sans", sans-serif;
+  border-left: 1px solid #DDD;
+  font-size: 16px;
+  background-color: #F5F5F5;
+  color: #FF2222;
+  line-height: 24px;
+  margin: 0;
+}
+
 .footer {
   width: 100%;
 }
