@@ -10,7 +10,7 @@
 
 
 /* Smaller than standard 960 (devices and browsers) */
-@media only screen and (max-width: 959px) {
+@media only screen and (max-width: 1059px) {
 	#logo {
 		font-size: 21px;
 		margin-bottom: 15px; }
@@ -19,7 +19,7 @@
 }
 
 /* Tablet Portrait size to standard 960 (devices and browsers) */
-@media only screen and (min-width: 768px) and (max-width: 959px) {
+@media only screen and (min-width: 768px) and (max-width: 1059px) {
 	nav {
 		width: 160px; }
 	.sidebar h2 {
@@ -68,7 +68,7 @@ ul.posts li
 	}
 }
 
-@media only screen and (min-width:960px)
+@media only screen and (min-width:1060px)
 {
 topbar {
 		display: none;
