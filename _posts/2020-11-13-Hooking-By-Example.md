@@ -568,7 +568,7 @@ If we look at the functions imported by mspaint in a debugger (like [x64dbg](htt
 It turns out that our breakpoint _does_ get hit in response to the button click, which is fantastic. If we switch over to the callstack view while we're stopped at the breakpoint, we can see a couple of mspaint.exe functions much higher up in the stack. It's possible that the one of these that's highest in the callstack is the button handler function we're after. 
 
 <div align="center">
-<img src="/images/post_images/2020-11-13/reverse_step2.PNG" />
+<img src="/images/post_images/2020-11-13/reverse_step2.png" />
 <br><br>
 </div>
 
