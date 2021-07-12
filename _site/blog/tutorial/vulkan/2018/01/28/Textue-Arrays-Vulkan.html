@@ -18,6 +18,7 @@
 
   <link rel="stylesheet" href="/assets/css/all.css">
   <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    
 </head>
 <body>
   <div class="container">
@@ -29,8 +30,7 @@
   <h2>I'm <a href="/">Kyle Halladay</a>.</h2>
   <div id="bio">
     <p>I do graphics and engine programming for games. </p>
-    <p>I'm the author of <a href="https://www.amazon.com/Practical-Shader-Development-Fragment-Developers/dp/1484244567">Practical Shader Development</a>, which is all about learning to write shaders.
-    <p>I also dabble in GBA dev, you can find my tutorials <a href="/gba.html">here.</a>
+    <p>I'm the author of <a href="https://www.amazon.com/Practical-Shader-Development-Fragment-Developers/dp/1484244567">Practical Shader Development</a>, which is all about learning to write shaders.</p>
     <p>Check out <a href="/archive.html">some other stuff I've written</a></p>
   </div>
   <div id="social">
@@ -93,7 +93,8 @@
 
 </p>
 
-<h1 class="title">Using Arrays of Textures in Vulkan Shaders</h1>
+<div style="font-size:14px">28 Jan 2018</div>
+<h1 class="title">Using Arrays of Textures in Vulkan Shaders</h1> 
 
 <div id="post">
   <p>Lately I’ve been trying to wrap my head how to effectively deal with textures in Vulkan. I don’t want any descriptor sets that need to be bound on a per object basis, which means that just sticking each texture into it’s own set binding isn’t going to work. Instead, thanks to the <a href="http://32ipi028l5q82yhj72224m8j-wpengine.netdna-ssl.com/wp-content/uploads/2016/03/VulkanFastPaths.pdf">Vulkan Fast Paths</a> presentation from AMD, I’ve been looking into using a global array of textures that stores all my textures in a descriptor set that I can bind at the beginning of the frame.</p>
@@ -185,7 +186,7 @@
 
 <div class="highlight"><pre><code class="language-c" data-lang="c"><span class="s">"glslangvalidator -c &gt; myconfig.config"</span></code></pre></div>
 
-<p>It’s important that your file uses the .config extension, because that’s the extension that glslangvalidator will look for in it’s argument list to know if an alternate config file is being provided.  </p>
+<p>It’s important that your file uses the .config extension, because that’s the extension that glslangvalidator will look for in it’s argument list to know if an alternate config file is being provided.</p>
 
 <p>Once you have this config file, all you need to do is open it up in your favourite text editor and look for the “MaxCombinedTextureImageUnits” line:</p>
 
@@ -217,19 +218,19 @@
   <ul class="posts">
     
     <li>
-      <span>04 Dec 2019 &raquo;</span> <a href="/blog/2019/12/04/Recreating-A-Dirty-Gamedev-Hack.html">Recreating An Old "Dirty Gamedev Trick"</a>
+      <span>14 Jul 2021 &raquo;</span> <a href="/blog/2021/07/14/Dll-Search-Order-Hijacking-For-PostProcess-Injection.html">Hooking and Hijacking DirectX 11 Functions In Skyrim</a>
     </li>
     
     <li>
-      <span>18 Apr 2019 &raquo;</span> <a href="/blog/2019/04/18/I-Wrote-A-Book.html">I Wrote A Book About Shaders!</a>
+      <span>13 Nov 2020 &raquo;</span> <a href="/blog/2020/11/13/Hooking-By-Example.html">X64 Function Hooking by Example</a>
     </li>
     
     <li>
-      <span>05 Feb 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/02/05/Bind-Once-Uniform-Data-Vulkan.html">A "Bind Once" Approach to Uniform Data</a>
+      <span>20 May 2020 &raquo;</span> <a href="/blog/2020/05/20/Rendering-With-Notepad.html">Ray Tracing In Notepad.exe At 30 FPS</a>
     </li>
     
     <li>
-      <span>28 Jan 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/01/28/Textue-Arrays-Vulkan.html">Using Arrays of Textures in Vulkan Shaders</a>
+      <span>20 May 2020 &raquo;</span> <a href="/blog/2020/05/20/Hooking-Input-Snake-In-Notepad.html">Hooking Keyboard Input To Play Snake In Notepad.exe</a>
     </li>
     
   </ul>
@@ -246,27 +247,12 @@
   
 
   <p>
-    © Kyle Halladay, 2014 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
+    © Kyle Halladay, 2021 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
   </p>
 </div>
       </div>
     </div>
   </div>
-
-
-<script type="text/javascript">
-
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-40292745-1']);
-  _gaq.push(['_trackPageview']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-
-</script>
 
 </body>
 </html>

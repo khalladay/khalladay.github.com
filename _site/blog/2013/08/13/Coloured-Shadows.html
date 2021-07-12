@@ -18,6 +18,7 @@
 
   <link rel="stylesheet" href="/assets/css/all.css">
   <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    
 </head>
 <body>
   <div class="container">
@@ -29,8 +30,7 @@
   <h2>I'm <a href="/">Kyle Halladay</a>.</h2>
   <div id="bio">
     <p>I do graphics and engine programming for games. </p>
-    <p>I'm the author of <a href="https://www.amazon.com/Practical-Shader-Development-Fragment-Developers/dp/1484244567">Practical Shader Development</a>, which is all about learning to write shaders.
-    <p>I also dabble in GBA dev, you can find my tutorials <a href="/gba.html">here.</a>
+    <p>I'm the author of <a href="https://www.amazon.com/Practical-Shader-Development-Fragment-Developers/dp/1484244567">Practical Shader Development</a>, which is all about learning to write shaders.</p>
     <p>Check out <a href="/archive.html">some other stuff I've written</a></p>
   </div>
   <div id="social">
@@ -93,7 +93,8 @@
 
 </p>
 
-<h1 class="title">Multi Coloured Shadows In Unity</h1>
+<div style="font-size:14px">13 Aug 2013</div>
+<h1 class="title">Multi Coloured Shadows In Unity</h1> 
 
 <div id="post">
   <div style="background-color:#EEAAAA;">NOTE: This article is OLD! (From 2013!). Information in it may be out of date or outright useless, and I have no plansto update it. Beware!
@@ -103,9 +104,9 @@
 
 <p><strong>UPDATE: I’ve posted a tutorial on how to get coloured shadows working in your project. Check it out <a href="http://kylehalladay.com/all/blog/2014/05/16/Coloured-Shadows-In-Unity.html">here</a></strong></p>
 
-<p>Lately, in my (precious little) free time, I’ve been working on a custom shadow receiver system which will give me greater control over the appearance of soft shadows in Unity. On the surface, it sounds like a fun project. It gets slightly more insane when you take into account that i had never so much as written my own shadow map system before starting this. Crawling is boring, I tend to jump (metaphorical) cliffs and hope that I figure out flying, running, landing, and crawling by the time I hit ground. </p>
+<p>Lately, in my (precious little) free time, I’ve been working on a custom shadow receiver system which will give me greater control over the appearance of soft shadows in Unity. On the surface, it sounds like a fun project. It gets slightly more insane when you take into account that i had never so much as written my own shadow map system before starting this. Crawling is boring, I tend to jump (metaphorical) cliffs and hope that I figure out flying, running, landing, and crawling by the time I hit ground.</p>
 
-<p>At first, I thought I’d actually start from the ground up and simply disable the Unity shadows altogether and substitute my own depth maps. It works pretty well for one light, but I’ve run into issues trying to pass multiple shadow maps to multiple passes in Unity. I’m not yet sure whether thats a limitation on my own knowledge, or just something that Unity doesn’t let you do. Once I hit that wall though, it occurred to me that it might just be easier to tap into the shadow maps already being generated. It would certainly save a lot of extra scripts, and would benefit from all the work that’s already gone into Unity. </p>
+<p>At first, I thought I’d actually start from the ground up and simply disable the Unity shadows altogether and substitute my own depth maps. It works pretty well for one light, but I’ve run into issues trying to pass multiple shadow maps to multiple passes in Unity. I’m not yet sure whether thats a limitation on my own knowledge, or just something that Unity doesn’t let you do. Once I hit that wall though, it occurred to me that it might just be easier to tap into the shadow maps already being generated. It would certainly save a lot of extra scripts, and would benefit from all the work that’s already gone into Unity.</p>
 
 <div align="center">
 	<img src="/images/post_images/2013-08-13/shadowmap.png" /><br />
@@ -117,7 +118,7 @@
 
 <p>And so, I (once again) entered the wonderful world of undocumented Unity functionality. This time, I ended up delving through the CGInclude files that come with the built in shaders. The result of this was an interesting set of variables defined in the UnityShaderVariables.cginc and AutoLight.cginc files, namely: unity_World2Shadow[4], _ShadowMapTexture, _LightShadowData and the macro UNITY_SAMPLE_SHADOW_PROJ.</p>
 
-<p>Most of the above is self explanatory, but the macro was something I hadn’t thought about. A lot of functionality is wrapped in macros in the built in shaders, which handle the difference between DirectX and GLSL shading. </p>
+<p>Most of the above is self explanatory, but the macro was something I hadn’t thought about. A lot of functionality is wrapped in macros in the built in shaders, which handle the difference between DirectX and GLSL shading.</p>
 
 <p>Once I knew what the internal variables were called, it was pretty easy to get rudimentary hard shadows up and running using the built in shadow map…. for one light. I’m still working on getting multiple lights working at once, but, in the interest of enjoying small victories, I figured I’d do something a bit fun with the new shadows I had made. Since I now have complete control over the shader producing the shadows, why not change their colour. Therefore, may I present, the most fabulous looking hard shadows ever produced in Unity…probably!</p>
 
@@ -140,19 +141,19 @@
   <ul class="posts">
     
     <li>
-      <span>04 Dec 2019 &raquo;</span> <a href="/blog/2019/12/04/Recreating-A-Dirty-Gamedev-Hack.html">Recreating An Old "Dirty Gamedev Trick"</a>
+      <span>14 Jul 2021 &raquo;</span> <a href="/blog/2021/07/14/Dll-Search-Order-Hijacking-For-PostProcess-Injection.html">Hooking and Hijacking DirectX 11 Functions In Skyrim</a>
     </li>
     
     <li>
-      <span>18 Apr 2019 &raquo;</span> <a href="/blog/2019/04/18/I-Wrote-A-Book.html">I Wrote A Book About Shaders!</a>
+      <span>13 Nov 2020 &raquo;</span> <a href="/blog/2020/11/13/Hooking-By-Example.html">X64 Function Hooking by Example</a>
     </li>
     
     <li>
-      <span>05 Feb 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/02/05/Bind-Once-Uniform-Data-Vulkan.html">A "Bind Once" Approach to Uniform Data</a>
+      <span>20 May 2020 &raquo;</span> <a href="/blog/2020/05/20/Rendering-With-Notepad.html">Ray Tracing In Notepad.exe At 30 FPS</a>
     </li>
     
     <li>
-      <span>28 Jan 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/01/28/Textue-Arrays-Vulkan.html">Using Arrays of Textures in Vulkan Shaders</a>
+      <span>20 May 2020 &raquo;</span> <a href="/blog/2020/05/20/Hooking-Input-Snake-In-Notepad.html">Hooking Keyboard Input To Play Snake In Notepad.exe</a>
     </li>
     
   </ul>
@@ -169,27 +170,12 @@
   
 
   <p>
-    © Kyle Halladay, 2014 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
+    © Kyle Halladay, 2021 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
   </p>
 </div>
       </div>
     </div>
   </div>
-
-
-<script type="text/javascript">
-
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-40292745-1']);
-  _gaq.push(['_trackPageview']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-
-</script>
 
 </body>
 </html>

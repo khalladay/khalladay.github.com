@@ -1,0 +1,1512 @@
+<!DOCTYPE html>
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kyle Halladay - Hooking and Hijacking DirectX 11 Functions In Skyrim</title>
+  <meta name="author" content="Kyle Halladay" />
+  <meta name="description" content="I build shaders, renderers, games, and other stuff that's fun to stare at." />
+  <link rel="canonical" href="http://kylehalladay.com/blog/2021/07/14/Dll-Search-Order-Hijacking-For-PostProcess-Injection.html" />
+  <meta name="keywords" content="life,code,software,development,games,graphics,shaders,indie" />
+
+  <link href="//fonts.googleapis.com/css?family=Open+Sans:600,800" rel="stylesheet" type="text/css">
+  <link rel="shortcut icon" href="/favicon.png">
+  <link rel="alternate" type="application/rss+xml" title="Kyle Halladay" href="http://kylehalladay.com/atom.xml" />
+
+  <link rel="stylesheet" href="/assets/css/all.css">
+  <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    
+</head>
+<body>
+  <div class="container">
+    <div class="four columns sidebar">
+      <nav>
+  <a href="/">
+    <img src="/logo.jpg" id="logo" alt="Blog logo" width="200" height="200"/>
+  </a>
+  <h2>I'm <a href="/">Kyle Halladay</a>.</h2>
+  <div id="bio">
+    <p>I do graphics and engine programming for games. </p>
+    <p>I'm the author of <a href="https://www.amazon.com/Practical-Shader-Development-Fragment-Developers/dp/1484244567">Practical Shader Development</a>, which is all about learning to write shaders.</p>
+    <p>Check out <a href="/archive.html">some other stuff I've written</a></p>
+  </div>
+  <div id="social">
+    Want to say hi?
+<div id="stalker">
+  
+  <a title="khalladay on Github" href="https://github.com/khalladay">
+    <i class="fa fa-github-square"></i>
+  </a>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  <a title="khalladay on Twitter" href="https://twitter.com/khalladay">
+    <i class="fa fa-twitter-square"></i>
+  </a>
+  
+
+  
+
+  
+
+  
+  <a title="Kyle Halladay on LinkedIn" href="https://www.linkedin.com/in/kylehalladay">
+    <i class="fa fa-linkedin-square"></i>
+  </a>
+  
+
+  
+
+  
+  <a title="Kyle Halladay via Email" href="mailto:k.mj.halladay@gmail.com">
+    <i class="fa fa-envelope-square"></i>
+  </a>
+  
+
+  <a title="RSS feed" id="rss" href="/atom.xml">
+    <i class="fa fa-rss-square"></i>
+  </a>
+</div>
+
+  </div>
+</nav>
+
+    </div>
+
+    <div class="eleven columns content">
+      <topbar><div align="center"><h2><a href="/index.html" style="color:#000">KyleHalladay.com</a></h2></div>
+      <div align="center" style="font-size:18px"><a href="/archive.html">Archive</a></div>
+      <hr style="border-color:#000; margin:1em -0.25em;"></topbar>
+
+      <p class="meta">
+
+</p>
+
+<div style="font-size:14px">14 Jul 2021</div>
+<h1 class="title">Hooking and Hijacking DirectX 11 Functions In Skyrim</h1> 
+
+<div id="post">
+  <style>
+.collapsible {
+  padding: 10px;
+  background-color: #F0F0F0;
+  border-style: solid;
+  border-color: #333333;
+  border-width: 1px;
+}
+
+.collapsewrapper2 {
+    padding: 0px 0px 18px 0px;
+}
+</style>
+
+<p>My last post was a deep dive into the nuts and bolts of how function hooking works, so for my next project I wanted to focus less on how hooking works, and more on how to use it to do something cool. I started looking at function hooking because I wanted to understand how <a href="https://reshade.me/">ReShade</a> works, so I decided that I’d take a baby step closer to that goal and draw a triangle across the screen in a real game. I’m a huge Skyrim fan, and it seemed like as good a candidate as any, so that’s what I went with.</p>
+
+<p>This post is going to take it for granted that you already know how function hooking works. If you don’t, and that sounds interesting, see my <a href="/blog/2020/11/13/Hooking-By-Example.html">previous post</a>, or my <a href="https://github.com/khalladay/hooking-by-example">hooking-by-example</a> project.</p>
+
+<div align="center">
+<img src="/images/post_images/2021-07-14/skyrim_triangle.jpg" />
+<font size="2">Note: you're looking for modern c++, clean code or best practices, turn back now</font>
+<br /><br />
+</div>
+
+<p>As usual with things I write about, all the code for this project is up <a href="https://github.com/khalladay/triangle-injection">on github</a>, so if you just want to see the code, have at it!</p>
+
+<h2 id="dll-hijacking-is-the-new-dll-injection">DLL Hijacking is the New DLL Injection</h2>
+<p>I’ve built a few projects that have used process injection to get programs to run code they didn’t intend to, so for this project I decided to try something new. Instead of injecting a dll containing the code to draw a triangle, I decided to abuse Windows’ DLL search order to get Skyrim to load a dll full of my code during startup.</p>
+
+<p>Whenever a program loads a DLL by name, it looks in a number of pre-set locations for that DLL, and loads the first one it finds. I knew that Skyrim uses DirectX 11 for it’s renderer, which means that it loads d3d11.dll during startup. My plan was to create my own dll, call it d3d11.dll, and place it in the same directory as Skyrim’s executable.</p>
+
+<p>This dll would sit in between the game code and the real version of d3d11.dll. For functions I didn’t want to add any additional sauce to, my code would call the real dll’s version of that function and return the result. In cases where I wanted to add my own logic, I could intercept any function call I wanted and insert that logic before or after calling the real D3D11.dll’s function. DLLs that do this are called “proxy” dlls. This isn’t a new idea by any means, there’s tons of projects and literature out there for using proxy dlls for everything (including game hacking). Also I stole the idea from ReShade.</p>
+
+<div align="center">
+<img src="/images/post_images/2021-07-14/proxy_dll.png" />
+<br /><br />
+</div>
+
+<p>Creating a proxy version of d3d11.dll that contains every function eported by the actual library is a chunk of work, but luckily I didn’t have to do that. Instead, I fired up <a href="https://ntcore.com/?page_id=388">CFF Explorer</a> and took a look at the functions Skyrim actually imports. It turns out this is just a single D3D11.dll export: D3D11CreateDeviceAndSwapChain. No complaints here.</p>
+
+<p>I had never built a proxy dll before, so my first step was to make an empty one (with just a dllmain function), and see what happens if a progrma loads a dll that doesn’t have the functions it expects it to have. This works as well as you might expect. I put a call to MessageBox() in DLLMain to see if things even progressed that far. They didnt.</p>
+
+<div align="center">
+<img src="/images/post_images/2021-07-14/launching_with_dxgi_that_just_pops_messagebox.png" />
+<font size="2">I changed my system's language to french once, some things have never changed back</font>
+<br /><br />
+</div>
+
+<p>My next step was to try to write a proxy dll that didn’t do anything except forward all calls to D3D11CreateDeviceAndSwapChain to the real version of that function, and return the result. The goal here being that I could get Skyrim to load my dll (confirmed by a call to MessageBox in DLLMain), and run like normal. This is a relatively straightforward process. My .def file already declared that the proxy dll was exporting a function called D3D11CreateDeviceAndSwapChain, so all I had to do was create that function with the right type signature, and in the function body, load the real D3D11 library and call the real D3D11CreateDeviceAndSwapChain function.</p>
+
+<div class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="k">typedef</span> <span class="nf">HRESULT</span><span class="p">(</span><span class="kr">__stdcall</span><span class="o">*</span> <span class="n">fn_D3D11CreateDeviceAndSwapChain</span><span class="p">)(</span>
+  <span class="n">IDXGIAdapter</span><span class="o">*</span><span class="p">,</span>
+  <span class="n">D3D_DRIVER_TYPE</span><span class="p">,</span>
+  <span class="n">HMODULE</span><span class="p">,</span>
+  <span class="n">UINT</span><span class="p">,</span>
+  <span class="k">const</span> <span class="n">D3D_FEATURE_LEVEL</span><span class="o">*</span><span class="p">,</span>
+  <span class="n">UINT</span><span class="p">,</span>
+  <span class="n">UINT</span><span class="p">,</span>
+  <span class="k">const</span> <span class="n">DXGI_SWAP_CHAIN_DESC</span><span class="o">*</span><span class="p">,</span>
+  <span class="n">IDXGISwapChain</span><span class="o">**</span><span class="p">,</span>
+  <span class="n">ID3D11Device</span><span class="o">**</span><span class="p">,</span>
+  <span class="n">D3D_FEATURE_LEVEL</span><span class="o">*</span><span class="p">,</span>
+  <span class="n">ID3D11DeviceContext</span><span class="o">**</span><span class="p">);</span>
+
+
+<span class="n">fn_D3D11CreateDeviceAndSwapChain</span> <span class="nf">LoadD3D11AndGetOriginalFuncPointer</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="kt">char</span> <span class="n">path</span><span class="p">[</span><span class="n">MAX_PATH</span><span class="p">];</span>
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">GetSystemDirectoryA</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">MAX_PATH</span><span class="p">))</span> <span class="k">return</span> <span class="nb">nullptr</span><span class="p">;</span>
+
+  <span class="n">strcat_s</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">MAX_PATH</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">char</span><span class="p">),</span> <span class="s">"</span><span class="se">\\</span><span class="s">d3d11.dll"</span><span class="p">);</span>
+  <span class="n">HMODULE</span> <span class="n">d3d_dll</span> <span class="o">=</span> <span class="n">LoadLibraryA</span><span class="p">(</span><span class="n">path</span><span class="p">);</span> 
+
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">d3d_dll</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">MessageBox</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="n">TEXT</span><span class="p">(</span><span class="s">"Could Not Locate Original D3D11 DLL"</span><span class="p">),</span> <span class="n">TEXT</span><span class="p">(</span><span class="s">"Darn"</span><span class="p">),</span> <span class="mi">0</span><span class="p">);</span>
+    <span class="k">return</span> <span class="nb">nullptr</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="p">(</span><span class="n">fn_D3D11CreateDeviceAndSwapChain</span><span class="p">)</span><span class="n">GetProcAddress</span><span class="p">(</span><span class="n">d3d_dll</span><span class="p">,</span> <span class="n">TEXT</span><span class="p">(</span><span class="s">"D3D11CreateDeviceAndSwapChain"</span><span class="p">));</span>
+<span class="p">}</span>
+
+
+<span class="k">extern</span> <span class="s">"C"</span> <span class="n">HRESULT</span> <span class="kr">__stdcall</span> <span class="nf">D3D11CreateDeviceAndSwapChain</span><span class="p">(</span>
+  <span class="n">IDXGIAdapter</span> <span class="o">*</span> <span class="n">pAdapter</span><span class="p">,</span>
+  <span class="n">D3D_DRIVER_TYPE</span>            <span class="n">DriverType</span><span class="p">,</span>
+  <span class="n">HMODULE</span>                    <span class="n">Software</span><span class="p">,</span>
+  <span class="n">UINT</span>                       <span class="n">Flags</span><span class="p">,</span>
+  <span class="k">const</span> <span class="n">D3D_FEATURE_LEVEL</span> <span class="o">*</span> <span class="n">pFeatureLevels</span><span class="p">,</span>
+  <span class="n">UINT</span>                       <span class="n">FeatureLevels</span><span class="p">,</span>
+  <span class="n">UINT</span>                       <span class="n">SDKVersion</span><span class="p">,</span>
+  <span class="k">const</span> <span class="n">DXGI_SWAP_CHAIN_DESC</span> <span class="o">*</span> <span class="n">pSwapChainDesc</span><span class="p">,</span>
+  <span class="n">IDXGISwapChain</span> <span class="o">*</span> <span class="o">*</span><span class="n">ppSwapChain</span><span class="p">,</span>
+  <span class="n">ID3D11Device</span> <span class="o">*</span> <span class="o">*</span><span class="n">ppDevice</span><span class="p">,</span>
+  <span class="n">D3D_FEATURE_LEVEL</span> <span class="o">*</span> <span class="n">pFeatureLevel</span><span class="p">,</span>
+  <span class="n">ID3D11DeviceContext</span> <span class="o">*</span> <span class="o">*</span><span class="n">ppImmediateContext</span>
+<span class="p">)</span>
+<span class="p">{</span>   
+  <span class="n">fn_D3D11CreateDeviceAndSwapChain</span> <span class="n">D3D11CreateDeviceAndSwapChain_Orig</span> <span class="o">=</span> <span class="n">LoadD3D11AndGetOriginalFuncPointer</span><span class="p">();</span>
+  
+  <span class="n">HRESULT</span> <span class="n">res</span> <span class="o">=</span> <span class="n">D3D11CreateDeviceAndSwapChain_Orig</span><span class="p">(</span>
+    <span class="n">pAdapter</span><span class="p">,</span> 
+    <span class="n">DriverType</span><span class="p">,</span> 
+    <span class="n">Software</span><span class="p">,</span> 
+    <span class="n">Flags</span><span class="p">,</span> 
+    <span class="n">pFeatureLevels</span><span class="p">,</span> 
+    <span class="n">FeatureLevels</span><span class="p">,</span> 
+    <span class="n">SDKVersion</span><span class="p">,</span> 
+    <span class="n">pSwapChainDesc</span><span class="p">,</span> 
+    <span class="n">ppSwapChain</span><span class="p">,</span> 
+    <span class="n">ppDevice</span><span class="p">,</span> 
+    <span class="n">pFeatureLevel</span><span class="p">,</span> 
+    <span class="n">ppImmediateContext</span><span class="p">);</span>
+  
+  <span class="k">return</span> <span class="n">res</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">BOOL</span> <span class="n">WINAPI</span> <span class="nf">DllMain</span><span class="p">(</span><span class="n">HINSTANCE</span> <span class="n">hinstDLL</span><span class="p">,</span> <span class="n">DWORD</span> <span class="n">ul_reason_for_call</span><span class="p">,</span> <span class="n">LPVOID</span> <span class="n">lpvReserved</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">ul_reason_for_call</span> <span class="o">==</span> <span class="n">DLL_PROCESS_ATTACH</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">MessageBox</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="n">TEXT</span><span class="p">(</span><span class="s">"Loaded Proxy DLL"</span><span class="p">),</span> <span class="n">TEXT</span><span class="p">(</span><span class="s">"Success"</span><span class="p">),</span> <span class="mi">0</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="nb">true</span><span class="p">;</span>
+<span class="p">}</span></code></pre></div>
+
+<p>Pasting the dll created with the code next to the Skyrim binary (for me: C:\Program Files (x86)\Steam\steamapps\common\Skyrim Special Edition) and then launching the game through Steam successfully popped the message box, and proceeded to play like normal. Perfect.</p>
+
+<h2 id="finding-a-function-to-hook">Finding A Function To Hook</h2>
+<p>Now that I had my proxy dll minimally working, it was time to use it to do something interesting. I figured it would be pretty easy to add some more code to D3D11CreateDeviceAndSwapChain to set up all the buffers and shaders needed to render a triangle, and then intercept a call to IDXGISwapchain::Present to insert a draw call for that triangle at the end of a frame. There was just one small problem: I had no idea what the address of IDXGISwapchain::Present was, and this is where things take a turn for the hacky.</p>
+
+<p>IDXGISwapChain isn’t really a class, it’s a COM interface. The ppSwapChain pointer returned by D3D11CreateDeviceAndSwapChain is a pointer to <em>something</em> that implements said interface, but you never get to see the actual concrete type pointed to by that pointer, so I couldn’t just make a function pointer to the concrete implementation of Present(). The one saving grace in all this is that i knew that whatever ppSwapChain pointed to, it had a vtable. Somewhere in memory, I already had a pointer to the Present function, I just needed to figure out how to get it.</p>
+
+<p>First, I needed to get a pointer to the vtable for the swapchain that gets created by the call to CreateDeviceAndSwapChain. This meant adding the following perfectly reasonable line of code to my proxy CreateDeviceAndSwapChain function (right before the return statement):</p>
+
+<div class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="kt">void</span><span class="o">**</span> <span class="n">swapChainVTable</span> <span class="o">=</span> <span class="o">*</span><span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="kt">void</span><span class="o">***&gt;</span><span class="p">(</span><span class="o">*</span><span class="n">ppSwapChain</span><span class="p">);</span></code></pre></div>
+
+<p>Then I threw a breakpoint right after that line so I could see the value of swapChainVTable in the VS debugger. By itself, this isn’t super helpful, since it’s just a pointer to the first element in the vtable, but in the course of doing this I learned a new Visual Studio trick to help out here. If you add a watch for a variable, and then add a suffix to the name of that watch like “, 50”, Visual Studio will give you a debug view that assumes swapChainVTable is a pointer to an array, and show you the next 50 elements in that array. So I created a watch for “swapChainVTable,50” which showed me the first 50 pointers in the swapchain object’s vtable.</p>
+
+<div align="center">
+<img src="/images/post_images/2021-07-14/nosymbol_watchwindow.png" />
+<br /><br />
+</div>
+
+<p>This by itself wasn’t be the most useful (although I guess I could have figured out the right function by trial and error). Microsoft publishes the symbols for D3D11.dll though, so I had VS grab those from the Microsoft symbol server and used them to get the function names that corresponded with the vtable memory addresses. Once I had that, I could see that the Present function is the 9th element in swapChain vtable.</p>
+
+<p>Of course, Microsoft could update DXGI and change the ordering of function in the vtable at any time, but it works for now, so yolo.</p>
+
+<div align="center">
+<img src="/images/post_images/2021-07-14/symbolicated_watchwindow.png" />
+<br /><br />
+</div>
+
+<p>Once I had the actual address, I could re-use the hooking code from my last post and redirect all calls to Present to my own function, which I could use to issue a draw call for the custom triangle prior to actually calling Present().</p>
+
+<div class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="n">HRESULT</span> <span class="nf">DXGISwapChain_Present_Hook</span><span class="p">(</span><span class="n">IDXGISwapChain</span><span class="o">*</span> <span class="n">thisPtr</span><span class="p">,</span> <span class="n">UINT</span> <span class="n">SyncInterval</span><span class="p">,</span> <span class="n">UINT</span> <span class="n">Flags</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="c1">//triangle drawing code will go here</span>
+
+  <span class="c1">//this is a specific quirk of my hooking code,</span>
+  <span class="c1">//the address for the function being hooked is stored in a thread-local stack,</span>
+  <span class="c1">//Getting the address of the original function means calling PopAddress.</span>
+  <span class="c1">//more details in the "Hooking By Example" project on my github</span>
+  <span class="n">fn_DXGISwapChain_Present</span> <span class="n">DXGISwapChain_Present_Orig</span><span class="p">;</span>
+  <span class="n">PopAddress</span><span class="p">(</span><span class="kt">uint64_t</span><span class="p">(</span><span class="o">&amp;</span><span class="n">DXGISwapChain_Present_Orig</span><span class="p">));</span>
+
+  <span class="c1">//actuall call Present</span>
+  <span class="n">HRESULT</span> <span class="n">r</span> <span class="o">=</span> <span class="n">DXGISwapChain_Present_Orig</span><span class="p">(</span><span class="n">thisPtr</span><span class="p">,</span> <span class="n">SyncInterval</span><span class="p">,</span> <span class="n">Flags</span><span class="p">);</span>
+  <span class="k">return</span> <span class="n">r</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">extern</span> <span class="s">"C"</span> <span class="n">HRESULT</span> <span class="kr">__stdcall</span> <span class="nf">D3D11CreateDeviceAndSwapChain</span><span class="p">(</span>
+  <span class="n">IDXGIAdapter</span> <span class="o">*</span> <span class="n">pAdapter</span><span class="p">,</span>
+  <span class="n">D3D_DRIVER_TYPE</span>            <span class="n">DriverType</span><span class="p">,</span>
+  <span class="n">HMODULE</span>                    <span class="n">Software</span><span class="p">,</span>
+  <span class="n">UINT</span>                       <span class="n">Flags</span><span class="p">,</span>
+  <span class="k">const</span> <span class="n">D3D_FEATURE_LEVEL</span> <span class="o">*</span> <span class="n">pFeatureLevels</span><span class="p">,</span>
+  <span class="n">UINT</span>                       <span class="n">FeatureLevels</span><span class="p">,</span>
+  <span class="n">UINT</span>                       <span class="n">SDKVersion</span><span class="p">,</span>
+  <span class="k">const</span> <span class="n">DXGI_SWAP_CHAIN_DESC</span> <span class="o">*</span> <span class="n">pSwapChainDesc</span><span class="p">,</span>
+  <span class="n">IDXGISwapChain</span> <span class="o">*</span> <span class="o">*</span><span class="n">ppSwapChain</span><span class="p">,</span>
+  <span class="n">ID3D11Device</span> <span class="o">*</span> <span class="o">*</span><span class="n">ppDevice</span><span class="p">,</span>
+  <span class="n">D3D_FEATURE_LEVEL</span> <span class="o">*</span> <span class="n">pFeatureLevel</span><span class="p">,</span>
+  <span class="n">ID3D11DeviceContext</span> <span class="o">*</span> <span class="o">*</span><span class="n">ppImmediateContext</span>
+<span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">fn_D3D11CreateDeviceAndSwapChain</span> <span class="n">D3D11CreateDeviceAndSwapChain_Orig</span> <span class="o">=</span> <span class="n">LoadD3D11AndGetOriginalFuncPointer</span><span class="p">();</span>
+
+  <span class="n">HRESULT</span> <span class="n">res</span> <span class="o">=</span> <span class="n">D3D11CreateDeviceAndSwapChain_Orig</span><span class="p">(</span><span class="n">pAdapter</span><span class="p">,</span> <span class="n">DriverType</span><span class="p">,</span> <span class="n">Software</span><span class="p">,</span> <span class="n">Flags</span><span class="p">,</span> <span class="n">pFeatureLevels</span><span class="p">,</span> <span class="n">FeatureLevels</span><span class="p">,</span> <span class="n">SDKVersion</span><span class="p">,</span> <span class="n">pSwapChainDesc</span><span class="p">,</span> <span class="n">ppSwapChain</span><span class="p">,</span> <span class="n">ppDevice</span><span class="p">,</span> <span class="n">pFeatureLevel</span><span class="p">,</span> <span class="n">ppImmediateContext</span><span class="p">);</span>
+
+  <span class="kt">void</span><span class="o">**</span> <span class="n">swapChainVTable</span> <span class="o">=</span> <span class="o">*</span><span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="kt">void</span><span class="o">***&gt;</span><span class="p">(</span><span class="o">*</span><span class="n">ppSwapChain</span><span class="p">);</span>  
+  
+  <span class="c1">//redirects calls to swapChainVTable[8] to DXGISwapChain_Present_Hook</span>
+  <span class="c1">//for more details about hooking, see my previous blog post</span>
+  <span class="n">InstallHook</span><span class="p">(</span><span class="n">swapChainVTable</span><span class="p">[</span><span class="mi">8</span><span class="p">],</span> <span class="n">DXGISwapChain_Present_Hook</span><span class="p">);</span>
+
+  <span class="k">return</span> <span class="n">res</span><span class="p">;</span>
+<span class="p">}</span></code></pre></div>
+
+<h2 id="actually-drawing-a-triangle">Actually Drawing a Triangle</h2>
+<p>Once I had the IDXGISwapChain::Present hook working, the rest of this project fell into place pretty quickly. I added all the normal D3D11 calls for creating a mesh, compiling shaders, etc to CreateDeviceAndSwapChain (after device creation), and then added the draw commands for the triangle to the Present hook, before having that hook call the regular Present function. Rather than try to shove hlsl code in my cpp files, I just had the code look for a folder called “hook_content” in the same directory as the hooked binary, and load the shaders from there. Yet another idea I stole from <a href="https://reshade.me/">ReShade</a>.</p>
+
+<p>The resulting code is simple enough to be a D3D11 tutorial project, so I’m just going to paste it below for reference and not waste much time talking about it. I’ve also included all the hooking code too. As mentioned, the entire project (including the test d3d11 app I built) is also <a href="https://github.com/khalladay/triangle-injection">on github</a>.</p>
+
+<div class="collapsewrapper2">
+<details class="collapsible">
+    <summary>Full DX11 Hooking Code (Click To Expand)</summary>
+
+    <div class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="cp">#pragma once
+#include &lt;Windows.h&gt;
+#include "debug.h"
+#include &lt;stdint.h&gt;
+#include &lt;d3dcompiler.h&gt;
+#include &lt;d3d11.h&gt;
+#include &lt;d3d11_4.h&gt;
+#include &lt;shlwapi.h&gt;
+#include "hooking.h"
+</span>
+<span class="cp">#pragma comment (lib, "Shlwapi.lib") //for PathRemoveFileSpecA
+#pragma comment(lib, "d3dcompiler.lib")
+</span>
+
+<span class="k">typedef</span> <span class="nf">HRESULT</span><span class="p">(</span><span class="kr">__stdcall</span><span class="o">*</span> <span class="n">fn_D3D11CreateDeviceAndSwapChain</span><span class="p">)(</span>
+  <span class="n">IDXGIAdapter</span><span class="o">*</span><span class="p">,</span>
+  <span class="n">D3D_DRIVER_TYPE</span><span class="p">,</span>
+  <span class="n">HMODULE</span><span class="p">,</span>
+  <span class="n">UINT</span><span class="p">,</span>
+  <span class="k">const</span> <span class="n">D3D_FEATURE_LEVEL</span><span class="o">*</span><span class="p">,</span>
+  <span class="n">UINT</span><span class="p">,</span>
+  <span class="n">UINT</span><span class="p">,</span>
+  <span class="k">const</span> <span class="n">DXGI_SWAP_CHAIN_DESC</span><span class="o">*</span><span class="p">,</span>
+  <span class="n">IDXGISwapChain</span><span class="o">**</span><span class="p">,</span>
+  <span class="n">ID3D11Device</span><span class="o">**</span><span class="p">,</span>
+  <span class="n">D3D_FEATURE_LEVEL</span><span class="o">*</span><span class="p">,</span>
+  <span class="n">ID3D11DeviceContext</span><span class="o">**</span><span class="p">);</span>
+
+<span class="k">typedef</span> <span class="nf">HRESULT</span><span class="p">(</span><span class="kr">__stdcall</span><span class="o">*</span> <span class="n">fn_DXGISwapChain_Present</span><span class="p">)(</span><span class="n">IDXGISwapChain</span><span class="o">*</span><span class="p">,</span> <span class="n">UINT</span><span class="p">,</span> <span class="n">UINT</span><span class="p">);</span>
+
+<span class="n">IDXGISwapChain</span><span class="o">*</span> <span class="n">swapChain</span> <span class="o">=</span> <span class="nb">nullptr</span><span class="p">;</span>
+<span class="n">ID3D11Device5</span><span class="o">*</span> <span class="n">device</span> <span class="o">=</span> <span class="nb">nullptr</span><span class="p">;</span>
+<span class="n">ID3D11DeviceContext4</span><span class="o">*</span> <span class="n">devCon</span> <span class="o">=</span> <span class="nb">nullptr</span><span class="p">;</span>
+<span class="n">ID3D10Blob</span><span class="o">*</span> <span class="n">vs_blob</span> <span class="o">=</span> <span class="nb">nullptr</span><span class="p">;</span>
+<span class="n">ID3D11VertexShader</span><span class="o">*</span> <span class="n">vs</span> <span class="o">=</span> <span class="nb">nullptr</span><span class="p">;</span>
+<span class="n">ID3D10Blob</span><span class="o">*</span> <span class="n">ps_blob</span> <span class="o">=</span> <span class="nb">nullptr</span><span class="p">;</span>
+<span class="n">ID3D11PixelShader</span><span class="o">*</span> <span class="n">ps</span> <span class="o">=</span> <span class="nb">nullptr</span><span class="p">;</span>
+<span class="n">ID3D11Buffer</span><span class="o">*</span> <span class="n">vertex_buffer</span> <span class="o">=</span> <span class="nb">nullptr</span><span class="p">;</span>
+<span class="n">ID3D11InputLayout</span><span class="o">*</span> <span class="n">vertLayout</span> <span class="o">=</span> <span class="nb">nullptr</span><span class="p">;</span>
+<span class="n">ID3D11RasterizerState</span><span class="o">*</span> <span class="n">SolidRasterState</span> <span class="o">=</span> <span class="nb">nullptr</span><span class="p">;</span>
+<span class="n">ID3D11DepthStencilState</span><span class="o">*</span> <span class="n">SolidDepthStencilState</span> <span class="o">=</span> <span class="nb">nullptr</span><span class="p">;</span>
+
+<span class="n">HRESULT</span> <span class="nf">DXGISwapChain_Present_Hook</span><span class="p">(</span><span class="n">IDXGISwapChain</span><span class="o">*</span> <span class="n">thisPtr</span><span class="p">,</span> <span class="n">UINT</span> <span class="n">SyncInterval</span><span class="p">,</span> <span class="n">UINT</span> <span class="n">Flags</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">devCon</span><span class="o">-&gt;</span><span class="n">VSSetShader</span><span class="p">(</span><span class="n">vs</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+  <span class="n">devCon</span><span class="o">-&gt;</span><span class="n">PSSetShader</span><span class="p">(</span><span class="n">ps</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+  <span class="n">devCon</span><span class="o">-&gt;</span><span class="n">IASetInputLayout</span><span class="p">(</span><span class="n">vertLayout</span><span class="p">);</span>
+  <span class="n">devCon</span><span class="o">-&gt;</span><span class="n">RSSetState</span><span class="p">(</span><span class="n">SolidRasterState</span><span class="p">);</span>
+  <span class="n">devCon</span><span class="o">-&gt;</span><span class="n">OMSetDepthStencilState</span><span class="p">(</span><span class="n">SolidDepthStencilState</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+
+  <span class="n">UINT</span> <span class="n">stride</span> <span class="o">=</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">float</span><span class="p">)</span> <span class="o">*</span> <span class="mi">6</span><span class="p">;</span>
+  <span class="n">UINT</span> <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="n">devCon</span><span class="o">-&gt;</span><span class="n">IASetVertexBuffers</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">vertex_buffer</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">stride</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">offset</span><span class="p">);</span>
+  <span class="n">devCon</span><span class="o">-&gt;</span><span class="n">IASetPrimitiveTopology</span><span class="p">(</span><span class="n">D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST</span><span class="p">);</span>
+  <span class="n">devCon</span><span class="o">-&gt;</span><span class="n">Draw</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+
+
+  <span class="n">fn_DXGISwapChain_Present</span> <span class="n">DXGISwapChain_Present_Orig</span><span class="p">;</span>
+  <span class="n">PopAddress</span><span class="p">(</span><span class="kt">uint64_t</span><span class="p">(</span><span class="o">&amp;</span><span class="n">DXGISwapChain_Present_Orig</span><span class="p">));</span>
+
+  <span class="n">HRESULT</span> <span class="n">r</span> <span class="o">=</span> <span class="n">DXGISwapChain_Present_Orig</span><span class="p">(</span><span class="n">thisPtr</span><span class="p">,</span> <span class="n">SyncInterval</span><span class="p">,</span> <span class="n">Flags</span><span class="p">);</span>
+  <span class="k">return</span> <span class="n">r</span><span class="p">;</span>
+<span class="p">}</span>
+
+
+<span class="kt">void</span> <span class="nf">LoadShaders</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="p">{</span>
+    <span class="kt">char</span> <span class="n">filepath</span><span class="p">[</span><span class="mi">512</span><span class="p">];</span>
+    <span class="n">HMODULE</span> <span class="n">hModule</span> <span class="o">=</span> <span class="n">GetModuleHandle</span><span class="p">(</span><span class="nb">NULL</span><span class="p">);</span>
+    <span class="n">GetModuleFileNameA</span><span class="p">(</span><span class="n">hModule</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="mi">512</span><span class="p">);</span>
+    <span class="n">PathRemoveFileSpecA</span><span class="p">(</span><span class="n">filepath</span><span class="p">);</span>
+
+    <span class="n">strcat_s</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="mi">512</span><span class="p">,</span> <span class="s">"</span><span class="se">\\</span><span class="s">hook_content</span><span class="se">\\</span><span class="s">passthrough_vs.shader"</span><span class="p">);</span>
+
+    <span class="kt">wchar_t</span> <span class="n">wPath</span><span class="p">[</span><span class="mi">513</span><span class="p">];</span>
+    <span class="kt">size_t</span> <span class="n">outSize</span><span class="p">;</span>
+
+    <span class="n">mbstowcs_s</span><span class="p">(</span><span class="o">&amp;</span><span class="n">outSize</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">wPath</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">strlen</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">strlen</span><span class="p">(</span><span class="n">filepath</span><span class="p">));</span>
+    <span class="n">ID3D10Blob</span><span class="o">*</span> <span class="n">compileErrors</span> <span class="o">=</span> <span class="nb">nullptr</span><span class="p">;</span>
+
+    <span class="n">HRESULT</span> <span class="n">err</span> <span class="o">=</span> <span class="n">D3DCompileFromFile</span><span class="p">(</span><span class="n">wPath</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s">"main"</span><span class="p">,</span> <span class="s">"vs_5_0"</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">vs_blob</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">compileErrors</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">compileErrors</span> <span class="o">!=</span> <span class="nb">nullptr</span> <span class="o">&amp;&amp;</span> <span class="n">compileErrors</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">ID3D10Blob</span><span class="o">*</span> <span class="n">outErrorsDeref</span> <span class="o">=</span> <span class="n">compileErrors</span><span class="p">;</span>
+      <span class="n">OutputDebugStringA</span><span class="p">((</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">compileErrors</span><span class="o">-&gt;</span><span class="n">GetBufferPointer</span><span class="p">());</span>
+    <span class="p">}</span>
+
+    <span class="n">err</span> <span class="o">=</span> <span class="n">device</span><span class="o">-&gt;</span><span class="n">CreateVertexShader</span><span class="p">(</span><span class="n">vs_blob</span><span class="o">-&gt;</span><span class="n">GetBufferPointer</span><span class="p">(),</span> <span class="n">vs_blob</span><span class="o">-&gt;</span><span class="n">GetBufferSize</span><span class="p">(),</span> <span class="nb">NULL</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">vs</span><span class="p">);</span>
+    <span class="n">check</span><span class="p">(</span><span class="n">err</span> <span class="o">==</span> <span class="n">S_OK</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="p">{</span>
+    <span class="kt">char</span> <span class="n">filepath</span><span class="p">[</span><span class="mi">512</span><span class="p">];</span>
+    <span class="n">HMODULE</span> <span class="n">hModule</span> <span class="o">=</span> <span class="n">GetModuleHandle</span><span class="p">(</span><span class="nb">NULL</span><span class="p">);</span>
+    <span class="n">GetModuleFileNameA</span><span class="p">(</span><span class="n">hModule</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="mi">512</span><span class="p">);</span>
+    <span class="n">PathRemoveFileSpecA</span><span class="p">(</span><span class="n">filepath</span><span class="p">);</span>
+
+    <span class="n">strcat_s</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="mi">512</span><span class="p">,</span> <span class="s">"</span><span class="se">\\</span><span class="s">hook_content</span><span class="se">\\</span><span class="s">vertex_color_ps.shader"</span><span class="p">);</span>
+
+    <span class="kt">wchar_t</span> <span class="n">wPath</span><span class="p">[</span><span class="mi">513</span><span class="p">];</span>
+    <span class="kt">size_t</span> <span class="n">outSize</span><span class="p">;</span>
+
+    <span class="n">mbstowcs_s</span><span class="p">(</span><span class="o">&amp;</span><span class="n">outSize</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">wPath</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">strlen</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">strlen</span><span class="p">(</span><span class="n">filepath</span><span class="p">));</span>
+    <span class="n">ID3D10Blob</span><span class="o">*</span> <span class="n">compileErrors</span><span class="p">;</span>
+
+    <span class="n">HRESULT</span> <span class="n">err</span> <span class="o">=</span> <span class="n">D3DCompileFromFile</span><span class="p">(</span><span class="n">wPath</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s">"main"</span><span class="p">,</span> <span class="s">"ps_5_0"</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">ps_blob</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">compileErrors</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">compileErrors</span> <span class="o">!=</span> <span class="nb">nullptr</span> <span class="o">&amp;&amp;</span> <span class="n">compileErrors</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">ID3D10Blob</span><span class="o">*</span> <span class="n">outErrorsDeref</span> <span class="o">=</span> <span class="n">compileErrors</span><span class="p">;</span>
+      <span class="n">OutputDebugStringA</span><span class="p">((</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">compileErrors</span><span class="o">-&gt;</span><span class="n">GetBufferPointer</span><span class="p">());</span>
+    <span class="p">}</span>
+
+    <span class="n">err</span> <span class="o">=</span> <span class="n">device</span><span class="o">-&gt;</span><span class="n">CreatePixelShader</span><span class="p">(</span><span class="n">ps_blob</span><span class="o">-&gt;</span><span class="n">GetBufferPointer</span><span class="p">(),</span> <span class="n">ps_blob</span><span class="o">-&gt;</span><span class="n">GetBufferSize</span><span class="p">(),</span> <span class="nb">NULL</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">ps</span><span class="p">);</span>
+    <span class="n">check</span><span class="p">(</span><span class="n">err</span> <span class="o">==</span> <span class="n">S_OK</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+
+<span class="kt">void</span> <span class="nf">CreateMesh</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="k">const</span> <span class="kt">float</span> <span class="n">vertData</span><span class="p">[]</span> <span class="o">=</span>
+  <span class="p">{</span>
+    <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span>
+    <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span>  <span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span>
+    <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span>  <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span>
+  <span class="p">};</span>
+
+  <span class="n">D3D11_BUFFER_DESC</span> <span class="n">vertBufferDesc</span><span class="p">;</span>
+  <span class="n">ZeroMemory</span><span class="p">(</span><span class="o">&amp;</span><span class="n">vertBufferDesc</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">vertBufferDesc</span><span class="p">));</span>
+  <span class="n">vertBufferDesc</span><span class="p">.</span><span class="n">Usage</span> <span class="o">=</span> <span class="n">D3D11_USAGE_DEFAULT</span><span class="p">;</span>
+  <span class="n">vertBufferDesc</span><span class="p">.</span><span class="n">ByteWidth</span> <span class="o">=</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">float</span><span class="p">)</span> <span class="o">*</span> <span class="mi">6</span> <span class="o">*</span> <span class="mi">3</span><span class="p">;</span> <span class="c1">//6 floats per vert, 3 verts</span>
+  <span class="n">vertBufferDesc</span><span class="p">.</span><span class="n">BindFlags</span> <span class="o">=</span> <span class="n">D3D11_BIND_VERTEX_BUFFER</span><span class="p">;</span>
+  <span class="n">vertBufferDesc</span><span class="p">.</span><span class="n">CPUAccessFlags</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="n">vertBufferDesc</span><span class="p">.</span><span class="n">MiscFlags</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+  <span class="n">D3D11_SUBRESOURCE_DATA</span> <span class="n">vertBufferData</span><span class="p">;</span>
+  <span class="n">ZeroMemory</span><span class="p">(</span><span class="o">&amp;</span><span class="n">vertBufferData</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">vertBufferData</span><span class="p">));</span>
+  <span class="n">vertBufferData</span><span class="p">.</span><span class="n">pSysMem</span> <span class="o">=</span> <span class="n">vertData</span><span class="p">;</span>
+
+  <span class="n">HRESULT</span> <span class="n">res</span> <span class="o">=</span> <span class="n">device</span><span class="o">-&gt;</span><span class="n">CreateBuffer</span><span class="p">(</span><span class="o">&amp;</span><span class="n">vertBufferDesc</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">vertBufferData</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">vertex_buffer</span><span class="p">);</span>
+  <span class="n">check</span><span class="p">(</span><span class="n">res</span> <span class="o">==</span> <span class="n">S_OK</span><span class="p">);</span>
+<span class="p">}</span>
+
+
+<span class="kt">void</span> <span class="nf">CreateInputLayout</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="n">D3D11_INPUT_ELEMENT_DESC</span> <span class="n">vertElements</span><span class="p">[]</span> <span class="o">=</span>
+  <span class="p">{</span>
+    <span class="p">{</span><span class="s">"POSITION"</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">DXGI_FORMAT_R32G32B32_FLOAT</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span><span class="n">D3D11_INPUT_PER_VERTEX_DATA</span><span class="p">,</span> <span class="mi">0</span><span class="p">},</span>
+    <span class="p">{</span><span class="s">"COLOR"</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">DXGI_FORMAT_R32G32B32_FLOAT</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="n">D3D11_INPUT_PER_VERTEX_DATA</span><span class="p">,</span> <span class="mi">0</span><span class="p">}</span>
+  <span class="p">};</span>
+
+  <span class="n">HRESULT</span> <span class="n">err</span> <span class="o">=</span> <span class="n">device</span><span class="o">-&gt;</span><span class="n">CreateInputLayout</span><span class="p">(</span><span class="n">vertElements</span><span class="p">,</span> <span class="n">_countof</span><span class="p">(</span><span class="n">vertElements</span><span class="p">),</span> <span class="n">vs_blob</span><span class="o">-&gt;</span><span class="n">GetBufferPointer</span><span class="p">(),</span> <span class="n">vs_blob</span><span class="o">-&gt;</span><span class="n">GetBufferSize</span><span class="p">(),</span> <span class="o">&amp;</span><span class="n">vertLayout</span><span class="p">);</span>
+  <span class="n">check</span><span class="p">(</span><span class="n">err</span> <span class="o">==</span> <span class="n">S_OK</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">CreateRasterizerAndDepthStates</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="n">D3D11_RASTERIZER_DESC</span> <span class="n">soliddesc</span><span class="p">;</span>
+  <span class="n">ZeroMemory</span><span class="p">(</span><span class="o">&amp;</span><span class="n">soliddesc</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">D3D11_RASTERIZER_DESC</span><span class="p">));</span>
+  <span class="n">soliddesc</span><span class="p">.</span><span class="n">FillMode</span> <span class="o">=</span> <span class="n">D3D11_FILL_SOLID</span><span class="p">;</span>
+  <span class="n">soliddesc</span><span class="p">.</span><span class="n">CullMode</span> <span class="o">=</span> <span class="n">D3D11_CULL_NONE</span><span class="p">;</span>
+  <span class="n">HRESULT</span> <span class="n">err</span> <span class="o">=</span> <span class="n">device</span><span class="o">-&gt;</span><span class="n">CreateRasterizerState</span><span class="p">(</span><span class="o">&amp;</span><span class="n">soliddesc</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">SolidRasterState</span><span class="p">);</span>
+  <span class="n">check</span><span class="p">(</span><span class="n">err</span> <span class="o">==</span> <span class="n">S_OK</span><span class="p">);</span>
+
+  <span class="n">D3D11_DEPTH_STENCIL_DESC</span> <span class="n">depthDesc</span><span class="p">;</span>
+  <span class="n">ZeroMemory</span><span class="p">(</span><span class="o">&amp;</span><span class="n">depthDesc</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">D3D11_DEPTH_STENCIL_DESC</span><span class="p">));</span>
+  <span class="n">depthDesc</span><span class="p">.</span><span class="n">DepthEnable</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+  <span class="n">depthDesc</span><span class="p">.</span><span class="n">DepthWriteMask</span> <span class="o">=</span> <span class="n">D3D11_DEPTH_WRITE_MASK_ALL</span><span class="p">;</span>
+  <span class="n">depthDesc</span><span class="p">.</span><span class="n">DepthFunc</span> <span class="o">=</span> <span class="n">D3D11_COMPARISON_ALWAYS</span><span class="p">;</span>
+  <span class="n">err</span> <span class="o">=</span> <span class="n">device</span><span class="o">-&gt;</span><span class="n">CreateDepthStencilState</span><span class="p">(</span><span class="o">&amp;</span><span class="n">depthDesc</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">SolidDepthStencilState</span><span class="p">);</span>
+  <span class="n">check</span><span class="p">(</span><span class="n">err</span> <span class="o">==</span> <span class="n">S_OK</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="n">fn_D3D11CreateDeviceAndSwapChain</span> <span class="nf">LoadD3D11AndGetOriginalFuncPointer</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="kt">char</span> <span class="n">path</span><span class="p">[</span><span class="n">MAX_PATH</span><span class="p">];</span>
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">GetSystemDirectoryA</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">MAX_PATH</span><span class="p">))</span> <span class="k">return</span> <span class="nb">nullptr</span><span class="p">;</span>
+
+  <span class="n">strcat_s</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">MAX_PATH</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">char</span><span class="p">),</span> <span class="s">"</span><span class="se">\\</span><span class="s">d3d11.dll"</span><span class="p">);</span>
+  <span class="n">HMODULE</span> <span class="n">d3d_dll</span> <span class="o">=</span> <span class="n">LoadLibraryA</span><span class="p">(</span><span class="n">path</span><span class="p">);</span> 
+
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">d3d_dll</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">MessageBox</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="n">TEXT</span><span class="p">(</span><span class="s">"Could Not Locate Original D3D11 DLL"</span><span class="p">),</span> <span class="n">TEXT</span><span class="p">(</span><span class="s">"Darn"</span><span class="p">),</span> <span class="mi">0</span><span class="p">);</span>
+    <span class="k">return</span> <span class="nb">nullptr</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="p">(</span><span class="n">fn_D3D11CreateDeviceAndSwapChain</span><span class="p">)</span><span class="n">GetProcAddress</span><span class="p">(</span><span class="n">d3d_dll</span><span class="p">,</span> <span class="n">TEXT</span><span class="p">(</span><span class="s">"D3D11CreateDeviceAndSwapChain"</span><span class="p">));</span>
+<span class="p">}</span>
+
+<span class="kr">inline</span> <span class="kt">void</span><span class="o">**</span> <span class="nf">get_vtable_ptr</span><span class="p">(</span><span class="kt">void</span><span class="o">*</span> <span class="n">obj</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">return</span> <span class="o">*</span><span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="kt">void</span><span class="o">***&gt;</span><span class="p">(</span><span class="n">obj</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">extern</span> <span class="s">"C"</span> <span class="n">HRESULT</span> <span class="kr">__stdcall</span> <span class="nf">D3D11CreateDeviceAndSwapChain</span><span class="p">(</span>
+  <span class="n">IDXGIAdapter</span> <span class="o">*</span> <span class="n">pAdapter</span><span class="p">,</span>
+  <span class="n">D3D_DRIVER_TYPE</span>            <span class="n">DriverType</span><span class="p">,</span>
+  <span class="n">HMODULE</span>                    <span class="n">Software</span><span class="p">,</span>
+  <span class="n">UINT</span>                       <span class="n">Flags</span><span class="p">,</span>
+  <span class="k">const</span> <span class="n">D3D_FEATURE_LEVEL</span> <span class="o">*</span> <span class="n">pFeatureLevels</span><span class="p">,</span>
+  <span class="n">UINT</span>                       <span class="n">FeatureLevels</span><span class="p">,</span>
+  <span class="n">UINT</span>                       <span class="n">SDKVersion</span><span class="p">,</span>
+  <span class="k">const</span> <span class="n">DXGI_SWAP_CHAIN_DESC</span> <span class="o">*</span> <span class="n">pSwapChainDesc</span><span class="p">,</span>
+  <span class="n">IDXGISwapChain</span> <span class="o">*</span> <span class="o">*</span><span class="n">ppSwapChain</span><span class="p">,</span>
+  <span class="n">ID3D11Device</span> <span class="o">*</span> <span class="o">*</span><span class="n">ppDevice</span><span class="p">,</span>
+  <span class="n">D3D_FEATURE_LEVEL</span> <span class="o">*</span> <span class="n">pFeatureLevel</span><span class="p">,</span>
+  <span class="n">ID3D11DeviceContext</span> <span class="o">*</span> <span class="o">*</span><span class="n">ppImmediateContext</span>
+<span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">MessageBox</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="n">TEXT</span><span class="p">(</span><span class="s">"Calling D3D11CreateDeviceAndSwapChain"</span><span class="p">),</span> <span class="n">TEXT</span><span class="p">(</span><span class="s">"Ok"</span><span class="p">),</span> <span class="mi">0</span><span class="p">);</span>
+
+  <span class="n">fn_D3D11CreateDeviceAndSwapChain</span> <span class="n">D3D11CreateDeviceAndSwapChain_Orig</span> <span class="o">=</span> <span class="n">LoadD3D11AndGetOriginalFuncPointer</span><span class="p">();</span>
+
+  <span class="n">HRESULT</span> <span class="n">res</span> <span class="o">=</span> <span class="n">D3D11CreateDeviceAndSwapChain_Orig</span><span class="p">(</span><span class="n">pAdapter</span><span class="p">,</span> <span class="n">DriverType</span><span class="p">,</span> <span class="n">Software</span><span class="p">,</span> <span class="n">Flags</span><span class="p">,</span> <span class="n">pFeatureLevels</span><span class="p">,</span> <span class="n">FeatureLevels</span><span class="p">,</span> <span class="n">SDKVersion</span><span class="p">,</span> <span class="n">pSwapChainDesc</span><span class="p">,</span> <span class="n">ppSwapChain</span><span class="p">,</span> <span class="n">ppDevice</span><span class="p">,</span> <span class="n">pFeatureLevel</span><span class="p">,</span> <span class="n">ppImmediateContext</span><span class="p">);</span>
+
+  <span class="n">HRESULT</span> <span class="n">hr</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="n">ppDevice</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">QueryInterface</span><span class="p">(</span><span class="kr">__uuidof</span><span class="p">(</span><span class="n">ID3D11Device5</span><span class="p">),</span> <span class="p">(</span><span class="kt">void</span><span class="o">**</span><span class="p">)</span><span class="o">&amp;</span><span class="n">device</span><span class="p">);</span>
+  <span class="n">hr</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="n">ppImmediateContext</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">QueryInterface</span><span class="p">(</span><span class="kr">__uuidof</span><span class="p">(</span><span class="n">ID3D11DeviceContext</span><span class="p">),</span> <span class="p">(</span><span class="kt">void</span><span class="o">**</span><span class="p">)</span><span class="o">&amp;</span><span class="n">devCon</span><span class="p">);</span>
+
+  <span class="n">LoadShaders</span><span class="p">();</span>
+  <span class="n">CreateMesh</span><span class="p">();</span>
+  <span class="n">CreateInputLayout</span><span class="p">();</span>
+  <span class="n">CreateRasterizerAndDepthStates</span><span class="p">();</span>
+
+  <span class="n">swapChain</span> <span class="o">=</span> <span class="o">*</span><span class="n">ppSwapChain</span><span class="p">;</span>
+  <span class="kt">void</span><span class="o">**</span> <span class="n">swapChainVTable</span> <span class="o">=</span> <span class="n">get_vtable_ptr</span><span class="p">(</span><span class="n">swapChain</span><span class="p">);</span>
+  
+  <span class="n">InstallHook</span><span class="p">(</span><span class="n">swapChainVTable</span><span class="p">[</span><span class="mi">8</span><span class="p">],</span> <span class="n">DXGISwapChain_Present_Hook</span><span class="p">);</span>
+  <span class="c1">//present is [8];</span>
+
+  <span class="k">return</span> <span class="n">res</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">BOOL</span> <span class="n">WINAPI</span> <span class="nf">DllMain</span><span class="p">(</span><span class="n">HINSTANCE</span> <span class="n">hinstDLL</span><span class="p">,</span> <span class="n">DWORD</span> <span class="n">ul_reason_for_call</span><span class="p">,</span> <span class="n">LPVOID</span> <span class="n">lpvReserved</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">ul_reason_for_call</span> <span class="o">==</span> <span class="n">DLL_PROCESS_ATTACH</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">MessageBox</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="n">TEXT</span><span class="p">(</span><span class="s">"Target app has loaded your proxy d3d11.dll and called DllMain. If you're launching Skyrim via steam, you need to dismiss this popup quickly, otherwise you get a load error"</span><span class="p">),</span> <span class="n">TEXT</span><span class="p">(</span><span class="s">"Success"</span><span class="p">),</span> <span class="mi">0</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="nb">true</span><span class="p">;</span>
+<span class="p">}</span></code></pre></div>
+
+  </details></div>
+
+<div class="collapsewrapper2">
+<details class="collapsible">
+    <summary>Hooking Code (Click To Expand)</summary>
+
+    <p>Hooking.h:</p>
+
+    <div class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="cp">#pragma once
+#include &lt;Windows.h&gt;
+#include &lt;stdint.h&gt;
+</span>
+
+<span class="kt">void</span> <span class="nf">InstallHook</span><span class="p">(</span><span class="kt">void</span><span class="o">*</span> <span class="n">func2hook</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span> <span class="n">payloadFunc</span><span class="p">);</span>
+<span class="kr">__declspec</span><span class="p">(</span><span class="n">noinline</span><span class="p">)</span> <span class="kt">void</span> <span class="nf">PopAddress</span><span class="p">(</span><span class="kt">uint64_t</span> <span class="n">trampolinePtr</span><span class="p">);</span></code></pre></div>
+
+    <p>Hooking.cpp:</p>
+
+    <div class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="cp">#include "hooking.h"
+#include &lt;Windows.h&gt;
+#include &lt;stack&gt;
+#include &lt;stdio.h&gt;
+#include &lt;memoryapi.h&gt;
+#include &lt;wow64apiset.h&gt; // for checking is process is 64 bit
+#include &lt;TlHelp32.h&gt; //for PROCESSENTRY32, needs to be included after windows.h
+#include &lt;Psapi.h&gt;
+#include &lt;stdint.h&gt;
+#include "capstone/x86.h"
+#include "capstone/capstone.h"
+#include "debug.h"
+</span>
+<span class="k">thread_local</span> <span class="n">std</span><span class="o">::</span><span class="n">stack</span><span class="o">&lt;</span><span class="kt">uint64_t</span><span class="o">&gt;</span> <span class="n">hookJumpAddresses</span><span class="p">;</span>
+
+
+<span class="cp">#if _WIN64
+</span><span class="k">typedef</span> <span class="kt">uint64_t</span> <span class="n">addr_t</span><span class="p">;</span>
+<span class="cp">#else 
+</span><span class="k">typedef</span> <span class="kt">uint32_t</span> <span class="n">addr_t</span><span class="p">;</span>
+<span class="cp">#endif
+</span>
+<span class="kt">bool</span> <span class="nf">IsProcess64Bit</span><span class="p">(</span><span class="n">HANDLE</span> <span class="n">process</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">BOOL</span> <span class="n">isWow64</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+  <span class="n">IsWow64Process</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">isWow64</span><span class="p">);</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="n">isWow64</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="c1">//process is 32 bit, running on 64 bit machine</span>
+    <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="k">else</span>
+  <span class="p">{</span>
+    <span class="n">SYSTEM_INFO</span> <span class="n">sysInfo</span><span class="p">;</span>
+    <span class="n">GetSystemInfo</span><span class="p">(</span><span class="o">&amp;</span><span class="n">sysInfo</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">sysInfo</span><span class="p">.</span><span class="n">wProcessorArchitecture</span> <span class="o">==</span> <span class="n">PROCESSOR_ARCHITECTURE_AMD64</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="o">*</span> <span class="nf">AllocPageInTargetProcess</span><span class="p">(</span><span class="n">HANDLE</span> <span class="n">process</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">SYSTEM_INFO</span> <span class="n">sysInfo</span><span class="p">;</span>
+  <span class="n">GetSystemInfo</span><span class="p">(</span><span class="o">&amp;</span><span class="n">sysInfo</span><span class="p">);</span>
+  <span class="kt">int</span> <span class="n">PAGE_SIZE</span> <span class="o">=</span> <span class="n">sysInfo</span><span class="p">.</span><span class="n">dwPageSize</span><span class="p">;</span>
+
+  <span class="kt">void</span><span class="o">*</span> <span class="n">newPage</span> <span class="o">=</span> <span class="n">VirtualAllocEx</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">PAGE_SIZE</span><span class="p">,</span> <span class="n">MEM_COMMIT</span> <span class="o">|</span> <span class="n">MEM_RESERVE</span><span class="p">,</span> <span class="n">PAGE_EXECUTE_READWRITE</span><span class="p">);</span>
+  <span class="k">return</span> <span class="n">newPage</span><span class="p">;</span>
+<span class="p">}</span>
+
+
+<span class="kt">void</span><span class="o">*</span> <span class="nf">AllocPage</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="n">SYSTEM_INFO</span> <span class="n">sysInfo</span><span class="p">;</span>
+  <span class="n">GetSystemInfo</span><span class="p">(</span><span class="o">&amp;</span><span class="n">sysInfo</span><span class="p">);</span>
+  <span class="kt">int</span> <span class="n">PAGE_SIZE</span> <span class="o">=</span> <span class="n">sysInfo</span><span class="p">.</span><span class="n">dwPageSize</span><span class="p">;</span>
+
+  <span class="kt">void</span><span class="o">*</span> <span class="n">newPage</span> <span class="o">=</span> <span class="n">VirtualAlloc</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="n">PAGE_SIZE</span><span class="p">,</span> <span class="n">MEM_COMMIT</span> <span class="o">|</span> <span class="n">MEM_RESERVE</span><span class="p">,</span> <span class="n">PAGE_EXECUTE_READWRITE</span><span class="p">);</span>
+  <span class="k">return</span> <span class="n">newPage</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="o">*</span> <span class="nf">AllocatePageNearAddressRemote</span><span class="p">(</span><span class="n">HANDLE</span> <span class="n">handle</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span> <span class="n">targetAddr</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">check</span><span class="p">(</span><span class="n">IsProcess64Bit</span><span class="p">(</span><span class="n">handle</span><span class="p">));</span>
+
+  <span class="n">SYSTEM_INFO</span> <span class="n">sysInfo</span><span class="p">;</span>
+  <span class="n">GetSystemInfo</span><span class="p">(</span><span class="o">&amp;</span><span class="n">sysInfo</span><span class="p">);</span>
+  <span class="k">const</span> <span class="kt">uint64_t</span> <span class="n">PAGE_SIZE</span> <span class="o">=</span> <span class="n">sysInfo</span><span class="p">.</span><span class="n">dwPageSize</span><span class="p">;</span>
+
+  <span class="kt">uint64_t</span> <span class="n">startAddr</span> <span class="o">=</span> <span class="p">(</span><span class="kt">uint64_t</span><span class="p">(</span><span class="n">targetAddr</span><span class="p">)</span> <span class="o">&amp;</span> <span class="o">~</span><span class="p">(</span><span class="n">PAGE_SIZE</span> <span class="o">-</span> <span class="mi">1</span><span class="p">));</span> <span class="c1">//round down to nearest page boundary</span>
+  <span class="kt">uint64_t</span> <span class="n">minAddr</span> <span class="o">=</span> <span class="n">min</span><span class="p">(</span><span class="n">startAddr</span> <span class="o">-</span> <span class="mh">0x7FFFFF00</span><span class="p">,</span> <span class="p">(</span><span class="kt">uint64_t</span><span class="p">)</span><span class="n">sysInfo</span><span class="p">.</span><span class="n">lpMinimumApplicationAddress</span><span class="p">);</span>
+  <span class="kt">uint64_t</span> <span class="n">maxAddr</span> <span class="o">=</span> <span class="n">max</span><span class="p">(</span><span class="n">startAddr</span> <span class="o">+</span> <span class="mh">0x7FFFFF00</span><span class="p">,</span> <span class="p">(</span><span class="kt">uint64_t</span><span class="p">)</span><span class="n">sysInfo</span><span class="p">.</span><span class="n">lpMaximumApplicationAddress</span><span class="p">);</span>
+
+  <span class="kt">uint64_t</span> <span class="n">startPage</span> <span class="o">=</span> <span class="p">(</span><span class="n">startAddr</span> <span class="o">-</span> <span class="p">(</span><span class="n">startAddr</span> <span class="o">%</span> <span class="n">PAGE_SIZE</span><span class="p">));</span>
+
+  <span class="kt">uint64_t</span> <span class="n">pageOffset</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="kt">uint64_t</span> <span class="n">byteOffset</span> <span class="o">=</span> <span class="n">pageOffset</span> <span class="o">*</span> <span class="n">PAGE_SIZE</span><span class="p">;</span>
+    <span class="kt">uint64_t</span> <span class="n">highAddr</span> <span class="o">=</span> <span class="n">startPage</span> <span class="o">+</span> <span class="n">byteOffset</span><span class="p">;</span>
+    <span class="kt">uint64_t</span> <span class="n">lowAddr</span> <span class="o">=</span> <span class="p">(</span><span class="n">startPage</span> <span class="o">&gt;</span> <span class="n">byteOffset</span><span class="p">)</span> <span class="o">?</span> <span class="n">startPage</span> <span class="o">-</span> <span class="n">byteOffset</span> <span class="o">:</span> <span class="mi">0</span><span class="p">;</span>
+
+    <span class="kt">bool</span> <span class="n">needsExit</span> <span class="o">=</span> <span class="n">highAddr</span> <span class="o">&gt;</span> <span class="n">maxAddr</span> <span class="o">&amp;&amp;</span> <span class="n">lowAddr</span> <span class="o">&lt;</span> <span class="n">minAddr</span><span class="p">;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">highAddr</span> <span class="o">&lt;</span> <span class="n">maxAddr</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="kt">void</span><span class="o">*</span> <span class="n">outAddr</span> <span class="o">=</span> <span class="n">VirtualAllocEx</span><span class="p">(</span><span class="n">handle</span><span class="p">,</span> <span class="p">(</span><span class="kt">void</span><span class="o">*</span><span class="p">)</span><span class="n">highAddr</span><span class="p">,</span> <span class="p">(</span><span class="kt">size_t</span><span class="p">)</span><span class="n">PAGE_SIZE</span><span class="p">,</span> <span class="n">MEM_COMMIT</span> <span class="o">|</span> <span class="n">MEM_RESERVE</span><span class="p">,</span> <span class="n">PAGE_EXECUTE_READWRITE</span><span class="p">);</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">outAddr</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">outAddr</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">lowAddr</span> <span class="o">&gt;</span> <span class="n">minAddr</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="kt">void</span><span class="o">*</span> <span class="n">outAddr</span> <span class="o">=</span> <span class="n">VirtualAllocEx</span><span class="p">(</span><span class="n">handle</span><span class="p">,</span> <span class="p">(</span><span class="kt">void</span><span class="o">*</span><span class="p">)</span><span class="n">lowAddr</span><span class="p">,</span> <span class="p">(</span><span class="kt">size_t</span><span class="p">)</span><span class="n">PAGE_SIZE</span><span class="p">,</span> <span class="n">MEM_COMMIT</span> <span class="o">|</span> <span class="n">MEM_RESERVE</span><span class="p">,</span> <span class="n">PAGE_EXECUTE_READWRITE</span><span class="p">);</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">outAddr</span> <span class="o">!=</span> <span class="nb">nullptr</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">outAddr</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="n">pageOffset</span><span class="o">++</span><span class="p">;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">needsExit</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="k">break</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="nb">nullptr</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="o">*</span> <span class="nf">AllocatePageNearAddress</span><span class="p">(</span><span class="kt">void</span><span class="o">*</span> <span class="n">targetAddr</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">return</span> <span class="n">AllocatePageNearAddressRemote</span><span class="p">(</span><span class="n">GetCurrentProcess</span><span class="p">(),</span> <span class="n">targetAddr</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">//I use subst to alias my development folder to W: </span>
+<span class="c1">//this will rebase any virtual drives made by subst to</span>
+<span class="c1">//their actual drive equivalent, to prevent conflicts. Likely</span>
+<span class="c1">//not important for most people and can be ignored</span>
+<span class="kt">void</span> <span class="nf">RebaseVirtualDrivePath</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">path</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">outBuff</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">outBuffSize</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">memset</span><span class="p">(</span><span class="n">outBuff</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">outBuffSize</span><span class="p">);</span>
+
+  <span class="kt">char</span> <span class="n">driveLetter</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span> <span class="mi">0</span> <span class="p">};</span>
+  <span class="n">memcpy</span><span class="p">(</span><span class="n">driveLetter</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
+
+  <span class="kt">char</span> <span class="n">deviceDrive</span><span class="p">[</span><span class="mi">512</span><span class="p">];</span>
+  <span class="n">QueryDosDevice</span><span class="p">(</span><span class="n">driveLetter</span><span class="p">,</span> <span class="n">deviceDrive</span><span class="p">,</span> <span class="mi">512</span><span class="p">);</span>
+
+  <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">virtualDrivePrefix</span> <span class="o">=</span> <span class="s">"</span><span class="se">\\</span><span class="s">??</span><span class="se">\\</span><span class="s">"</span><span class="p">;</span>
+  <span class="kt">char</span><span class="o">*</span> <span class="n">prefix</span> <span class="o">=</span> <span class="n">strstr</span><span class="p">(</span><span class="n">deviceDrive</span><span class="p">,</span> <span class="n">virtualDrivePrefix</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">prefix</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="kt">size_t</span> <span class="n">replacementLen</span> <span class="o">=</span> <span class="n">strlen</span><span class="p">(</span><span class="n">deviceDrive</span><span class="p">)</span> <span class="o">-</span> <span class="n">strlen</span><span class="p">(</span><span class="n">virtualDrivePrefix</span><span class="p">);</span>
+    <span class="kt">size_t</span> <span class="n">rebasedPathLen</span> <span class="o">=</span> <span class="n">replacementLen</span> <span class="o">+</span> <span class="n">strlen</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span><span class="p">;</span>
+    <span class="n">check</span><span class="p">(</span><span class="n">rebasedPathLen</span> <span class="o">&lt;</span> <span class="n">outBuffSize</span><span class="p">);</span>
+    <span class="n">memcpy</span><span class="p">(</span><span class="n">outBuff</span><span class="p">,</span> <span class="n">deviceDrive</span> <span class="o">+</span> <span class="n">strlen</span><span class="p">(</span><span class="n">virtualDrivePrefix</span><span class="p">),</span> <span class="n">replacementLen</span><span class="p">);</span>
+    <span class="n">memcpy</span><span class="p">(</span><span class="n">outBuff</span> <span class="o">+</span> <span class="n">replacementLen</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">path</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">strlen</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="k">else</span>
+  <span class="p">{</span>
+    <span class="n">check</span><span class="p">(</span><span class="n">strlen</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">outBuffSize</span><span class="p">);</span>
+    <span class="n">memcpy</span><span class="p">(</span><span class="n">outBuff</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">strlen</span><span class="p">(</span><span class="n">path</span><span class="p">));</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">//returns the first module called "name" -&gt; only searches for dll name, not whole path</span>
+<span class="c1">//ie: somepath/subdir/mydll.dll can be searched for with "mydll.dll"</span>
+<span class="n">HMODULE</span> <span class="nf">FindModuleInProcess</span><span class="p">(</span><span class="n">HANDLE</span> <span class="n">process</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">name</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">char</span><span class="o">*</span> <span class="n">lowerCaseName</span> <span class="o">=</span> <span class="n">_strdup</span><span class="p">(</span><span class="n">name</span><span class="p">);</span>
+  <span class="n">_strlwr_s</span><span class="p">(</span><span class="n">lowerCaseName</span><span class="p">,</span> <span class="n">strlen</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+
+  <span class="n">HMODULE</span> <span class="n">remoteProcessModules</span><span class="p">[</span><span class="mi">1024</span><span class="p">];</span>
+  <span class="n">DWORD</span> <span class="n">numBytesWrittenInModuleArray</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="n">BOOL</span> <span class="n">success</span> <span class="o">=</span> <span class="n">EnumProcessModules</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">remoteProcessModules</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">HMODULE</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">numBytesWrittenInModuleArray</span><span class="p">);</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">success</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span> <span class="s">"Error enumerating modules on target process. Error Code %lu </span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">GetLastError</span><span class="p">());</span>
+    <span class="n">DebugBreak</span><span class="p">();</span>
+  <span class="p">}</span>
+
+  <span class="n">DWORD</span> <span class="n">numRemoteModules</span> <span class="o">=</span> <span class="n">numBytesWrittenInModuleArray</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">HMODULE</span><span class="p">);</span>
+  <span class="n">CHAR</span> <span class="n">remoteProcessName</span><span class="p">[</span><span class="mi">256</span><span class="p">];</span>
+  <span class="n">GetModuleFileNameEx</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">remoteProcessName</span><span class="p">,</span> <span class="mi">256</span><span class="p">);</span> <span class="c1">//a null module handle gets the process name</span>
+  <span class="n">_strlwr_s</span><span class="p">(</span><span class="n">remoteProcessName</span><span class="p">,</span> <span class="mi">256</span><span class="p">);</span>
+
+  <span class="n">MODULEINFO</span> <span class="n">remoteProcessModuleInfo</span><span class="p">;</span>
+  <span class="n">HMODULE</span> <span class="n">remoteProcessModule</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">//An HMODULE is just the DLL's base address </span>
+
+  <span class="k">for</span> <span class="p">(</span><span class="n">DWORD</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">numRemoteModules</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">CHAR</span> <span class="n">moduleName</span><span class="p">[</span><span class="mi">256</span><span class="p">];</span>
+    <span class="n">CHAR</span> <span class="n">absoluteModuleName</span><span class="p">[</span><span class="mi">256</span><span class="p">];</span>
+    <span class="n">CHAR</span> <span class="n">rebasedPath</span><span class="p">[</span><span class="mi">256</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span> <span class="mi">0</span> <span class="p">};</span>
+    <span class="n">GetModuleFileNameEx</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">remoteProcessModules</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">moduleName</span><span class="p">,</span> <span class="mi">256</span><span class="p">);</span>
+    <span class="n">_strlwr_s</span><span class="p">(</span><span class="n">moduleName</span><span class="p">,</span> <span class="mi">256</span><span class="p">);</span>
+    <span class="kt">char</span><span class="o">*</span> <span class="n">lastSlash</span> <span class="o">=</span> <span class="n">strrchr</span><span class="p">(</span><span class="n">moduleName</span><span class="p">,</span> <span class="sc">'\\'</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">lastSlash</span><span class="p">)</span> <span class="n">lastSlash</span> <span class="o">=</span> <span class="n">strrchr</span><span class="p">(</span><span class="n">moduleName</span><span class="p">,</span> <span class="sc">'/'</span><span class="p">);</span>
+
+    <span class="kt">char</span><span class="o">*</span> <span class="n">dllName</span> <span class="o">=</span> <span class="n">lastSlash</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">strcmp</span><span class="p">(</span><span class="n">dllName</span><span class="p">,</span> <span class="n">lowerCaseName</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">remoteProcessModule</span> <span class="o">=</span> <span class="n">remoteProcessModules</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+
+      <span class="n">success</span> <span class="o">=</span> <span class="n">GetModuleInformation</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">remoteProcessModules</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">remoteProcessModuleInfo</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">MODULEINFO</span><span class="p">));</span>
+      <span class="n">check</span><span class="p">(</span><span class="n">success</span><span class="p">);</span>
+      <span class="n">free</span><span class="p">(</span><span class="n">lowerCaseName</span><span class="p">);</span>
+      <span class="k">return</span> <span class="n">remoteProcessModule</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="c1">//the following string operations are to account for cases where GetModuleFileNameEx</span>
+    <span class="c1">//returns a relative path rather than an absolute one, the path we get to the module</span>
+    <span class="c1">//is using a virtual drive letter (ie: one created by subst) rather than a real drive</span>
+    <span class="kt">char</span><span class="o">*</span> <span class="n">err</span> <span class="o">=</span> <span class="n">_fullpath</span><span class="p">(</span><span class="n">absoluteModuleName</span><span class="p">,</span> <span class="n">moduleName</span><span class="p">,</span> <span class="mi">256</span><span class="p">);</span>
+    <span class="n">check</span><span class="p">(</span><span class="n">err</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="n">free</span><span class="p">(</span><span class="n">lowerCaseName</span><span class="p">);</span>
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">PrintModulesForProcess</span><span class="p">(</span><span class="n">HANDLE</span> <span class="n">process</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">HMODULE</span> <span class="n">remoteProcessModules</span><span class="p">[</span><span class="mi">1024</span><span class="p">];</span>
+  <span class="n">DWORD</span> <span class="n">numBytesWrittenInModuleArray</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="n">BOOL</span> <span class="n">success</span> <span class="o">=</span> <span class="n">EnumProcessModules</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">remoteProcessModules</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">HMODULE</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">numBytesWrittenInModuleArray</span><span class="p">);</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">success</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span> <span class="s">"Error enumerating modules on target process. Error Code %lu </span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">GetLastError</span><span class="p">());</span>
+    <span class="n">DebugBreak</span><span class="p">();</span>
+  <span class="p">}</span>
+
+  <span class="n">DWORD</span> <span class="n">numRemoteModules</span> <span class="o">=</span> <span class="n">numBytesWrittenInModuleArray</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">HMODULE</span><span class="p">);</span>
+  <span class="n">HMODULE</span> <span class="n">remoteProcessModule</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">//An HMODULE is just the DLL's base address </span>
+
+  <span class="k">for</span> <span class="p">(</span><span class="n">DWORD</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">numRemoteModules</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">CHAR</span> <span class="n">moduleName</span><span class="p">[</span><span class="mi">256</span><span class="p">];</span>
+    <span class="n">CHAR</span> <span class="n">absoluteModuleName</span><span class="p">[</span><span class="mi">256</span><span class="p">];</span>
+    <span class="n">GetModuleFileNameEx</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">remoteProcessModules</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">moduleName</span><span class="p">,</span> <span class="mi">256</span><span class="p">);</span>
+
+    <span class="c1">//the following string operations are to account for cases where GetModuleFileNameEx</span>
+    <span class="c1">//returns a relative path rather than an absolute one, the path we get to the module</span>
+    <span class="c1">//is using a virtual drive letter (ie: one created by subst) rather than a real drive</span>
+    <span class="kt">char</span><span class="o">*</span> <span class="n">err</span> <span class="o">=</span> <span class="n">_fullpath</span><span class="p">(</span><span class="n">absoluteModuleName</span><span class="p">,</span> <span class="n">moduleName</span><span class="p">,</span> <span class="mi">256</span><span class="p">);</span>
+    <span class="n">check</span><span class="p">(</span><span class="n">err</span><span class="p">);</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"%s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">absoluteModuleName</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="n">HMODULE</span> <span class="nf">GetBaseModuleForProcess</span><span class="p">(</span><span class="n">HANDLE</span> <span class="n">process</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">HMODULE</span> <span class="n">remoteProcessModules</span><span class="p">[</span><span class="mi">1024</span><span class="p">];</span>
+  <span class="n">DWORD</span> <span class="n">numBytesWrittenInModuleArray</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="n">BOOL</span> <span class="n">success</span> <span class="o">=</span> <span class="n">EnumProcessModules</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">remoteProcessModules</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">HMODULE</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">numBytesWrittenInModuleArray</span><span class="p">);</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">success</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span> <span class="s">"Error enumerating modules on target process. Error Code %lu </span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">GetLastError</span><span class="p">());</span>
+    <span class="n">DebugBreak</span><span class="p">();</span>
+  <span class="p">}</span>
+
+  <span class="n">DWORD</span> <span class="n">numRemoteModules</span> <span class="o">=</span> <span class="n">numBytesWrittenInModuleArray</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">HMODULE</span><span class="p">);</span>
+  <span class="n">CHAR</span> <span class="n">remoteProcessName</span><span class="p">[</span><span class="mi">256</span><span class="p">];</span>
+  <span class="n">GetModuleFileNameEx</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">remoteProcessName</span><span class="p">,</span> <span class="mi">256</span><span class="p">);</span> <span class="c1">//a null module handle gets the process name</span>
+  <span class="n">_strlwr_s</span><span class="p">(</span><span class="n">remoteProcessName</span><span class="p">,</span> <span class="mi">256</span><span class="p">);</span>
+
+  <span class="n">MODULEINFO</span> <span class="n">remoteProcessModuleInfo</span><span class="p">;</span>
+  <span class="n">HMODULE</span> <span class="n">remoteProcessModule</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">//An HMODULE is just the DLL's base address </span>
+
+  <span class="k">for</span> <span class="p">(</span><span class="n">DWORD</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">numRemoteModules</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">CHAR</span> <span class="n">moduleName</span><span class="p">[</span><span class="mi">256</span><span class="p">];</span>
+    <span class="n">CHAR</span> <span class="n">absoluteModuleName</span><span class="p">[</span><span class="mi">256</span><span class="p">];</span>
+    <span class="n">CHAR</span> <span class="n">rebasedPath</span><span class="p">[</span><span class="mi">256</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span> <span class="mi">0</span> <span class="p">};</span>
+    <span class="n">GetModuleFileNameEx</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">remoteProcessModules</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">moduleName</span><span class="p">,</span> <span class="mi">256</span><span class="p">);</span>
+
+    <span class="c1">//the following string operations are to account for cases where GetModuleFileNameEx</span>
+    <span class="c1">//returns a relative path rather than an absolute one, the path we get to the module</span>
+    <span class="c1">//is using a virtual drive letter (ie: one created by subst) rather than a real drive</span>
+    <span class="kt">char</span><span class="o">*</span> <span class="n">err</span> <span class="o">=</span> <span class="n">_fullpath</span><span class="p">(</span><span class="n">absoluteModuleName</span><span class="p">,</span> <span class="n">moduleName</span><span class="p">,</span> <span class="mi">256</span><span class="p">);</span>
+    <span class="n">check</span><span class="p">(</span><span class="n">err</span><span class="p">);</span>
+
+    <span class="n">RebaseVirtualDrivePath</span><span class="p">(</span><span class="n">absoluteModuleName</span><span class="p">,</span> <span class="n">rebasedPath</span><span class="p">,</span> <span class="mi">256</span><span class="p">);</span>
+    <span class="n">_strlwr_s</span><span class="p">(</span><span class="n">rebasedPath</span><span class="p">,</span> <span class="mi">256</span><span class="p">);</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">strcmp</span><span class="p">(</span><span class="n">remoteProcessName</span><span class="p">,</span> <span class="n">rebasedPath</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">remoteProcessModule</span> <span class="o">=</span> <span class="n">remoteProcessModules</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+
+      <span class="n">success</span> <span class="o">=</span> <span class="n">GetModuleInformation</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">remoteProcessModules</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">remoteProcessModuleInfo</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">MODULEINFO</span><span class="p">));</span>
+      <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">success</span><span class="p">)</span>
+      <span class="p">{</span>
+        <span class="n">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span> <span class="s">"Error getting module information for remote process module</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+        <span class="n">DebugBreak</span><span class="p">();</span>
+      <span class="p">}</span>
+      <span class="k">break</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="n">remoteProcessModule</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">DWORD</span> <span class="nf">FindPidByName</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">name</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">HANDLE</span> <span class="n">h</span><span class="p">;</span>
+  <span class="n">PROCESSENTRY32</span> <span class="n">singleProcess</span><span class="p">;</span>
+  <span class="n">h</span> <span class="o">=</span> <span class="n">CreateToolhelp32Snapshot</span><span class="p">(</span> <span class="c1">//takes a snapshot of specified processes</span>
+    <span class="n">TH32CS_SNAPPROCESS</span><span class="p">,</span> <span class="c1">//get all processes</span>
+    <span class="mi">0</span><span class="p">);</span> <span class="c1">//ignored for SNAPPROCESS</span>
+
+  <span class="n">singleProcess</span><span class="p">.</span><span class="n">dwSize</span> <span class="o">=</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">PROCESSENTRY32</span><span class="p">);</span>
+
+  <span class="k">do</span> <span class="p">{</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">strcmp</span><span class="p">(</span><span class="n">singleProcess</span><span class="p">.</span><span class="n">szExeFile</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">DWORD</span> <span class="n">pid</span> <span class="o">=</span> <span class="n">singleProcess</span><span class="p">.</span><span class="n">th32ProcessID</span><span class="p">;</span>
+      <span class="n">CloseHandle</span><span class="p">(</span><span class="n">h</span><span class="p">);</span>
+      <span class="k">return</span> <span class="n">pid</span><span class="p">;</span>
+    <span class="p">}</span>
+
+  <span class="p">}</span> <span class="k">while</span> <span class="p">(</span><span class="n">Process32Next</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">singleProcess</span><span class="p">));</span>
+
+  <span class="n">CloseHandle</span><span class="p">(</span><span class="n">h</span><span class="p">);</span>
+
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">uint32_t</span> <span class="nf">WriteMovToRCX</span><span class="p">(</span><span class="kt">uint8_t</span><span class="o">*</span> <span class="n">dst</span><span class="p">,</span> <span class="kt">uint64_t</span> <span class="n">val</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">check</span><span class="p">(</span><span class="n">IsProcess64Bit</span><span class="p">(</span><span class="n">GetCurrentProcess</span><span class="p">()));</span>
+
+  <span class="kt">uint8_t</span> <span class="n">movAsmBytes</span><span class="p">[]</span> <span class="o">=</span>
+  <span class="p">{</span>
+    <span class="mh">0x48</span><span class="p">,</span> <span class="mh">0xB9</span><span class="p">,</span> <span class="mh">0xAA</span><span class="p">,</span> <span class="mh">0xAA</span><span class="p">,</span> <span class="mh">0xAA</span><span class="p">,</span> <span class="mh">0xAA</span><span class="p">,</span> <span class="mh">0xAA</span><span class="p">,</span> <span class="mh">0xAA</span><span class="p">,</span> <span class="mh">0xAA</span><span class="p">,</span> <span class="mh">0xAA</span><span class="p">,</span> <span class="c1">//movabs 64 bit value into rcx</span>
+  <span class="p">};</span>
+  <span class="n">memcpy</span><span class="p">(</span><span class="o">&amp;</span><span class="n">movAsmBytes</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">val</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">uint64_t</span><span class="p">));</span>
+  <span class="n">memcpy</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">movAsmBytes</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">movAsmBytes</span><span class="p">));</span>
+
+  <span class="k">return</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">movAsmBytes</span><span class="p">);</span>
+
+<span class="p">}</span>
+
+<span class="kt">uint32_t</span> <span class="nf">WriteSaveArgumentRegisters</span><span class="p">(</span><span class="kt">uint8_t</span><span class="o">*</span> <span class="n">dst</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">uint8_t</span> <span class="n">asmBytes</span><span class="p">[]</span> <span class="o">=</span>
+  <span class="p">{</span>
+    <span class="mh">0x51</span><span class="p">,</span> <span class="c1">//push rcx</span>
+    <span class="mh">0x52</span><span class="p">,</span> <span class="c1">//push rdx</span>
+    <span class="mh">0x41</span><span class="p">,</span> <span class="mh">0x50</span><span class="p">,</span> <span class="c1">//push r8</span>
+    <span class="mh">0x41</span><span class="p">,</span> <span class="mh">0x51</span><span class="p">,</span> <span class="c1">//push r9</span>
+    <span class="mh">0x48</span><span class="p">,</span> <span class="mh">0x83</span><span class="p">,</span> <span class="mh">0xEC</span><span class="p">,</span> <span class="mh">0x40</span><span class="p">,</span> <span class="c1">//sub rsp, 64 -&gt; space for xmm registers</span>
+    <span class="mh">0x0F</span><span class="p">,</span> <span class="mh">0x11</span><span class="p">,</span> <span class="mh">0x04</span><span class="p">,</span> <span class="mh">0x24</span><span class="p">,</span> <span class="c1">// movups xmmword ptr [rsp],xmm0</span>
+    <span class="mh">0x0F</span><span class="p">,</span> <span class="mh">0x11</span><span class="p">,</span> <span class="mh">0x4C</span><span class="p">,</span> <span class="mh">0x24</span><span class="p">,</span> <span class="mh">0x10</span><span class="p">,</span> <span class="c1">//movups xmmword ptr [rsp+10h],xmm1</span>
+    <span class="mh">0x0F</span><span class="p">,</span> <span class="mh">0x11</span><span class="p">,</span> <span class="mh">0x54</span><span class="p">,</span> <span class="mh">0x24</span><span class="p">,</span> <span class="mh">0x20</span><span class="p">,</span> <span class="c1">//movups xmmword ptr [rsp+20h],xmm2</span>
+    <span class="mh">0x0F</span><span class="p">,</span> <span class="mh">0x11</span><span class="p">,</span> <span class="mh">0x5C</span><span class="p">,</span> <span class="mh">0x24</span><span class="p">,</span> <span class="mh">0x30</span> <span class="c1">//movups  xmmword ptr [rsp+30h],xmm3</span>
+  <span class="p">};</span>
+
+  <span class="n">memcpy</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">asmBytes</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">asmBytes</span><span class="p">));</span>
+  <span class="k">return</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">asmBytes</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">uint32_t</span> <span class="nf">WriteRestoreArgumentRegisters</span><span class="p">(</span><span class="kt">uint8_t</span><span class="o">*</span> <span class="n">dst</span><span class="p">)</span>
+<span class="p">{</span>
+
+  <span class="kt">uint8_t</span> <span class="n">asmBytes</span><span class="p">[]</span> <span class="o">=</span>
+  <span class="p">{</span>
+    <span class="mh">0x0F</span><span class="p">,</span> <span class="mh">0x10</span><span class="p">,</span> <span class="mh">0x04</span><span class="p">,</span> <span class="mh">0x24</span><span class="p">,</span> <span class="c1">//movups xmm0,xmmword ptr[rsp]</span>
+    <span class="mh">0x0F</span><span class="p">,</span> <span class="mh">0x10</span><span class="p">,</span> <span class="mh">0x4C</span><span class="p">,</span> <span class="mh">0x24</span><span class="p">,</span> <span class="mh">0x10</span><span class="p">,</span><span class="c1">//movups xmm1,xmmword ptr[rsp + 10h]</span>
+    <span class="mh">0x0F</span><span class="p">,</span> <span class="mh">0x10</span><span class="p">,</span> <span class="mh">0x54</span><span class="p">,</span> <span class="mh">0x24</span><span class="p">,</span> <span class="mh">0x20</span><span class="p">,</span><span class="c1">//movups xmm2,xmmword ptr[rsp + 20h]</span>
+    <span class="mh">0x0F</span><span class="p">,</span> <span class="mh">0x10</span><span class="p">,</span> <span class="mh">0x5C</span><span class="p">,</span> <span class="mh">0x24</span><span class="p">,</span> <span class="mh">0x30</span><span class="p">,</span><span class="c1">//movups xmm3,xmmword ptr[rsp + 30h]</span>
+    <span class="mh">0x48</span><span class="p">,</span> <span class="mh">0x83</span><span class="p">,</span> <span class="mh">0xC4</span><span class="p">,</span> <span class="mh">0x40</span><span class="p">,</span><span class="c1">//add rsp,40h</span>
+    <span class="mh">0x41</span><span class="p">,</span> <span class="mh">0x59</span><span class="p">,</span><span class="c1">//pop r9</span>
+    <span class="mh">0x41</span><span class="p">,</span> <span class="mh">0x58</span><span class="p">,</span><span class="c1">//pop r8</span>
+    <span class="mh">0x5A</span><span class="p">,</span><span class="c1">//pop rdx</span>
+    <span class="mh">0x59</span> <span class="c1">//pop rcx</span>
+  <span class="p">};</span>
+
+  <span class="n">memcpy</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">asmBytes</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">asmBytes</span><span class="p">));</span>
+  <span class="k">return</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">asmBytes</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">uint32_t</span> <span class="nf">WriteAddRSP32</span><span class="p">(</span><span class="kt">uint8_t</span><span class="o">*</span> <span class="n">dst</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">uint8_t</span> <span class="n">addAsmBytes</span><span class="p">[]</span> <span class="o">=</span>
+  <span class="p">{</span>
+    <span class="mh">0x48</span><span class="p">,</span> <span class="mh">0x83</span><span class="p">,</span> <span class="mh">0xC4</span><span class="p">,</span> <span class="mh">0x20</span>
+  <span class="p">};</span>
+  <span class="n">memcpy</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">addAsmBytes</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">addAsmBytes</span><span class="p">));</span>
+  <span class="k">return</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">addAsmBytes</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">uint32_t</span> <span class="nf">WriteSubRSP32</span><span class="p">(</span><span class="kt">uint8_t</span><span class="o">*</span> <span class="n">dst</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">uint8_t</span> <span class="n">subAsmBytes</span><span class="p">[]</span> <span class="o">=</span>
+  <span class="p">{</span>
+    <span class="mh">0x48</span><span class="p">,</span> <span class="mh">0x83</span><span class="p">,</span> <span class="mh">0xEC</span><span class="p">,</span> <span class="mh">0x20</span>
+  <span class="p">};</span>
+  <span class="n">memcpy</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">subAsmBytes</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">subAsmBytes</span><span class="p">));</span>
+  <span class="k">return</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">subAsmBytes</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">uint32_t</span> <span class="nf">WriteAbsoluteCall64</span><span class="p">(</span><span class="kt">uint8_t</span><span class="o">*</span> <span class="n">dst</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span> <span class="n">funcToCall</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">check</span><span class="p">(</span><span class="n">IsProcess64Bit</span><span class="p">(</span><span class="n">GetCurrentProcess</span><span class="p">()));</span>
+
+  <span class="kt">uint8_t</span> <span class="n">callAsmBytes</span><span class="p">[]</span> <span class="o">=</span>
+  <span class="p">{</span>
+    <span class="mh">0x49</span><span class="p">,</span> <span class="mh">0xBA</span><span class="p">,</span> <span class="mh">0xAA</span><span class="p">,</span> <span class="mh">0xAA</span><span class="p">,</span> <span class="mh">0xAA</span><span class="p">,</span> <span class="mh">0xAA</span><span class="p">,</span> <span class="mh">0xAA</span><span class="p">,</span> <span class="mh">0xAA</span><span class="p">,</span> <span class="mh">0xAA</span><span class="p">,</span> <span class="mh">0xAA</span><span class="p">,</span> <span class="c1">//movabs 64 bit value into r10</span>
+    <span class="mh">0x41</span><span class="p">,</span> <span class="mh">0xFF</span><span class="p">,</span> <span class="mh">0xD2</span><span class="p">,</span> <span class="c1">//call r10</span>
+  <span class="p">};</span>
+  <span class="n">memcpy</span><span class="p">(</span><span class="o">&amp;</span><span class="n">callAsmBytes</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">funcToCall</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">void</span><span class="o">*</span><span class="p">));</span>
+  <span class="n">memcpy</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">callAsmBytes</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">callAsmBytes</span><span class="p">));</span>
+
+  <span class="k">return</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">callAsmBytes</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">uint32_t</span> <span class="nf">WriteAbsoluteJump64</span><span class="p">(</span><span class="kt">void</span><span class="o">*</span> <span class="n">absJumpMemory</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span> <span class="n">addrToJumpTo</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">check</span><span class="p">(</span><span class="n">IsProcess64Bit</span><span class="p">(</span><span class="n">GetCurrentProcess</span><span class="p">()));</span>
+
+  <span class="c1">//this writes the absolute jump instructions into the memory allocated near the target</span>
+  <span class="c1">//the E9 jump installed in the target function (GetNum) will jump to here</span>
+  <span class="kt">uint8_t</span> <span class="n">absJumpInstructions</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span> <span class="mh">0x49</span><span class="p">,</span> <span class="mh">0xBA</span><span class="p">,</span> <span class="mh">0xAA</span><span class="p">,</span> <span class="mh">0xAA</span><span class="p">,</span> <span class="mh">0xAA</span><span class="p">,</span> <span class="mh">0xAA</span><span class="p">,</span> <span class="mh">0xAA</span><span class="p">,</span> <span class="mh">0xAA</span><span class="p">,</span> <span class="mh">0xAA</span><span class="p">,</span> <span class="mh">0xAA</span><span class="p">,</span> <span class="c1">//mov 64 bit value into r10</span>
+                    <span class="mh">0x41</span><span class="p">,</span> <span class="mh">0xFF</span><span class="p">,</span> <span class="mh">0xE2</span> <span class="p">};</span> <span class="c1">//jmp r10</span>
+
+  <span class="kt">uint64_t</span> <span class="n">addrToJumpTo64</span> <span class="o">=</span> <span class="p">(</span><span class="kt">uint64_t</span><span class="p">)</span><span class="n">addrToJumpTo</span><span class="p">;</span>
+  <span class="n">memcpy</span><span class="p">(</span><span class="o">&amp;</span><span class="n">absJumpInstructions</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">addrToJumpTo64</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">addrToJumpTo64</span><span class="p">));</span>
+  <span class="n">memcpy</span><span class="p">(</span><span class="n">absJumpMemory</span><span class="p">,</span> <span class="n">absJumpInstructions</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">absJumpInstructions</span><span class="p">));</span>
+  <span class="k">return</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">absJumpInstructions</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">uint32_t</span> <span class="nf">WriteAbsoluteJump64</span><span class="p">(</span><span class="n">HANDLE</span> <span class="n">process</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span> <span class="n">absJumpMemory</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span> <span class="n">addrToJumpTo</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">check</span><span class="p">(</span><span class="n">IsProcess64Bit</span><span class="p">(</span><span class="n">process</span><span class="p">));</span>
+
+  <span class="c1">//this writes the absolute jump instructions into the memory allocated near the target</span>
+  <span class="c1">//the E9 jump installed in the target function (GetNum) will jump to here</span>
+  <span class="kt">uint8_t</span> <span class="n">absJumpInstructions</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span> <span class="mh">0x49</span><span class="p">,</span> <span class="mh">0xBA</span><span class="p">,</span> <span class="mh">0xAA</span><span class="p">,</span> <span class="mh">0xAA</span><span class="p">,</span> <span class="mh">0xAA</span><span class="p">,</span> <span class="mh">0xAA</span><span class="p">,</span> <span class="mh">0xAA</span><span class="p">,</span> <span class="mh">0xAA</span><span class="p">,</span> <span class="mh">0xAA</span><span class="p">,</span> <span class="mh">0xAA</span><span class="p">,</span> <span class="c1">//mov 64 bit value into r10</span>
+                      <span class="mh">0x41</span><span class="p">,</span> <span class="mh">0xFF</span><span class="p">,</span> <span class="mh">0xE2</span> <span class="p">};</span> <span class="c1">//jmp r10</span>
+
+  <span class="kt">uint64_t</span> <span class="n">addrToJumpTo64</span> <span class="o">=</span> <span class="p">(</span><span class="kt">uint64_t</span><span class="p">)</span><span class="n">addrToJumpTo</span><span class="p">;</span>
+  <span class="n">memcpy</span><span class="p">(</span><span class="o">&amp;</span><span class="n">absJumpInstructions</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">addrToJumpTo64</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">addrToJumpTo64</span><span class="p">));</span>
+
+  <span class="n">WriteProcessMemory</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">absJumpMemory</span><span class="p">,</span> <span class="n">absJumpInstructions</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">absJumpInstructions</span><span class="p">),</span> <span class="nb">nullptr</span><span class="p">);</span>
+  <span class="k">return</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">absJumpInstructions</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">uint32_t</span> <span class="nf">WriteRelativeJump</span><span class="p">(</span><span class="kt">void</span><span class="o">*</span> <span class="n">func2hook</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span> <span class="n">jumpTarget</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">uint8_t</span> <span class="n">jmpInstruction</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span> <span class="mh">0xE9</span><span class="p">,</span> <span class="mh">0x0</span><span class="p">,</span> <span class="mh">0x0</span><span class="p">,</span> <span class="mh">0x0</span><span class="p">,</span> <span class="mh">0x0</span> <span class="p">};</span>
+
+  <span class="kt">int64_t</span> <span class="n">relativeToJumpTarget64</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int64_t</span><span class="p">)</span><span class="n">jumpTarget</span> <span class="o">-</span> <span class="p">((</span><span class="kt">int64_t</span><span class="p">)</span><span class="n">func2hook</span> <span class="o">+</span> <span class="mi">5</span><span class="p">);</span>
+  <span class="n">check</span><span class="p">(</span><span class="n">relativeToJumpTarget64</span> <span class="o">&lt;</span> <span class="n">INT32_MAX</span><span class="p">);</span>
+
+  <span class="kt">int32_t</span> <span class="n">relativeToJumpTarget</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int32_t</span><span class="p">)</span><span class="n">relativeToJumpTarget64</span><span class="p">;</span>
+
+  <span class="n">memcpy</span><span class="p">(</span><span class="n">jmpInstruction</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">relativeToJumpTarget</span><span class="p">,</span> <span class="mi">4</span><span class="p">);</span>
+
+  <span class="n">DWORD</span> <span class="n">oldProtect</span><span class="p">;</span>
+  <span class="kt">bool</span> <span class="n">err</span> <span class="o">=</span> <span class="n">VirtualProtect</span><span class="p">(</span><span class="n">func2hook</span><span class="p">,</span> <span class="mi">1024</span><span class="p">,</span> <span class="n">PAGE_EXECUTE_READWRITE</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">oldProtect</span><span class="p">);</span>
+  <span class="n">check</span><span class="p">(</span><span class="n">err</span><span class="p">);</span>
+
+  <span class="n">memcpy</span><span class="p">(</span><span class="n">func2hook</span><span class="p">,</span> <span class="n">jmpInstruction</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">jmpInstruction</span><span class="p">));</span>
+  <span class="k">return</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">jmpInstruction</span><span class="p">);</span>
+
+<span class="p">}</span>
+
+<span class="kt">uint32_t</span> <span class="nf">WriteRelativeJump</span><span class="p">(</span><span class="kt">void</span><span class="o">*</span> <span class="n">func2hook</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span> <span class="n">jumpTarget</span><span class="p">,</span> <span class="kt">uint8_t</span> <span class="n">numTrailingNOPs</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">uint8_t</span> <span class="n">jmpInstruction</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span> <span class="mh">0xE9</span><span class="p">,</span> <span class="mh">0x0</span><span class="p">,</span> <span class="mh">0x0</span><span class="p">,</span> <span class="mh">0x0</span><span class="p">,</span> <span class="mh">0x0</span> <span class="p">};</span>
+
+  <span class="kt">int64_t</span> <span class="n">relativeToJumpTarget64</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int64_t</span><span class="p">)</span><span class="n">jumpTarget</span> <span class="o">-</span> <span class="p">((</span><span class="kt">int64_t</span><span class="p">)</span><span class="n">func2hook</span> <span class="o">+</span> <span class="mi">5</span><span class="p">);</span>
+  <span class="n">check</span><span class="p">(</span><span class="n">relativeToJumpTarget64</span> <span class="o">&lt;</span> <span class="n">INT32_MAX</span><span class="p">);</span>
+
+  <span class="kt">int32_t</span> <span class="n">relativeToJumpTarget</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int32_t</span><span class="p">)</span><span class="n">relativeToJumpTarget64</span><span class="p">;</span>
+
+  <span class="n">memcpy</span><span class="p">(</span><span class="n">jmpInstruction</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">relativeToJumpTarget</span><span class="p">,</span> <span class="mi">4</span><span class="p">);</span>
+
+  <span class="n">DWORD</span> <span class="n">oldProtect</span><span class="p">;</span>
+  <span class="kt">bool</span> <span class="n">err</span> <span class="o">=</span> <span class="n">VirtualProtect</span><span class="p">(</span><span class="n">func2hook</span><span class="p">,</span> <span class="mi">1024</span><span class="p">,</span> <span class="n">PAGE_EXECUTE_READWRITE</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">oldProtect</span><span class="p">);</span>
+  <span class="n">check</span><span class="p">(</span><span class="n">err</span><span class="p">);</span>
+
+  <span class="n">memcpy</span><span class="p">(</span><span class="n">func2hook</span><span class="p">,</span> <span class="n">jmpInstruction</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">jmpInstruction</span><span class="p">));</span>
+
+  <span class="kt">uint8_t</span><span class="o">*</span> <span class="n">byteFunc2Hook</span> <span class="o">=</span> <span class="p">(</span><span class="kt">uint8_t</span><span class="o">*</span><span class="p">)</span><span class="n">func2hook</span><span class="p">;</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">numTrailingNOPs</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">memset</span><span class="p">((</span><span class="kt">void</span><span class="o">*</span><span class="p">)(</span><span class="n">byteFunc2Hook</span> <span class="o">+</span> <span class="mi">5</span> <span class="o">+</span> <span class="n">i</span><span class="p">),</span> <span class="mh">0x90</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">jmpInstruction</span><span class="p">)</span> <span class="o">+</span> <span class="n">numTrailingNOPs</span><span class="p">;</span>
+<span class="p">}</span>
+
+
+<span class="kt">uint32_t</span> <span class="nf">WriteRelativeJump</span><span class="p">(</span><span class="n">HANDLE</span> <span class="n">process</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span> <span class="n">func2hook</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span> <span class="n">jumpTarget</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">uint8_t</span> <span class="n">jmpInstruction</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span> <span class="mh">0xE9</span><span class="p">,</span> <span class="mh">0x0</span><span class="p">,</span> <span class="mh">0x0</span><span class="p">,</span> <span class="mh">0x0</span><span class="p">,</span> <span class="mh">0x0</span> <span class="p">};</span>
+
+  <span class="kt">int64_t</span> <span class="n">relativeToJumpTarget64</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int64_t</span><span class="p">)</span><span class="n">jumpTarget</span> <span class="o">-</span> <span class="p">((</span><span class="kt">int64_t</span><span class="p">)</span><span class="n">func2hook</span> <span class="o">+</span> <span class="mi">5</span><span class="p">);</span>
+  <span class="n">check</span><span class="p">(</span><span class="n">relativeToJumpTarget64</span> <span class="o">&lt;</span> <span class="n">INT32_MAX</span><span class="p">);</span>
+
+  <span class="kt">int32_t</span> <span class="n">relativeToJumpTarget</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int32_t</span><span class="p">)</span><span class="n">relativeToJumpTarget64</span><span class="p">;</span>
+
+  <span class="n">memcpy</span><span class="p">(</span><span class="n">jmpInstruction</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">relativeToJumpTarget</span><span class="p">,</span> <span class="mi">4</span><span class="p">);</span>
+
+  <span class="n">DWORD</span> <span class="n">oldProtect</span><span class="p">;</span>
+  <span class="kt">bool</span> <span class="n">err</span> <span class="o">=</span> <span class="n">VirtualProtectEx</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">func2hook</span><span class="p">,</span> <span class="mi">1024</span><span class="p">,</span> <span class="n">PAGE_EXECUTE_READWRITE</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">oldProtect</span><span class="p">);</span>
+  <span class="n">check</span><span class="p">(</span><span class="n">err</span><span class="p">);</span>
+
+  <span class="n">err</span> <span class="o">=</span> <span class="n">WriteProcessMemory</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">func2hook</span><span class="p">,</span> <span class="n">jmpInstruction</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">jmpInstruction</span><span class="p">),</span> <span class="nb">nullptr</span><span class="p">);</span>
+  <span class="n">check</span><span class="p">(</span><span class="n">err</span><span class="p">);</span>
+
+  <span class="k">return</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">jmpInstruction</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="n">HMODULE</span> <span class="nf">FindModuleBaseAddress</span><span class="p">(</span><span class="n">HANDLE</span> <span class="n">process</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">targetModule</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">HMODULE</span> <span class="n">hMods</span><span class="p">[</span><span class="mi">1024</span><span class="p">];</span>
+  <span class="n">DWORD</span> <span class="n">cbNeeded</span><span class="p">;</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="n">EnumProcessModules</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">hMods</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">hMods</span><span class="p">),</span> <span class="o">&amp;</span><span class="n">cbNeeded</span><span class="p">))</span>
+  <span class="p">{</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">uint32_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">cbNeeded</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">HMODULE</span><span class="p">));</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">TCHAR</span> <span class="n">moduleName</span><span class="p">[</span><span class="n">MAX_PATH</span><span class="p">];</span>
+
+      <span class="c1">// Get the full path to the module's file.</span>
+
+      <span class="k">if</span> <span class="p">(</span><span class="n">GetModuleFileNameEx</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">hMods</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">moduleName</span><span class="p">,</span>
+        <span class="k">sizeof</span><span class="p">(</span><span class="n">moduleName</span><span class="p">)</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">TCHAR</span><span class="p">)))</span>
+      <span class="p">{</span>
+        <span class="c1">// Print the module name and handle value.</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">strstr</span><span class="p">(</span><span class="n">moduleName</span><span class="p">,</span> <span class="n">targetModule</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">nullptr</span><span class="p">)</span>
+        <span class="p">{</span>
+          <span class="k">return</span> <span class="n">hMods</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+        <span class="p">}</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="o">*</span> <span class="nf">FindAddressOfRemoteDLLFunction</span><span class="p">(</span><span class="n">HANDLE</span> <span class="n">process</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">dllName</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">funcName</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="c1">//first, load the dll into this process so we can use GetProcAddress to determine the offset</span>
+  <span class="c1">//of the target function from the DLL base address</span>
+  <span class="n">HMODULE</span> <span class="n">localDLL</span> <span class="o">=</span> <span class="n">LoadLibraryEx</span><span class="p">(</span><span class="n">dllName</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+  <span class="n">check</span><span class="p">(</span><span class="n">localDLL</span><span class="p">);</span>
+  <span class="kt">void</span><span class="o">*</span> <span class="n">localHookFunc</span> <span class="o">=</span> <span class="n">GetProcAddress</span><span class="p">(</span><span class="n">localDLL</span><span class="p">,</span> <span class="n">funcName</span><span class="p">);</span>
+  <span class="n">check</span><span class="p">(</span><span class="n">localHookFunc</span><span class="p">);</span>
+
+  <span class="kt">uint64_t</span> <span class="n">offsetOfHookFunc</span> <span class="o">=</span> <span class="p">(</span><span class="kt">uint64_t</span><span class="p">)</span><span class="n">localHookFunc</span> <span class="o">-</span> <span class="p">(</span><span class="kt">uint64_t</span><span class="p">)</span><span class="n">localDLL</span><span class="p">;</span>
+  <span class="n">FreeLibrary</span><span class="p">(</span><span class="n">localDLL</span><span class="p">);</span> <span class="c1">//free the library, we don't need it anymore.</span>
+
+  <span class="c1">//Technically, we could just use the result of GetProcAddress, since in 99% of cases, the base address of the dll</span>
+  <span class="c1">//in the two processes will be shared thanks to ASLR, but just in case the remote process has relocated the dll, </span>
+  <span class="c1">//I'm getting it here separately.</span>
+
+  <span class="n">HMODULE</span> <span class="n">remoteModuleBase</span> <span class="o">=</span> <span class="n">FindModuleBaseAddress</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">dllName</span><span class="p">);</span>
+
+  <span class="k">return</span> <span class="p">(</span><span class="kt">void</span><span class="o">*</span><span class="p">)((</span><span class="kt">uint64_t</span><span class="p">)</span><span class="n">remoteModuleBase</span> <span class="o">+</span> <span class="n">offsetOfHookFunc</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">SetOtherThreadsSuspended</span><span class="p">(</span><span class="kt">bool</span> <span class="n">suspend</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">HANDLE</span> <span class="n">hSnapshot</span> <span class="o">=</span> <span class="n">CreateToolhelp32Snapshot</span><span class="p">(</span><span class="n">TH32CS_SNAPTHREAD</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">hSnapshot</span> <span class="o">!=</span> <span class="n">INVALID_HANDLE_VALUE</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">THREADENTRY32</span> <span class="n">te</span><span class="p">;</span>
+    <span class="n">te</span><span class="p">.</span><span class="n">dwSize</span> <span class="o">=</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">THREADENTRY32</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">Thread32First</span><span class="p">(</span><span class="n">hSnapshot</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">te</span><span class="p">))</span>
+    <span class="p">{</span>
+      <span class="k">do</span>
+      <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">te</span><span class="p">.</span><span class="n">dwSize</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="n">FIELD_OFFSET</span><span class="p">(</span><span class="n">THREADENTRY32</span><span class="p">,</span> <span class="n">th32OwnerProcessID</span><span class="p">)</span> <span class="o">+</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">DWORD</span><span class="p">))</span>
+          <span class="o">&amp;&amp;</span> <span class="n">te</span><span class="p">.</span><span class="n">th32OwnerProcessID</span> <span class="o">==</span> <span class="n">GetCurrentProcessId</span><span class="p">()</span>
+          <span class="o">&amp;&amp;</span> <span class="n">te</span><span class="p">.</span><span class="n">th32ThreadID</span> <span class="o">!=</span> <span class="n">GetCurrentThreadId</span><span class="p">())</span>
+        <span class="p">{</span>
+
+          <span class="n">HANDLE</span> <span class="kr">thread</span> <span class="o">=</span> <span class="o">::</span><span class="n">OpenThread</span><span class="p">(</span><span class="n">THREAD_ALL_ACCESS</span><span class="p">,</span> <span class="n">FALSE</span><span class="p">,</span> <span class="n">te</span><span class="p">.</span><span class="n">th32ThreadID</span><span class="p">);</span>
+          <span class="k">if</span> <span class="p">(</span><span class="kr">thread</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span>
+          <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">suspend</span><span class="p">)</span>
+            <span class="p">{</span>
+              <span class="n">SuspendThread</span><span class="p">(</span><span class="kr">thread</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="k">else</span>
+            <span class="p">{</span>
+              <span class="n">ResumeThread</span><span class="p">(</span><span class="kr">thread</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="n">CloseHandle</span><span class="p">(</span><span class="kr">thread</span><span class="p">);</span>
+          <span class="p">}</span>
+        <span class="p">}</span>
+      <span class="p">}</span> <span class="k">while</span> <span class="p">(</span><span class="n">Thread32Next</span><span class="p">(</span><span class="n">hSnapshot</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">te</span><span class="p">));</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">struct</span> <span class="nc">X64Instructions</span>
+<span class="p">{</span>
+  <span class="n">cs_insn</span><span class="o">*</span> <span class="n">instructions</span><span class="p">;</span>
+  <span class="kt">uint32_t</span> <span class="n">numInstructions</span><span class="p">;</span>
+  <span class="kt">uint32_t</span> <span class="n">numBytes</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="n">X64Instructions</span> <span class="nf">StealBytes</span><span class="p">(</span><span class="kt">void</span><span class="o">*</span> <span class="n">function</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="c1">// Disassemble stolen bytes</span>
+  <span class="n">csh</span> <span class="n">handle</span><span class="p">;</span>
+  <span class="n">cs_open</span><span class="p">(</span><span class="n">CS_ARCH_X86</span><span class="p">,</span> <span class="n">CS_MODE_64</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">handle</span><span class="p">);</span>
+  <span class="n">cs_option</span><span class="p">(</span><span class="n">handle</span><span class="p">,</span> <span class="n">CS_OPT_DETAIL</span><span class="p">,</span> <span class="n">CS_OPT_ON</span><span class="p">);</span> <span class="c1">// turn ON detail feature with CS_OPT_ON</span>
+
+  <span class="kt">size_t</span> <span class="n">count</span><span class="p">;</span>
+  <span class="n">cs_insn</span><span class="o">*</span> <span class="n">disassembledInstructions</span><span class="p">;</span> <span class="c1">//allocated by cs_disasm, needs to be manually freed later</span>
+  <span class="n">count</span> <span class="o">=</span> <span class="n">cs_disasm</span><span class="p">(</span><span class="n">handle</span><span class="p">,</span> <span class="p">(</span><span class="kt">uint8_t</span><span class="o">*</span><span class="p">)</span><span class="n">function</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="p">(</span><span class="kt">uint64_t</span><span class="p">)</span><span class="n">function</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">disassembledInstructions</span><span class="p">);</span>
+
+  <span class="c1">//get the instructions covered by the first 5 bytes of the original function</span>
+  <span class="kt">uint32_t</span> <span class="n">byteCount</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="kt">uint32_t</span> <span class="n">stolenInstrCount</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kt">int32_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">count</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">cs_insn</span><span class="o">&amp;</span> <span class="n">inst</span> <span class="o">=</span> <span class="n">disassembledInstructions</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+    <span class="n">byteCount</span> <span class="o">+=</span> <span class="n">inst</span><span class="p">.</span><span class="n">size</span><span class="p">;</span>
+    <span class="n">stolenInstrCount</span><span class="o">++</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">byteCount</span> <span class="o">&gt;=</span> <span class="mi">5</span><span class="p">)</span> <span class="k">break</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="c1">//replace stolen instructions in target func wtih NOPs, so that when we jump</span>
+  <span class="c1">//back to the target function, we don't have to care about how many</span>
+  <span class="c1">//bytes were stolen</span>
+  <span class="n">memset</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <span class="mh">0x90</span><span class="p">,</span> <span class="n">byteCount</span><span class="p">);</span>
+
+  <span class="n">cs_close</span><span class="p">(</span><span class="o">&amp;</span><span class="n">handle</span><span class="p">);</span>
+  <span class="k">return</span> <span class="p">{</span> <span class="n">disassembledInstructions</span><span class="p">,</span> <span class="n">stolenInstrCount</span><span class="p">,</span> <span class="n">byteCount</span> <span class="p">};</span>
+<span class="p">}</span>
+
+<span class="kt">bool</span> <span class="nf">IsRelativeJump</span><span class="p">(</span><span class="n">cs_insn</span><span class="o">&amp;</span> <span class="n">inst</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">bool</span> <span class="n">isAnyJumpInstruction</span> <span class="o">=</span> <span class="n">inst</span><span class="p">.</span><span class="n">id</span> <span class="o">&gt;=</span> <span class="n">X86_INS_JAE</span> <span class="o">&amp;&amp;</span> <span class="n">inst</span><span class="p">.</span><span class="n">id</span> <span class="o">&lt;=</span> <span class="n">X86_INS_JS</span><span class="p">;</span>
+  <span class="kt">bool</span> <span class="n">isJmp</span> <span class="o">=</span> <span class="n">inst</span><span class="p">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">X86_INS_JMP</span><span class="p">;</span>
+  <span class="kt">bool</span> <span class="n">startsWithEBorE9</span> <span class="o">=</span> <span class="n">inst</span><span class="p">.</span><span class="n">bytes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mh">0xEB</span> <span class="o">||</span> <span class="n">inst</span><span class="p">.</span><span class="n">bytes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mh">0xE9</span><span class="p">;</span>
+  <span class="k">return</span> <span class="n">isJmp</span> <span class="o">?</span> <span class="n">startsWithEBorE9</span> <span class="o">:</span> <span class="n">isAnyJumpInstruction</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">bool</span> <span class="nf">IsRelativeCall</span><span class="p">(</span><span class="n">cs_insn</span><span class="o">&amp;</span> <span class="n">inst</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">bool</span> <span class="n">isCall</span> <span class="o">=</span> <span class="n">inst</span><span class="p">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">X86_INS_CALL</span><span class="p">;</span>
+  <span class="kt">bool</span> <span class="n">startsWithE8</span> <span class="o">=</span> <span class="n">inst</span><span class="p">.</span><span class="n">bytes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mh">0xE8</span><span class="p">;</span>
+  <span class="k">return</span> <span class="n">isCall</span> <span class="o">&amp;&amp;</span> <span class="n">startsWithE8</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">bool</span> <span class="nf">IsRIPRelativeInstr</span><span class="p">(</span><span class="n">cs_insn</span><span class="o">&amp;</span> <span class="n">inst</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">cs_x86</span><span class="o">*</span> <span class="n">x86</span> <span class="o">=</span> <span class="o">&amp;</span><span class="p">(</span><span class="n">inst</span><span class="p">.</span><span class="n">detail</span><span class="o">-&gt;</span><span class="n">x86</span><span class="p">);</span>
+
+  <span class="k">for</span> <span class="p">(</span><span class="kt">uint32_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">inst</span><span class="p">.</span><span class="n">detail</span><span class="o">-&gt;</span><span class="n">x86</span><span class="p">.</span><span class="n">op_count</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">cs_x86_op</span><span class="o">*</span> <span class="n">op</span> <span class="o">=</span> <span class="o">&amp;</span><span class="p">(</span><span class="n">x86</span><span class="o">-&gt;</span><span class="n">operands</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+
+    <span class="c1">//mem type is rip relative, like lea rcx,[rip+0xbeef]</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">op</span><span class="o">-&gt;</span><span class="n">type</span> <span class="o">==</span> <span class="n">X86_OP_MEM</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="c1">//if we're relative to rip</span>
+      <span class="k">return</span> <span class="n">op</span><span class="o">-&gt;</span><span class="n">mem</span><span class="p">.</span><span class="n">base</span> <span class="o">==</span> <span class="n">X86_REG_RIP</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">template</span><span class="o">&lt;</span><span class="k">class</span> <span class="nc">T</span><span class="p">&gt;</span>
+<span class="n">T</span> <span class="nf">GetDisplacement</span><span class="p">(</span><span class="n">cs_insn</span><span class="o">*</span> <span class="n">inst</span><span class="p">,</span> <span class="kt">uint8_t</span> <span class="n">offset</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">T</span> <span class="n">disp</span><span class="p">;</span>
+  <span class="n">memcpy</span><span class="p">(</span><span class="o">&amp;</span><span class="n">disp</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">inst</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="p">[</span><span class="n">offset</span><span class="p">],</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">T</span><span class="p">));</span>
+  <span class="k">return</span> <span class="n">disp</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">//rewrite instruction bytes so that any RIP-relative displacement operands</span>
+<span class="c1">//make sense with wherever we're relocating to</span>
+<span class="kt">void</span> <span class="nf">RelocateInstruction</span><span class="p">(</span><span class="n">cs_insn</span><span class="o">*</span> <span class="n">inst</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span> <span class="n">dstLocation</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">cs_x86</span><span class="o">*</span> <span class="n">x86</span> <span class="o">=</span> <span class="o">&amp;</span><span class="p">(</span><span class="n">inst</span><span class="o">-&gt;</span><span class="n">detail</span><span class="o">-&gt;</span><span class="n">x86</span><span class="p">);</span>
+  <span class="kt">uint8_t</span> <span class="n">offset</span> <span class="o">=</span> <span class="n">x86</span><span class="o">-&gt;</span><span class="n">encoding</span><span class="p">.</span><span class="n">disp_offset</span><span class="p">;</span>
+
+  <span class="kt">uint64_t</span> <span class="n">displacement</span> <span class="o">=</span> <span class="n">inst</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="p">[</span><span class="n">x86</span><span class="o">-&gt;</span><span class="n">encoding</span><span class="p">.</span><span class="n">disp_offset</span><span class="p">];</span>
+  <span class="k">switch</span> <span class="p">(</span><span class="n">x86</span><span class="o">-&gt;</span><span class="n">encoding</span><span class="p">.</span><span class="n">disp_size</span><span class="p">)</span>
+  <span class="p">{</span>
+  <span class="k">case</span> <span class="mi">1</span><span class="p">:</span>
+  <span class="p">{</span>
+    <span class="kt">int8_t</span> <span class="n">disp</span> <span class="o">=</span> <span class="n">GetDisplacement</span><span class="o">&lt;</span><span class="kt">uint8_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">inst</span><span class="p">,</span> <span class="n">offset</span><span class="p">);</span>
+    <span class="n">disp</span> <span class="o">-=</span> <span class="kt">int8_t</span><span class="p">(</span><span class="kt">uint64_t</span><span class="p">(</span><span class="n">dstLocation</span><span class="p">)</span> <span class="o">-</span> <span class="n">inst</span><span class="o">-&gt;</span><span class="n">address</span><span class="p">);</span>
+    <span class="n">memcpy</span><span class="p">(</span><span class="o">&amp;</span><span class="n">inst</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="p">[</span><span class="n">offset</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">disp</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+  <span class="p">}</span><span class="k">break</span><span class="p">;</span>
+
+  <span class="k">case</span> <span class="mi">2</span><span class="p">:</span>
+  <span class="p">{</span>
+    <span class="kt">int16_t</span> <span class="n">disp</span> <span class="o">=</span> <span class="n">GetDisplacement</span><span class="o">&lt;</span><span class="kt">uint16_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">inst</span><span class="p">,</span> <span class="n">offset</span><span class="p">);</span>
+    <span class="n">disp</span> <span class="o">-=</span> <span class="kt">int16_t</span><span class="p">(</span><span class="kt">uint64_t</span><span class="p">(</span><span class="n">dstLocation</span><span class="p">)</span> <span class="o">-</span> <span class="n">inst</span><span class="o">-&gt;</span><span class="n">address</span><span class="p">);</span>
+    <span class="n">memcpy</span><span class="p">(</span><span class="o">&amp;</span><span class="n">inst</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="p">[</span><span class="n">offset</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">disp</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
+  <span class="p">}</span><span class="k">break</span><span class="p">;</span>
+
+  <span class="k">case</span> <span class="mi">4</span><span class="p">:</span>
+  <span class="p">{</span>
+    <span class="kt">int32_t</span> <span class="n">disp</span> <span class="o">=</span> <span class="n">GetDisplacement</span><span class="o">&lt;</span><span class="kt">int32_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">inst</span><span class="p">,</span> <span class="n">offset</span><span class="p">);</span>
+    <span class="n">disp</span> <span class="o">-=</span> <span class="kt">int32_t</span><span class="p">(</span><span class="kt">uint64_t</span><span class="p">(</span><span class="n">dstLocation</span><span class="p">)</span> <span class="o">-</span> <span class="n">inst</span><span class="o">-&gt;</span><span class="n">address</span><span class="p">);</span>
+    <span class="n">memcpy</span><span class="p">(</span><span class="o">&amp;</span><span class="n">inst</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="p">[</span><span class="n">offset</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">disp</span><span class="p">,</span> <span class="mi">4</span><span class="p">);</span>
+  <span class="p">}</span><span class="k">break</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+
+<span class="c1">//relative jump instructions need to be rewritten so that they jump to the appropriate</span>
+<span class="c1">//place in the Absolute Instruction Table. Since we want to preserve any conditional</span>
+<span class="c1">//jump logic, this func rewrites the instruction's operand bytes only. </span>
+<span class="kt">void</span> <span class="nf">RewriteStolenJumpInstruction</span><span class="p">(</span><span class="n">cs_insn</span><span class="o">*</span> <span class="n">instr</span><span class="p">,</span> <span class="kt">uint8_t</span><span class="o">*</span> <span class="n">instrPtr</span><span class="p">,</span> <span class="kt">uint8_t</span><span class="o">*</span> <span class="n">absTableEntry</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">uint8_t</span> <span class="n">distToJumpTable</span> <span class="o">=</span> <span class="kt">uint8_t</span><span class="p">(</span><span class="n">absTableEntry</span> <span class="o">-</span> <span class="p">(</span><span class="n">instrPtr</span> <span class="o">+</span> <span class="n">instr</span><span class="o">-&gt;</span><span class="n">size</span><span class="p">));</span>
+
+  <span class="c1">//jmp instructions can have a 1 or 2 byte opcode, and need a 1-4 byte operand</span>
+  <span class="c1">//rewrite the operand for the jump to go to the jump table</span>
+  <span class="kt">uint8_t</span> <span class="n">instrByteSize</span> <span class="o">=</span> <span class="n">instr</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mh">0x0F</span> <span class="o">?</span> <span class="mi">2</span> <span class="o">:</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="kt">uint8_t</span> <span class="n">operandSize</span> <span class="o">=</span> <span class="n">instr</span><span class="o">-&gt;</span><span class="n">size</span> <span class="o">-</span> <span class="n">instrByteSize</span><span class="p">;</span>
+
+  <span class="k">switch</span> <span class="p">(</span><span class="n">operandSize</span><span class="p">)</span>
+  <span class="p">{</span>
+  <span class="k">case</span> <span class="mi">1</span><span class="p">:</span> <span class="n">instr</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="p">[</span><span class="n">instrByteSize</span><span class="p">]</span> <span class="o">=</span> <span class="n">distToJumpTable</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>
+  <span class="k">case</span> <span class="mi">2</span><span class="p">:</span> <span class="p">{</span><span class="kt">uint16_t</span> <span class="n">dist16</span> <span class="o">=</span> <span class="n">distToJumpTable</span><span class="p">;</span> <span class="n">memcpy</span><span class="p">(</span><span class="o">&amp;</span><span class="n">instr</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="p">[</span><span class="n">instrByteSize</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">dist16</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span> <span class="p">}</span> <span class="k">break</span><span class="p">;</span>
+  <span class="k">case</span> <span class="mi">4</span><span class="p">:</span> <span class="p">{</span><span class="kt">uint32_t</span> <span class="n">dist32</span> <span class="o">=</span> <span class="n">distToJumpTable</span><span class="p">;</span> <span class="n">memcpy</span><span class="p">(</span><span class="o">&amp;</span><span class="n">instr</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="p">[</span><span class="n">instrByteSize</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">dist32</span><span class="p">,</span> <span class="mi">4</span><span class="p">);</span> <span class="p">}</span> <span class="k">break</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">//relative call instructions need to be rewritten as jumps to the appropriate</span>
+<span class="c1">//plaec in the Absolute Instruction Table. Since we want to preserve the length</span>
+<span class="c1">//of the call instruction, we first replace all the instruction's bytes with 1 byte</span>
+<span class="c1">//NOPs, before writing a 2 byte jump to the start</span>
+<span class="kt">void</span> <span class="nf">RewriteStolenCallInstruction</span><span class="p">(</span><span class="n">cs_insn</span><span class="o">*</span> <span class="n">instr</span><span class="p">,</span> <span class="kt">uint8_t</span><span class="o">*</span> <span class="n">instrPtr</span><span class="p">,</span> <span class="kt">uint8_t</span><span class="o">*</span> <span class="n">absTableEntry</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">uint32_t</span> <span class="n">numNOPs</span> <span class="o">=</span> <span class="n">instr</span><span class="o">-&gt;</span><span class="n">size</span> <span class="o">-</span> <span class="mi">2</span><span class="p">;</span>
+  <span class="kt">uint8_t</span> <span class="n">distToJumpTable</span> <span class="o">=</span> <span class="kt">uint8_t</span><span class="p">(</span><span class="n">absTableEntry</span> <span class="o">-</span> <span class="p">(</span><span class="n">instrPtr</span> <span class="o">+</span> <span class="n">instr</span><span class="o">-&gt;</span><span class="n">size</span> <span class="o">-</span> <span class="n">numNOPs</span><span class="p">));</span>
+
+  <span class="c1">//calls need to be rewritten as relative jumps to the abs table</span>
+  <span class="c1">//but we want to preserve the length of the instruction, so pad with NOPs</span>
+  <span class="kt">uint8_t</span> <span class="n">jmpBytes</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span> <span class="mh">0xEB</span><span class="p">,</span> <span class="n">distToJumpTable</span> <span class="p">};</span>
+  <span class="n">memset</span><span class="p">(</span><span class="n">instr</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="p">,</span> <span class="mh">0x90</span><span class="p">,</span> <span class="n">instr</span><span class="o">-&gt;</span><span class="n">size</span><span class="p">);</span>
+  <span class="n">memcpy</span><span class="p">(</span><span class="n">instr</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="p">,</span> <span class="n">jmpBytes</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">jmpBytes</span><span class="p">));</span>
+<span class="p">}</span>
+
+<span class="kt">uint32_t</span> <span class="nf">AddJmpToAbsTable</span><span class="p">(</span><span class="n">cs_insn</span><span class="o">&amp;</span> <span class="n">jmp</span><span class="p">,</span> <span class="kt">uint8_t</span><span class="o">*</span> <span class="n">absTableMem</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">char</span><span class="o">*</span> <span class="n">targetAddrStr</span> <span class="o">=</span> <span class="n">jmp</span><span class="p">.</span><span class="n">op_str</span><span class="p">;</span> <span class="c1">//where the instruction intended to go</span>
+  <span class="kt">uint64_t</span> <span class="n">targetAddr</span> <span class="o">=</span> <span class="n">_strtoui64</span><span class="p">(</span><span class="n">targetAddrStr</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+  <span class="k">return</span> <span class="n">WriteAbsoluteJump64</span><span class="p">(</span><span class="n">absTableMem</span><span class="p">,</span> <span class="p">(</span><span class="kt">void</span><span class="o">*</span><span class="p">)</span><span class="n">targetAddr</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">uint32_t</span> <span class="nf">AddCallToAbsTable</span><span class="p">(</span><span class="n">cs_insn</span><span class="o">&amp;</span> <span class="n">call</span><span class="p">,</span> <span class="kt">uint8_t</span><span class="o">*</span> <span class="n">absTableMem</span><span class="p">,</span> <span class="kt">uint8_t</span><span class="o">*</span> <span class="n">jumpBackToHookedFunc</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">char</span><span class="o">*</span> <span class="n">targetAddrStr</span> <span class="o">=</span> <span class="n">call</span><span class="p">.</span><span class="n">op_str</span><span class="p">;</span> <span class="c1">//where the instruction intended to go</span>
+  <span class="kt">uint64_t</span> <span class="n">targetAddr</span> <span class="o">=</span> <span class="n">_strtoui64</span><span class="p">(</span><span class="n">targetAddrStr</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+
+  <span class="kt">uint8_t</span><span class="o">*</span> <span class="n">dstMem</span> <span class="o">=</span> <span class="n">absTableMem</span><span class="p">;</span>
+
+  <span class="kt">uint8_t</span> <span class="n">callAsmBytes</span><span class="p">[]</span> <span class="o">=</span>
+  <span class="p">{</span>
+    <span class="mh">0x49</span><span class="p">,</span> <span class="mh">0xBA</span><span class="p">,</span> <span class="mh">0xAA</span><span class="p">,</span> <span class="mh">0xAA</span><span class="p">,</span> <span class="mh">0xAA</span><span class="p">,</span> <span class="mh">0xAA</span><span class="p">,</span> <span class="mh">0xAA</span><span class="p">,</span> <span class="mh">0xAA</span><span class="p">,</span> <span class="mh">0xAA</span><span class="p">,</span> <span class="mh">0xAA</span><span class="p">,</span> <span class="c1">//movabs 64 bit value into r10</span>
+    <span class="mh">0x41</span><span class="p">,</span> <span class="mh">0xFF</span><span class="p">,</span> <span class="mh">0xD2</span><span class="p">,</span> <span class="c1">//call r10</span>
+  <span class="p">};</span>
+  <span class="n">memcpy</span><span class="p">(</span><span class="o">&amp;</span><span class="n">callAsmBytes</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">targetAddr</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">void</span><span class="o">*</span><span class="p">));</span>
+  <span class="n">memcpy</span><span class="p">(</span><span class="n">dstMem</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">callAsmBytes</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">callAsmBytes</span><span class="p">));</span>
+  <span class="n">dstMem</span> <span class="o">+=</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">callAsmBytes</span><span class="p">);</span>
+
+  <span class="c1">//after the call, we need to add a second 2 byte jump, which will jump back to the </span>
+    <span class="c1">//final jump of the stolen bytes</span>
+  <span class="kt">uint8_t</span> <span class="n">jmpBytes</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span> <span class="mh">0xEB</span><span class="p">,</span> <span class="kt">uint8_t</span><span class="p">(</span><span class="n">jumpBackToHookedFunc</span> <span class="o">-</span> <span class="p">(</span><span class="n">dstMem</span> <span class="o">+</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">jmpBytes</span><span class="p">)))</span> <span class="p">};</span>
+  <span class="n">memcpy</span><span class="p">(</span><span class="n">dstMem</span><span class="p">,</span> <span class="n">jmpBytes</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">jmpBytes</span><span class="p">));</span>
+
+  <span class="k">return</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">callAsmBytes</span><span class="p">)</span> <span class="o">+</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">jmpBytes</span><span class="p">);</span> <span class="c1">//15</span>
+<span class="p">}</span>
+
+
+<span class="cm">/*build a "jump - sandwich" style trampoline. This style of trampoline has three sections:
+
+    |----------------------------|
+    |Stolen Instructions         |
+    |----------------------------|
+    |Jummp back to target func   |
+    |----------------------------|
+    |Absolute Instruction Table  |
+    |----------------------------|
+
+Relative instructions in the stolen instructions section need to be rewritten as absolute
+instructions which jump/call to the intended target address of those instructions (since they've
+been relocated). Absolute versions of these instructions are added to the absolute instruction
+table. The relative instruction in the stolen instructions section get rewritten to relative
+jumps to the corresponding instructions in the absolute instruction table.
+*/</span>
+
+<span class="kt">uint32_t</span> <span class="nf">BuildTrampoline</span><span class="p">(</span><span class="kt">void</span><span class="o">*</span> <span class="n">func2hook</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span> <span class="n">dstMemForTrampoline</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">X64Instructions</span> <span class="n">stolenInstrs</span> <span class="o">=</span> <span class="n">StealBytes</span><span class="p">(</span><span class="n">func2hook</span><span class="p">);</span>
+
+  <span class="kt">uint8_t</span><span class="o">*</span> <span class="n">stolenByteMem</span> <span class="o">=</span> <span class="p">(</span><span class="kt">uint8_t</span><span class="o">*</span><span class="p">)</span><span class="n">dstMemForTrampoline</span><span class="p">;</span>
+  <span class="kt">uint8_t</span><span class="o">*</span> <span class="n">jumpBackMem</span> <span class="o">=</span> <span class="n">stolenByteMem</span> <span class="o">+</span> <span class="n">stolenInstrs</span><span class="p">.</span><span class="n">numBytes</span><span class="p">;</span>
+  <span class="kt">uint8_t</span><span class="o">*</span> <span class="n">absTableMem</span> <span class="o">=</span> <span class="n">jumpBackMem</span> <span class="o">+</span> <span class="mi">13</span><span class="p">;</span> <span class="c1">//13 is the size of a 64 bit mov/jmp instruction pair</span>
+
+  <span class="k">for</span> <span class="p">(</span><span class="kt">uint32_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">stolenInstrs</span><span class="p">.</span><span class="n">numInstructions</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">cs_insn</span><span class="o">&amp;</span> <span class="n">inst</span> <span class="o">=</span> <span class="n">stolenInstrs</span><span class="p">.</span><span class="n">instructions</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">inst</span><span class="p">.</span><span class="n">id</span> <span class="o">&gt;=</span> <span class="n">X86_INS_LOOP</span> <span class="o">&amp;&amp;</span> <span class="n">inst</span><span class="p">.</span><span class="n">id</span> <span class="o">&lt;=</span> <span class="n">X86_INS_LOOPNE</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="k">return</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">//bail out on loop instructions, I don't have a good way of handling them </span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">IsRelativeJump</span><span class="p">(</span><span class="n">inst</span><span class="p">))</span>
+    <span class="p">{</span>
+      <span class="kt">uint32_t</span> <span class="n">aitSize</span> <span class="o">=</span> <span class="n">AddJmpToAbsTable</span><span class="p">(</span><span class="n">inst</span><span class="p">,</span> <span class="n">absTableMem</span><span class="p">);</span>
+      <span class="n">RewriteStolenJumpInstruction</span><span class="p">(</span><span class="o">&amp;</span><span class="n">inst</span><span class="p">,</span> <span class="n">stolenByteMem</span><span class="p">,</span> <span class="n">absTableMem</span><span class="p">);</span>
+      <span class="n">absTableMem</span> <span class="o">+=</span> <span class="n">aitSize</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">IsRelativeCall</span><span class="p">(</span><span class="n">inst</span><span class="p">))</span>
+    <span class="p">{</span>
+      <span class="kt">uint32_t</span> <span class="n">aitSize</span> <span class="o">=</span> <span class="n">AddCallToAbsTable</span><span class="p">(</span><span class="n">inst</span><span class="p">,</span> <span class="n">absTableMem</span><span class="p">,</span> <span class="n">jumpBackMem</span><span class="p">);</span>
+      <span class="n">RewriteStolenCallInstruction</span><span class="p">(</span><span class="o">&amp;</span><span class="n">inst</span><span class="p">,</span> <span class="n">stolenByteMem</span><span class="p">,</span> <span class="n">absTableMem</span><span class="p">);</span>
+      <span class="n">absTableMem</span> <span class="o">+=</span> <span class="n">aitSize</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">IsRIPRelativeInstr</span><span class="p">(</span><span class="n">inst</span><span class="p">))</span>
+    <span class="p">{</span>
+      <span class="n">RelocateInstruction</span><span class="p">(</span><span class="o">&amp;</span><span class="n">inst</span><span class="p">,</span> <span class="n">stolenByteMem</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="n">memcpy</span><span class="p">(</span><span class="n">stolenByteMem</span><span class="p">,</span> <span class="n">inst</span><span class="p">.</span><span class="n">bytes</span><span class="p">,</span> <span class="n">inst</span><span class="p">.</span><span class="n">size</span><span class="p">);</span>
+    <span class="n">stolenByteMem</span> <span class="o">+=</span> <span class="n">inst</span><span class="p">.</span><span class="n">size</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="n">WriteAbsoluteJump64</span><span class="p">(</span><span class="n">jumpBackMem</span><span class="p">,</span> <span class="p">(</span><span class="kt">uint8_t</span><span class="o">*</span><span class="p">)</span><span class="n">func2hook</span> <span class="o">+</span> <span class="mi">5</span><span class="p">);</span>
+  <span class="n">free</span><span class="p">(</span><span class="n">stolenInstrs</span><span class="p">.</span><span class="n">instructions</span><span class="p">);</span>
+
+  <span class="k">return</span> <span class="kt">uint32_t</span><span class="p">((</span><span class="kt">uint8_t</span><span class="o">*</span><span class="p">)</span><span class="n">absTableMem</span> <span class="o">-</span> <span class="p">(</span><span class="kt">uint8_t</span><span class="o">*</span><span class="p">)</span><span class="n">dstMemForTrampoline</span><span class="p">);</span>
+<span class="p">}</span>
+
+
+<span class="kt">void</span> <span class="nf">PushAddress</span><span class="p">(</span><span class="kt">uint64_t</span> <span class="n">addr</span><span class="p">)</span> <span class="c1">//push the address of the jump target</span>
+<span class="p">{</span>
+  <span class="n">hookJumpAddresses</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">addr</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">//we absolutely don't wnat this inlined</span>
+<span class="kr">__declspec</span><span class="p">(</span><span class="n">noinline</span><span class="p">)</span> <span class="kt">void</span> <span class="nf">PopAddress</span><span class="p">(</span><span class="kt">uint64_t</span> <span class="n">trampolinePtr</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">uint64_t</span> <span class="n">addr</span> <span class="o">=</span> <span class="n">hookJumpAddresses</span><span class="p">.</span><span class="n">top</span><span class="p">();</span>
+  <span class="n">hookJumpAddresses</span><span class="p">.</span><span class="n">pop</span><span class="p">();</span>
+  <span class="n">memcpy</span><span class="p">((</span><span class="kt">void</span><span class="o">*</span><span class="p">)</span><span class="n">trampolinePtr</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">addr</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">uint64_t</span><span class="p">));</span>
+<span class="p">}</span>
+
+
+<span class="kt">void</span> <span class="nf">InstallHook</span><span class="p">(</span><span class="kt">void</span><span class="o">*</span> <span class="n">func2hook</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span> <span class="n">payloadFunc</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">SetOtherThreadsSuspended</span><span class="p">(</span><span class="nb">true</span><span class="p">);</span>
+
+  <span class="n">DWORD</span> <span class="n">oldProtect</span><span class="p">;</span>
+  <span class="n">VirtualProtect</span><span class="p">(</span><span class="n">func2hook</span><span class="p">,</span> <span class="mi">1024</span><span class="p">,</span> <span class="n">PAGE_EXECUTE_READWRITE</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">oldProtect</span><span class="p">);</span>
+
+  <span class="c1">//102 is the size of the "pre-payload" instructions that are written below</span>
+  <span class="c1">//the trampoline will be located after these instructions in memory</span>
+  <span class="kt">void</span><span class="o">*</span> <span class="n">hookMemory</span> <span class="o">=</span> <span class="n">AllocatePageNearAddress</span><span class="p">(</span><span class="n">func2hook</span><span class="p">);</span>
+
+  <span class="kt">uint32_t</span> <span class="n">trampolineSize</span> <span class="o">=</span> <span class="n">BuildTrampoline</span><span class="p">(</span><span class="n">func2hook</span><span class="p">,</span> <span class="p">(</span><span class="kt">void</span><span class="o">*</span><span class="p">)((</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">hookMemory</span> <span class="o">+</span> <span class="mi">102</span><span class="p">));</span>
+
+  <span class="kt">uint8_t</span><span class="o">*</span> <span class="n">memoryIter</span> <span class="o">=</span> <span class="p">(</span><span class="kt">uint8_t</span><span class="o">*</span><span class="p">)</span><span class="n">hookMemory</span><span class="p">;</span>
+  <span class="kt">uint64_t</span> <span class="n">trampolineAddress</span> <span class="o">=</span> <span class="p">(</span><span class="kt">uint64_t</span><span class="p">)(</span><span class="n">memoryIter</span><span class="p">)</span><span class="o">+</span><span class="mi">102</span><span class="p">;</span>
+
+  <span class="n">memoryIter</span> <span class="o">+=</span> <span class="n">WriteSaveArgumentRegisters</span><span class="p">(</span><span class="n">memoryIter</span><span class="p">);</span>
+  <span class="n">memoryIter</span> <span class="o">+=</span> <span class="n">WriteMovToRCX</span><span class="p">(</span><span class="n">memoryIter</span><span class="p">,</span> <span class="n">trampolineAddress</span><span class="p">);</span>
+  <span class="n">memoryIter</span> <span class="o">+=</span> <span class="n">WriteSubRSP32</span><span class="p">(</span><span class="n">memoryIter</span><span class="p">);</span> <span class="c1">//allocate home space for function call</span>
+  <span class="n">memoryIter</span> <span class="o">+=</span> <span class="n">WriteAbsoluteCall64</span><span class="p">(</span><span class="n">memoryIter</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">PushAddress</span><span class="p">);</span>
+  <span class="n">memoryIter</span> <span class="o">+=</span> <span class="n">WriteAddRSP32</span><span class="p">(</span><span class="n">memoryIter</span><span class="p">);</span>
+  <span class="n">memoryIter</span> <span class="o">+=</span> <span class="n">WriteRestoreArgumentRegisters</span><span class="p">(</span><span class="n">memoryIter</span><span class="p">);</span>
+  <span class="n">memoryIter</span> <span class="o">+=</span> <span class="n">WriteAbsoluteJump64</span><span class="p">(</span><span class="n">memoryIter</span><span class="p">,</span> <span class="n">payloadFunc</span><span class="p">);</span>
+
+  <span class="c1">//create the relay function</span>
+  <span class="kt">void</span><span class="o">*</span> <span class="n">relayFuncMemory</span> <span class="o">=</span> <span class="n">memoryIter</span> <span class="o">+</span> <span class="n">trampolineSize</span><span class="p">;</span>
+  <span class="n">WriteAbsoluteJump64</span><span class="p">(</span><span class="n">relayFuncMemory</span><span class="p">,</span> <span class="n">hookMemory</span><span class="p">);</span> <span class="c1">//write relay func instructions</span>
+
+  <span class="c1">//install the hook</span>
+  <span class="kt">uint8_t</span> <span class="n">jmpInstruction</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span> <span class="mh">0xE9</span><span class="p">,</span> <span class="mh">0x0</span><span class="p">,</span> <span class="mh">0x0</span><span class="p">,</span> <span class="mh">0x0</span><span class="p">,</span> <span class="mh">0x0</span> <span class="p">};</span>
+  <span class="k">const</span> <span class="kt">int32_t</span> <span class="n">relAddr</span> <span class="o">=</span> <span class="kt">int32_t</span><span class="p">((</span><span class="kt">int64_t</span><span class="p">)</span><span class="n">relayFuncMemory</span> <span class="o">-</span> <span class="p">((</span><span class="kt">int64_t</span><span class="p">)</span><span class="n">func2hook</span> <span class="o">+</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">jmpInstruction</span><span class="p">)));</span>
+  <span class="n">memcpy</span><span class="p">(</span><span class="n">jmpInstruction</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">relAddr</span><span class="p">,</span> <span class="mi">4</span><span class="p">);</span>
+  <span class="n">memcpy</span><span class="p">(</span><span class="n">func2hook</span><span class="p">,</span> <span class="n">jmpInstruction</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">jmpInstruction</span><span class="p">));</span>
+
+  <span class="n">SetOtherThreadsSuspended</span><span class="p">(</span><span class="nb">false</span><span class="p">);</span>
+<span class="p">}</span></code></pre></div>
+
+  </details></div>
+
+<h2 id="wrap-up">Wrap Up</h2>
+<p>This was a fun project to work on, and I feel like all of these hooking/hacking related projects have taught me an awful lot about stuff that I took for granted before. Hopefully it was as much fun to read about as it was to figure out. Who knows, maybe one day you’ll need to add an obnoxious triangle to a third party binary and some of this will come in handy.</p>
+
+<p>I’ve got nothing else interesting to say so I guess that means it’s time to plug my Twitter hadle (<a href="https://twitter.com/khalladay">@khalladay</a>) and share a couple links I found helpful while figuring out to make this project work. Enjoy!</p>
+
+<ul>
+  <li><a href="https://guidedhacking.com/threads/what-is-dll-hijacking-fast-explanation.13607/">https://guidedhacking.com/threads/what-is-dll-hijacking-fast-explanation.13607/</a></li>
+  <li><a href="https://itm4n.github.io/windows-dll-hijacking-clarified/">https://itm4n.github.io/windows-dll-hijacking-clarified/</a></li>
+  <li><a href="https://www.fireeye.com/blog/threat-research/2019/06/hunting-com-objects.html">https://www.fireeye.com/blog/threat-research/2019/06/hunting-com-objects.html</a></li>
+  <li><a href="https://docs.microsoft.com/en-us/windows/win32/com/component-object-model--com--portal">https://docs.microsoft.com/en-us/windows/win32/com/component-object-model–com–portal</a></li>
+</ul>
+
+<div align="center">
+<img src="/images/post_images/2021-07-14/skyrim_triangle2.jpg" />
+<br /><br />
+</div>
+
+</div>
+
+<div id="related">
+  <h3>Recent Posts</h3>
+  <ul class="posts">
+    
+    <li>
+      <span>14 Jul 2021 &raquo;</span> <a href="/blog/2021/07/14/Dll-Search-Order-Hijacking-For-PostProcess-Injection.html">Hooking and Hijacking DirectX 11 Functions In Skyrim</a>
+    </li>
+    
+    <li>
+      <span>13 Nov 2020 &raquo;</span> <a href="/blog/2020/11/13/Hooking-By-Example.html">X64 Function Hooking by Example</a>
+    </li>
+    
+    <li>
+      <span>20 May 2020 &raquo;</span> <a href="/blog/2020/05/20/Rendering-With-Notepad.html">Ray Tracing In Notepad.exe At 30 FPS</a>
+    </li>
+    
+    <li>
+      <span>20 May 2020 &raquo;</span> <a href="/blog/2020/05/20/Hooking-Input-Snake-In-Notepad.html">Hooking Keyboard Input To Play Snake In Notepad.exe</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      <div class="footer">
+        <div class="disclaimer">
+  
+  <p>
+    The postings on this site are my own and don't necessarily represent my 
+    employer’s positions, strategies or opinions.
+  </p>
+  
+
+  <p>
+    © Kyle Halladay, 2021 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
+  </p>
+</div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

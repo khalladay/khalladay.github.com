@@ -18,6 +18,7 @@
 
   <link rel="stylesheet" href="/assets/css/all.css">
   <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    
 </head>
 <body>
   <div class="container">
@@ -29,8 +30,7 @@
   <h2>I'm <a href="/">Kyle Halladay</a>.</h2>
   <div id="bio">
     <p>I do graphics and engine programming for games. </p>
-    <p>I'm the author of <a href="https://www.amazon.com/Practical-Shader-Development-Fragment-Developers/dp/1484244567">Practical Shader Development</a>, which is all about learning to write shaders.
-    <p>I also dabble in GBA dev, you can find my tutorials <a href="/gba.html">here.</a>
+    <p>I'm the author of <a href="https://www.amazon.com/Practical-Shader-Development-Fragment-Developers/dp/1484244567">Practical Shader Development</a>, which is all about learning to write shaders.</p>
     <p>Check out <a href="/archive.html">some other stuff I've written</a></p>
   </div>
   <div id="social">
@@ -93,7 +93,8 @@
 
 </p>
 
-<h1 class="title">Lessons Learned While Building a Vulkan Material System</h1>
+<div style="font-size:14px">27 Nov 2017</div>
+<h1 class="title">Lessons Learned While Building a Vulkan Material System</h1> 
 
 <div id="post">
   <p>One of the things I’m noticing about learning Vulkan, is that there isn’t a lot of material out there to bridge the gap between being a complete beginner, and being able to build your own real applications.</p>
@@ -110,7 +111,7 @@
 
 <p>This post is going to jump around a little bit, as you’ll notice by the headings. Some things I want to share are just things I didn’t realize about how to use the Vulkan API, some are “good ideas” that are working out for me so far, and finally I want to write a bit about the high level structure of how my material system works.</p>
 
-<p>All the code for everything is <a href="https://github.com/khalladay/VkMaterialSystem">on github</a>, and I’ve tried to add helpful comments to <a href="https://github.com/khalladay/VkMaterialSystem/blob/master/VkMaterialSystem/material_creation.cpp">material_creation.cpp</a>, which contains most of the stuff I’m talking about here. Standard caveats to everything: I barely know what I’m doing, there’s probably better ways to do this, I’m not a lawyer, yadda yadda yadda.  </p>
+<p>All the code for everything is <a href="https://github.com/khalladay/VkMaterialSystem">on github</a>, and I’ve tried to add helpful comments to <a href="https://github.com/khalladay/VkMaterialSystem/blob/master/VkMaterialSystem/material_creation.cpp">material_creation.cpp</a>, which contains most of the stuff I’m talking about here. Standard caveats to everything: I barely know what I’m doing, there’s probably better ways to do this, I’m not a lawyer, yadda yadda yadda.</p>
 
 <h2 id="how-descriptor-sets-and-bindings-work">How Descriptor Sets (and Bindings!) Work</h2>
 
@@ -141,13 +142,13 @@
 <p>An example of how this might play out:</p>
 
 <div class="highlight"><pre><code class="language-c" data-lang="c"><span class="k">for</span> <span class="n">each</span> <span class="n">view</span> <span class="p">{</span>
-  <span class="n">bind</span> <span class="n">global</span> <span class="n">resourcees</span>          <span class="c1">// set 0
-</span>
+  <span class="n">bind</span> <span class="n">global</span> <span class="n">resourcees</span>          <span class="c1">// set 0</span>
+
   <span class="k">for</span> <span class="n">each</span> <span class="n">shader</span> <span class="p">{</span>
     <span class="n">bind</span> <span class="n">shader</span> <span class="n">pipeline</span>  
     <span class="k">for</span> <span class="n">each</span> <span class="n">material</span> <span class="p">{</span>
-      <span class="n">bind</span> <span class="n">material</span> <span class="n">resources</span>  <span class="c1">// sets 2,3
-</span>    <span class="p">}</span>
+      <span class="n">bind</span> <span class="n">material</span> <span class="n">resources</span>  <span class="c1">// sets 2,3</span>
+    <span class="p">}</span>
   <span class="p">}</span>
 <span class="p">}</span></code></pre></div>
 
@@ -165,7 +166,7 @@
 
 <p>The most obvious problem with building a generic material loading system in Vulkan vs OpenGL is the lack of shader reflection available at runtime. In OpenGL all this functionality was there by default, but in Vulkan we need to use the wonderful <a href="https://github.com/KhronosGroup/SPIRV-Cross">SPIR-V Cross</a> library to help us get at this information.</p>
 
-<p>I didn’t want to embed SPIR-V Cross in my runtime application, since it felt like unnecessary bloat, so I wrote a separate application that I called the “ShaderPipeline” (also available <a href="https://github.com/khalladay/VkMaterialSystem/tree/master/ShaderPipeline">on github</a>). This program runs whenever a shader has been edited, and handles compiling GLSL into SPIR-V, and creating json files (.refl files) that store reflection information about these shaders.  </p>
+<p>I didn’t want to embed SPIR-V Cross in my runtime application, since it felt like unnecessary bloat, so I wrote a separate application that I called the “ShaderPipeline” (also available <a href="https://github.com/khalladay/VkMaterialSystem/tree/master/ShaderPipeline">on github</a>). This program runs whenever a shader has been edited, and handles compiling GLSL into SPIR-V, and creating json files (.refl files) that store reflection information about these shaders.</p>
 
 <p>One of these .refl files might look like the following:</p>
 
@@ -311,8 +312,8 @@
 
 <div class="highlight"><pre><code class="language-c" data-lang="c"><span class="k">struct</span> <span class="n">MaterialRenderData</span>
 <span class="p">{</span>
-  <span class="c1">//general material data
-</span>  <span class="n">VkPipeline</span> <span class="n">pipeline</span><span class="p">;</span>
+  <span class="c1">//general material data</span>
+  <span class="n">VkPipeline</span> <span class="n">pipeline</span><span class="p">;</span>
   <span class="n">VkPipelineLayout</span> <span class="n">pipelineLayout</span><span class="p">;</span>
 
   <span class="kt">uint32_t</span> <span class="n">layoutCount</span><span class="p">;</span>
@@ -324,24 +325,24 @@
   <span class="n">UniformBlockDef</span> <span class="n">pushConstantLayout</span><span class="p">;</span>
   <span class="kt">char</span><span class="o">*</span> <span class="n">pushConstantData</span><span class="p">;</span>
 
-  <span class="c1">//we don't need a layout for static data since it cannot be
-</span>  <span class="c1">//changed after initialization
-</span>  <span class="n">VkBuffer</span><span class="o">*</span> <span class="n">staticBuffers</span><span class="p">;</span>
+  <span class="c1">//we don't need a layout for static data since it cannot be</span>
+  <span class="c1">//changed after initialization</span>
+  <span class="n">VkBuffer</span><span class="o">*</span> <span class="n">staticBuffers</span><span class="p">;</span>
   <span class="n">VkDeviceMemory</span> <span class="n">staticUniformMem</span><span class="p">;</span>
     <span class="kt">uint32_t</span> <span class="n">numStaticBuffers</span><span class="p">;</span>
 
-  <span class="c1">//for now, just add buffers here to modify. when this
-</span>  <span class="c1">//is modified to support material instances, we'll change it
-</span>  <span class="c1">//to something more sane.
-</span>  <span class="n">MaterialDynamicData</span> <span class="n">dynamic</span><span class="p">;</span>
+  <span class="c1">//for now, just add buffers here to modify. when this</span>
+  <span class="c1">//is modified to support material instances, we'll change it</span>
+  <span class="c1">//to something more sane.</span>
+  <span class="n">MaterialDynamicData</span> <span class="n">dynamic</span><span class="p">;</span>
 <span class="p">};</span></code></pre></div>
 
 <p>There are a few things to talk about here. Firstly, I store the data used for a material’s push constants in the RenderData struct, so that if nothing has changed since the last time they were set, we have that data already sorted out. Rather than store each of the push constant members in a map, or other collection, I keep all the data for the entire push constant block in a char* buffer, and then store layout data about that char* in a UniformBlockDef struct, which looks like this:</p>
 
 <div class="highlight"><pre><code class="language-c" data-lang="c"><span class="k">struct</span> <span class="n">UniformBlockDef</span>
 <span class="p">{</span>
-  <span class="c1">//stride 2 - hashed name / member offset
-</span>  <span class="kt">uint32_t</span><span class="o">*</span> <span class="n">layout</span><span class="p">;</span>
+  <span class="c1">//stride 2 - hashed name / member offset</span>
+  <span class="kt">uint32_t</span><span class="o">*</span> <span class="n">layout</span><span class="p">;</span>
   <span class="kt">uint32_t</span> <span class="n">blockSize</span><span class="p">;</span>
   <span class="kt">uint32_t</span> <span class="n">memberCount</span><span class="p">;</span>
   <span class="n">VkShaderStageFlags</span> <span class="n">visibleStages</span><span class="p">;</span>
@@ -378,9 +379,9 @@
 <span class="p">{</span>
   <span class="kt">uint32_t</span> <span class="n">numInputs</span><span class="p">;</span>
 
-  <span class="c1">// stride: 4 - hashed name / buffer index / member size / member offset
-</span>  <span class="c1">// for images- hasehd name / textureViewPtr index / desc set write idx / padding
-</span>  <span class="kt">uint32_t</span><span class="o">*</span> <span class="n">layout</span><span class="p">;</span>
+  <span class="c1">// stride: 4 - hashed name / buffer index / member size / member offset</span>
+  <span class="c1">// for images- hasehd name / textureViewPtr index / desc set write idx / padding</span>
+  <span class="kt">uint32_t</span><span class="o">*</span> <span class="n">layout</span><span class="p">;</span>
   <span class="n">VkBuffer</span><span class="o">*</span> <span class="n">buffers</span><span class="p">;</span>
   <span class="n">VkDeviceMemory</span> <span class="n">uniformMem</span><span class="p">;</span>
 
@@ -412,19 +413,19 @@
   <ul class="posts">
     
     <li>
-      <span>04 Dec 2019 &raquo;</span> <a href="/blog/2019/12/04/Recreating-A-Dirty-Gamedev-Hack.html">Recreating An Old "Dirty Gamedev Trick"</a>
+      <span>14 Jul 2021 &raquo;</span> <a href="/blog/2021/07/14/Dll-Search-Order-Hijacking-For-PostProcess-Injection.html">Hooking and Hijacking DirectX 11 Functions In Skyrim</a>
     </li>
     
     <li>
-      <span>18 Apr 2019 &raquo;</span> <a href="/blog/2019/04/18/I-Wrote-A-Book.html">I Wrote A Book About Shaders!</a>
+      <span>13 Nov 2020 &raquo;</span> <a href="/blog/2020/11/13/Hooking-By-Example.html">X64 Function Hooking by Example</a>
     </li>
     
     <li>
-      <span>05 Feb 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/02/05/Bind-Once-Uniform-Data-Vulkan.html">A "Bind Once" Approach to Uniform Data</a>
+      <span>20 May 2020 &raquo;</span> <a href="/blog/2020/05/20/Rendering-With-Notepad.html">Ray Tracing In Notepad.exe At 30 FPS</a>
     </li>
     
     <li>
-      <span>28 Jan 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/01/28/Textue-Arrays-Vulkan.html">Using Arrays of Textures in Vulkan Shaders</a>
+      <span>20 May 2020 &raquo;</span> <a href="/blog/2020/05/20/Hooking-Input-Snake-In-Notepad.html">Hooking Keyboard Input To Play Snake In Notepad.exe</a>
     </li>
     
   </ul>
@@ -441,27 +442,12 @@
   
 
   <p>
-    © Kyle Halladay, 2014 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
+    © Kyle Halladay, 2021 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
   </p>
 </div>
       </div>
     </div>
   </div>
-
-
-<script type="text/javascript">
-
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-40292745-1']);
-  _gaq.push(['_trackPageview']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-
-</script>
 
 </body>
 </html>

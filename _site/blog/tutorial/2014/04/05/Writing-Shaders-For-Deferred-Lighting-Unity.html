@@ -18,6 +18,7 @@
 
   <link rel="stylesheet" href="/assets/css/all.css">
   <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    
 </head>
 <body>
   <div class="container">
@@ -29,8 +30,7 @@
   <h2>I'm <a href="/">Kyle Halladay</a>.</h2>
   <div id="bio">
     <p>I do graphics and engine programming for games. </p>
-    <p>I'm the author of <a href="https://www.amazon.com/Practical-Shader-Development-Fragment-Developers/dp/1484244567">Practical Shader Development</a>, which is all about learning to write shaders.
-    <p>I also dabble in GBA dev, you can find my tutorials <a href="/gba.html">here.</a>
+    <p>I'm the author of <a href="https://www.amazon.com/Practical-Shader-Development-Fragment-Developers/dp/1484244567">Practical Shader Development</a>, which is all about learning to write shaders.</p>
     <p>Check out <a href="/archive.html">some other stuff I've written</a></p>
   </div>
   <div id="social">
@@ -93,7 +93,8 @@
 
 </p>
 
-<h1 class="title">Writing Shaders for Deferred Lighting in Unity3D</h1>
+<div style="font-size:14px">05 Apr 2014</div>
+<h1 class="title">Writing Shaders for Deferred Lighting in Unity3D</h1> 
 
 <div id="post">
   <div style="background-color:#EEAAAA;">NOTE: This article is for an old version of Unity (Unity 4...sometime in 2014) and probably won't run anymore, but the basic idea is still valid. I just don't want to spend time updating old posts every time Unity increments a version number
@@ -120,9 +121,9 @@
 
 <h2>A Very Brief Intro to Forward Rendering</h2>
 
-<p>In traditional forward rendering, each object is drawn once for every pixel light that touches it (with all the vertex lights being lumped into the base pass). Each pass works independently of the other passes, and runs a vertex and a fragment shader to do its magic (and then adds that result to the previous passes). </p>
+<p>In traditional forward rendering, each object is drawn once for every pixel light that touches it (with all the vertex lights being lumped into the base pass). Each pass works independently of the other passes, and runs a vertex and a fragment shader to do its magic (and then adds that result to the previous passes).</p>
 
-<p>This works great for simple scenes, but when you need to have a large number of lights it can get bogged down pretty quickly. To use draw calls as an example: in forward rendering your draw call count is (roughly) numberOfObjects * numberOfLights. </p>
+<p>This works great for simple scenes, but when you need to have a large number of lights it can get bogged down pretty quickly. To use draw calls as an example: in forward rendering your draw call count is (roughly) numberOfObjects * numberOfLights.</p>
 
 <p>For example: the screenshot above has 16 spheres, each being lit by 16 pixel lights, predictably, this results in 256 draw calls, as shown in the stats window:</p>
 
@@ -136,13 +137,13 @@
 
 <p>Normally unity would be using a bunch of tricks to minimize those draw calls, by batching calls, and automatically setting some lights to vertex lights, but I’ve turned all that off for demonstration purposes.</p>
 
-<p>So if forward rendering chokes with tons of lights, how do games render scenes with hundreds of lights in them? That’s where deferred techniques come in. </p>
+<p>So if forward rendering chokes with tons of lights, how do games render scenes with hundreds of lights in them? That’s where deferred techniques come in.</p>
 
 <h2>A Brief Intro to Deferred Lighting</h2>
 
 <p>Deferred lighting solves the problem of handling a large number of lights by assuming that all objects use the same lighting model, and then calculating the lighting contribution to each pixel on the screen in a single pass. This allows the rendering speed to be dependent on the number of pixels being rendered, not the objects in the scene.</p>
 
-<p>As described in greater detail in <a href="http://docs.unity3d.com/Documentation/Components/RenderTech-DeferredLighting.html">the docs</a>, Unity’s deferred lighting system is a 3 step process. </p>
+<p>As described in greater detail in <a href="http://docs.unity3d.com/Documentation/Components/RenderTech-DeferredLighting.html">the docs</a>, Unity’s deferred lighting system is a 3 step process.</p>
 
 <ol>
 <li>
@@ -154,7 +155,7 @@
 <strong>Step 3</strong>: all of the objects are drawn again. This time, they are shaded with a combination of the computed lighting from step 2 and their surface properties (texture, colour, lighting function, etc).
 </li>
 </ol>
-<p>As you may have guessed, this technique comes with much more overhead than forward rendering, but it also scales much better for complex scenes. To relate things back to draw calls, each object produces 2 draw calls, and each light produces 1 call (+1 for lightmapping). Thus, the example scene from above ends up being roughly 16 ∗ 2 + 16 ∗ 2. Unity’s window says 65 draw calls, don’t ask me where that extra one came from. </p>
+<p>As you may have guessed, this technique comes with much more overhead than forward rendering, but it also scales much better for complex scenes. To relate things back to draw calls, each object produces 2 draw calls, and each light produces 1 call (+1 for lightmapping). Thus, the example scene from above ends up being roughly 16 ∗ 2 + 16 ∗ 2. Unity’s window says 65 draw calls, don’t ask me where that extra one came from.</p>
 
 <div align="center">
 	 	
@@ -170,9 +171,9 @@
 
 <h2>So about those shaders...</h2>
 
-<p>As you also may have noticed from the above description, deferred lighting assumes that all objects use the same lighting model. This doesn’t mean that objects can’t appear to be lit differently, but it does mean that things like light attenuation and how the diffuse and specular terms are calculation are uniform across all objects. </p>
+<p>As you also may have noticed from the above description, deferred lighting assumes that all objects use the same lighting model. This doesn’t mean that objects can’t appear to be lit differently, but it does mean that things like light attenuation and how the diffuse and specular terms are calculation are uniform across all objects.</p>
 
-<p>As such, one of the tradeoffs with deferred lighting is a loss of control in your shaders. Since the lighting model is uniform across all objects, we no longer get to define that per shader. </p>
+<p>As such, one of the tradeoffs with deferred lighting is a loss of control in your shaders. Since the lighting model is uniform across all objects, we no longer get to define that per shader.</p>
 
 <p>In light of this, surface shaders are the best way to tackle writing custom shaders for deferred lighting. They’re already set up to work with Unity’s system, and enforce the restrictions we’re working with by design.</p>
 
@@ -196,11 +197,11 @@
 </span>
 	<span class="n">sampler2D</span> <span class="n">_MainTex</span><span class="p">;</span>
 
-	<span class="k">struct</span> <span class="n">Input</span> <span class="p">{</span>
+	<span class="k">struct</span> <span class="nc">Input</span> <span class="p">{</span>
 		<span class="n">float2</span> <span class="n">uv_MainTex</span><span class="p">;</span>
 	<span class="p">};</span>
 
-	<span class="kt">void</span> <span class="nf">surf</span> <span class="p">(</span><span class="n">Input</span> <span class="n">IN</span><span class="p">,</span> <span class="n">inout</span> <span class="n">SurfaceOutput</span> <span class="n">o</span><span class="p">)</span> <span class="p">{</span>
+	<span class="kt">void</span> <span class="n">surf</span> <span class="p">(</span><span class="n">Input</span> <span class="n">IN</span><span class="p">,</span> <span class="n">inout</span> <span class="n">SurfaceOutput</span> <span class="n">o</span><span class="p">)</span> <span class="p">{</span>
 		<span class="n">half4</span> <span class="n">c</span> <span class="o">=</span> <span class="n">tex2D</span> <span class="p">(</span><span class="n">_MainTex</span><span class="p">,</span> <span class="n">IN</span><span class="p">.</span><span class="n">uv_MainTex</span><span class="p">);</span>
 		<span class="n">o</span><span class="p">.</span><span class="n">Albedo</span> <span class="o">=</span> <span class="n">c</span><span class="p">.</span><span class="n">rgb</span><span class="p">;</span>
 		<span class="n">o</span><span class="p">.</span><span class="n">Alpha</span> <span class="o">=</span> <span class="n">c</span><span class="p">.</span><span class="n">a</span><span class="p">;</span>
@@ -209,13 +210,13 @@
 <span class="p">}</span> 
 <span class="p">}</span></code></pre></div>
 
-<p>Out of the box, Unity’s built in lighting functions already will all work fine with deferred lighting, so technically, the above is a fully functioning diffuse deferred shader. </p>
+<p>Out of the box, Unity’s built in lighting functions already will all work fine with deferred lighting, so technically, the above is a fully functioning diffuse deferred shader.</p>
 
-<p>Here’s how this plays out in deferred lighting (roughly): </p>
+<p>Here’s how this plays out in deferred lighting (roughly):</p>
 
 <ul>
   <li>The surface function defines all the material specific properties for this object</li>
-  <li>Unity computes the lighting buffer. If the surface function writes to a variable used in one of these buffers (like the fragment’s normal), the data for the buffer comes from the surface function instead of the raw geometry. </li>
+  <li>Unity computes the lighting buffer. If the surface function writes to a variable used in one of these buffers (like the fragment’s normal), the data for the buffer comes from the surface function instead of the raw geometry.</li>
   <li>The Lambert lighting function controls how the lighting buffer and object’s surface properties get combined into the final output for the current fragment.</li>
 </ul>
 
@@ -226,7 +227,7 @@
 	<span class="k">return</span> <span class="n">float4</span><span class="p">(</span><span class="n">i</span><span class="p">.</span><span class="n">Albedo</span> <span class="o">*</span> <span class="n">light</span><span class="p">.</span><span class="n">rgb</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">);</span>
 <span class="p">}</span></code></pre></div>
 
-<p>This is very similar to writing lighting functions for forward rendering. All you have to do is add “_PrePass” to the end of the function name, and change the input arguments to take the output struct from your surface function and a single float4 for the combined lighting at that pixel. </p>
+<p>This is very similar to writing lighting functions for forward rendering. All you have to do is add “_PrePass” to the end of the function name, and change the input arguments to take the output struct from your surface function and a single float4 for the combined lighting at that pixel.</p>
 
 <p>That’s really all there is to it. For completenesses sake, here’s the full shader, and how it looks:</p>
 
@@ -252,17 +253,17 @@
 </span>
 	<span class="n">sampler2D</span> <span class="n">_MainTex</span><span class="p">;</span>
 
-	<span class="k">struct</span> <span class="n">Input</span> <span class="p">{</span>
+	<span class="k">struct</span> <span class="nc">Input</span> <span class="p">{</span>
 		<span class="n">float2</span> <span class="n">uv_MainTex</span><span class="p">;</span>
 	<span class="p">};</span>
 
-	<span class="kt">void</span> <span class="nf">surf</span> <span class="p">(</span><span class="n">Input</span> <span class="n">IN</span><span class="p">,</span> <span class="n">inout</span> <span class="n">SurfaceOutput</span> <span class="n">o</span><span class="p">)</span> <span class="p">{</span>
+	<span class="kt">void</span> <span class="n">surf</span> <span class="p">(</span><span class="n">Input</span> <span class="n">IN</span><span class="p">,</span> <span class="n">inout</span> <span class="n">SurfaceOutput</span> <span class="n">o</span><span class="p">)</span> <span class="p">{</span>
 		<span class="n">half4</span> <span class="n">c</span> <span class="o">=</span> <span class="n">tex2D</span> <span class="p">(</span><span class="n">_MainTex</span><span class="p">,</span> <span class="n">IN</span><span class="p">.</span><span class="n">uv_MainTex</span><span class="p">);</span>
 		<span class="n">o</span><span class="p">.</span><span class="n">Albedo</span> <span class="o">=</span> <span class="n">c</span><span class="p">.</span><span class="n">rgb</span><span class="p">;</span>
 		<span class="n">o</span><span class="p">.</span><span class="n">Alpha</span> <span class="o">=</span> <span class="n">c</span><span class="p">.</span><span class="n">a</span><span class="p">;</span>
 	<span class="p">}</span>
 	
-	<span class="n">float4</span> <span class="nf">LightingMyDiffuse_PrePass</span><span class="p">(</span><span class="n">SurfaceOutput</span> <span class="n">i</span><span class="p">,</span> <span class="n">float4</span> <span class="n">light</span><span class="p">)</span>
+	<span class="n">float4</span> <span class="n">LightingMyDiffuse_PrePass</span><span class="p">(</span><span class="n">SurfaceOutput</span> <span class="n">i</span><span class="p">,</span> <span class="n">float4</span> <span class="n">light</span><span class="p">)</span>
 	<span class="p">{</span>
 		<span class="k">return</span> <span class="n">float4</span><span class="p">(</span><span class="n">i</span><span class="p">.</span><span class="n">Albedo</span> <span class="o">*</span> <span class="n">light</span><span class="p">.</span><span class="n">rgb</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">);</span>
 	<span class="p">}</span>
@@ -272,7 +273,7 @@
 
 <h2>Conclusion</h2>
 
-<p>So there you have it, a custom diffuse shader for deferred lighting! Surface shaders really aren’t as much fun as regular pixel shaders (imo), but they definitely fit the bill in this case. </p>
+<p>So there you have it, a custom diffuse shader for deferred lighting! Surface shaders really aren’t as much fun as regular pixel shaders (imo), but they definitely fit the bill in this case.</p>
 
 <p>If you notice any errors, have a good system worked out for writing non surface shaders with Unity’s deferred path, or just want to say hi, send me a message <a href="http://twitter.com/khalladay">on twitter</a>. Happy coding!</p>
 
@@ -284,19 +285,19 @@
   <ul class="posts">
     
     <li>
-      <span>04 Dec 2019 &raquo;</span> <a href="/blog/2019/12/04/Recreating-A-Dirty-Gamedev-Hack.html">Recreating An Old "Dirty Gamedev Trick"</a>
+      <span>14 Jul 2021 &raquo;</span> <a href="/blog/2021/07/14/Dll-Search-Order-Hijacking-For-PostProcess-Injection.html">Hooking and Hijacking DirectX 11 Functions In Skyrim</a>
     </li>
     
     <li>
-      <span>18 Apr 2019 &raquo;</span> <a href="/blog/2019/04/18/I-Wrote-A-Book.html">I Wrote A Book About Shaders!</a>
+      <span>13 Nov 2020 &raquo;</span> <a href="/blog/2020/11/13/Hooking-By-Example.html">X64 Function Hooking by Example</a>
     </li>
     
     <li>
-      <span>05 Feb 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/02/05/Bind-Once-Uniform-Data-Vulkan.html">A "Bind Once" Approach to Uniform Data</a>
+      <span>20 May 2020 &raquo;</span> <a href="/blog/2020/05/20/Rendering-With-Notepad.html">Ray Tracing In Notepad.exe At 30 FPS</a>
     </li>
     
     <li>
-      <span>28 Jan 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/01/28/Textue-Arrays-Vulkan.html">Using Arrays of Textures in Vulkan Shaders</a>
+      <span>20 May 2020 &raquo;</span> <a href="/blog/2020/05/20/Hooking-Input-Snake-In-Notepad.html">Hooking Keyboard Input To Play Snake In Notepad.exe</a>
     </li>
     
   </ul>
@@ -313,27 +314,12 @@
   
 
   <p>
-    © Kyle Halladay, 2014 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
+    © Kyle Halladay, 2021 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
   </p>
 </div>
       </div>
     </div>
   </div>
-
-
-<script type="text/javascript">
-
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-40292745-1']);
-  _gaq.push(['_trackPageview']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-
-</script>
 
 </body>
 </html>

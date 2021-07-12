@@ -18,6 +18,7 @@
 
   <link rel="stylesheet" href="/assets/css/all.css">
   <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    
 </head>
 <body>
   <div class="container">
@@ -29,8 +30,7 @@
   <h2>I'm <a href="/">Kyle Halladay</a>.</h2>
   <div id="bio">
     <p>I do graphics and engine programming for games. </p>
-    <p>I'm the author of <a href="https://www.amazon.com/Practical-Shader-Development-Fragment-Developers/dp/1484244567">Practical Shader Development</a>, which is all about learning to write shaders.
-    <p>I also dabble in GBA dev, you can find my tutorials <a href="/gba.html">here.</a>
+    <p>I'm the author of <a href="https://www.amazon.com/Practical-Shader-Development-Fragment-Developers/dp/1484244567">Practical Shader Development</a>, which is all about learning to write shaders.</p>
     <p>Check out <a href="/archive.html">some other stuff I've written</a></p>
   </div>
   <div id="social">
@@ -93,7 +93,8 @@
 
 </p>
 
-<h1 class="title">GBA By Example - Drawing and Moving Backgrounds</h1>
+<div style="font-size:14px">11 Apr 2017</div>
+<h1 class="title">GBA By Example - Drawing and Moving Backgrounds</h1> 
 
 <div id="post">
   <p>(Note: This is Part 3 of my GBA by Example series. A list of my other GBA tutorials can be found <a href="http://kylehalladay.com/gba.html">here</a>)</p>
@@ -160,7 +161,7 @@
     <span class="mh">0x0000</span><span class="p">,</span><span class="mh">0x0000</span><span class="p">,</span><span class="mh">0x0000</span><span class="p">,</span><span class="mh">0x0000</span><span class="p">,</span><span class="mh">0x0000</span><span class="p">,</span><span class="mh">0x0000</span><span class="p">,</span><span class="mh">0x0000</span><span class="p">,</span><span class="mh">0x0000</span><span class="p">,</span>
     <span class="mh">0x0000</span><span class="p">,</span><span class="mh">0x0000</span><span class="p">,</span><span class="mh">0x0000</span><span class="p">,</span><span class="mh">0x0000</span><span class="p">,</span><span class="mh">0x0000</span><span class="p">,</span><span class="mh">0x0000</span><span class="p">,</span><span class="mh">0x0000</span><span class="p">,</span><span class="mh">0x0000</span><span class="p">,</span>
 
-    <span class="o">//</span><span class="k">continue</span> <span class="k">for</span> <span class="n">another</span> <span class="mi">30</span> <span class="n">rows</span></code></pre></div>
+    <span class="c1">//continue for another 30 rows</span></code></pre></div>
 
 <p>As seen here, Screen Blocks are defined row by row, top to bottom, each value representing the index of a tile. When you’re working with 8bpp tiles, this is all there is to it. There’s more to think about in 4bpp mode, but since this is the first time we’re doing anything with bacgkrounds, let’s keep it simple and continue working in 8bpp mode.</p>
 
@@ -223,8 +224,8 @@ Alright, let’s start putting this into practice!</p>
 </span>
 <span class="kt">void</span> <span class="nf">UploadScreenBlock</span><span class="p">()</span>
 <span class="p">{</span>
-    <span class="c1">//checkerBg is the ScreenBlock data from the gist
-</span>    <span class="n">memcpy</span><span class="p">(</span><span class="o">&amp;</span><span class="n">MEM_SCREENBLOCKS</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">checkerBg</span><span class="p">,</span> <span class="n">checkerBgLen</span><span class="p">);</span>
+    <span class="c1">//checkerBg is the ScreenBlock data from the gist</span>
+    <span class="n">memcpy</span><span class="p">(</span><span class="o">&amp;</span><span class="n">MEM_SCREENBLOCKS</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">checkerBg</span><span class="p">,</span> <span class="n">checkerBgLen</span><span class="p">);</span>
 <span class="p">}</span></code></pre></div>
 
 <p>That should about do it for uploading the data we have for our tiles, but I also mentioned that I generated the gradient background in code. Here’s the code for that:</p>
@@ -236,16 +237,16 @@ Alright, let’s start putting this into practice!</p>
 
 <span class="kt">void</span> <span class="nf">GenerateGradient</span><span class="p">()</span>
 <span class="p">{</span>
-    <span class="c1">//we've uploaded 4 colours to palette memory
-</span>    <span class="c1">//so make sure we don't overwrite those
-</span>    <span class="k">for</span> <span class="p">(</span><span class="n">uint16</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">32</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+    <span class="c1">//we've uploaded 4 colours to palette memory</span>
+    <span class="c1">//so make sure we don't overwrite those</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">uint16</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">32</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
     <span class="p">{</span>
         <span class="o">*</span><span class="p">((</span><span class="n">uint16</span><span class="o">*</span><span class="p">)(</span><span class="n">MEM_BG_PALETTE</span><span class="o">+</span><span class="p">(</span><span class="mi">4</span><span class="o">+</span><span class="n">i</span><span class="p">)))</span> <span class="o">=</span> <span class="n">MakeCol</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">i</span><span class="p">);</span>
     <span class="p">}</span>
 
-    <span class="c1">//every tile is 64 palette indices
-</span>    <span class="c1">//we have 32 grayscale values from above
-</span>    <span class="n">uint8</span> <span class="n">tile</span><span class="p">[</span><span class="mi">64</span><span class="p">];</span>
+    <span class="c1">//every tile is 64 palette indices</span>
+    <span class="c1">//we have 32 grayscale values from above</span>
+    <span class="n">uint8</span> <span class="n">tile</span><span class="p">[</span><span class="mi">64</span><span class="p">];</span>
     <span class="k">for</span> <span class="p">(</span><span class="n">uint16</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">32</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
     <span class="p">{</span>
         <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="mi">64</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span>
@@ -255,19 +256,19 @@ Alright, let’s start putting this into practice!</p>
         <span class="n">memcpy</span><span class="p">(</span><span class="n">MEM_TILE</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">tile</span><span class="p">,</span> <span class="mi">64</span><span class="p">);</span>
     <span class="p">}</span>
 
-    <span class="c1">//generate 2 screen blocks,
-</span>    <span class="c1">//each gray value getting two tiles of width
-</span>    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">block</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">block</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">;</span> <span class="o">++</span><span class="n">block</span><span class="p">)</span>
+    <span class="c1">//generate 2 screen blocks,</span>
+    <span class="c1">//each gray value getting two tiles of width</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">block</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">block</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">;</span> <span class="o">++</span><span class="n">block</span><span class="p">)</span>
     <span class="p">{</span>
         <span class="n">uint16</span> <span class="n">screenBlock</span><span class="p">[</span><span class="mi">1024</span><span class="p">];</span>
 
-        <span class="c1">//screen block data is row by row, top to bottom
-</span>        <span class="k">for</span> <span class="p">(</span><span class="n">uint16</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">32</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+        <span class="c1">//screen block data is row by row, top to bottom</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">uint16</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">32</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
         <span class="p">{</span>
             <span class="k">for</span> <span class="p">(</span><span class="n">uint16</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="mi">32</span><span class="p">;</span> <span class="o">++</span><span class="n">j</span><span class="p">)</span>
             <span class="p">{</span>
-                <span class="c1">//each block gets 16 colours, 2 tiles wide for each
-</span>                <span class="n">screenBlock</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="mi">32</span> <span class="o">+</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span>  <span class="p">(</span><span class="n">j</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">block</span><span class="o">*</span><span class="mi">16</span><span class="p">);</span>
+                <span class="c1">//each block gets 16 colours, 2 tiles wide for each</span>
+                <span class="n">screenBlock</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="mi">32</span> <span class="o">+</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span>  <span class="p">(</span><span class="n">j</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">block</span><span class="o">*</span><span class="mi">16</span><span class="p">);</span>
             <span class="p">}</span>
         <span class="p">}</span>
         <span class="n">memcpy</span><span class="p">(</span><span class="n">MEM_SCREENBLOCKS</span><span class="p">[</span><span class="n">block</span><span class="o">+</span><span class="mi">2</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">screenBlock</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">2048</span><span class="p">);</span>
@@ -408,9 +409,9 @@ Alright, let’s start putting this into practice!</p>
 
 <p>Using the above tables, if we wanted to define our first background (the checkerboard), as a 32x32 tile background which uses tiles starting at the first tile block, and uses the second Screen Block (since it’s offset from the start of VRAM to make space for tile memory), we would do the following:</p>
 
-<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="c1">//Size 00, Screen Block 1, Color Mode 1, Tile Block 0, Depth 0
-//0000 0001 1000 0000
-</span>
+<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="c1">//Size 00, Screen Block 1, Color Mode 1, Tile Block 0, Depth 0</span>
+<span class="c1">//0000 0001 1000 0000</span>
+
 <span class="n">REG_BG0_CONTROL</span> <span class="o">=</span> <span class="mh">0x0180</span><span class="p">;</span></code></pre></div>
 
 <p>Notice that we want our Z Depth to be 0 as well. The higher this value, the farther back in the drawing order a background is, so a BG at depth 0 will draw on top of backgrounds with any higher values. Since our checkerboard background has the transparent pixels in it, we want it to be drawn on top of whatever will fill in those transparent pixels.</p>
@@ -442,13 +443,13 @@ Alright, let’s start putting this into practice!</p>
 </span>
 <span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
 <span class="p">{</span>
-    <span class="c1">//load data
-</span>    <span class="n">memcpy</span><span class="p">(</span><span class="n">MEM_BG_PALETTE</span><span class="p">,</span> <span class="n">bgPal</span><span class="p">,</span> <span class="n">bgPalLen</span> <span class="p">);</span>
+    <span class="c1">//load data</span>
+    <span class="n">memcpy</span><span class="p">(</span><span class="n">MEM_BG_PALETTE</span><span class="p">,</span> <span class="n">bgPal</span><span class="p">,</span> <span class="n">bgPalLen</span> <span class="p">);</span>
     <span class="n">memcpy</span><span class="p">(</span><span class="o">&amp;</span><span class="n">MEM_TILE</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">bgTiles</span><span class="p">,</span> <span class="n">bgTilesLen</span><span class="p">);</span>
     <span class="n">memcpy</span><span class="p">(</span><span class="o">&amp;</span><span class="n">MEM_SCREENBLOCKS</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">checkerBg</span><span class="p">,</span> <span class="n">checkerBgLen</span><span class="p">);</span>
 
-    <span class="n">REG_BG0_CONTROL</span> <span class="o">=</span> <span class="mh">0x0180</span><span class="p">;</span><span class="c1">// 0000 0001 1000 0000;
-</span>    <span class="n">REG_DISPLAYCONTROL</span> <span class="o">=</span>  <span class="n">VIDEOMODE_0</span> <span class="o">|</span> <span class="n">BACKGROUND_0</span><span class="p">;</span>
+    <span class="n">REG_BG0_CONTROL</span> <span class="o">=</span> <span class="mh">0x0180</span><span class="p">;</span><span class="c1">// 0000 0001 1000 0000;</span>
+    <span class="n">REG_DISPLAYCONTROL</span> <span class="o">=</span>  <span class="n">VIDEOMODE_0</span> <span class="o">|</span> <span class="n">BACKGROUND_0</span><span class="p">;</span>
 
     <span class="k">while</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
     <span class="p">{</span>
@@ -464,9 +465,9 @@ Alright, let’s start putting this into practice!</p>
 
 <p>Which is excellent! We officially have our first background on the screen. Let’s add our second one now. Remember that we used 2 Screen Blocks to hold all the values for this background, and we want them laid out horizontally, so we’ll have a 64x32 background. We want it to be at priority 0, and use the data we populated with the gradient generating code above.</p>
 
-<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="c1">// Size 01, Screen Block 2, Color Mode 1, Tile Block 1, Priority 1
-</span> <span class="c1">// 0100 0010 1000 0101
-</span><span class="n">REG_BG1_CONTROL</span> <span class="o">=</span> <span class="mh">0x4285</span><span class="p">;</span></code></pre></div>
+<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="c1">// Size 01, Screen Block 2, Color Mode 1, Tile Block 1, Priority 1</span>
+ <span class="c1">// 0100 0010 1000 0101</span>
+<span class="n">REG_BG1_CONTROL</span> <span class="o">=</span> <span class="mh">0x4285</span><span class="p">;</span></code></pre></div>
 
 <p>If we add the above line, and the required #defines and gradient code to what we have, we get the following (I’ve omitted GenerateGradient() function body for brevity). I promise after this to not paste any more large code blocks into the article :)</p>
 
@@ -502,20 +503,20 @@ Alright, let’s start putting this into practice!</p>
     <span class="k">return</span> <span class="n">red</span> <span class="o">|</span> <span class="p">(</span><span class="n">green</span><span class="o">&lt;&lt;</span><span class="mi">5</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">blue</span><span class="o">&lt;&lt;</span><span class="mi">10</span><span class="p">);</span>
 <span class="p">}</span>
 
-<span class="kt">void</span> <span class="n">GenerateGradient</span><span class="p">();</span>
+<span class="kt">void</span> <span class="nf">GenerateGradient</span><span class="p">();</span>
 
 <span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
 <span class="p">{</span>
-    <span class="c1">//load data
-</span>    <span class="n">memcpy</span><span class="p">(</span><span class="n">MEM_BG_PALETTE</span><span class="p">,</span> <span class="n">bgPal</span><span class="p">,</span> <span class="n">bgPalLen</span> <span class="p">);</span>
+    <span class="c1">//load data</span>
+    <span class="n">memcpy</span><span class="p">(</span><span class="n">MEM_BG_PALETTE</span><span class="p">,</span> <span class="n">bgPal</span><span class="p">,</span> <span class="n">bgPalLen</span> <span class="p">);</span>
     <span class="n">memcpy</span><span class="p">(</span><span class="o">&amp;</span><span class="n">MEM_TILE</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">bgTiles</span><span class="p">,</span> <span class="n">bgTilesLen</span><span class="p">);</span>
     <span class="n">memcpy</span><span class="p">(</span><span class="o">&amp;</span><span class="n">MEM_SCREENBLOCKS</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">checkerBg</span><span class="p">,</span> <span class="n">checkerBgLen</span><span class="p">);</span>
 
     <span class="n">GenerateGradient</span><span class="p">();</span>
 
-    <span class="n">REG_BG0_CONTROL</span> <span class="o">=</span> <span class="mh">0x0180</span><span class="p">;</span><span class="c1">// 0000 0001 1000 0000;
-</span>    <span class="n">REG_BG1_CONTROL</span> <span class="o">=</span> <span class="mh">0x4285</span><span class="p">;</span> <span class="c1">// 0100 0010 1000 0101
-</span>    <span class="n">REG_DISPLAYCONTROL</span> <span class="o">=</span>  <span class="n">VIDEOMODE_0</span> <span class="o">|</span> <span class="n">BACKGROUND_0</span> <span class="o">|</span> <span class="n">BACKGROUND_1</span><span class="p">;</span>
+    <span class="n">REG_BG0_CONTROL</span> <span class="o">=</span> <span class="mh">0x0180</span><span class="p">;</span><span class="c1">// 0000 0001 1000 0000;</span>
+    <span class="n">REG_BG1_CONTROL</span> <span class="o">=</span> <span class="mh">0x4285</span><span class="p">;</span> <span class="c1">// 0100 0010 1000 0101</span>
+    <span class="n">REG_DISPLAYCONTROL</span> <span class="o">=</span>  <span class="n">VIDEOMODE_0</span> <span class="o">|</span> <span class="n">BACKGROUND_0</span> <span class="o">|</span> <span class="n">BACKGROUND_1</span><span class="p">;</span>
     <span class="k">while</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
     <span class="p">{</span>
     <span class="p">}</span>
@@ -576,19 +577,19 @@ Alright, let’s start putting this into practice!</p>
   <ul class="posts">
     
     <li>
-      <span>04 Dec 2019 &raquo;</span> <a href="/blog/2019/12/04/Recreating-A-Dirty-Gamedev-Hack.html">Recreating An Old "Dirty Gamedev Trick"</a>
+      <span>14 Jul 2021 &raquo;</span> <a href="/blog/2021/07/14/Dll-Search-Order-Hijacking-For-PostProcess-Injection.html">Hooking and Hijacking DirectX 11 Functions In Skyrim</a>
     </li>
     
     <li>
-      <span>18 Apr 2019 &raquo;</span> <a href="/blog/2019/04/18/I-Wrote-A-Book.html">I Wrote A Book About Shaders!</a>
+      <span>13 Nov 2020 &raquo;</span> <a href="/blog/2020/11/13/Hooking-By-Example.html">X64 Function Hooking by Example</a>
     </li>
     
     <li>
-      <span>05 Feb 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/02/05/Bind-Once-Uniform-Data-Vulkan.html">A "Bind Once" Approach to Uniform Data</a>
+      <span>20 May 2020 &raquo;</span> <a href="/blog/2020/05/20/Rendering-With-Notepad.html">Ray Tracing In Notepad.exe At 30 FPS</a>
     </li>
     
     <li>
-      <span>28 Jan 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/01/28/Textue-Arrays-Vulkan.html">Using Arrays of Textures in Vulkan Shaders</a>
+      <span>20 May 2020 &raquo;</span> <a href="/blog/2020/05/20/Hooking-Input-Snake-In-Notepad.html">Hooking Keyboard Input To Play Snake In Notepad.exe</a>
     </li>
     
   </ul>
@@ -605,27 +606,12 @@ Alright, let’s start putting this into practice!</p>
   
 
   <p>
-    © Kyle Halladay, 2014 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
+    © Kyle Halladay, 2021 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
   </p>
 </div>
       </div>
     </div>
   </div>
-
-
-<script type="text/javascript">
-
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-40292745-1']);
-  _gaq.push(['_trackPageview']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-
-</script>
 
 </body>
 </html>

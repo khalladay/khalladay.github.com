@@ -18,6 +18,7 @@
 
   <link rel="stylesheet" href="/assets/css/all.css">
   <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    
 </head>
 <body>
   <div class="container">
@@ -29,8 +30,7 @@
   <h2>I'm <a href="/">Kyle Halladay</a>.</h2>
   <div id="bio">
     <p>I do graphics and engine programming for games. </p>
-    <p>I'm the author of <a href="https://www.amazon.com/Practical-Shader-Development-Fragment-Developers/dp/1484244567">Practical Shader Development</a>, which is all about learning to write shaders.
-    <p>I also dabble in GBA dev, you can find my tutorials <a href="/gba.html">here.</a>
+    <p>I'm the author of <a href="https://www.amazon.com/Practical-Shader-Development-Fragment-Developers/dp/1484244567">Practical Shader Development</a>, which is all about learning to write shaders.</p>
     <p>Check out <a href="/archive.html">some other stuff I've written</a></p>
   </div>
   <div id="social">
@@ -93,7 +93,8 @@
 
 </p>
 
-<h1 class="title">Ray-Sphere Intersection with Simple Math</h1>
+<div style="font-size:14px">24 Dec 2013</div>
+<h1 class="title">Ray-Sphere Intersection with Simple Math</h1> 
 
 <div id="post">
   <div style="background-color:#EEAAAA;">NOTE: This article is OLD! (From 2013!). Information in it may be out of date or outright useless, and I have no plans to update it. Beware!
@@ -116,7 +117,7 @@ The current output of my ray tracer
 
 <p>So I thought that I’d do my part for the next person who starts writing a ray tracer, and share a bit of what I’ve figured out in as much detail as possible, as clearly as possible.</p>
 
-<p>As the title of this post suggests, the end product of this post will be a function which will take a ray and a sphere, and return both if the they intersect, and if so, the location of the intersection(s). </p>
+<p>As the title of this post suggests, the end product of this post will be a function which will take a ray and a sphere, and return both if the they intersect, and if so, the location of the intersection(s).</p>
 
 <h2>What you need to know before starting</h2>
 
@@ -127,7 +128,7 @@ The current output of my ray tracer
   <li>a good handle on vector math (including dot products)</li>
 </ul>
 
-<p>Have you got that? Good! If not, there are a bazillion resources online, go check one of them out before proceeding. </p>
+<p>Have you got that? Good! If not, there are a bazillion resources online, go check one of them out before proceeding.</p>
 
 <h2>Representing our objects</h2>
 
@@ -140,7 +141,7 @@ The current output of my ray tracer
 };
 </code></pre>
 
-<p>With these 2 vectors, we can represent any point on the ray like this: </p>
+<p>With these 2 vectors, we can represent any point on the ray like this:</p>
 
 <div align="center">
 	
@@ -148,7 +149,7 @@ Origin + Direction * t = Point
 
 </div>
 <p><br />
-Each point will have a specific t value, representing how far along the direction vector the point lies, but the equation remains the same otherwise. This will be important later, so make sure that you try this out on paper and really understand it before proceeding. </p>
+Each point will have a specific t value, representing how far along the direction vector the point lies, but the equation remains the same otherwise. This will be important later, so make sure that you try this out on paper and really understand it before proceeding.</p>
 
 <div align="center">
 	
@@ -158,7 +159,7 @@ Each point will have a specific t value, representing how far along the directio
 
 <p><br /></p>
 
-<p>Spheres are even simpler. Given that spheres don’t have a direction, all we need is the location of the center point, and the radius of the sphere. This means our sphere object will simply be a struct containing one vector and one float. </p>
+<p>Spheres are even simpler. Given that spheres don’t have a direction, all we need is the location of the center point, and the radius of the sphere. This means our sphere object will simply be a struct containing one vector and one float.</p>
 
 <pre><code>struct Sphere
 {
@@ -178,11 +179,11 @@ Each point will have a specific t value, representing how far along the directio
 
 <p><br /></p>
 
-<p>Alright, so the image above shows the general lay of the problem. We have a ray, and a sphere, we know the ray’s origin point, and it’s direction, and we know the location of the sphere’s center point. What we want to do, is determine if the ray will ever intersect the sphere (spoiler: in this tutorial, it will), and if so, where that intersection occurs. </p>
+<p>Alright, so the image above shows the general lay of the problem. We have a ray, and a sphere, we know the ray’s origin point, and it’s direction, and we know the location of the sphere’s center point. What we want to do, is determine if the ray will ever intersect the sphere (spoiler: in this tutorial, it will), and if so, where that intersection occurs.</p>
 
-<p>There are 2 points that I haven’t mentioned yet, labelled above as P1 and P2, these are the points that we want to solve for, as both of these represent a point of intersection. </p>
+<p>There are 2 points that I haven’t mentioned yet, labelled above as P1 and P2, these are the points that we want to solve for, as both of these represent a point of intersection.</p>
 
-<p>Speaking of those points, remember that we can solve for any point on a ray with the following equation: </p>
+<p>Speaking of those points, remember that we can solve for any point on a ray with the following equation:</p>
 
 <div align="center">
 
@@ -191,7 +192,7 @@ Origin + Direction * t = Point
 </div>
 
 <p><br />
-So, in order to get the locations of the P0 and P1, all we need to do is find the correct t value for each of them. This is going to make our lives a lot easier, provided you remember a bit of trig (don’t worry, I didn’t either, we’ll go over it as we get to it), since now all we need to do is find 1 number for each point, instead of their exact co-ordinates. </p>
+So, in order to get the locations of the P0 and P1, all we need to do is find the correct t value for each of them. This is going to make our lives a lot easier, provided you remember a bit of trig (don’t worry, I didn’t either, we’ll go over it as we get to it), since now all we need to do is find 1 number for each point, instead of their exact co-ordinates.</p>
 
 <div align="center">
 	
@@ -207,7 +208,7 @@ So, in order to get the locations of the P0 and P1, all we need to do is find th
 
 <h2>Finding tc</h2>
 
-<p>As the headline suggests, the first value we need to solve for is tc. As the diagram below shows, the first step to finding tc is to create a right angle triangle, using tc, the vector from the sphere’s center to the ray’s origin, and a line (d) from the center to the ray. </p>
+<p>As the headline suggests, the first value we need to solve for is tc. As the diagram below shows, the first step to finding tc is to create a right angle triangle, using tc, the vector from the sphere’s center to the ray’s origin, and a line (d) from the center to the ray.</p>
 
 <div align="center">
 
@@ -217,7 +218,7 @@ So, in order to get the locations of the P0 and P1, all we need to do is find th
 
 <p><br /></p>
 
-<p>The first thing we need to find is the length of L. This is simple enough, since we know the positions of both the center and ray origin. </p>
+<p>The first thing we need to find is the length of L. This is simple enough, since we know the positions of both the center and ray origin.</p>
 
 <div align="center">
 
@@ -251,7 +252,7 @@ tc = L &middot; Direction
 
 <p><br /></p>
 
-<p>Looking familiar yet? If you can remember Pythagoras’ Theorem, you’ll already know where I’m going with this. If not, I’ll help: </p>
+<p>Looking familiar yet? If you can remember Pythagoras’ Theorem, you’ll already know where I’m going with this. If not, I’ll help:</p>
 
 <div align="center">
 
@@ -261,7 +262,7 @@ a&sup2; + b&sup2; = c&sup2;
 
 <p><br /></p>
 
-<p>We need to find d, which in this case is edge b, so we need to rearrange the equation a bit: </p>
+<p>We need to find d, which in this case is edge b, so we need to rearrange the equation a bit:</p>
 
 <div align="center">
 
@@ -282,7 +283,7 @@ d = &#x221a;(tc&sup2; - L&sup2;)
 
 <p><br /></p>
 
-<p>Just like tc before it, this is an important calculation. If d is greater than the radius of our sphere, it means that t1c will give us a point outside of the sphere, and our ray doesn’t intersect at all (and we can go home early). </p>
+<p>Just like tc before it, this is an important calculation. If d is greater than the radius of our sphere, it means that t1c will give us a point outside of the sphere, and our ray doesn’t intersect at all (and we can go home early).</p>
 
 <p>If not, great! Time to move on to the next triangle.</p>
 
@@ -296,7 +297,7 @@ d = &#x221a;(tc&sup2; - L&sup2;)
 </div>
 
 <p><br />
-Now that we have tc and d, this is actually incredibly easy. Since a² + b² = c², we already know the length of the edge labelled h (it’s the radius of the sphere) and the length of d. Using Pythagoras’ Theorem again gives us: </p>
+Now that we have tc and d, this is actually incredibly easy. Since a² + b² = c², we already know the length of the edge labelled h (it’s the radius of the sphere) and the length of d. Using Pythagoras’ Theorem again gives us:</p>
 
 <div align="center">
 
@@ -308,7 +309,7 @@ t1c = &#x221a;(radius&sup2; - d&sup2;) <br />
 
 <p><br /></p>
 
-<p>Guess that means it’s time to move on to yet another subheading eh? </p>
+<p>Guess that means it’s time to move on to yet another subheading eh?</p>
 
 <h2>Solving for t1 and t2</h2>
 
@@ -320,7 +321,7 @@ t1c = &#x221a;(radius&sup2; - d&sup2;) <br />
 
 </div>
 
-<p>Notice anything? Now that we have values for t1c and tc, solving for the two variables we actually want is trivial! </p>
+<p>Notice anything? Now that we have values for t1c and tc, solving for the two variables we actually want is trivial!</p>
 
 <div align="center">
 	
@@ -333,7 +334,7 @@ t2 = tc + t1c
 
 <p><br /></p>
 
-<p>Which means that all we need to do to get our intersection points is: </p>
+<p>Which means that all we need to do to get our intersection points is:</p>
 
 <div align="center">
 	
@@ -343,40 +344,40 @@ P2 = Origin + Direction * t2
 
 </div>
 
-<p><br />	</p>
+<p><br /></p>
 
 <h2>An Intersect Function</h2>
 <p><br />
-Congratulations on getting this far! Now that we have all that theory out of the way, it’s time for your prize: a sphere intersection function! Let’s see what that might look like if we simply went step by step using the instructions above: </p>
+Congratulations on getting this far! Now that we have all that theory out of the way, it’s time for your prize: a sphere intersection function! Let’s see what that might look like if we simply went step by step using the instructions above:</p>
 
 <div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="kt">bool</span> <span class="n">intersec</span><span class="o">++</span><span class="p">(</span><span class="n">Ray</span><span class="o">*</span> <span class="n">r</span><span class="p">,</span> <span class="n">Sphere</span><span class="o">*</span> <span class="n">s</span><span class="p">)</span>
 <span class="p">{</span>
-	<span class="c1">//solve for tc
-</span>	<span class="kt">float</span> <span class="n">L</span> <span class="o">=</span> <span class="n">s</span><span class="o">-&gt;</span><span class="n">center</span> <span class="o">-</span> <span class="n">r</span><span class="o">-&gt;</span><span class="n">origin</span><span class="p">;</span>
+	<span class="c1">//solve for tc</span>
+	<span class="kt">float</span> <span class="n">L</span> <span class="o">=</span> <span class="n">s</span><span class="o">-&gt;</span><span class="n">center</span> <span class="o">-</span> <span class="n">r</span><span class="o">-&gt;</span><span class="n">origin</span><span class="p">;</span>
 	<span class="kt">float</span> <span class="n">tc</span> <span class="o">=</span> <span class="n">dot</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">r</span><span class="o">-&gt;</span><span class="n">direction</span><span class="p">);</span>
 	<span class="k">if</span> <span class="p">(</span> <span class="n">tc</span> <span class="o">&lt;</span> <span class="mf">0.0</span> <span class="p">)</span> <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
 	
 	<span class="kt">float</span> <span class="n">d</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">((</span><span class="n">tc</span><span class="o">*</span><span class="n">tc</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">L</span><span class="o">*</span><span class="n">L</span><span class="p">));</span>
 	<span class="k">if</span> <span class="p">(</span> <span class="n">d</span> <span class="o">&gt;</span> <span class="n">s</span><span class="o">-&gt;</span><span class="n">radius</span><span class="p">)</span> <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
 	
-	<span class="c1">//solve for t1c
-</span>	<span class="kt">float</span> <span class="n">t1c</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span> <span class="p">(</span><span class="n">s</span><span class="o">-&gt;</span><span class="n">radius</span> <span class="o">*</span> <span class="n">s</span><span class="o">-&gt;</span><span class="n">radius</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">d</span><span class="o">*</span><span class="n">d</span><span class="p">)</span> <span class="p">);</span>
+	<span class="c1">//solve for t1c</span>
+	<span class="kt">float</span> <span class="n">t1c</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span> <span class="p">(</span><span class="n">s</span><span class="o">-&gt;</span><span class="n">radius</span> <span class="o">*</span> <span class="n">s</span><span class="o">-&gt;</span><span class="n">radius</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">d</span><span class="o">*</span><span class="n">d</span><span class="p">)</span> <span class="p">);</span>
 	
-	<span class="c1">//solve for intersection points
-</span>	<span class="kt">float</span> <span class="n">t1</span> <span class="o">=</span> <span class="n">tc</span> <span class="o">-</span> <span class="n">t1c</span><span class="p">;</span>
+	<span class="c1">//solve for intersection points</span>
+	<span class="kt">float</span> <span class="n">t1</span> <span class="o">=</span> <span class="n">tc</span> <span class="o">-</span> <span class="n">t1c</span><span class="p">;</span>
 	<span class="kt">float</span> <span class="n">t2</span> <span class="o">=</span> <span class="n">tc</span> <span class="o">+</span> <span class="n">t1c</span><span class="p">;</span>
 	
 	<span class="k">return</span> <span class="nb">true</span><span class="p">;</span>
 <span class="p">}</span></code></pre></div>
 
-<p>For really basic use cases, the above may be sufficient, but there’s an awful lot of wasted effort up there (like calculation t1 and t2 and then not using them). For a ray tracer (the use case that led me to writing this post) it isn’t enough just to know if a ray hits an object, you need to know exactly where the point of contact is. </p>
+<p>For really basic use cases, the above may be sufficient, but there’s an awful lot of wasted effort up there (like calculation t1 and t2 and then not using them). For a ray tracer (the use case that led me to writing this post) it isn’t enough just to know if a ray hits an object, you need to know exactly where the point of contact is.</p>
 
 <p>So let’s rethink the above function (and optimize it in the process):</p>
 
 <div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="kt">bool</span> <span class="nf">intersect</span><span class="p">(</span><span class="n">Ray</span><span class="o">*</span> <span class="n">r</span><span class="p">,</span> <span class="n">Sphere</span><span class="o">*</span> <span class="n">s</span><span class="p">,</span> <span class="kt">float</span><span class="o">*</span> <span class="n">t1</span><span class="p">,</span> <span class="kt">float</span> <span class="o">*</span><span class="n">t2</span><span class="p">)</span>
 <span class="p">{</span>
-	<span class="c1">//solve for tc
-</span>	<span class="kt">float</span> <span class="n">L</span> <span class="o">=</span> <span class="n">s</span><span class="o">-&gt;</span><span class="n">center</span> <span class="o">-</span> <span class="n">r</span><span class="o">-&gt;</span><span class="n">origin</span><span class="p">;</span>
+	<span class="c1">//solve for tc</span>
+	<span class="kt">float</span> <span class="n">L</span> <span class="o">=</span> <span class="n">s</span><span class="o">-&gt;</span><span class="n">center</span> <span class="o">-</span> <span class="n">r</span><span class="o">-&gt;</span><span class="n">origin</span><span class="p">;</span>
 	<span class="kt">float</span> <span class="n">tc</span> <span class="o">=</span> <span class="n">dot</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">r</span><span class="o">-&gt;</span><span class="n">direction</span><span class="p">);</span>
 	
 	<span class="k">if</span> <span class="p">(</span> <span class="n">tc</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="mf">0.0</span> <span class="p">)</span> <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
@@ -385,21 +386,21 @@ Congratulations on getting this far! Now that we have all that theory out of the
 	<span class="kt">float</span> <span class="n">radius2</span> <span class="o">=</span> <span class="n">s</span><span class="o">-&gt;</span><span class="n">radius</span> <span class="o">*</span> <span class="n">s</span><span class="o">-&gt;</span><span class="n">radius</span><span class="p">;</span>
 	<span class="k">if</span> <span class="p">(</span> <span class="n">d2</span> <span class="o">&gt;</span> <span class="n">radius2</span><span class="p">)</span> <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
 
-	<span class="c1">//solve for t1c
-</span>	<span class="kt">float</span> <span class="n">t1c</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span> <span class="n">radius2</span> <span class="o">-</span> <span class="n">d2</span> <span class="p">);</span>
+	<span class="c1">//solve for t1c</span>
+	<span class="kt">float</span> <span class="n">t1c</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span> <span class="n">radius2</span> <span class="o">-</span> <span class="n">d2</span> <span class="p">);</span>
 
-	<span class="c1">//solve for intersection points
-</span>	<span class="o">*</span><span class="n">t1</span> <span class="o">=</span> <span class="n">tc</span> <span class="o">-</span> <span class="n">t1c</span><span class="p">;</span>
+	<span class="c1">//solve for intersection points</span>
+	<span class="o">*</span><span class="n">t1</span> <span class="o">=</span> <span class="n">tc</span> <span class="o">-</span> <span class="n">t1c</span><span class="p">;</span>
 	<span class="o">*</span><span class="n">t2</span> <span class="o">=</span> <span class="n">tc</span> <span class="o">+</span> <span class="n">t1c</span><span class="p">;</span>
 	
 	<span class="k">return</span> <span class="nb">true</span><span class="p">;</span>
 <span class="p">}</span></code></pre></div>
 
-<p>Much better! Not only are we returning getting the solved t values out of the function, but we’ve also managed to get rid of a costly square root operation. This may not seem like a big deal, but when you factor in how many times you will be calling this intersect function, any optimizations you can make pay dividends. </p>
+<p>Much better! Not only are we returning getting the solved t values out of the function, but we’ve also managed to get rid of a costly square root operation. This may not seem like a big deal, but when you factor in how many times you will be calling this intersect function, any optimizations you can make pay dividends.</p>
 
-<p>Whew, that was a long post. If anything is unclear, or you spot a mistake (I wrote most of this on a train, it’s very possible something is a bit off) feel free to send me a message <a href="http://twitter.com/khalladay">on Twitter.</a> </p>
+<p>Whew, that was a long post. If anything is unclear, or you spot a mistake (I wrote most of this on a train, it’s very possible something is a bit off) feel free to send me a message <a href="http://twitter.com/khalladay">on Twitter.</a></p>
 
-<p>Merry Christmas! :D </p>
+<p>Merry Christmas! :D</p>
 
 </div>
 
@@ -408,19 +409,19 @@ Congratulations on getting this far! Now that we have all that theory out of the
   <ul class="posts">
     
     <li>
-      <span>04 Dec 2019 &raquo;</span> <a href="/blog/2019/12/04/Recreating-A-Dirty-Gamedev-Hack.html">Recreating An Old "Dirty Gamedev Trick"</a>
+      <span>14 Jul 2021 &raquo;</span> <a href="/blog/2021/07/14/Dll-Search-Order-Hijacking-For-PostProcess-Injection.html">Hooking and Hijacking DirectX 11 Functions In Skyrim</a>
     </li>
     
     <li>
-      <span>18 Apr 2019 &raquo;</span> <a href="/blog/2019/04/18/I-Wrote-A-Book.html">I Wrote A Book About Shaders!</a>
+      <span>13 Nov 2020 &raquo;</span> <a href="/blog/2020/11/13/Hooking-By-Example.html">X64 Function Hooking by Example</a>
     </li>
     
     <li>
-      <span>05 Feb 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/02/05/Bind-Once-Uniform-Data-Vulkan.html">A "Bind Once" Approach to Uniform Data</a>
+      <span>20 May 2020 &raquo;</span> <a href="/blog/2020/05/20/Rendering-With-Notepad.html">Ray Tracing In Notepad.exe At 30 FPS</a>
     </li>
     
     <li>
-      <span>28 Jan 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/01/28/Textue-Arrays-Vulkan.html">Using Arrays of Textures in Vulkan Shaders</a>
+      <span>20 May 2020 &raquo;</span> <a href="/blog/2020/05/20/Hooking-Input-Snake-In-Notepad.html">Hooking Keyboard Input To Play Snake In Notepad.exe</a>
     </li>
     
   </ul>
@@ -437,27 +438,12 @@ Congratulations on getting this far! Now that we have all that theory out of the
   
 
   <p>
-    © Kyle Halladay, 2014 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
+    © Kyle Halladay, 2021 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
   </p>
 </div>
       </div>
     </div>
   </div>
-
-
-<script type="text/javascript">
-
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-40292745-1']);
-  _gaq.push(['_trackPageview']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-
-</script>
 
 </body>
 </html>

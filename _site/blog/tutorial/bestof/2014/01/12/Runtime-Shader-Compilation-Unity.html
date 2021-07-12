@@ -18,6 +18,7 @@
 
   <link rel="stylesheet" href="/assets/css/all.css">
   <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    
 </head>
 <body>
   <div class="container">
@@ -29,8 +30,7 @@
   <h2>I'm <a href="/">Kyle Halladay</a>.</h2>
   <div id="bio">
     <p>I do graphics and engine programming for games. </p>
-    <p>I'm the author of <a href="https://www.amazon.com/Practical-Shader-Development-Fragment-Developers/dp/1484244567">Practical Shader Development</a>, which is all about learning to write shaders.
-    <p>I also dabble in GBA dev, you can find my tutorials <a href="/gba.html">here.</a>
+    <p>I'm the author of <a href="https://www.amazon.com/Practical-Shader-Development-Fragment-Developers/dp/1484244567">Practical Shader Development</a>, which is all about learning to write shaders.</p>
     <p>Check out <a href="/archive.html">some other stuff I've written</a></p>
   </div>
   <div id="social">
@@ -93,7 +93,8 @@
 
 </p>
 
-<h1 class="title">Creating GLSL Shaders at Runtime in Unity3D</h1>
+<div style="font-size:14px">12 Jan 2014</div>
+<h1 class="title">Creating GLSL Shaders at Runtime in Unity3D</h1> 
 
 <div id="post">
   <div style="background-color:#EEAAAA;">NOTE: This article is for an old version of Unity (Unity 4...sometime in 2014) and probably won't run anymore. Beware!
@@ -103,11 +104,11 @@
 
 <p>The feeling of solving a problem that seems potentially impossible is awesome. My latest project is no exception.</p>
 
-<p>The concept involves users being able to write shaders while the program is running, and compiling them at runtime onto objects in the scene. Normally this wouldn’t be an unreasonable task, however this project is being built in Unity, which complicates things immensely. </p>
+<p>The concept involves users being able to write shaders while the program is running, and compiling them at runtime onto objects in the scene. Normally this wouldn’t be an unreasonable task, however this project is being built in Unity, which complicates things immensely.</p>
 
-<p>I had seen an example of shaderlab code being passed to the Material constructor at runtime before, but I hadn’t ever seen anyone play around with any other shader language in the same way. It turns out that’s because you can’t. The <a href="http://docs.unity3d.com/Documentation/ScriptReference/Material-ctor.html">Material constructor</a> that I was hoping to use only accepts Shaderlab; Unity doesn’t support runtime compilation of GLSL, Cg, or HLSL, end of story. </p>
+<p>I had seen an example of shaderlab code being passed to the Material constructor at runtime before, but I hadn’t ever seen anyone play around with any other shader language in the same way. It turns out that’s because you can’t. The <a href="http://docs.unity3d.com/Documentation/ScriptReference/Material-ctor.html">Material constructor</a> that I was hoping to use only accepts Shaderlab; Unity doesn’t support runtime compilation of GLSL, Cg, or HLSL, end of story.</p>
 
-<p>Except that isn’t the whole story. If it was, this would be a very short post. It turns out that with some elbow grease, you can actually get other languages (or at least GLSL) to compile. The rest of this post is going to show you how. </p>
+<p>Except that isn’t the whole story. If it was, this would be a very short post. It turns out that with some elbow grease, you can actually get other languages (or at least GLSL) to compile. The rest of this post is going to show you how.</p>
 
 <div align="center">
 	
@@ -120,9 +121,9 @@
 
 <h3>Setting Up Your Project</h3>
 
-<p>There are at least a few people who have tried to make this work before. A quick google search for “runtime shader compilation unity” will bring you to <a href="http://forum.unity3d.com/threads/87085-Runtime-shader-compilation">this Unity forum post</a>. If you scroll down you’ll find a post from a user named Sirithang, who is the real unsung hero of this post. </p>
+<p>There are at least a few people who have tried to make this work before. A quick google search for “runtime shader compilation unity” will bring you to <a href="http://forum.unity3d.com/threads/87085-Runtime-shader-compilation">this Unity forum post</a>. If you scroll down you’ll find a post from a user named Sirithang, who is the real unsung hero of this post.</p>
 
-<p>Their post talks about a tool called CgBatch, which is included with Unity, and according to <a href="http://www.realtimerendering.com/downloads/MobileCrossPlatformChallenges_siggraph.pdf">this SIGGRAPH presentation</a>, is either the entire shader compilation pipeline for Unity, or is at least one step in it. The siggraph link only describes it as a tool to generate HLSL, but in practice it seems to fully translate shaders into a format accepted by that material constructor from above. Since CgBatch isn’t meant for public use, there isn’t anything in the way of documentation to know for sure. </p>
+<p>Their post talks about a tool called CgBatch, which is included with Unity, and according to <a href="http://www.realtimerendering.com/downloads/MobileCrossPlatformChallenges_siggraph.pdf">this SIGGRAPH presentation</a>, is either the entire shader compilation pipeline for Unity, or is at least one step in it. The siggraph link only describes it as a tool to generate HLSL, but in practice it seems to fully translate shaders into a format accepted by that material constructor from above. Since CgBatch isn’t meant for public use, there isn’t anything in the way of documentation to know for sure.</p>
 
 <p>Ok, so we know we need to use CgBatch, but where do we get it. On Mac, you can find it inside of Unity.app (right click and select “Show Package Contents”), inside the Tools folder. On Windows, you’re looking for CgBatch.exe, located in Unity/Editor/Data/Tools. Thanks to <a href="https://twitter.com/izaleu">@izaleu</a> for finding this on Windows :D ). Create a folder inside your project’s StreamingAssets directory and paste CgBatch into it (it must be inside subdirectory of StreamingAssets).</p>
 
@@ -150,18 +151,18 @@ So CgBatch needs at least 4 parameters. Based on the forum post linked previousl
   <li><strong>input</strong> : The path to your uncompiled shader file</li>
   <li><strong>path</strong> : The path to the directory that contains your shader</li>
   <li><strong>includepath</strong> : The path to the CGInclude files for Unity</li>
-  <li><strong>output</strong> : Where to put the output shader file. </li>
+  <li><strong>output</strong> : Where to put the output shader file.</li>
 </ul>
 
-<p>If you run this with the appropriate parameters, you should be able to get output that can be accepted by the Material shader string constructor, which is great! So now we need to be able to do this inside a running program. </p>
+<p>If you run this with the appropriate parameters, you should be able to get output that can be accepted by the Material shader string constructor, which is great! So now we need to be able to do this inside a running program.</p>
 
 <h3>Introducing System.Diagnostics</h3>
 
-<p>Thankfully, Mono has us covered (even on Mac!). The Process class (inside System.Diagnostics) is specifically designed to run command line applications, and can be configured to execute programs in bash as well as the windows command line. </p>
+<p>Thankfully, Mono has us covered (even on Mac!). The Process class (inside System.Diagnostics) is specifically designed to run command line applications, and can be configured to execute programs in bash as well as the windows command line.</p>
 
 <p>The way to do this is to create a new Process object, and use that object’s StartInfo property to specify exactly what command and arguments you wish to execute, and then call Process.Start();</p>
 
-<p>In practice, this looks like the following: </p>
+<p>In practice, this looks like the following:</p>
 
 <div class="highlight"><pre><code class="language-c#" data-lang="c#"><span class="k">using</span> <span class="nn">System.Diagnostics</span><span class="p">;</span>
 	
@@ -175,13 +176,13 @@ So CgBatch needs at least 4 parameters. Based on the forum post linked previousl
 
 <p>(the above is mac specific, I don’t have a windows machine to work try this stuff out on right now)</p>
 
-<p>As shown above, the name of the command that you need to execute is actually bash, and not CgBatch. In order to execute a command from batch, you need to pass that as an argument to bash using the -c flag, and enclosing the command and all its arguments inside single quotes. </p>
+<p>As shown above, the name of the command that you need to execute is actually bash, and not CgBatch. In order to execute a command from batch, you need to pass that as an argument to bash using the -c flag, and enclosing the command and all its arguments inside single quotes.</p>
 
 <p>Setting RedirectStandardOutput to true allows us to read the output of the command into the Unity console (really handy for debugging), but in order for that to work, UseShellExecute needs to be set to false, which means that we will not be using the operating system shell to launch the program (in this case bash), we will launch bash directly.</p>
 
 <h3>Actually Making This Work</h3>
 
-<p>Now we have our tools set up, we now how to execute CgBatch, it’s time to put it all together. </p>
+<p>Now we have our tools set up, we now how to execute CgBatch, it’s time to put it all together.</p>
 
 <p>For the proof of concept, I only wanted users to write fragment shaders, so I needed to provide a vertex shader for them:</p>
 
@@ -202,11 +203,11 @@ So CgBatch needs at least 4 parameters. Based on the forum post linked previousl
 
 <div class="highlight"><pre><code class="language-c#" data-lang="c#"><span class="kt">string</span> <span class="n">suffix</span> <span class="p">=</span> <span class="s">"\n#endif\nENDGLSL}}}"</span><span class="p">;</span></code></pre></div>
 
-<p>As the variable names suggest, the user’s fragment shader will be positioned in between these two strings when building our input file. </p>
+<p>As the variable names suggest, the user’s fragment shader will be positioned in between these two strings when building our input file.</p>
 
-<p>Get the user input however you see fit (I as the picture earlier showed, I’m using Unity.GUI for now), and then assemble the full file string with prefix+USERINPUT+suffix. </p>
+<p>Get the user input however you see fit (I as the picture earlier showed, I’m using Unity.GUI for now), and then assemble the full file string with prefix+USERINPUT+suffix.</p>
 
-<p>Once you’ve assembled the full shader string, you need to write it to a file, since CgBatch expects the input parameter to be a file path. Since we don’t want this file to persist between runs, I’m writing the input file to Application.temporaryCachePath. </p>
+<p>Once you’ve assembled the full shader string, you need to write it to a file, since CgBatch expects the input parameter to be a file path. Since we don’t want this file to persist between runs, I’m writing the input file to Application.temporaryCachePath.</p>
 
 <div class="highlight"><pre><code class="language-c#" data-lang="c#"><span class="kt">byte</span><span class="p">[]</span> <span class="n">byteShader</span> <span class="p">=</span> <span class="n">System</span><span class="p">.</span><span class="n">Text</span><span class="p">.</span><span class="n">Encoding</span><span class="p">.</span><span class="n">UTF8</span><span class="p">.</span><span class="nf">GetBytes</span><span class="p">(</span><span class="n">prefix</span><span class="p">+</span><span class="n">shader</span><span class="p">+</span><span class="n">suffix</span><span class="p">);</span>
 
@@ -214,7 +215,7 @@ So CgBatch needs at least 4 parameters. Based on the forum post linked previousl
 <span class="n">tempShader</span><span class="p">.</span><span class="nf">Write</span><span class="p">(</span><span class="n">byteShader</span><span class="p">,</span><span class="m">0</span><span class="p">,(</span><span class="n">prefix</span><span class="p">+</span><span class="n">suffix</span><span class="p">+</span><span class="n">shader</span><span class="p">).</span><span class="n">Length</span><span class="p">);</span>
 <span class="n">tempShader</span><span class="p">.</span><span class="nf">Close</span><span class="p">();</span></code></pre></div>
 
-<p>Finally, we need to read in the output and actually build a material out of it. All together, the shader compilation process looks like the following: </p>
+<p>Finally, we need to read in the output and actually build a material out of it. All together, the shader compilation process looks like the following:</p>
 
 <div class="highlight"><pre><code class="language-c#" data-lang="c#"><span class="kt">byte</span><span class="p">[]</span> <span class="n">byteShader</span> <span class="p">=</span> <span class="n">System</span><span class="p">.</span><span class="n">Text</span><span class="p">.</span><span class="n">Encoding</span><span class="p">.</span><span class="n">UTF8</span><span class="p">.</span><span class="nf">GetBytes</span><span class="p">(</span><span class="n">prefix</span><span class="p">+</span><span class="n">shader</span><span class="p">+</span><span class="n">suffix</span><span class="p">);</span>
 
@@ -263,19 +264,19 @@ So CgBatch needs at least 4 parameters. Based on the forum post linked previousl
   <ul class="posts">
     
     <li>
-      <span>04 Dec 2019 &raquo;</span> <a href="/blog/2019/12/04/Recreating-A-Dirty-Gamedev-Hack.html">Recreating An Old "Dirty Gamedev Trick"</a>
+      <span>14 Jul 2021 &raquo;</span> <a href="/blog/2021/07/14/Dll-Search-Order-Hijacking-For-PostProcess-Injection.html">Hooking and Hijacking DirectX 11 Functions In Skyrim</a>
     </li>
     
     <li>
-      <span>18 Apr 2019 &raquo;</span> <a href="/blog/2019/04/18/I-Wrote-A-Book.html">I Wrote A Book About Shaders!</a>
+      <span>13 Nov 2020 &raquo;</span> <a href="/blog/2020/11/13/Hooking-By-Example.html">X64 Function Hooking by Example</a>
     </li>
     
     <li>
-      <span>05 Feb 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/02/05/Bind-Once-Uniform-Data-Vulkan.html">A "Bind Once" Approach to Uniform Data</a>
+      <span>20 May 2020 &raquo;</span> <a href="/blog/2020/05/20/Rendering-With-Notepad.html">Ray Tracing In Notepad.exe At 30 FPS</a>
     </li>
     
     <li>
-      <span>28 Jan 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/01/28/Textue-Arrays-Vulkan.html">Using Arrays of Textures in Vulkan Shaders</a>
+      <span>20 May 2020 &raquo;</span> <a href="/blog/2020/05/20/Hooking-Input-Snake-In-Notepad.html">Hooking Keyboard Input To Play Snake In Notepad.exe</a>
     </li>
     
   </ul>
@@ -292,27 +293,12 @@ So CgBatch needs at least 4 parameters. Based on the forum post linked previousl
   
 
   <p>
-    © Kyle Halladay, 2014 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
+    © Kyle Halladay, 2021 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
   </p>
 </div>
       </div>
     </div>
   </div>
-
-
-<script type="text/javascript">
-
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-40292745-1']);
-  _gaq.push(['_trackPageview']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-
-</script>
 
 </body>
 </html>

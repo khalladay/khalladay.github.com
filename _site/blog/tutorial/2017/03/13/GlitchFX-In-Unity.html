@@ -18,6 +18,7 @@
 
   <link rel="stylesheet" href="/assets/css/all.css">
   <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    
 </head>
 <body>
   <div class="container">
@@ -29,8 +30,7 @@
   <h2>I'm <a href="/">Kyle Halladay</a>.</h2>
   <div id="bio">
     <p>I do graphics and engine programming for games. </p>
-    <p>I'm the author of <a href="https://www.amazon.com/Practical-Shader-Development-Fragment-Developers/dp/1484244567">Practical Shader Development</a>, which is all about learning to write shaders.
-    <p>I also dabble in GBA dev, you can find my tutorials <a href="/gba.html">here.</a>
+    <p>I'm the author of <a href="https://www.amazon.com/Practical-Shader-Development-Fragment-Developers/dp/1484244567">Practical Shader Development</a>, which is all about learning to write shaders.</p>
     <p>Check out <a href="/archive.html">some other stuff I've written</a></p>
   </div>
   <div id="social">
@@ -93,10 +93,11 @@
 
 </p>
 
-<h1 class="title">Fixeds, Floats and a Block Damage Effect</h1>
+<div style="font-size:14px">13 Mar 2017</div>
+<h1 class="title">Fixeds, Floats and a Block Damage Effect</h1> 
 
 <div id="post">
-  <p>As you may have guessed from the everything that I post, I love cheesy rendering effects, and no surprise, that means that I’m a big fan of cyberpunk games, especially ones that really go over the top with effects. As such, I thought I’d spend some time this weekend building a classic glitch effect:  </p>
+  <p>As you may have guessed from the everything that I post, I love cheesy rendering effects, and no surprise, that means that I’m a big fan of cyberpunk games, especially ones that really go over the top with effects. As such, I thought I’d spend some time this weekend building a classic glitch effect:</p>
 
 <div align="center">
 <img src="/images/post_images/2017-03-13/preview.gif" /><br />
@@ -138,7 +139,7 @@
 
 <p>Like usual, we’re going to be making a post effect, so we need to start with a bit of scaffolding in C#. Unlike past articles, this effect is simple enough that we don’t need to set up any extra cameras, we just need to make sure that blit to the screen using our effect material:</p>
 
-<div class="highlight"><pre><code class="language-c#" data-lang="c#"><span class="na">[RequireComponent(typeof(Camera))]</span>
+<div class="highlight"><pre><code class="language-c#" data-lang="c#"><span class="p">[</span><span class="nf">RequireComponent</span><span class="p">(</span><span class="k">typeof</span><span class="p">(</span><span class="n">Camera</span><span class="p">))]</span>
 <span class="k">public</span> <span class="k">class</span> <span class="nc">GlitchFX</span><span class="p">:</span> <span class="n">MonoBehaviour</span>
 <span class="p">{</span>
 <span class="k">public</span> <span class="kt">float</span> <span class="n">glitchAmount</span> <span class="p">=</span> <span class="m">0.0f</span><span class="p">;</span>
@@ -200,7 +201,7 @@
     <span class="n">RenderTexture</span><span class="p">.</span><span class="nf">ReleaseTemporary</span><span class="p">(</span><span class="n">t</span><span class="p">);</span>
 <span class="p">}</span></code></pre></div>
 
-<p>On my iPhone 6, the performance impact was too small to see without doing something like the above, and even in the above stress test, we’re talking about a difference of about 2 ms. It’s not like your project will fail if you don’t know this technique, but small optimizations add up, especially when you’re trying to hit 60 fps on mobile.  </p>
+<p>On my iPhone 6, the performance impact was too small to see without doing something like the above, and even in the above stress test, we’re talking about a difference of about 2 ms. It’s not like your project will fail if you don’t know this technique, but small optimizations add up, especially when you’re trying to hit 60 fps on mobile.</p>
 
 <p>So that covers the texture sample line, but I also mentioned that we’d pay special attention to the precision of variables in this post, so let’s talk about why the texture sample was stored in a fixed2, and not a float2, for instance. As we’ll see when we have more instructions to look at, it’s a matter of minimizing the number of times we need to cast our data to a different precision. Some functions take floats as args, so passing in a fixed will require it to be cast up into a higher precision type or vice versa.</p>
 
@@ -454,19 +455,19 @@
   <ul class="posts">
     
     <li>
-      <span>04 Dec 2019 &raquo;</span> <a href="/blog/2019/12/04/Recreating-A-Dirty-Gamedev-Hack.html">Recreating An Old "Dirty Gamedev Trick"</a>
+      <span>14 Jul 2021 &raquo;</span> <a href="/blog/2021/07/14/Dll-Search-Order-Hijacking-For-PostProcess-Injection.html">Hooking and Hijacking DirectX 11 Functions In Skyrim</a>
     </li>
     
     <li>
-      <span>18 Apr 2019 &raquo;</span> <a href="/blog/2019/04/18/I-Wrote-A-Book.html">I Wrote A Book About Shaders!</a>
+      <span>13 Nov 2020 &raquo;</span> <a href="/blog/2020/11/13/Hooking-By-Example.html">X64 Function Hooking by Example</a>
     </li>
     
     <li>
-      <span>05 Feb 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/02/05/Bind-Once-Uniform-Data-Vulkan.html">A "Bind Once" Approach to Uniform Data</a>
+      <span>20 May 2020 &raquo;</span> <a href="/blog/2020/05/20/Rendering-With-Notepad.html">Ray Tracing In Notepad.exe At 30 FPS</a>
     </li>
     
     <li>
-      <span>28 Jan 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/01/28/Textue-Arrays-Vulkan.html">Using Arrays of Textures in Vulkan Shaders</a>
+      <span>20 May 2020 &raquo;</span> <a href="/blog/2020/05/20/Hooking-Input-Snake-In-Notepad.html">Hooking Keyboard Input To Play Snake In Notepad.exe</a>
     </li>
     
   </ul>
@@ -483,27 +484,12 @@
   
 
   <p>
-    © Kyle Halladay, 2014 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
+    © Kyle Halladay, 2021 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
   </p>
 </div>
       </div>
     </div>
   </div>
-
-
-<script type="text/javascript">
-
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-40292745-1']);
-  _gaq.push(['_trackPageview']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-
-</script>
 
 </body>
 </html>

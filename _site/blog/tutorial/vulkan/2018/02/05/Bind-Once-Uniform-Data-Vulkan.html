@@ -18,6 +18,7 @@
 
   <link rel="stylesheet" href="/assets/css/all.css">
   <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    
 </head>
 <body>
   <div class="container">
@@ -29,8 +30,7 @@
   <h2>I'm <a href="/">Kyle Halladay</a>.</h2>
   <div id="bio">
     <p>I do graphics and engine programming for games. </p>
-    <p>I'm the author of <a href="https://www.amazon.com/Practical-Shader-Development-Fragment-Developers/dp/1484244567">Practical Shader Development</a>, which is all about learning to write shaders.
-    <p>I also dabble in GBA dev, you can find my tutorials <a href="/gba.html">here.</a>
+    <p>I'm the author of <a href="https://www.amazon.com/Practical-Shader-Development-Fragment-Developers/dp/1484244567">Practical Shader Development</a>, which is all about learning to write shaders.</p>
     <p>Check out <a href="/archive.html">some other stuff I've written</a></p>
   </div>
   <div id="social">
@@ -93,7 +93,8 @@
 
 </p>
 
-<h1 class="title">A "Bind Once" Approach to Uniform Data</h1>
+<div style="font-size:14px">05 Feb 2018</div>
+<h1 class="title">A "Bind Once" Approach to Uniform Data</h1> 
 
 <div id="post">
   <p>After figuring out how to use a global <a href="http://kylehalladay.com/blog/tutorial/vulkan/2018/01/28/Textue-Arrays-Vulkan.html">array of textures</a> to store all the textures that are in use for a frame in a single descriptor set, I returned to my <a href="https://github.com/khalladay/VkMaterialSystem">material system project</a> and realized how much easier life would be if I could do all my descriptor set binding at the beginning of a frame, both because I’d avoid any performance overhead from doing lots of binding, and because it greatly simplifies anything related to descriptor set versioning (or dealing with updating buffers that are in flight).</p>
@@ -191,7 +192,7 @@
 
 <span class="n">vkCreateDescriptorSetLayout</span><span class="p">(...)</span></code></pre></div>
 
-<p>You don’t even need to worry about specifying the number of elements in the array, since it’s all stored in a uniform block. As far as the descriptor set is concerned, we’re not even using an array.  </p>
+<p>You don’t even need to worry about specifying the number of elements in the array, since it’s all stored in a uniform block. As far as the descriptor set is concerned, we’re not even using an array.</p>
 
 <p>Once you’ve set up your Descriptor Set Layout, allocating the buffer to store the data is similarly easy. I’m going to just copy + paste the utility function call from my demo project, because allocating a buffer and memory associated with it in vulkan has a lot of boiler plate, but in reality, all you do is create a buffer large enough to hold the array you declared. So if you have an array of length 8, that stores 48 byte structures, you’re buffer needs to be 8 * 48 (384) bytes large.</p>
 
@@ -227,14 +228,14 @@
 
 <p>I’ve already covered that you need to keep the uniform objects the same size, but how to do that is a bit different for Vulkan than it might be if you were working with solely cpu side structs. This is because struct members in Vulkan shaders are 16 byte aligned, which means that if you’re trying to manually specify the structs in your c++ code (like I do in my example project), you need to add some additional syntax to make sure if all adds up properly:</p>
 
-<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="k">struct</span> <span class="n">LayoutA</span>
+<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="k">struct</span> <span class="nc">LayoutA</span>
 <span class="p">{</span>
     <span class="kr">__declspec</span><span class="p">(</span><span class="n">align</span><span class="p">(</span><span class="mi">16</span><span class="p">))</span> <span class="n">glm</span><span class="o">::</span><span class="n">vec4</span> <span class="n">colorA</span><span class="p">;</span>
     <span class="kr">__declspec</span><span class="p">(</span><span class="n">align</span><span class="p">(</span><span class="mi">16</span><span class="p">))</span> <span class="n">glm</span><span class="o">::</span><span class="n">vec4</span> <span class="n">colorB</span><span class="p">;</span>
     <span class="kr">__declspec</span><span class="p">(</span><span class="n">align</span><span class="p">(</span><span class="mi">16</span><span class="p">))</span> <span class="n">glm</span><span class="o">::</span><span class="n">vec4</span> <span class="n">colorC</span><span class="p">;</span>
 <span class="p">};</span>
 
-<span class="k">struct</span> <span class="n">LayoutB</span>
+<span class="k">struct</span> <span class="nc">LayoutB</span>
 <span class="p">{</span>
     <span class="kr">__declspec</span><span class="p">(</span><span class="n">align</span><span class="p">(</span><span class="mi">16</span><span class="p">))</span> <span class="kt">float</span> <span class="n">r</span><span class="p">;</span>
     <span class="kr">__declspec</span><span class="p">(</span><span class="n">align</span><span class="p">(</span><span class="mi">16</span><span class="p">))</span> <span class="n">glm</span><span class="o">::</span><span class="n">vec4</span> <span class="n">colorA</span><span class="p">;</span>
@@ -247,7 +248,7 @@
 
 <div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="kt">char</span><span class="o">*</span> <span class="n">sharedData</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">LayoutA</span><span class="p">)</span> <span class="o">*</span> <span class="n">BUFFER_ARRAY_SIZE</span><span class="p">);</span>
 <span class="n">LayoutA</span> <span class="n">first</span> <span class="o">=</span> <span class="p">{</span><span class="n">glm</span><span class="o">::</span><span class="n">vec4</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">glm</span><span class="o">::</span><span class="n">vec4</span><span class="p">(</span><span class="mf">0.25</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">glm</span><span class="o">::</span><span class="n">vec4</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.25</span><span class="p">,</span><span class="mf">0.25</span><span class="p">,</span><span class="mi">1</span><span class="p">)};</span>
-<span class="n">LayoutB</span> <span class="n">second</span> <span class="o">=</span>  <span class="mf">1.0</span><span class="p">,</span> <span class="n">glm</span><span class="o">::</span><span class="n">vec4</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="mi">1</span><span class="p">};</span>
+<span class="n">LayoutB</span> <span class="n">second</span> <span class="o">=</span>  <span class="mf">1.0</span><span class="p">,</span> <span class="n">glm</span><span class="o">::</span><span class="n">vec4</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="mi">1</span><span class="err">}</span><span class="p">;</span>
 
 <span class="kt">char</span><span class="o">*</span> <span class="n">writeLocation</span> <span class="o">=</span> <span class="n">sharedData</span><span class="p">;</span>
 <span class="n">memcpy</span><span class="p">(</span><span class="n">writeLocation</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">first</span><span class="p">,</span> <span class="n">SHARED_UNIFORM_SIZE</span><span class="p">);</span>
@@ -319,19 +320,19 @@
   <ul class="posts">
     
     <li>
-      <span>04 Dec 2019 &raquo;</span> <a href="/blog/2019/12/04/Recreating-A-Dirty-Gamedev-Hack.html">Recreating An Old "Dirty Gamedev Trick"</a>
+      <span>14 Jul 2021 &raquo;</span> <a href="/blog/2021/07/14/Dll-Search-Order-Hijacking-For-PostProcess-Injection.html">Hooking and Hijacking DirectX 11 Functions In Skyrim</a>
     </li>
     
     <li>
-      <span>18 Apr 2019 &raquo;</span> <a href="/blog/2019/04/18/I-Wrote-A-Book.html">I Wrote A Book About Shaders!</a>
+      <span>13 Nov 2020 &raquo;</span> <a href="/blog/2020/11/13/Hooking-By-Example.html">X64 Function Hooking by Example</a>
     </li>
     
     <li>
-      <span>05 Feb 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/02/05/Bind-Once-Uniform-Data-Vulkan.html">A "Bind Once" Approach to Uniform Data</a>
+      <span>20 May 2020 &raquo;</span> <a href="/blog/2020/05/20/Rendering-With-Notepad.html">Ray Tracing In Notepad.exe At 30 FPS</a>
     </li>
     
     <li>
-      <span>28 Jan 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/01/28/Textue-Arrays-Vulkan.html">Using Arrays of Textures in Vulkan Shaders</a>
+      <span>20 May 2020 &raquo;</span> <a href="/blog/2020/05/20/Hooking-Input-Snake-In-Notepad.html">Hooking Keyboard Input To Play Snake In Notepad.exe</a>
     </li>
     
   </ul>
@@ -348,27 +349,12 @@
   
 
   <p>
-    © Kyle Halladay, 2014 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
+    © Kyle Halladay, 2021 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
   </p>
 </div>
       </div>
     </div>
   </div>
-
-
-<script type="text/javascript">
-
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-40292745-1']);
-  _gaq.push(['_trackPageview']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-
-</script>
 
 </body>
 </html>

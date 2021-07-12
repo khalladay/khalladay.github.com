@@ -18,6 +18,7 @@
 
   <link rel="stylesheet" href="/assets/css/all.css">
   <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    
 </head>
 <body>
   <div class="container">
@@ -29,8 +30,7 @@
   <h2>I'm <a href="/">Kyle Halladay</a>.</h2>
   <div id="bio">
     <p>I do graphics and engine programming for games. </p>
-    <p>I'm the author of <a href="https://www.amazon.com/Practical-Shader-Development-Fragment-Developers/dp/1484244567">Practical Shader Development</a>, which is all about learning to write shaders.
-    <p>I also dabble in GBA dev, you can find my tutorials <a href="/gba.html">here.</a>
+    <p>I'm the author of <a href="https://www.amazon.com/Practical-Shader-Development-Fragment-Developers/dp/1484244567">Practical Shader Development</a>, which is all about learning to write shaders.</p>
     <p>Check out <a href="/archive.html">some other stuff I've written</a></p>
   </div>
   <div id="social">
@@ -93,7 +93,8 @@
 
 </p>
 
-<h1 class="title">Improving Vulkan Breakout</h1>
+<div style="font-size:14px">30 Aug 2017</div>
+<h1 class="title">Improving Vulkan Breakout</h1> 
 
 <div id="post">
   <p>There are lots of reasons why I love the internet, but one of the big ones is that it gives me a way to learn from folks that I would never get to interact with in real life.</p>
@@ -138,20 +139,20 @@
 
 <p>With that done, all that’s left is to add the appropriate calls to the draw function:</p>
 
-<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="c1">//abbreviated code
-</span>
+<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="c1">//abbreviated code</span>
+
 <span class="n">vkBeginCommandBuffer</span><span class="p">(</span><span class="n">commandBuffer</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">beginInfo</span><span class="p">);</span>
 <span class="n">vkCmdResetQueryPool</span><span class="p">(</span><span class="n">commandBuffer</span><span class="p">,</span> <span class="n">queryPool</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
 
-<span class="c1">//more set up code... (omitted for brevity)
-</span>
-<span class="c1">//the block we want to time starts here
-</span><span class="n">vkCmdWriteTimestamp</span><span class="p">(</span><span class="n">commandBuffer</span><span class="p">,</span> <span class="n">VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT</span><span class="p">,</span> <span class="n">queryPool</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+<span class="c1">//more set up code... (omitted for brevity)</span>
+
+<span class="c1">//the block we want to time starts here</span>
+<span class="n">vkCmdWriteTimestamp</span><span class="p">(</span><span class="n">commandBuffer</span><span class="p">,</span> <span class="n">VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT</span><span class="p">,</span> <span class="n">queryPool</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
 
 <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">PRIM_COUNT</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
 <span class="p">{</span>
-    <span class="c1">//per primitive logic that we want to time
-</span><span class="p">}</span>
+    <span class="c1">//per primitive logic that we want to time</span>
+<span class="p">}</span>
 <span class="n">vkCmdWriteTimestamp</span><span class="p">(</span><span class="n">commandBuffer</span><span class="p">,</span> <span class="n">VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT</span><span class="p">,</span> <span class="n">queryPool</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span></code></pre></div>
 
 <p>As you may have noticed, vkCmdWriteTimestamp takes a pipeline stage as one of it’s arguments. This was unintuitive for me, but here’s what the docs say about it:</p>
@@ -204,8 +205,8 @@
 
 <p>However, while testing this, I realized that (for the Single Buffer Approach), I could reduce the need for this allocation at all with a very small amount of effort. If I could get the mapped pointer to the buffer before I pass this data to the draw function, I could save myself a lot of effort. So I rearranged things a bit to try that out:</p>
 
-<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="c1">//abbreviated code
-</span><span class="n">uniformData</span> <span class="o">=</span> <span class="p">(</span><span class="n">PrimitiveUniformObject</span><span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="n">bufferSize</span><span class="p">);</span>
+<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="c1">//abbreviated code</span>
+<span class="n">uniformData</span> <span class="o">=</span> <span class="p">(</span><span class="n">PrimitiveUniformObject</span><span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="n">bufferSize</span><span class="p">);</span>
 
 <span class="kt">int</span> <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 <span class="kt">char</span><span class="o">*</span> <span class="n">uniformChar</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">uniformData</span><span class="p">;</span>
@@ -224,8 +225,8 @@
 
 <p>Becomes:</p>
 
-<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="c1">//abbreviated code
-</span>
+<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="c1">//abbreviated code</span>
+
 <span class="kt">int</span> <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 
 <span class="kt">char</span><span class="o">*</span> <span class="n">uniformChar</span> <span class="o">=</span> <span class="n">Renderer</span><span class="o">::</span><span class="n">mapBufferPtr</span><span class="p">();</span>
@@ -313,7 +314,7 @@
 
 <p>That’s all for today! When I started making my little Breakout clone, I had no idea that it was going to turn out to be so informative! That being said, I need to move on now. There were some bits of advice that I got that I really liked, that I didn’t end up trying out here simply to save my sanity. This code was never written to be anything other than throwaway code, and it’s time to throw it all out and start fresh. Who knows, maybe my next foray into vulkan will even have textures!</p>
 
-<p>If you spot any errors (there’s likely a ton) in the above code, or just want to say hi, I’m always around <a href="https://twitter.com/khalladay">on Twitter!</a>. I’ve learned more from people pointing out my mistakes in the past week than I did actually building this thing from scratch, so keep the feedback coming!  </p>
+<p>If you spot any errors (there’s likely a ton) in the above code, or just want to say hi, I’m always around <a href="https://twitter.com/khalladay">on Twitter!</a>. I’ve learned more from people pointing out my mistakes in the past week than I did actually building this thing from scratch, so keep the feedback coming!</p>
 
 <font size="2"><div style="border-style:solid; background-color:#DDDDDD ">
 
@@ -337,19 +338,19 @@ In case reviewing testing methods is your thing, here's how I got the numbers in
   <ul class="posts">
     
     <li>
-      <span>04 Dec 2019 &raquo;</span> <a href="/blog/2019/12/04/Recreating-A-Dirty-Gamedev-Hack.html">Recreating An Old "Dirty Gamedev Trick"</a>
+      <span>14 Jul 2021 &raquo;</span> <a href="/blog/2021/07/14/Dll-Search-Order-Hijacking-For-PostProcess-Injection.html">Hooking and Hijacking DirectX 11 Functions In Skyrim</a>
     </li>
     
     <li>
-      <span>18 Apr 2019 &raquo;</span> <a href="/blog/2019/04/18/I-Wrote-A-Book.html">I Wrote A Book About Shaders!</a>
+      <span>13 Nov 2020 &raquo;</span> <a href="/blog/2020/11/13/Hooking-By-Example.html">X64 Function Hooking by Example</a>
     </li>
     
     <li>
-      <span>05 Feb 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/02/05/Bind-Once-Uniform-Data-Vulkan.html">A "Bind Once" Approach to Uniform Data</a>
+      <span>20 May 2020 &raquo;</span> <a href="/blog/2020/05/20/Rendering-With-Notepad.html">Ray Tracing In Notepad.exe At 30 FPS</a>
     </li>
     
     <li>
-      <span>28 Jan 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/01/28/Textue-Arrays-Vulkan.html">Using Arrays of Textures in Vulkan Shaders</a>
+      <span>20 May 2020 &raquo;</span> <a href="/blog/2020/05/20/Hooking-Input-Snake-In-Notepad.html">Hooking Keyboard Input To Play Snake In Notepad.exe</a>
     </li>
     
   </ul>
@@ -366,27 +367,12 @@ In case reviewing testing methods is your thing, here's how I got the numbers in
   
 
   <p>
-    © Kyle Halladay, 2014 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
+    © Kyle Halladay, 2021 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
   </p>
 </div>
       </div>
     </div>
   </div>
-
-
-<script type="text/javascript">
-
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-40292745-1']);
-  _gaq.push(['_trackPageview']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-
-</script>
 
 </body>
 </html>

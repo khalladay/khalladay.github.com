@@ -18,6 +18,7 @@
 
   <link rel="stylesheet" href="/assets/css/all.css">
   <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    
 </head>
 <body>
   <div class="container">
@@ -29,8 +30,7 @@
   <h2>I'm <a href="/">Kyle Halladay</a>.</h2>
   <div id="bio">
     <p>I do graphics and engine programming for games. </p>
-    <p>I'm the author of <a href="https://www.amazon.com/Practical-Shader-Development-Fragment-Developers/dp/1484244567">Practical Shader Development</a>, which is all about learning to write shaders.
-    <p>I also dabble in GBA dev, you can find my tutorials <a href="/gba.html">here.</a>
+    <p>I'm the author of <a href="https://www.amazon.com/Practical-Shader-Development-Fragment-Developers/dp/1484244567">Practical Shader Development</a>, which is all about learning to write shaders.</p>
     <p>Check out <a href="/archive.html">some other stuff I've written</a></p>
   </div>
   <div id="social">
@@ -93,7 +93,8 @@
 
 </p>
 
-<h1 class="title">A Burning Paper Shader</h1>
+<div style="font-size:14px">10 Nov 2015</div>
+<h1 class="title">A Burning Paper Shader</h1> 
 
 <div id="post">
   <p>After a long hiatus, I’ve decided to start posting again! And I can think of no better way to kick that off than with revisiting a <a href="http://kylehalladay.com/blog/tutorial/bestof/2013/09/28/How-to-dissolve-effect.html">cheesy old shader</a> that I posted 2 years ago.</p>
@@ -131,13 +132,13 @@
 
 <p>As a fragment function, the above logic might look like this:</p>
 
-<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">fixed4</span> <span class="n">frag</span><span class="p">(</span><span class="n">vOUT</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span> <span class="n">COLOR</span>
+<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">fixed4</span> <span class="nf">frag</span><span class="p">(</span><span class="n">vOUT</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span> <span class="n">COLOR</span>
 <span class="p">{</span>
    <span class="n">fixed4</span> <span class="n">mainTex</span> <span class="o">=</span> <span class="n">tex2D</span><span class="p">(</span><span class="n">_MainTex</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">uv</span><span class="p">);</span>
    <span class="n">fixed</span> <span class="n">noiseVal</span> <span class="o">=</span> <span class="n">tex2D</span><span class="p">(</span><span class="n">_NoiseTex</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">uv</span><span class="p">).</span><span class="n">r</span><span class="p">;</span>
    <span class="n">mainTex</span><span class="p">.</span><span class="n">a</span> <span class="o">*=</span> <span class="n">floor</span><span class="p">(</span><span class="n">_DissolveVal</span> <span class="o">+</span> <span class="n">min</span><span class="p">(</span><span class="mf">0.99</span><span class="p">,</span><span class="n">noiseVal</span><span class="p">.</span><span class="n">r</span><span class="p">));</span>
    <span class="k">return</span> <span class="n">mainTex</span><span class="p">;</span>
-<span class="p">}</span></code></pre></div>
+<span class="err">}</span></code></pre></div>
 
 <p>For brevity’s sake I’m going to omit posting the whole shader source as we work through it, but the full source is at the bottom of this article so if you’re stuck just jump down there and fill in any blanks.</p>
 
@@ -156,7 +157,7 @@
 
 <p>This might sound tricky, but it isn’t as long as you set the wrap mode of your gradient to “clamp,” so that we can get values outside the range of 0 and 1.Provided that’s set up correctly, the following will work just fine:</p>
 
-<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">fixed4</span> <span class="n">frag</span><span class="p">(</span><span class="n">vOUT</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span> <span class="n">COLOR</span>
+<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">fixed4</span> <span class="nf">frag</span><span class="p">(</span><span class="n">vOUT</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span> <span class="n">COLOR</span>
 <span class="p">{</span>
    <span class="n">fixed4</span> <span class="n">mainTex</span> <span class="o">=</span> <span class="n">tex2D</span><span class="p">(</span><span class="n">_MainTex</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">uv</span><span class="p">);</span>
    <span class="n">fixed</span> <span class="n">noiseVal</span> <span class="o">=</span> <span class="n">tex2D</span><span class="p">(</span><span class="n">_NoiseTex</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">uv</span><span class="p">).</span><span class="n">r</span><span class="p">;</span>
@@ -166,7 +167,7 @@
 
    <span class="n">fixed4</span> <span class="n">burn</span> <span class="o">=</span> <span class="n">tex2D</span><span class="p">(</span><span class="n">_BurnGradient</span><span class="p">,</span> <span class="n">float2</span><span class="p">(</span> <span class="n">overOne</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">));</span>
    <span class="k">return</span> <span class="n">mainTex</span> <span class="o">*</span> <span class="n">burn</span><span class="p">;</span>
-<span class="p">}</span></code></pre></div>
+<span class="err">}</span></code></pre></div>
 
 <p>The _GradientAdjust parameter isn’t necessary to make the effect work, but it provides a great deal of control over how tight you want the edges of your effect to be (just make sure that its value is greater than 1). I found that with the gradient I was using, setting that parameter to 2 produced reasonably good results, which looked like this:</p>
 
@@ -222,7 +223,7 @@
 
 <p>Using this value, we can modify our fragment function to look like so:</p>
 
-<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">fixed4</span> <span class="n">frag</span><span class="p">(</span><span class="n">vOUT</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span> <span class="n">COLOR</span>
+<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">fixed4</span> <span class="nf">frag</span><span class="p">(</span><span class="n">vOUT</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span> <span class="n">COLOR</span>
 <span class="p">{</span>
    <span class="n">fixed4</span> <span class="n">mainTex</span> <span class="o">=</span> <span class="n">tex2D</span><span class="p">(</span><span class="n">_MainTex</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">uv</span><span class="p">);</span>
    <span class="n">fixed</span> <span class="n">noiseVal</span> <span class="o">=</span> <span class="n">tex2D</span><span class="p">(</span><span class="n">_NoiseTex</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">uv</span><span class="p">).</span><span class="n">r</span><span class="p">;</span>
@@ -234,11 +235,11 @@
 
    <span class="n">fixed4</span> <span class="n">burn</span> <span class="o">=</span> <span class="n">tex2D</span><span class="p">(</span><span class="n">_BurnGradient</span><span class="p">,</span> <span class="n">float2</span><span class="p">(</span><span class="n">overOne</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">));</span>
    <span class="k">return</span> <span class="n">mainTex</span> <span class="o">*</span> <span class="n">burn</span><span class="p">;</span>
-<span class="p">}</span></code></pre></div>
+<span class="err">}</span></code></pre></div>
 
 <p>This actually is pretty close to our end product, but now we have a new problem: by scaling our distance like this, we no longer can guarantee that we have a fully opaque mesh at _DissolveValue 1. What we need to do is make our divisor smaller for higher values of _DissolveValue, which can be done like so:</p>
 
-<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">fixed4</span> <span class="n">frag</span><span class="p">(</span><span class="n">vOUT</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span> <span class="n">COLOR</span>
+<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">fixed4</span> <span class="nf">frag</span><span class="p">(</span><span class="n">vOUT</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span> <span class="n">COLOR</span>
 <span class="p">{</span>
    <span class="n">fixed4</span> <span class="n">mainTex</span> <span class="o">=</span> <span class="n">tex2D</span><span class="p">(</span><span class="n">_MainTex</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">uv</span><span class="p">);</span>
    <span class="n">fixed</span> <span class="n">noiseVal</span> <span class="o">=</span> <span class="n">tex2D</span><span class="p">(</span><span class="n">_NoiseTex</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">uv</span><span class="p">).</span><span class="n">r</span><span class="p">;</span>
@@ -250,7 +251,7 @@
 
    <span class="n">fixed4</span> <span class="n">burn</span> <span class="o">=</span> <span class="n">tex2D</span><span class="p">(</span><span class="n">_BurnGradient</span><span class="p">,</span> <span class="n">float2</span><span class="p">(</span> <span class="n">overOne</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">));</span>
    <span class="k">return</span> <span class="n">mainTex</span> <span class="o">*</span> <span class="n">burn</span><span class="p">;</span>
-<span class="p">}</span></code></pre></div>
+<span class="err">}</span></code></pre></div>
 
 <p>Make sure that whatever number you subtract _DissolveValue from when you do this is greater than the max value that you can set _DissolveValue to, otherwise you risk dividing by 0 at some point in your effect, which can cause all kinds of problems.</p>
 
@@ -305,7 +306,7 @@
    <span class="n">Vector3</span> <span class="n">point</span><span class="p">;</span>
    <span class="kt">bool</span> <span class="n">didHit</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
    <span class="n">DissolveEffect</span> <span class="n">targetEffect</span><span class="p">;</span>
-   <span class="kt">void</span> <span class="nf">Update</span> <span class="p">()</span>
+   <span class="kt">void</span> <span class="n">Update</span> <span class="p">()</span>
    <span class="p">{</span>
       <span class="k">if</span> <span class="p">(</span><span class="n">Input</span><span class="p">.</span><span class="n">GetMouseButton</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
       <span class="p">{</span>
@@ -350,19 +351,19 @@
   <ul class="posts">
     
     <li>
-      <span>04 Dec 2019 &raquo;</span> <a href="/blog/2019/12/04/Recreating-A-Dirty-Gamedev-Hack.html">Recreating An Old "Dirty Gamedev Trick"</a>
+      <span>14 Jul 2021 &raquo;</span> <a href="/blog/2021/07/14/Dll-Search-Order-Hijacking-For-PostProcess-Injection.html">Hooking and Hijacking DirectX 11 Functions In Skyrim</a>
     </li>
     
     <li>
-      <span>18 Apr 2019 &raquo;</span> <a href="/blog/2019/04/18/I-Wrote-A-Book.html">I Wrote A Book About Shaders!</a>
+      <span>13 Nov 2020 &raquo;</span> <a href="/blog/2020/11/13/Hooking-By-Example.html">X64 Function Hooking by Example</a>
     </li>
     
     <li>
-      <span>05 Feb 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/02/05/Bind-Once-Uniform-Data-Vulkan.html">A "Bind Once" Approach to Uniform Data</a>
+      <span>20 May 2020 &raquo;</span> <a href="/blog/2020/05/20/Rendering-With-Notepad.html">Ray Tracing In Notepad.exe At 30 FPS</a>
     </li>
     
     <li>
-      <span>28 Jan 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/01/28/Textue-Arrays-Vulkan.html">Using Arrays of Textures in Vulkan Shaders</a>
+      <span>20 May 2020 &raquo;</span> <a href="/blog/2020/05/20/Hooking-Input-Snake-In-Notepad.html">Hooking Keyboard Input To Play Snake In Notepad.exe</a>
     </li>
     
   </ul>
@@ -379,27 +380,12 @@
   
 
   <p>
-    © Kyle Halladay, 2014 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
+    © Kyle Halladay, 2021 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
   </p>
 </div>
       </div>
     </div>
   </div>
-
-
-<script type="text/javascript">
-
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-40292745-1']);
-  _gaq.push(['_trackPageview']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-
-</script>
 
 </body>
 </html>

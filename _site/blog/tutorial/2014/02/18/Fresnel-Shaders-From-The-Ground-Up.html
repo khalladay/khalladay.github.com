@@ -18,6 +18,7 @@
 
   <link rel="stylesheet" href="/assets/css/all.css">
   <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    
 </head>
 <body>
   <div class="container">
@@ -29,8 +30,7 @@
   <h2>I'm <a href="/">Kyle Halladay</a>.</h2>
   <div id="bio">
     <p>I do graphics and engine programming for games. </p>
-    <p>I'm the author of <a href="https://www.amazon.com/Practical-Shader-Development-Fragment-Developers/dp/1484244567">Practical Shader Development</a>, which is all about learning to write shaders.
-    <p>I also dabble in GBA dev, you can find my tutorials <a href="/gba.html">here.</a>
+    <p>I'm the author of <a href="https://www.amazon.com/Practical-Shader-Development-Fragment-Developers/dp/1484244567">Practical Shader Development</a>, which is all about learning to write shaders.</p>
     <p>Check out <a href="/archive.html">some other stuff I've written</a></p>
   </div>
   <div id="social">
@@ -93,7 +93,8 @@
 
 </p>
 
-<h1 class="title">The Basics of Fresnel Shading</h1>
+<div style="font-size:14px">18 Feb 2014</div>
+<h1 class="title">The Basics of Fresnel Shading</h1> 
 
 <div id="post">
   <div style="background-color:#EEAAAA;">NOTE: This article is for an old version of Unity (Unity 4...sometime in 2014) and probably won't run anymore. Beware!
@@ -101,7 +102,7 @@
 
 <p><br /></p>
 
-<p>I recently stumbled on the awesome article: <a href="http://filmicgames.com/archives/557">Everything Has Fresnel</a> (if you haven’t read it, go read it now). The main premise of the article is that real world materials are not actually as neat and tidy as programmers would like to believe, and more specifically, that virtually everything in real life has some degree of fresnel reflectivity. </p>
+<p>I recently stumbled on the awesome article: <a href="http://filmicgames.com/archives/557">Everything Has Fresnel</a> (if you haven’t read it, go read it now). The main premise of the article is that real world materials are not actually as neat and tidy as programmers would like to believe, and more specifically, that virtually everything in real life has some degree of fresnel reflectivity.</p>
 
 <p>Fresnel isn’t an effect that I’ve seen often in Unity projects and in fact wasn’t an effect that I was familiar with building, so I decided to kill two birds with one project and put together my latest shader pack: <a href="/all/graphics/2014/02/23/Fresnel-Shaders.html">Fresnel Shaders</a>. It’s all free to use, MIT license, all that jazz, so enjoy :D</p>
 
@@ -119,9 +120,9 @@
 
 <p>In essence, the fresnel effect describes the relationship between the angle that you look at a surface and the amount of reflectivity you see. This is very easy to demonstrate if you have a window nearby. If you look at the window straight on you can see through the window as intended, however, if you move so that you try to look through the window at a glancing angle (ie: your view direction is approaching parallel to the window’s surface) the window becomes much closer to a mirror.</p>
 
-<p>But this effect isn’t limited to windows, or even particularly shiny objects. As John Hable points out in <a href="http://filmicgames.com/archives/557">Everything Has Fresnel</a>, pretty much everything (including towels and bricks!) exhibit the fresnel effect to some degree. I’ve made a game out of trying to spot instances of it as I walk to work (without looking I’ve lost my mind). </p>
+<p>But this effect isn’t limited to windows, or even particularly shiny objects. As John Hable points out in <a href="http://filmicgames.com/archives/557">Everything Has Fresnel</a>, pretty much everything (including towels and bricks!) exhibit the fresnel effect to some degree. I’ve made a game out of trying to spot instances of it as I walk to work (without looking I’ve lost my mind).</p>
 
-<p>So what does this look like when added to an object in Unity? Here’s a few more examples from my shader pack: </p>
+<p>So what does this look like when added to an object in Unity? Here’s a few more examples from my shader pack:</p>
 
 <div align="center">
 	 	
@@ -133,15 +134,15 @@
 
 <h2>How is it implemented?</h2>
 
-<p>As it turns out, Fresnel equations are complicated, way more so than can be adequately covered by a blog post, and way more than is feasible to execute in real time for most applications. In practice, it’s far more realistic to use an approximation of these equations. In searching, I’ve ended up finding two such approximations have so far seemed appropriate to use in real time shaders. </p>
+<p>As it turns out, Fresnel equations are complicated, way more so than can be adequately covered by a blog post, and way more than is feasible to execute in real time for most applications. In practice, it’s far more realistic to use an approximation of these equations. In searching, I’ve ended up finding two such approximations have so far seemed appropriate to use in real time shaders.</p>
 
-<p>The first is the Schlick Approximation. This is easy enough to google for, but I’ll put here just for reference as well: </p>
+<p>The first is the Schlick Approximation. This is easy enough to google for, but I’ll put here just for reference as well:</p>
 
 <div align="center">
  R(&theta;) = R<sub>0</sub> + (1 - R<sub>0</sub>)(1 - cos&theta;)<sup>5</sup>
 </div>
 <p><br />
- In the above equation, R<sub>0</sub> refers to the reflection coefficient for light moving between 2 interfaces with different refractivity (most commonly, air and whatever type of material the surface is). If you’re really interested, definitely check out more detailed sources online. In practice, I’ve found that while this method gives decent looking results, the next option gives us much greater control over the appearance of our materials at the cost of physical correctness. Given that real time graphics are anything but physically correct, I’m ok with this tradeoff. </p>
+ In the above equation, R<sub>0</sub> refers to the reflection coefficient for light moving between 2 interfaces with different refractivity (most commonly, air and whatever type of material the surface is). If you’re really interested, definitely check out more detailed sources online. In practice, I’ve found that while this method gives decent looking results, the next option gives us much greater control over the appearance of our materials at the cost of physical correctness. Given that real time graphics are anything but physically correct, I’m ok with this tradeoff.</p>
 
 <p>The second approximation comes from chapter 7 of the <a href="http://http.developer.nvidia.com/CgTutorial/cg&#95;tutorial&#95;chapter07.html">Cg Tutorial</a> from NVidia, which refers to it as the “Empricial Approximation.”<br />
  <br /></p>
@@ -157,7 +158,7 @@
 <li>bias, scale and power are values exposed to allow control over the appearance of the Fresnel effect</li>
 </ul>
 
-<p>This equation is a bit of a double edged sword. It’s very easy to make hideous looking Fresnel by tweaking the values of bias, scale and power, but it also gives you the ability to fine tune your materials to exactly how you want them to look. </p>
+<p>This equation is a bit of a double edged sword. It’s very easy to make hideous looking Fresnel by tweaking the values of bias, scale and power, but it also gives you the ability to fine tune your materials to exactly how you want them to look.</p>
 
 <div align="center">
 	 	
@@ -186,19 +187,19 @@
 	<span class="k">return</span> <span class="n">o</span><span class="p">;</span>
 <span class="p">}</span></code></pre></div>
 
-<p>There isn’t too much to say about this, since it’s pretty much the equation above verbatim. One handy tip though: I’ve found that I’ve been perfectly happy with the results I get if I omit the bias parameter entirely, and doing so makes it more difficult to produce wonky results. </p>
+<p>There isn’t too much to say about this, since it’s pretty much the equation above verbatim. One handy tip though: I’ve found that I’ve been perfectly happy with the results I get if I omit the bias parameter entirely, and doing so makes it more difficult to produce wonky results.</p>
 
-<p>Once you have the R value calculated, the rest of the implementation is just a lerp in the fragment shader: </p>
+<p>Once you have the R value calculated, the rest of the implementation is just a lerp in the fragment shader:</p>
 
-<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">float4</span> <span class="n">frag</span><span class="p">(</span><span class="n">vOUT</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span>  <span class="n">COLOR</span>
+<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">float4</span> <span class="nf">frag</span><span class="p">(</span><span class="n">vOUT</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span>  <span class="n">COLOR</span>
 <span class="p">{</span>  
 	<span class="n">float4</span> <span class="n">col</span> <span class="o">=</span> <span class="n">tex2D</span><span class="p">(</span><span class="n">_MainTex</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">uv</span><span class="p">.</span><span class="n">xy</span> <span class="o">*</span> <span class="n">_MainTex_ST</span><span class="p">.</span><span class="n">xy</span> <span class="o">+</span> <span class="n">_MainTex_ST</span><span class="p">.</span><span class="n">zw</span><span class="p">);</span>
-	<span class="k">return</span> <span class="n">lerp</span><span class="p">(</span><span class="n">col</span><span class="p">,</span><span class="n">_Color</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">R</span><span class="p">);</span>
-<span class="p">}</span></code></pre></div>
+	<span class="k">return</span> <span class="nf">lerp</span><span class="p">(</span><span class="n">col</span><span class="p">,</span><span class="n">_Color</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">R</span><span class="p">);</span>
+<span class="err">}</span></code></pre></div>
 
-<p>If you’re not a Unity programmer, ignore all the _MainTex_ST stuff, that’s just a unity specific bit of code to handle tiling textures across an object. </p>
+<p>If you’re not a Unity programmer, ignore all the _MainTex_ST stuff, that’s just a unity specific bit of code to handle tiling textures across an object.</p>
 
-<p>Otherwise, all that’s new here is the lerp function. In this example, rather than reflecting anything, our Fresnel Rim is just a single color (_Color), but the principle is the same. If you wanted to turn the rim into a reflection, you’d simply replace the _Color variable with a color sampled from a cube map, or taken from a camera, or however else you want to pass in a reflection. </p>
+<p>Otherwise, all that’s new here is the lerp function. In this example, rather than reflecting anything, our Fresnel Rim is just a single color (_Color), but the principle is the same. If you wanted to turn the rim into a reflection, you’d simply replace the _Color variable with a color sampled from a cube map, or taken from a camera, or however else you want to pass in a reflection.</p>
 
 <p>Otherwise though, this is all there is to it to write a simple Fresnel shader, so go forth and make all of your objects more believable! And feel free to download the Fresnel Shader Pack that I’ve posted in the graphics section of this site to see some examples of more complicated Fresnel effects.</p>
 
@@ -211,19 +212,19 @@
   <ul class="posts">
     
     <li>
-      <span>04 Dec 2019 &raquo;</span> <a href="/blog/2019/12/04/Recreating-A-Dirty-Gamedev-Hack.html">Recreating An Old "Dirty Gamedev Trick"</a>
+      <span>14 Jul 2021 &raquo;</span> <a href="/blog/2021/07/14/Dll-Search-Order-Hijacking-For-PostProcess-Injection.html">Hooking and Hijacking DirectX 11 Functions In Skyrim</a>
     </li>
     
     <li>
-      <span>18 Apr 2019 &raquo;</span> <a href="/blog/2019/04/18/I-Wrote-A-Book.html">I Wrote A Book About Shaders!</a>
+      <span>13 Nov 2020 &raquo;</span> <a href="/blog/2020/11/13/Hooking-By-Example.html">X64 Function Hooking by Example</a>
     </li>
     
     <li>
-      <span>05 Feb 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/02/05/Bind-Once-Uniform-Data-Vulkan.html">A "Bind Once" Approach to Uniform Data</a>
+      <span>20 May 2020 &raquo;</span> <a href="/blog/2020/05/20/Rendering-With-Notepad.html">Ray Tracing In Notepad.exe At 30 FPS</a>
     </li>
     
     <li>
-      <span>28 Jan 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/01/28/Textue-Arrays-Vulkan.html">Using Arrays of Textures in Vulkan Shaders</a>
+      <span>20 May 2020 &raquo;</span> <a href="/blog/2020/05/20/Hooking-Input-Snake-In-Notepad.html">Hooking Keyboard Input To Play Snake In Notepad.exe</a>
     </li>
     
   </ul>
@@ -240,27 +241,12 @@
   
 
   <p>
-    © Kyle Halladay, 2014 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
+    © Kyle Halladay, 2021 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
   </p>
 </div>
       </div>
     </div>
   </div>
-
-
-<script type="text/javascript">
-
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-40292745-1']);
-  _gaq.push(['_trackPageview']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-
-</script>
 
 </body>
 </html>

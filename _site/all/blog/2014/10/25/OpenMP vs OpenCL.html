@@ -18,6 +18,7 @@
 
   <link rel="stylesheet" href="/assets/css/all.css">
   <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    
 </head>
 <body>
   <div class="container">
@@ -29,8 +30,7 @@
   <h2>I'm <a href="/">Kyle Halladay</a>.</h2>
   <div id="bio">
     <p>I do graphics and engine programming for games. </p>
-    <p>I'm the author of <a href="https://www.amazon.com/Practical-Shader-Development-Fragment-Developers/dp/1484244567">Practical Shader Development</a>, which is all about learning to write shaders.
-    <p>I also dabble in GBA dev, you can find my tutorials <a href="/gba.html">here.</a>
+    <p>I'm the author of <a href="https://www.amazon.com/Practical-Shader-Development-Fragment-Developers/dp/1484244567">Practical Shader Development</a>, which is all about learning to write shaders.</p>
     <p>Check out <a href="/archive.html">some other stuff I've written</a></p>
   </div>
   <div id="social">
@@ -93,7 +93,8 @@
 
 </p>
 
-<h1 class="title">OpenMP vs OpenCL - An Unfair Comparison</h1>
+<div style="font-size:14px">25 Oct 2014</div>
+<h1 class="title">OpenMP vs OpenCL - An Unfair Comparison</h1> 
 
 <div id="post">
   <p>In the wake of my last post, I decided to get started with my path tracing project by building a small proof of concept renderer to get my feet wet both with the path tracing algorithm and with OpenMP. I was pretty happy with the output of the path tracer (shown below), but I wasn’t happy with the speed I was getting. Since this project’s entire goal is to entertain me, having to wait minutes to see how a code change impacts the output image is a major buzzkill.</p>
@@ -107,9 +108,9 @@
 
 </div>
 
-<p>So I decided to ask (myself) a really stupid question: would this be faster on the GPU? </p>
+<p>So I decided to ask (myself) a really stupid question: would this be faster on the GPU?</p>
 
-<p>And because the answer for that was pretty obvious (yes!), I then asked a slightly less stupid question: how much faster? </p>
+<p>And because the answer for that was pretty obvious (yes!), I then asked a slightly less stupid question: how much faster?</p>
 
 <p>To answer that, I wrote a second version of the path tracer using OpenCL and ran both of them with the time command. It goes without saying that the code bases were so different that this comparison isn’t exactly fair, but I’ve always wanted to put a graph in a blog post, so here one is!</p>
 
@@ -121,9 +122,9 @@
 <br />
 
 </div>
-<p>It’s hard to see on the graph, but the OpenCL renderer only barely cracked a minute in running time on the 1024 samples per pixel run. OpenMP started at a minute and a half for the 64 samples per pixel case. There are obviously other things that impact which API will be the best for your use case, but iteration speed is pretty important to me, and it’s how I’m deciding which API I’m using for this project. Waiting makes you a waiter. </p>
+<p>It’s hard to see on the graph, but the OpenCL renderer only barely cracked a minute in running time on the 1024 samples per pixel run. OpenMP started at a minute and a half for the 64 samples per pixel case. There are obviously other things that impact which API will be the best for your use case, but iteration speed is pretty important to me, and it’s how I’m deciding which API I’m using for this project. Waiting makes you a waiter.</p>
 
-<p>If you’re interested, the code for both path tracers can be found on github: <a href="https://github.com/khalladay/CaribouPT">OpenMP</a> or <a href="https://github.com/khalladay/CaffeinePT">OpenCL</a>. If you can see anything in the OpenMP source that could be changed to make it 20x faster (which would <em>almost</em> catch up to OpenCL), please let me know! Until then, it looks like I’m abandoning OpenMP for this project. </p>
+<p>If you’re interested, the code for both path tracers can be found on github: <a href="https://github.com/khalladay/CaribouPT">OpenMP</a> or <a href="https://github.com/khalladay/CaffeinePT">OpenCL</a>. If you can see anything in the OpenMP source that could be changed to make it 20x faster (which would <em>almost</em> catch up to OpenCL), please let me know! Until then, it looks like I’m abandoning OpenMP for this project.</p>
 
 <p>As always, I’m <a href="http://twitter.com/khalladay">on twitter</a> if you want to say hi :D Happy Coding!</p>
 
@@ -134,19 +135,19 @@
   <ul class="posts">
     
     <li>
-      <span>04 Dec 2019 &raquo;</span> <a href="/blog/2019/12/04/Recreating-A-Dirty-Gamedev-Hack.html">Recreating An Old "Dirty Gamedev Trick"</a>
+      <span>14 Jul 2021 &raquo;</span> <a href="/blog/2021/07/14/Dll-Search-Order-Hijacking-For-PostProcess-Injection.html">Hooking and Hijacking DirectX 11 Functions In Skyrim</a>
     </li>
     
     <li>
-      <span>18 Apr 2019 &raquo;</span> <a href="/blog/2019/04/18/I-Wrote-A-Book.html">I Wrote A Book About Shaders!</a>
+      <span>13 Nov 2020 &raquo;</span> <a href="/blog/2020/11/13/Hooking-By-Example.html">X64 Function Hooking by Example</a>
     </li>
     
     <li>
-      <span>05 Feb 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/02/05/Bind-Once-Uniform-Data-Vulkan.html">A "Bind Once" Approach to Uniform Data</a>
+      <span>20 May 2020 &raquo;</span> <a href="/blog/2020/05/20/Rendering-With-Notepad.html">Ray Tracing In Notepad.exe At 30 FPS</a>
     </li>
     
     <li>
-      <span>28 Jan 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/01/28/Textue-Arrays-Vulkan.html">Using Arrays of Textures in Vulkan Shaders</a>
+      <span>20 May 2020 &raquo;</span> <a href="/blog/2020/05/20/Hooking-Input-Snake-In-Notepad.html">Hooking Keyboard Input To Play Snake In Notepad.exe</a>
     </li>
     
   </ul>
@@ -163,27 +164,12 @@
   
 
   <p>
-    © Kyle Halladay, 2014 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
+    © Kyle Halladay, 2021 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
   </p>
 </div>
       </div>
     </div>
   </div>
-
-
-<script type="text/javascript">
-
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-40292745-1']);
-  _gaq.push(['_trackPageview']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-
-</script>
 
 </body>
 </html>

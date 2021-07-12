@@ -18,6 +18,7 @@
 
   <link rel="stylesheet" href="/assets/css/all.css">
   <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    
 </head>
 <body>
   <div class="container">
@@ -29,8 +30,7 @@
   <h2>I'm <a href="/">Kyle Halladay</a>.</h2>
   <div id="bio">
     <p>I do graphics and engine programming for games. </p>
-    <p>I'm the author of <a href="https://www.amazon.com/Practical-Shader-Development-Fragment-Developers/dp/1484244567">Practical Shader Development</a>, which is all about learning to write shaders.
-    <p>I also dabble in GBA dev, you can find my tutorials <a href="/gba.html">here.</a>
+    <p>I'm the author of <a href="https://www.amazon.com/Practical-Shader-Development-Fragment-Developers/dp/1484244567">Practical Shader Development</a>, which is all about learning to write shaders.</p>
     <p>Check out <a href="/archive.html">some other stuff I've written</a></p>
   </div>
   <div id="social">
@@ -93,7 +93,8 @@
 
 </p>
 
-<h1 class="title">Setting Up OpenMP on Mavericks</h1>
+<div style="font-size:14px">15 Jul 2014</div>
+<h1 class="title">Setting Up OpenMP on Mavericks</h1> 
 
 <div id="post">
   <div style="background-color:#EEAAAA;">NOTE: This article is from 2014 and will not be updated. It may or may not still be valid
@@ -111,7 +112,7 @@
 
 </div>
 
-<p>I’ve tinkered with a few open source path tracers out there, but the one that caught my eye originally was <a href="http://www.kevinbeason.com/smallpt/">SmallPT</a>, which uses OpenMP. OpenMP is an API built by Intel that makes it dead simple to write parallel code. Want to have a for loop distribute itself over multiple cores? That looks like this: </p>
+<p>I’ve tinkered with a few open source path tracers out there, but the one that caught my eye originally was <a href="http://www.kevinbeason.com/smallpt/">SmallPT</a>, which uses OpenMP. OpenMP is an API built by Intel that makes it dead simple to write parallel code. Want to have a for loop distribute itself over multiple cores? That looks like this:</p>
 
 <div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="cp">#pragma omp parallel for
 </span><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
@@ -119,17 +120,17 @@
 	<span class="n">printf</span><span class="p">(</span><span class="s">"Loop executed on thread %d"</span><span class="p">,</span>  <span class="n">omp_get_thread_num</span><span class="p">());</span>
 <span class="p">}</span></code></pre></div>
 
-<p>After working with Boost’s Thread library on the ray tracer, which ended up dictating a lot of the structure of the renderer, OpenMP seems like a great way to let the compiler/runtime handle the implementation of the threading code and let me focus on actually building something cool. </p>
+<p>After working with Boost’s Thread library on the ray tracer, which ended up dictating a lot of the structure of the renderer, OpenMP seems like a great way to let the compiler/runtime handle the implementation of the threading code and let me focus on actually building something cool.</p>
 
 <p>So with that in mind, today’s article is all about how to set up OpenMP on Mavericks and get it working with a Makefile in Xcode 5; it’s a heck of a lot more involved than I originally anticipated. I suppose one caveat of this post is that most of the information here is taken from other places (which I’ve linked to), I’m just collecting it all in one place for the next person who wants to do this.</p>
 
 <h2>Extreme Yak Shaving</h2>
 
-<p>The first step to getting OpenMP up and running on Mavericks is to install a new compiler. No joke. The version of Clang installed on your system doesn’t support OpenMP, and Apple very quietly replaced gcc with a symlink to Clang with XCode 5, so we’re starting this process up a bit of a creek. </p>
+<p>The first step to getting OpenMP up and running on Mavericks is to install a new compiler. No joke. The version of Clang installed on your system doesn’t support OpenMP, and Apple very quietly replaced gcc with a symlink to Clang with XCode 5, so we’re starting this process up a bit of a creek.</p>
 
 <p>There are 2 commonly recommended options at this point. Probably the most logical solution is to simply install GCC 4.9 using Homebrew or Macports (or build it yourself if that turns your crank), but the Homebrew recipe for GCC 4.9 was broken at the time of writing this, and while I was looking for how to grab it from MacPorts I came across <a href="clang-opm.github.io">OpenMP®/Clang</a>.</p>
 
-<p>OpenMP®/Clang, unsurprisingly, is a modified version of Clang which supports OpenMP. Given that I’m already used to using Clang this seemed like a great idea, especially since the website is active, and indicates that the plan is to eventually contribute to the Clang trunk. May as well jump on the bandwagon early. </p>
+<p>OpenMP®/Clang, unsurprisingly, is a modified version of Clang which supports OpenMP. Given that I’m already used to using Clang this seemed like a great idea, especially since the website is active, and indicates that the plan is to eventually contribute to the Clang trunk. May as well jump on the bandwagon early.</p>
 
 <h2>Installing OpenMP®/Clang</h2>
 
@@ -137,13 +138,13 @@
 
 <p>One thing to pay attention to is that the script above will bind the new version of clang to the commands “clang2” and “clang2++,” which is great because it means we don’t have to screw with the moderately important command currently bound to “clang.”</p>
 
-<p>Aside from that though, that script should take care of a lot of the heavy lifting needed to get us going. </p>
+<p>Aside from that though, that script should take care of a lot of the heavy lifting needed to get us going.</p>
 
 <h2>Clang2 and XCode</h2>
 
 <p>If you’re happy just using Makefiles by themselves you can actually just stop here and use them to build you projects (remembering to use the -fopenmp flag), but I still wanted to use XCode as a front end for the llvm debugger so my odyssey continued for a bit. If that sounds like something you want too, the rest of this article will outline how to get that working.</p>
 
-<p>Setting up a makefile based project in XCode is (relatively) straightforward: </p>
+<p>Setting up a makefile based project in XCode is (relatively) straightforward:</p>
 
 <ul>
   <li>Create a new project like normal, choosing whatever template makes sense.</li>
@@ -155,7 +156,7 @@
   <li>In your Build Tool Configuration page, set the directory to wherever you’ve chosen to store your makefile, and set the arguments to “-f NAME_OF_YOUR_MAKEFILE”</li>
 </ul>
 
-<p>If you’ve followed those steps, your Build Tool Configuration page should look something like the following: </p>
+<p>If you’ve followed those steps, your Build Tool Configuration page should look something like the following:</p>
 
 <div align="center">
 	 	
@@ -164,7 +165,7 @@
 </div>
 <p><br /></p>
 
-<p>Great. Next up is to actually write the makefile. For the most part this is the same as any other makefile, except that you need to specify “clang2” as the compiler, and include the -fopenmp flag when you compile files that include OpenMP. A really simple makefile that does this might look like the following: </p>
+<p>Great. Next up is to actually write the makefile. For the most part this is the same as any other makefile, except that you need to specify “clang2” as the compiler, and include the -fopenmp flag when you compile files that include OpenMP. A really simple makefile that does this might look like the following:</p>
 
 <div align="center">
 	 	
@@ -173,17 +174,17 @@
 </div>
 <p><br /></p>
 
-<p>We’re almost there, but XCode isn’t through with us yet. If you try to build now, you’ll notice that it fails spectacularly and spits out a cryptic error that boils down to not knowing what the heck “clang2” is. This is because for some reason XCode doesn’t read the PATH variables that we set up in that script ealier, so we need to tell it where to find our compiler. </p>
+<p>We’re almost there, but XCode isn’t through with us yet. If you try to build now, you’ll notice that it fails spectacularly and spits out a cryptic error that boils down to not knowing what the heck “clang2” is. This is because for some reason XCode doesn’t read the PATH variables that we set up in that script ealier, so we need to tell it where to find our compiler.</p>
 
-<p>I’m sure theres a better way of doing this, but after a couple of hours of banging my head against a wall, I’ve resigned to launching XCode from the command line like so: </p>
+<p>I’m sure theres a better way of doing this, but after a couple of hours of banging my head against a wall, I’ve resigned to launching XCode from the command line like so:</p>
 
 <pre><code>$ source ~/.profile
 $ open -a "Xcode"
 </code></pre>
 
-<p>This will open XCode with the path variables we need set up properly. If you like Spotlight as much as I do, I recommend wrapping these in an Automator application so you can run these commands from there. </p>
+<p>This will open XCode with the path variables we need set up properly. If you like Spotlight as much as I do, I recommend wrapping these in an Automator application so you can run these commands from there.</p>
 
-<p>If you build from the XCode that was opened from the command line, you should finally we able to run your program. If you’re looking for a good test, I recommend the example found on <a href="clang-opm.github.io">clang-opm.github.io</a>. If OpenMP is running correctly, you should be able to see the printf statement get executed from multiple threads when that file is run. </p>
+<p>If you build from the XCode that was opened from the command line, you should finally we able to run your program. If you’re looking for a good test, I recommend the example found on <a href="clang-opm.github.io">clang-opm.github.io</a>. If OpenMP is running correctly, you should be able to see the printf statement get executed from multiple threads when that file is run.</p>
 
 <p>Normally this is where I tell you to contact me with any questions, but I fear that I’m as in the dark about this as you are right now, although hopefully that changes over the next few weeks. In any case, you can get a hold of me <a href="http://twitter.com/khalladay">on twitter</a> if you want to say hi. Happy Coding!</p>
 
@@ -194,19 +195,19 @@ $ open -a "Xcode"
   <ul class="posts">
     
     <li>
-      <span>04 Dec 2019 &raquo;</span> <a href="/blog/2019/12/04/Recreating-A-Dirty-Gamedev-Hack.html">Recreating An Old "Dirty Gamedev Trick"</a>
+      <span>14 Jul 2021 &raquo;</span> <a href="/blog/2021/07/14/Dll-Search-Order-Hijacking-For-PostProcess-Injection.html">Hooking and Hijacking DirectX 11 Functions In Skyrim</a>
     </li>
     
     <li>
-      <span>18 Apr 2019 &raquo;</span> <a href="/blog/2019/04/18/I-Wrote-A-Book.html">I Wrote A Book About Shaders!</a>
+      <span>13 Nov 2020 &raquo;</span> <a href="/blog/2020/11/13/Hooking-By-Example.html">X64 Function Hooking by Example</a>
     </li>
     
     <li>
-      <span>05 Feb 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/02/05/Bind-Once-Uniform-Data-Vulkan.html">A "Bind Once" Approach to Uniform Data</a>
+      <span>20 May 2020 &raquo;</span> <a href="/blog/2020/05/20/Rendering-With-Notepad.html">Ray Tracing In Notepad.exe At 30 FPS</a>
     </li>
     
     <li>
-      <span>28 Jan 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/01/28/Textue-Arrays-Vulkan.html">Using Arrays of Textures in Vulkan Shaders</a>
+      <span>20 May 2020 &raquo;</span> <a href="/blog/2020/05/20/Hooking-Input-Snake-In-Notepad.html">Hooking Keyboard Input To Play Snake In Notepad.exe</a>
     </li>
     
   </ul>
@@ -223,27 +224,12 @@ $ open -a "Xcode"
   
 
   <p>
-    © Kyle Halladay, 2014 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
+    © Kyle Halladay, 2021 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
   </p>
 </div>
       </div>
     </div>
   </div>
-
-
-<script type="text/javascript">
-
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-40292745-1']);
-  _gaq.push(['_trackPageview']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-
-</script>
 
 </body>
 </html>

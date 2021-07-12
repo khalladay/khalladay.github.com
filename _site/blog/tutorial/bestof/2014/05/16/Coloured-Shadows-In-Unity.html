@@ -18,6 +18,7 @@
 
   <link rel="stylesheet" href="/assets/css/all.css">
   <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    
 </head>
 <body>
   <div class="container">
@@ -29,8 +30,7 @@
   <h2>I'm <a href="/">Kyle Halladay</a>.</h2>
   <div id="bio">
     <p>I do graphics and engine programming for games. </p>
-    <p>I'm the author of <a href="https://www.amazon.com/Practical-Shader-Development-Fragment-Developers/dp/1484244567">Practical Shader Development</a>, which is all about learning to write shaders.
-    <p>I also dabble in GBA dev, you can find my tutorials <a href="/gba.html">here.</a>
+    <p>I'm the author of <a href="https://www.amazon.com/Practical-Shader-Development-Fragment-Developers/dp/1484244567">Practical Shader Development</a>, which is all about learning to write shaders.</p>
     <p>Check out <a href="/archive.html">some other stuff I've written</a></p>
   </div>
   <div id="social">
@@ -93,13 +93,14 @@
 
 </p>
 
-<h1 class="title">Colouring Shadows in Unity</h1>
+<div style="font-size:14px">16 May 2014</div>
+<h1 class="title">Colouring Shadows in Unity</h1> 
 
 <div id="post">
   <div style="background-color:#EEAAAA;">NOTE: This article is for an old version of Unity (Unity 4...sometime in 2014) and probably won't run anymore, but the basic idea is still valid. I just don't want to spend time updating old posts every time Unity increments a version number
 </div>
 
-<p>If you’ve ever looked for help getting different coloured shadows in your Unity game, you were probably surprised by how little there is on the forums in the way of help. In fact, at the time of writing this, the most help that google turned up was a $50 package on the asset store. Colouring shadows is not that hard, in fact, it’s only a few lines of shader code. </p>
+<p>If you’ve ever looked for help getting different coloured shadows in your Unity game, you were probably surprised by how little there is on the forums in the way of help. In fact, at the time of writing this, the most help that google turned up was a $50 package on the asset store. Colouring shadows is not that hard, in fact, it’s only a few lines of shader code.</p>
 
 <p>This post is going to show you a really simple way to get some really groovy shadows in Unity.</p>
 
@@ -117,9 +118,9 @@
 
 <p>To make this simple, we’re going to be writing a surface shader today. It’s important to note that the shader we’re writing will set the colour of the shadows being received by the object being shaded, not the colour of the shadows cast by that object onto others. If you want the ground to show coloured shadows, the ground needs to have a shadow colouring shader. In the image above, both the sphere and the ground have the shader applied.</p>
 
-<p>Let’s add coloured shadows to the default diffuse shader that comes with unity. First off, we’ll need the source for that. You can grab the source for all the built in shaders in Unity from their <a href="http://unity3d.com/unity/download/archive">downloads page</a>. </p>
+<p>Let’s add coloured shadows to the default diffuse shader that comes with unity. First off, we’ll need the source for that. You can grab the source for all the built in shaders in Unity from their <a href="http://unity3d.com/unity/download/archive">downloads page</a>.</p>
 
-<p>The default diffuse shader is in a file called Normal-Diffuse.shader. So let’s open it up, and copy the contents into a new shader in Unity: </p>
+<p>The default diffuse shader is in a file called Normal-Diffuse.shader. So let’s open it up, and copy the contents into a new shader in Unity:</p>
 
 <div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">Shader</span> <span class="s">"Colored Diffuse"</span> <span class="p">{</span>
 <span class="n">Properties</span> <span class="p">{</span>
@@ -136,11 +137,11 @@
 <span class="n">sampler2D</span> <span class="n">_MainTex</span><span class="p">;</span>
 <span class="n">fixed4</span> <span class="n">_Color</span><span class="p">;</span>
 
-<span class="k">struct</span> <span class="n">Input</span> <span class="p">{</span>
+<span class="k">struct</span> <span class="nc">Input</span> <span class="p">{</span>
 	<span class="n">float2</span> <span class="n">uv_MainTex</span><span class="p">;</span>
 <span class="p">};</span>
 
-<span class="kt">void</span> <span class="nf">surf</span> <span class="p">(</span><span class="n">Input</span> <span class="n">IN</span><span class="p">,</span> <span class="n">inout</span> <span class="n">SurfaceOutput</span> <span class="n">o</span><span class="p">)</span> <span class="p">{</span>
+<span class="kt">void</span> <span class="n">surf</span> <span class="p">(</span><span class="n">Input</span> <span class="n">IN</span><span class="p">,</span> <span class="n">inout</span> <span class="n">SurfaceOutput</span> <span class="n">o</span><span class="p">)</span> <span class="p">{</span>
 	<span class="n">fixed4</span> <span class="n">c</span> <span class="o">=</span> <span class="n">tex2D</span><span class="p">(</span><span class="n">_MainTex</span><span class="p">,</span> <span class="n">IN</span><span class="p">.</span><span class="n">uv_MainTex</span><span class="p">)</span> <span class="o">*</span> <span class="n">_Color</span><span class="p">;</span>
 	<span class="n">o</span><span class="p">.</span><span class="n">Albedo</span> <span class="o">=</span> <span class="n">c</span><span class="p">.</span><span class="n">rgb</span><span class="p">;</span>
 	<span class="n">o</span><span class="p">.</span><span class="n">Alpha</span> <span class="o">=</span> <span class="n">c</span><span class="p">.</span><span class="n">a</span><span class="p">;</span>
@@ -151,7 +152,7 @@
 <span class="n">Fallback</span> <span class="s">"VertexLit"</span>
 <span class="p">}</span></code></pre></div>
 
-<p>If you throw this on a material it should, unsurprisingly, look exactly like the “Diffuse” shader that comes with Unity. Now it’s time to have some fun. We’re going to need to write our own lighting function to get the shadows the colour we want them. Right now the shader is using the built in “Lambert” function, and ideally, our lighting should look exactly like it, just more fabulous. The easiest way to do this is to just grab the source for the Lambert function and modify that directly. </p>
+<p>If you throw this on a material it should, unsurprisingly, look exactly like the “Diffuse” shader that comes with Unity. Now it’s time to have some fun. We’re going to need to write our own lighting function to get the shadows the colour we want them. Right now the shader is using the built in “Lambert” function, and ideally, our lighting should look exactly like it, just more fabulous. The easiest way to do this is to just grab the source for the Lambert function and modify that directly.</p>
 
 <p>That built in shaders folder you downloaded also has the source code for the lighting functions (inside the file Lighting.cginc). If you open it up, and ctrl+f for “Lambert” you’ll find what we’re looking for. Let’s paste that into our shader as well:</p>
 
@@ -159,7 +160,7 @@
 <span class="cp">#pragma surface surf CSLambert
 </span><span class="n">sampler2D</span> <span class="n">_MainTex</span><span class="p">;</span>
 
-<span class="k">struct</span> <span class="n">Input</span> <span class="p">{</span>
+<span class="k">struct</span> <span class="nc">Input</span> <span class="p">{</span>
 	<span class="n">float2</span> <span class="n">uv_MainTex</span><span class="p">;</span>
 <span class="p">};</span>
 
@@ -181,9 +182,9 @@
 
 <span class="n">ENDCG</span></code></pre></div>
 
-<p>You’ll notice I changed the name of the lighting function (and the #pragma line which specifies which function to use). This is just to avoid confusion with the original Lambert function. </p>
+<p>You’ll notice I changed the name of the lighting function (and the #pragma line which specifies which function to use). This is just to avoid confusion with the original Lambert function.</p>
 
-<p>The lighting function is responsible for outputting the final colour of the object, which includes the colour of the shadowed area. The atten term you see above is the shadow multiplier. The higher the atten value, the brighter the surface, a low value points to the fragment being in shadow. The lower the atten value, the darker the shadows. </p>
+<p>The lighting function is responsible for outputting the final colour of the object, which includes the colour of the shadowed area. The atten term you see above is the shadow multiplier. The higher the atten value, the brighter the surface, a low value points to the fragment being in shadow. The lower the atten value, the darker the shadows.</p>
 
 <p>Since we know that any atten value less than 1.0 means that the fragment is in shadow, subtracting atten from 1.0 will give us the strength that the shadow colour needs to be. Lighter shadows (a higher atten) will naturally have a lighter shadow colour.</p>
 
@@ -195,14 +196,14 @@
 	<span class="n">fixed4</span> <span class="n">c</span><span class="p">;</span>
 	<span class="n">c</span><span class="p">.</span><span class="n">rgb</span> <span class="o">=</span> <span class="n">s</span><span class="p">.</span><span class="n">Albedo</span> <span class="o">*</span> <span class="n">_LightColor0</span><span class="p">.</span><span class="n">rgb</span> <span class="o">*</span> <span class="p">(</span><span class="n">diff</span> <span class="o">*</span> <span class="n">atten</span> <span class="o">*</span> <span class="mi">2</span><span class="p">);</span>
 	
-	<span class="c1">//shadow colorization
-</span>	<span class="n">c</span><span class="p">.</span><span class="n">rgb</span> <span class="o">+=</span> <span class="n">_ShadowColor</span><span class="p">.</span><span class="n">xyz</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span><span class="o">-</span><span class="n">atten</span><span class="p">);</span>
+	<span class="c1">//shadow colorization</span>
+	<span class="n">c</span><span class="p">.</span><span class="n">rgb</span> <span class="o">+=</span> <span class="n">_ShadowColor</span><span class="p">.</span><span class="n">xyz</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span><span class="o">-</span><span class="n">atten</span><span class="p">);</span>
 	
 	<span class="n">c</span><span class="p">.</span><span class="n">a</span> <span class="o">=</span> <span class="n">s</span><span class="p">.</span><span class="n">Alpha</span><span class="p">;</span>
 	<span class="k">return</span> <span class="n">c</span><span class="p">;</span>
 <span class="p">}</span></code></pre></div>
 
-<p>Make sure that you also add the _ShadowColor color property to the shader, and as a uniform inside your CG Program. Then throw this shader onto one of your objects, and watch the magic happen. </p>
+<p>Make sure that you also add the _ShadowColor color property to the shader, and as a uniform inside your CG Program. Then throw this shader onto one of your objects, and watch the magic happen.</p>
 
 <p>You may have noticed that the above change doesn’t account for diffuse shadows, that is, unlit sides of a diffuse material. You end up with a really weird looking dissonance between the object’s dark areas, and the areas that are receiving shadows.</p>
 
@@ -217,9 +218,9 @@
 </div>
 
 <p><br />
-This happens because although the atten value tell us if we’re being shadowed by another object, it doesn’t account for a fragment being dark as a result of it’s own lighting function. In the case of a diffuse material, this is when it is pointing away from all relevant light sources. </p>
+This happens because although the atten value tell us if we’re being shadowed by another object, it doesn’t account for a fragment being dark as a result of it’s own lighting function. In the case of a diffuse material, this is when it is pointing away from all relevant light sources.</p>
 
-<p>What we need is to have our shadow colouring take into account both the atten value and the lighting. We can do that like so: </p>
+<p>What we need is to have our shadow colouring take into account both the atten value and the lighting. We can do that like so:</p>
 
 <div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">half4</span> <span class="nf">LightingCSLambert</span> <span class="p">(</span><span class="n">SurfaceOutput</span> <span class="n">s</span><span class="p">,</span> <span class="n">half3</span> <span class="n">lightDir</span><span class="p">,</span> <span class="n">half</span> <span class="n">atten</span><span class="p">)</span> 
 <span class="p">{</span>
@@ -228,15 +229,15 @@ This happens because although the atten value tell us if we’re being shadowed 
 	<span class="n">fixed4</span> <span class="n">c</span><span class="p">;</span>
 	<span class="n">c</span><span class="p">.</span><span class="n">rgb</span> <span class="o">=</span> <span class="n">s</span><span class="p">.</span><span class="n">Albedo</span> <span class="o">*</span> <span class="n">_LightColor0</span><span class="p">.</span><span class="n">rgb</span> <span class="o">*</span> <span class="p">(</span><span class="n">diff</span> <span class="o">*</span> <span class="n">atten</span> <span class="o">*</span> <span class="mi">2</span><span class="p">);</span>
 	
-	<span class="c1">//shadow colorization
-</span>	<span class="n">c</span><span class="p">.</span><span class="n">rgb</span> <span class="o">+=</span> <span class="n">_ShadowColor</span><span class="p">.</span><span class="n">xyz</span> <span class="o">*</span> <span class="n">max</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,(</span><span class="mf">1.0</span><span class="o">-</span><span class="p">(</span><span class="n">diff</span><span class="o">*</span><span class="n">atten</span><span class="o">*</span><span class="mi">2</span><span class="p">)))</span> <span class="o">*</span> <span class="n">_DiffuseVal</span><span class="p">;</span>
+	<span class="c1">//shadow colorization</span>
+	<span class="n">c</span><span class="p">.</span><span class="n">rgb</span> <span class="o">+=</span> <span class="n">_ShadowColor</span><span class="p">.</span><span class="n">xyz</span> <span class="o">*</span> <span class="n">max</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,(</span><span class="mf">1.0</span><span class="o">-</span><span class="p">(</span><span class="n">diff</span><span class="o">*</span><span class="n">atten</span><span class="o">*</span><span class="mi">2</span><span class="p">)))</span> <span class="o">*</span> <span class="n">_DiffuseVal</span><span class="p">;</span>
 	<span class="n">c</span><span class="p">.</span><span class="n">a</span> <span class="o">=</span> <span class="n">s</span><span class="p">.</span><span class="n">Alpha</span><span class="p">;</span>
 	<span class="k">return</span> <span class="n">c</span><span class="p">;</span>
 <span class="p">}</span></code></pre></div>
 
 <p>Put it all together and you should end up with the most fabulous shadow colours you’ve ever seen!</p>
 
-<p>Extending this to other shaders is very similar to what we did here, simply grab the source for the shader you want to modify from the built in shader source, and modify the lighting function to add shadow colour based on that specific lighting function’s equation. </p>
+<p>Extending this to other shaders is very similar to what we did here, simply grab the source for the shader you want to modify from the built in shader source, and modify the lighting function to add shadow colour based on that specific lighting function’s equation.</p>
 
 <p>If you have any questions about this (or spot a mistake in what’s here), send me a send me a message <a href="http://twitter.com/khalladay">on twitter</a>. I won’t write shaders for you, but I’m happy to point you in the right direction for your specific use case. Happy shading!</p>
 
@@ -247,19 +248,19 @@ This happens because although the atten value tell us if we’re being shadowed 
   <ul class="posts">
     
     <li>
-      <span>04 Dec 2019 &raquo;</span> <a href="/blog/2019/12/04/Recreating-A-Dirty-Gamedev-Hack.html">Recreating An Old "Dirty Gamedev Trick"</a>
+      <span>14 Jul 2021 &raquo;</span> <a href="/blog/2021/07/14/Dll-Search-Order-Hijacking-For-PostProcess-Injection.html">Hooking and Hijacking DirectX 11 Functions In Skyrim</a>
     </li>
     
     <li>
-      <span>18 Apr 2019 &raquo;</span> <a href="/blog/2019/04/18/I-Wrote-A-Book.html">I Wrote A Book About Shaders!</a>
+      <span>13 Nov 2020 &raquo;</span> <a href="/blog/2020/11/13/Hooking-By-Example.html">X64 Function Hooking by Example</a>
     </li>
     
     <li>
-      <span>05 Feb 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/02/05/Bind-Once-Uniform-Data-Vulkan.html">A "Bind Once" Approach to Uniform Data</a>
+      <span>20 May 2020 &raquo;</span> <a href="/blog/2020/05/20/Rendering-With-Notepad.html">Ray Tracing In Notepad.exe At 30 FPS</a>
     </li>
     
     <li>
-      <span>28 Jan 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/01/28/Textue-Arrays-Vulkan.html">Using Arrays of Textures in Vulkan Shaders</a>
+      <span>20 May 2020 &raquo;</span> <a href="/blog/2020/05/20/Hooking-Input-Snake-In-Notepad.html">Hooking Keyboard Input To Play Snake In Notepad.exe</a>
     </li>
     
   </ul>
@@ -276,27 +277,12 @@ This happens because although the atten value tell us if we’re being shadowed 
   
 
   <p>
-    © Kyle Halladay, 2014 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
+    © Kyle Halladay, 2021 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
   </p>
 </div>
       </div>
     </div>
   </div>
-
-
-<script type="text/javascript">
-
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-40292745-1']);
-  _gaq.push(['_trackPageview']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-
-</script>
 
 </body>
 </html>

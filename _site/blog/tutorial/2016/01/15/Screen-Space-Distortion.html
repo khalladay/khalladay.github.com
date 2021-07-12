@@ -18,6 +18,7 @@
 
   <link rel="stylesheet" href="/assets/css/all.css">
   <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    
 </head>
 <body>
   <div class="container">
@@ -29,8 +30,7 @@
   <h2>I'm <a href="/">Kyle Halladay</a>.</h2>
   <div id="bio">
     <p>I do graphics and engine programming for games. </p>
-    <p>I'm the author of <a href="https://www.amazon.com/Practical-Shader-Development-Fragment-Developers/dp/1484244567">Practical Shader Development</a>, which is all about learning to write shaders.
-    <p>I also dabble in GBA dev, you can find my tutorials <a href="/gba.html">here.</a>
+    <p>I'm the author of <a href="https://www.amazon.com/Practical-Shader-Development-Fragment-Developers/dp/1484244567">Practical Shader Development</a>, which is all about learning to write shaders.</p>
     <p>Check out <a href="/archive.html">some other stuff I've written</a></p>
   </div>
   <div id="social">
@@ -93,7 +93,8 @@
 
 </p>
 
-<h1 class="title">Screen Space Distortion and a Sci-fi Shield Effect</h1>
+<div style="font-size:14px">15 Jan 2016</div>
+<h1 class="title">Screen Space Distortion and a Sci-fi Shield Effect</h1> 
 
 <div id="post">
   <p>Sometimes inspiration comes from the weirdest places. I was idly browsing reddit after work awhile ago and stumbled onto this post by user <a href="http://reddit.com/u/Guillaume_Langis">Guillaume_Langis</a>. It was a gif of a shield effect that they had created for their game <a href="http://projectwarfleet.blogspot.ca/">Warfleet</a>. The comments section on that site was filled (predictably) with users asking how they effect was done, and Guillame ended up actually posting the c# and shader source online for people to play with, which is awesome (thanks!)</p>
@@ -137,14 +138,14 @@
     <span class="n">RenderTexture</span> <span class="n">screenRT</span><span class="p">;</span>
     <span class="n">Camera</span> <span class="n">mainCam</span><span class="p">;</span>
 
-    <span class="kt">void</span> <span class="nf">Awake</span><span class="p">()</span>
+    <span class="kt">void</span> <span class="n">Awake</span><span class="p">()</span>
     <span class="p">{</span>
     	<span class="n">screenRT</span> <span class="o">=</span> <span class="k">new</span> <span class="n">RenderTexture</span><span class="p">(</span><span class="n">Screen</span><span class="p">.</span><span class="n">width</span><span class="p">,</span> <span class="n">Screen</span><span class="p">.</span><span class="n">height</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="n">RenderTextureFormat</span><span class="p">.</span><span class="n">Default</span><span class="p">);</span>
     	<span class="n">mainCam</span> <span class="o">=</span> <span class="n">GetComponent</span><span class="o">&lt;</span><span class="n">Camera</span><span class="o">&gt;</span><span class="p">();</span>
     	<span class="n">mainCam</span><span class="p">.</span><span class="n">SetTargetBuffers</span><span class="p">(</span><span class="n">screenRT</span><span class="p">.</span><span class="n">colorBuffer</span><span class="p">,</span> <span class="n">screenRT</span><span class="p">.</span><span class="n">depthBuffer</span><span class="p">);</span>
     <span class="p">}</span>
 
-    <span class="kt">void</span> <span class="nf">OnPostRender</span><span class="p">()</span>
+    <span class="kt">void</span> <span class="n">OnPostRender</span><span class="p">()</span>
     <span class="p">{</span>
     	<span class="n">Graphics</span><span class="p">.</span><span class="n">Blit</span><span class="p">(</span><span class="n">screenRT</span><span class="p">,</span> <span class="p">(</span><span class="n">RenderTexture</span><span class="p">)</span><span class="n">null</span><span class="p">);</span>
     <span class="p">}</span>
@@ -162,10 +163,10 @@
     <span class="k">return</span> <span class="n">o</span><span class="p">;</span>
 <span class="p">}</span>
 
-<span class="n">fixed4</span> <span class="n">frag</span><span class="p">(</span><span class="n">vOUT</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span> <span class="n">COLOR</span>
+<span class="n">fixed4</span> <span class="nf">frag</span><span class="p">(</span><span class="n">vOUT</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span> <span class="n">COLOR</span>
 <span class="p">{</span>
     <span class="k">return</span> <span class="n">tex2D</span><span class="p">(</span><span class="n">_MainTex</span><span class="p">,</span> <span class="n">fixed2</span><span class="p">(</span> <span class="n">i</span><span class="p">.</span><span class="n">uv</span><span class="p">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">sin</span><span class="p">(</span><span class="n">i</span><span class="p">.</span><span class="n">uv</span><span class="p">.</span><span class="n">y</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span><span class="o">*</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">uv</span><span class="p">.</span><span class="n">y</span><span class="p">)</span> <span class="p">);</span>
-<span class="p">}</span></code></pre></div>
+<span class="err">}</span></code></pre></div>
 
 <p>I’m going to call this shader our “composite” shader, since it’s what we’re going to use to combine data about how to render the distortion effect with our regular camera view.</p>
 
@@ -236,12 +237,12 @@
 <p>If you run this now (and make the shieldRT public), you’ll be able to see that we are successfully drawing into our shield buffer, but our effect shader isn’t doing anything useful with that data yet, so let’s look at that next. For this initial step, let’s modify the composite shader to simply subtract the G and B values of the distortion texture from the screen uvs:</p>
 
 <div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">sampler2D</span> <span class="n">_DistortionTex</span><span class="p">;</span>
-<span class="n">fixed4</span> <span class="n">frag</span><span class="p">(</span><span class="n">vOUT</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span> <span class="n">COLOR</span>
+<span class="n">fixed4</span> <span class="nf">frag</span><span class="p">(</span><span class="n">vOUT</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span> <span class="n">COLOR</span>
 <span class="p">{</span>
     <span class="n">fixed4</span> <span class="n">distort</span> <span class="o">=</span> <span class="n">tex2D</span><span class="p">(</span><span class="n">_DistortionTex</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">uv</span><span class="p">);</span>
     <span class="n">fixed4</span> <span class="n">tex</span> <span class="o">=</span> <span class="n">tex2D</span><span class="p">(</span><span class="n">_MainTex</span><span class="p">,</span> <span class="n">fixed2</span><span class="p">(</span><span class="n">i</span><span class="p">.</span><span class="n">uv</span><span class="p">.</span><span class="n">xy</span> <span class="o">-</span> <span class="p">(</span><span class="n">distort</span><span class="p">.</span><span class="n">gb</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)));</span>
     <span class="k">return</span> <span class="n">tex</span><span class="p">;</span>
-<span class="p">}</span></code></pre></div>
+<span class="err">}</span></code></pre></div>
 
 <p>If you hit run now, this is what the sample scene should look like:</p>
 
@@ -264,14 +265,14 @@
 #pragma fragment frag
 #include "ShieldEffect.cginc"
 </span>
-<span class="k">struct</span> <span class="n">vIN</span>
+<span class="k">struct</span> <span class="nc">vIN</span>
 <span class="p">{</span>
     <span class="n">float4</span> <span class="n">vertex</span> <span class="o">:</span> <span class="n">POSITION</span><span class="p">;</span>
     <span class="n">float2</span> <span class="n">texcoord</span> <span class="o">:</span> <span class="n">TEXCOORD0</span><span class="p">;</span>
     <span class="n">float3</span> <span class="n">normal</span> <span class="o">:</span> <span class="n">NORMAL</span><span class="p">;</span>
 <span class="p">};</span>
 
-<span class="k">struct</span> <span class="n">vOUT</span>
+<span class="k">struct</span> <span class="nc">vOUT</span>
 <span class="p">{</span>
     <span class="n">float4</span> <span class="n">pos</span> <span class="o">:</span> <span class="n">SV_POSITION</span><span class="p">;</span>
     <span class="n">float3</span> <span class="n">oPos</span> <span class="o">:</span> <span class="n">TEXCOORD0</span><span class="p">;</span>
@@ -295,7 +296,7 @@
     <span class="k">return</span> <span class="n">o</span><span class="p">;</span>
 <span class="p">}</span>
 
-<span class="n">fixed4</span> <span class="n">frag</span><span class="p">(</span><span class="n">vOUT</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span> <span class="n">COLOR</span>
+<span class="n">fixed4</span> <span class="nf">frag</span><span class="p">(</span><span class="n">vOUT</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span> <span class="n">COLOR</span>
 <span class="p">{</span>
     <span class="n">fixed4</span> <span class="n">tex</span> <span class="o">=</span> <span class="n">fixed4</span><span class="p">(</span><span class="n">i</span><span class="p">.</span><span class="n">oPos</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="n">i</span><span class="p">.</span><span class="n">oPos</span><span class="p">.</span><span class="n">y</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">);</span>
     <span class="kt">float</span> <span class="n">intensity</span> <span class="o">=</span> <span class="n">CalcShieldIntensity16</span><span class="p">(</span><span class="n">i</span><span class="p">.</span><span class="n">objPos</span><span class="p">);</span>
@@ -304,7 +305,7 @@
     <span class="kt">float</span> <span class="n">ang</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">-</span> <span class="n">dot</span><span class="p">(</span><span class="n">viewdir</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">wNorm</span><span class="p">)</span> <span class="o">+</span> <span class="n">intensity</span><span class="p">;</span>
 
     <span class="k">return</span> <span class="p">(</span><span class="n">tex</span> <span class="o">*</span>  <span class="n">ang</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">;</span>
-<span class="p">}</span>
+<span class="err">}</span>
 <span class="n">ENDCG</span></code></pre></div>
 
 <p>Before we go about plumbing this in to our game, let’s talk about what’s going on here. First, since we want our effect to look the same no matter what angle we’re viewing from, it simplifies a lot of things if we work in screenspace for generating the actual colours that we’re writing to the buffer. What we want is for the colours we write to be representative of their direction from the center of the shield, so to do that, we transform the origin point of the object (the zeroPos variable) into screen space as well, and then subtract that point from our vertex’s position in screen space. This gives us a nice direction vector to work with.</p>
@@ -394,7 +395,7 @@
     <span class="n">shieldCam</span><span class="p">.</span><span class="n">orthographicSize</span> <span class="o">=</span> <span class="n">mainCam</span><span class="p">.</span><span class="n">orthographicSize</span><span class="p">;</span>
 <span class="p">}</span>
 
-<span class="kt">void</span> <span class="n">OnPostRender</span><span class="p">(){...}</span></code></pre></div>
+<span class="kt">void</span> <span class="nf">OnPostRender</span><span class="p">(){...}</span></code></pre></div>
 
 <p>Notice that we also added a line to remove the Shield layer from the main camera’s culling mask. Now that we have a second camera doing this for us, that camera doesn’t need to create draw calls to incorrectly render the shield colour.</p>
 
@@ -531,7 +532,7 @@
 
 <p>There’s one last thing we need to do to finish this effect, and that’s to move the logic that used to live in our composite shader to the shader we use to draw our shields. There’s a completed shader at the end of this article but all we’re doing is adding uniforms to the shader so we can see the screenRT and shieldRT (the warp buffer), and then filling in areas of our object that would be transparent if we were alpha blending with a distorted lookup into screenRT. The addition to the fragment shader looks like this:</p>
 
-<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">fixed4</span> <span class="n">frag</span><span class="p">(</span><span class="n">v2f</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span> <span class="n">SV_Target</span>
+<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">fixed4</span> <span class="nf">frag</span><span class="p">(</span><span class="n">v2f</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span> <span class="n">SV_Target</span>
 <span class="p">{</span>
     <span class="n">float3</span> <span class="n">viewdir</span> <span class="o">=</span> <span class="n">normalize</span><span class="p">(</span><span class="n">_WorldSpaceCameraPos</span> <span class="o">-</span> <span class="n">i</span><span class="p">.</span><span class="n">worldPos</span><span class="p">);</span>
     <span class="kt">float</span> <span class="n">ang</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="n">abs</span><span class="p">(</span><span class="n">dot</span><span class="p">(</span><span class="n">viewdir</span><span class="p">,</span> <span class="n">normalize</span><span class="p">(</span><span class="n">i</span><span class="p">.</span><span class="n">normal</span><span class="p">))));</span>
@@ -547,8 +548,8 @@
     <span class="n">screenPos</span><span class="p">.</span><span class="n">xy</span> <span class="o">=</span>  <span class="n">screenPos</span><span class="p">.</span><span class="n">xy</span> <span class="o">-</span> <span class="p">(</span><span class="n">distortion</span><span class="p">.</span><span class="n">rb</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.5</span><span class="p">;</span>
 
     <span class="n">float4</span> <span class="n">d</span> <span class="o">=</span> <span class="n">tex2Dproj</span><span class="p">(</span><span class="n">_ScreenBuffer</span><span class="p">,</span> <span class="n">UNITY_PROJ_COORD</span><span class="p">(</span><span class="n">screenPos</span><span class="p">));</span>
-    <span class="k">return</span>  <span class="n">tex</span> <span class="o">+</span> <span class="n">d</span> <span class="o">+</span> <span class="n">texColor</span> <span class="o">*</span> <span class="n">CalcShieldIntensity16</span><span class="p">(</span><span class="n">i</span><span class="p">.</span><span class="n">oPos</span><span class="p">);</span>
-<span class="p">}</span></code></pre></div>
+    <span class="k">return</span>  <span class="n">tex</span> <span class="o">+</span> <span class="n">d</span> <span class="o">+</span> <span class="n">texColor</span> <span class="o">*</span> <span class="nf">CalcShieldIntensity16</span><span class="p">(</span><span class="n">i</span><span class="p">.</span><span class="n">oPos</span><span class="p">);</span>
+<span class="err">}</span></code></pre></div>
 
 <p>The ComputeScreenPos and UNITY_PROJ_COORD macros do most of the hard work for us here, but you can see where we’ve basically lifted the logic completely from the composite shader and added it here. This is going to make our 100% opaque objects look like they’re alpha blending with a warp effect. It also lets our war effect be occluded by geometry, by other warp effects, and if you took my advice and wrote out a non warp version of shield to the main camera, you can see one shield through another. All of this put together might look something like this:</p>
 
@@ -595,19 +596,19 @@
   <ul class="posts">
     
     <li>
-      <span>04 Dec 2019 &raquo;</span> <a href="/blog/2019/12/04/Recreating-A-Dirty-Gamedev-Hack.html">Recreating An Old "Dirty Gamedev Trick"</a>
+      <span>14 Jul 2021 &raquo;</span> <a href="/blog/2021/07/14/Dll-Search-Order-Hijacking-For-PostProcess-Injection.html">Hooking and Hijacking DirectX 11 Functions In Skyrim</a>
     </li>
     
     <li>
-      <span>18 Apr 2019 &raquo;</span> <a href="/blog/2019/04/18/I-Wrote-A-Book.html">I Wrote A Book About Shaders!</a>
+      <span>13 Nov 2020 &raquo;</span> <a href="/blog/2020/11/13/Hooking-By-Example.html">X64 Function Hooking by Example</a>
     </li>
     
     <li>
-      <span>05 Feb 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/02/05/Bind-Once-Uniform-Data-Vulkan.html">A "Bind Once" Approach to Uniform Data</a>
+      <span>20 May 2020 &raquo;</span> <a href="/blog/2020/05/20/Rendering-With-Notepad.html">Ray Tracing In Notepad.exe At 30 FPS</a>
     </li>
     
     <li>
-      <span>28 Jan 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/01/28/Textue-Arrays-Vulkan.html">Using Arrays of Textures in Vulkan Shaders</a>
+      <span>20 May 2020 &raquo;</span> <a href="/blog/2020/05/20/Hooking-Input-Snake-In-Notepad.html">Hooking Keyboard Input To Play Snake In Notepad.exe</a>
     </li>
     
   </ul>
@@ -624,27 +625,12 @@
   
 
   <p>
-    © Kyle Halladay, 2014 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
+    © Kyle Halladay, 2021 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
   </p>
 </div>
       </div>
     </div>
   </div>
-
-
-<script type="text/javascript">
-
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-40292745-1']);
-  _gaq.push(['_trackPageview']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-
-</script>
 
 </body>
 </html>

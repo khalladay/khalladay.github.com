@@ -18,6 +18,7 @@
 
   <link rel="stylesheet" href="/assets/css/all.css">
   <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    
 </head>
 <body>
   <div class="container">
@@ -29,8 +30,7 @@
   <h2>I'm <a href="/">Kyle Halladay</a>.</h2>
   <div id="bio">
     <p>I do graphics and engine programming for games. </p>
-    <p>I'm the author of <a href="https://www.amazon.com/Practical-Shader-Development-Fragment-Developers/dp/1484244567">Practical Shader Development</a>, which is all about learning to write shaders.
-    <p>I also dabble in GBA dev, you can find my tutorials <a href="/gba.html">here.</a>
+    <p>I'm the author of <a href="https://www.amazon.com/Practical-Shader-Development-Fragment-Developers/dp/1484244567">Practical Shader Development</a>, which is all about learning to write shaders.</p>
     <p>Check out <a href="/archive.html">some other stuff I've written</a></p>
   </div>
   <div id="social">
@@ -93,7 +93,8 @@
 
 </p>
 
-<h1 class="title">A Spline Based Object Placement Tool</h1>
+<div style="font-size:14px">30 Mar 2014</div>
+<h1 class="title">A Spline Based Object Placement Tool</h1> 
 
 <div id="post">
   <div style="background-color:#EEAAAA;">NOTE: This article is for an old version of Unity (Unity 4...sometime in 2014) and probably won't run anymore, but the basic idea is still valid. I just don't want to spend time updating old posts every time Unity increments a version number
@@ -101,9 +102,9 @@
 
 <p>I’m convinced that one of the secrets to levelling up your Unity skills is to become very comfortable writing custom editor tools. Every project I’ve worked on in the past year has been made significantly better by building tools to automate repetitive or time consuming tasks.</p>
 
-<p>For example, imagine you are working on a project which requires placing gems at even distances (like coins in Temple Run, or rings in Sonic). Placing all of these by hand isn’t a good use of anyone’s time, and making changes to these layouts sucks because moving a gem in the middle of a row means that everything after it needs to be adjusted as well. </p>
+<p>For example, imagine you are working on a project which requires placing gems at even distances (like coins in Temple Run, or rings in Sonic). Placing all of these by hand isn’t a good use of anyone’s time, and making changes to these layouts sucks because moving a gem in the middle of a row means that everything after it needs to be adjusted as well.</p>
 
-<p>A tool that automatically places objects at even spaces along a spline would not only allow you to get the objects placed faster, but make it way easier to make changes later. This post is going to show you the basics of how to put a tool like this together. </p>
+<p>A tool that automatically places objects at even spaces along a spline would not only allow you to get the objects placed faster, but make it way easier to make changes later. This post is going to show you the basics of how to put a tool like this together.</p>
 
 <p>(there’s a unitypackage download at the end of this post if you just want the code).</p>
 
@@ -116,7 +117,7 @@
 
 <h2>The General Idea</h2>
 
-<p>The tool we’re building is fairly simple, but there are a few different parts we need to set up. We’ll cover these in order: </p>
+<p>The tool we’re building is fairly simple, but there are a few different parts we need to set up. We’ll cover these in order:</p>
 
 <ul>
   <li>A way to make a spline</li>
@@ -126,9 +127,9 @@
 
 <h2>Making a Spline</h2>
 
-<p>I could probably write a few blog posts just covering different spline creation algorithms, but thankfully the Unity wiki has us covered here. Head over there and grab the <a href="http://wiki.unity3d.com/index.php?title=Interpolate#Interpolate.cs">Interpolate.cs script</a>. This will handle all the complicated parts of creating our spline for us. All that’s left for us is to define the inputs. </p>
+<p>I could probably write a few blog posts just covering different spline creation algorithms, but thankfully the Unity wiki has us covered here. Head over there and grab the <a href="http://wiki.unity3d.com/index.php?title=Interpolate#Interpolate.cs">Interpolate.cs script</a>. This will handle all the complicated parts of creating our spline for us. All that’s left for us is to define the inputs.</p>
 
-<p>If you look at Interpolate.cs, you’ll find the method that we’ll be using to generate our splines: </p>
+<p>If you look at Interpolate.cs, you’ll find the method that we’ll be using to generate our splines:</p>
 
 <div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="n">IEnumerable</span><span class="o">&lt;</span><span class="n">Vector3</span><span class="o">&gt;</span> <span class="n">NewCatmullRom</span><span class="p">(</span><span class="n">Transform</span><span class="p">[]</span> <span class="n">nodes</span><span class="p">,</span> <span class="kt">int</span> <span class="n">slices</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">loop</span><span class="p">)</span></code></pre></div>
 
@@ -138,7 +139,7 @@
 
 <h2>Seeing and Manipulating the Spline</h2>
 
-<p>So as mentioned, the first thing our tool will need to do is provide inputs to the Interpolate class. So let’s set that up: </p>
+<p>So as mentioned, the first thing our tool will need to do is provide inputs to the Interpolate class. So let’s set that up:</p>
 
 <div class="highlight"><pre><code class="language-c#" data-lang="c#"><span class="k">public</span> <span class="k">class</span> <span class="nc">SplinePlacer</span> <span class="p">:</span> <span class="n">MonoBehaviour</span>
 <span class="p">{</span>
@@ -148,7 +149,7 @@
 	<span class="k">public</span> <span class="n">GameObject</span> <span class="n">objectToPlace</span><span class="p">;</span>
 <span class="p">}</span></code></pre></div>
 
-<p>You can go ahead and set these up in the inspector if you want, although you won’t see anything yet. so perhaps we should also set up the gizmos to visualize the spline. Gizmos (for those who are unfamiliar with them) are objects which are drawn in the scene view but do not appear in your actual game. We’re going to be using the Gizmo api to draw our spline. </p>
+<p>You can go ahead and set these up in the inspector if you want, although you won’t see anything yet. so perhaps we should also set up the gizmos to visualize the spline. Gizmos (for those who are unfamiliar with them) are objects which are drawn in the scene view but do not appear in your actual game. We’re going to be using the Gizmo api to draw our spline.</p>
 
 <p>To write a custom gizmo for a component, you need to override the OnDrawGizmos method. Let’s start by drawing a sphere at every initial node point, so that we don’t need the Transform objects we’re supplying to have a mesh renderer attached to them. The code below allocates an array of Vector3[]s that isn’t really being used in this example, but we will be using this array later, so I’ve included it now to avoid needing to change code as we go.</p>
 
@@ -162,7 +163,7 @@
 	<span class="p">}</span>
 <span class="p">}</span></code></pre></div>
 
-<p>If you switch back to the editor, and add a few empty GameObjects to the list of initialNodes, you should now have shiny wireframe spheres in the scene view to help you see what’s going on. </p>
+<p>If you switch back to the editor, and add a few empty GameObjects to the list of initialNodes, you should now have shiny wireframe spheres in the scene view to help you see what’s going on.</p>
 
 <div align="center">
 	 	
@@ -202,7 +203,7 @@
 	<span class="p">}</span>
 <span class="p">}</span></code></pre></div>
 
-<p>If you compile this, and throw a few control points into the inspector panel, you should be able to drag them around see something like this: </p>
+<p>If you compile this, and throw a few control points into the inspector panel, you should be able to drag them around see something like this:</p>
 
 <div align="center">
 	 	
@@ -215,7 +216,7 @@
 
 <h2>Placing Objects on the Spline</h2>
 
-<p>The most common use case I’ve found for this type of tool is placing objects along the spline while setting up the scene (ie/ before runtime), so that’s what we’ll cover here. </p>
+<p>The most common use case I’ve found for this type of tool is placing objects along the spline while setting up the scene (ie/ before runtime), so that’s what we’ll cover here.</p>
 
 <p>I’ve found the most intuitive way to handle this is to write a custom inspector for the SplinePlacer class that draws a button that triggers the placement action. So lets do that now:</p>
 
@@ -258,10 +259,10 @@
 
 <div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="k">public</span> <span class="kt">void</span> <span class="nf">PlaceObjects</span><span class="p">()</span>
 <span class="p">{</span>
-<span class="c1">//To make things easier to understand
-//we're going to parse the spline into a 
-//list of Vector3s instead of using the iterator
-</span><span class="n">IEnumerable</span><span class="o">&lt;</span><span class="n">Vector3</span><span class="o">&gt;</span> <span class="n">spline</span> <span class="o">=</span> <span class="n">Interpolate</span><span class="p">.</span><span class="n">NewCatmullRom</span><span class="p">(</span><span class="n">initialNodes</span><span class="p">,</span> 
+<span class="c1">//To make things easier to understand</span>
+<span class="c1">//we're going to parse the spline into a </span>
+<span class="c1">//list of Vector3s instead of using the iterator</span>
+<span class="n">IEnumerable</span><span class="o">&lt;</span><span class="n">Vector3</span><span class="o">&gt;</span> <span class="n">spline</span> <span class="o">=</span> <span class="n">Interpolate</span><span class="p">.</span><span class="n">NewCatmullRom</span><span class="p">(</span><span class="n">initialNodes</span><span class="p">,</span> 
 							<span class="n">curveResolution</span><span class="p">,</span> 
 							<span class="n">loop</span><span class="p">);</span>
 <span class="n">IEnumerator</span> <span class="n">iterator</span> <span class="o">=</span> <span class="n">spline</span><span class="p">.</span><span class="n">GetEnumerator</span><span class="p">();</span>
@@ -271,18 +272,18 @@
 	<span class="n">splinePoints</span><span class="p">.</span><span class="n">Add</span><span class="p">((</span><span class="n">Vector3</span><span class="p">)</span><span class="n">iterator</span><span class="p">.</span><span class="n">Current</span><span class="p">);</span>
 <span class="p">}</span>
 
-<span class="c1">//distanceToMove represents how much farther
-//we need to progress down the spline before
-//we place the next object
-</span><span class="kt">int</span> <span class="n">nextSplinePointIndex</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="c1">//distanceToMove represents how much farther</span>
+<span class="c1">//we need to progress down the spline before</span>
+<span class="c1">//we place the next object</span>
+<span class="kt">int</span> <span class="n">nextSplinePointIndex</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
 <span class="kt">float</span> <span class="n">distanceToMove</span> <span class="o">=</span> <span class="n">distanceBetweenObjects</span><span class="p">;</span>
 
-<span class="c1">//our current position on the spline
-</span><span class="n">Vector3</span> <span class="n">positionIterator</span> <span class="o">=</span> <span class="n">splinePoints</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+<span class="c1">//our current position on the spline</span>
+<span class="n">Vector3</span> <span class="n">positionIterator</span> <span class="o">=</span> <span class="n">splinePoints</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
 
-<span class="c1">//our algo skips the first control point, so 
-//we need to manually place the first object
-</span><span class="n">GameObject</span><span class="p">.</span><span class="n">Instantiate</span><span class="p">(</span><span class="n">objectToPlace</span><span class="p">,</span> <span class="n">positionIterator</span><span class="p">,</span> <span class="n">Quaternion</span><span class="p">.</span><span class="n">identity</span><span class="p">);</span>
+<span class="c1">//our algo skips the first control point, so </span>
+<span class="c1">//we need to manually place the first object</span>
+<span class="n">GameObject</span><span class="p">.</span><span class="n">Instantiate</span><span class="p">(</span><span class="n">objectToPlace</span><span class="p">,</span> <span class="n">positionIterator</span><span class="p">,</span> <span class="n">Quaternion</span><span class="p">.</span><span class="n">identity</span><span class="p">);</span>
 <span class="k">while</span><span class="p">(</span><span class="n">nextSplinePointIndex</span> <span class="o">&lt;</span> <span class="n">splinePoints</span><span class="p">.</span><span class="n">Count</span><span class="p">)</span>
 <span class="p">{</span>
 	<span class="n">Vector3</span> <span class="n">direction</span> <span class="o">=</span> <span class="p">(</span><span class="n">splinePoints</span><span class="p">[</span><span class="n">nextSplinePointIndex</span><span class="p">]</span> <span class="o">-</span> <span class="n">positionIterator</span><span class="p">);</span>
@@ -334,19 +335,19 @@ YAY! :D
   <ul class="posts">
     
     <li>
-      <span>04 Dec 2019 &raquo;</span> <a href="/blog/2019/12/04/Recreating-A-Dirty-Gamedev-Hack.html">Recreating An Old "Dirty Gamedev Trick"</a>
+      <span>14 Jul 2021 &raquo;</span> <a href="/blog/2021/07/14/Dll-Search-Order-Hijacking-For-PostProcess-Injection.html">Hooking and Hijacking DirectX 11 Functions In Skyrim</a>
     </li>
     
     <li>
-      <span>18 Apr 2019 &raquo;</span> <a href="/blog/2019/04/18/I-Wrote-A-Book.html">I Wrote A Book About Shaders!</a>
+      <span>13 Nov 2020 &raquo;</span> <a href="/blog/2020/11/13/Hooking-By-Example.html">X64 Function Hooking by Example</a>
     </li>
     
     <li>
-      <span>05 Feb 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/02/05/Bind-Once-Uniform-Data-Vulkan.html">A "Bind Once" Approach to Uniform Data</a>
+      <span>20 May 2020 &raquo;</span> <a href="/blog/2020/05/20/Rendering-With-Notepad.html">Ray Tracing In Notepad.exe At 30 FPS</a>
     </li>
     
     <li>
-      <span>28 Jan 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/01/28/Textue-Arrays-Vulkan.html">Using Arrays of Textures in Vulkan Shaders</a>
+      <span>20 May 2020 &raquo;</span> <a href="/blog/2020/05/20/Hooking-Input-Snake-In-Notepad.html">Hooking Keyboard Input To Play Snake In Notepad.exe</a>
     </li>
     
   </ul>
@@ -363,27 +364,12 @@ YAY! :D
   
 
   <p>
-    © Kyle Halladay, 2014 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
+    © Kyle Halladay, 2021 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
   </p>
 </div>
       </div>
     </div>
   </div>
-
-
-<script type="text/javascript">
-
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-40292745-1']);
-  _gaq.push(['_trackPageview']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-
-</script>
 
 </body>
 </html>

@@ -18,6 +18,7 @@
 
   <link rel="stylesheet" href="/assets/css/all.css">
   <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    
 </head>
 <body>
   <div class="container">
@@ -29,8 +30,7 @@
   <h2>I'm <a href="/">Kyle Halladay</a>.</h2>
   <div id="bio">
     <p>I do graphics and engine programming for games. </p>
-    <p>I'm the author of <a href="https://www.amazon.com/Practical-Shader-Development-Fragment-Developers/dp/1484244567">Practical Shader Development</a>, which is all about learning to write shaders.
-    <p>I also dabble in GBA dev, you can find my tutorials <a href="/gba.html">here.</a>
+    <p>I'm the author of <a href="https://www.amazon.com/Practical-Shader-Development-Fragment-Developers/dp/1484244567">Practical Shader Development</a>, which is all about learning to write shaders.</p>
     <p>Check out <a href="/archive.html">some other stuff I've written</a></p>
   </div>
   <div id="social">
@@ -93,7 +93,8 @@
 
 </p>
 
-<h1 class="title">GBA By Example - Getting User Input</h1>
+<div style="font-size:14px">18 Apr 2017</div>
+<h1 class="title">GBA By Example - Getting User Input</h1> 
 
 <div id="post">
   <p>(Note: This is Part 5 of my GBA by Example series. A list of my other GBA tutorials can be found <a href="http://kylehalladay.com/gba.html">here</a>)</p>
@@ -240,7 +241,7 @@
  <span class="n">START</span><span class="o">:</span> <span class="mo">0000</span> <span class="mo">0000</span> <span class="mo">0000</span> <span class="mi">1000</span>
  <span class="o">--------------------------</span>
 <span class="n">val</span><span class="o">=</span> <span class="mi">0</span><span class="n">x</span> <span class="mo">0000</span> <span class="mo">0000</span> <span class="mo">0000</span> <span class="mo">0000</span>
-<span class="k">return</span> <span class="p">(</span><span class="o">!</span><span class="n">val</span><span class="p">);</span> <span class="o">//</span><span class="nb">true</span><span class="p">,</span> <span class="n">key</span> <span class="n">is</span> <span class="n">DOWN</span></code></pre></div>
+<span class="nf">return</span> <span class="p">(</span><span class="o">!</span><span class="n">val</span><span class="p">);</span> <span class="c1">//true, key is DOWN</span></code></pre></div>
 
 <ul>
   <li>
@@ -256,7 +257,7 @@
  <span class="o">--------------------------</span>
 <span class="n">val</span><span class="o">=</span> <span class="mi">0</span><span class="n">x</span> <span class="mo">0000</span> <span class="mo">0000</span> <span class="mo">0000</span> <span class="mo">0001</span>
 
-<span class="k">return</span> <span class="p">(</span><span class="o">!</span><span class="n">val</span><span class="p">);</span> <span class="o">//</span><span class="nb">false</span><span class="p">,</span> <span class="n">key</span> <span class="n">is</span> <span class="n">UP</span></code></pre></div>
+<span class="nf">return</span> <span class="p">(</span><span class="o">!</span><span class="n">val</span><span class="p">);</span> <span class="c1">//false, key is UP</span></code></pre></div>
 
 <p>The KEY_MASK constant is important for this function to work, because we have no idea that the top 6 bits of this value are being set to (whatever it is, it’s junk data), and we want to be sure that we’re only testing our key_code value against data that we expect is in the input register.</p>
 
@@ -281,8 +282,8 @@
         <span class="n">key_poll</span><span class="p">();</span>
         <span class="k">if</span> <span class="p">(</span> <span class="n">getKeyState</span><span class="p">(</span><span class="n">KEY_L</span><span class="p">)</span> <span class="p">)</span>
         <span class="p">{</span>
-            <span class="c1">//key is down
-</span>        <span class="p">}</span>
+            <span class="c1">//key is down</span>
+        <span class="p">}</span>
     <span class="p">}</span>
 <span class="p">}</span></code></pre></div>
 
@@ -366,7 +367,7 @@
 
 <h2 id="sprite-and-bg-data">Sprite and BG Data</h2>
 
-<p>All the sprites that I’m using for the example project can be found <a href="https://github.com/khalladay/GBAInput/tree/master/code">on github</a>. It isn’t super compact, but for such a simple program, that’s not really that important. If you want to follow along as I build this, grab the data from there. If you just want the final product, you can find the whole thing <a href="https://github.com/khalladay/GBAInput">on github here</a>.</p>
+<p>All the sprites that I’m using for the example project can be found <a href="https://github.com/khalladay/GBA-By-Example/tree/master/3-UserInput/data">on github</a>. It isn’t super compact, but for such a simple program, that’s not really that important. If you want to follow along as I build this, grab the data from there. If you just want the final product, you can find the whole thing <a href="https://github.com/khalladay/GBA-By-Example/tree/master/3-UserInput">on github here</a>.</p>
 
 <p>The function to load the sprite data is as follows:</p>
 
@@ -391,8 +392,8 @@
 
 <span class="kt">void</span> <span class="nf">LoadTileData</span><span class="p">()</span>
 <span class="p">{</span>
-    <span class="c1">//each sprite is 32 tiles
-</span>    <span class="n">memcpy</span><span class="p">(</span><span class="n">MEM_PALETTE</span><span class="p">,</span> <span class="n">Pal</span><span class="p">,</span>  <span class="n">PalLen</span> <span class="p">);</span>
+    <span class="c1">//each sprite is 32 tiles</span>
+    <span class="n">memcpy</span><span class="p">(</span><span class="n">MEM_PALETTE</span><span class="p">,</span> <span class="n">Pal</span><span class="p">,</span>  <span class="n">PalLen</span> <span class="p">);</span>
     <span class="n">memcpy</span><span class="p">(</span><span class="o">&amp;</span><span class="n">MEM_TILE</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">ATiles</span><span class="p">,</span> <span class="n">TileLen</span><span class="p">);</span>
     <span class="n">memcpy</span><span class="p">(</span><span class="o">&amp;</span><span class="n">MEM_TILE</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">32</span><span class="p">],</span> <span class="n">BTiles</span><span class="p">,</span> <span class="n">TileLen</span><span class="p">);</span>
     <span class="n">memcpy</span><span class="p">(</span><span class="o">&amp;</span><span class="n">MEM_TILE</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">64</span><span class="p">],</span> <span class="n">SelectTiles</span><span class="p">,</span> <span class="n">TileLen</span><span class="p">);</span>
@@ -517,8 +518,8 @@
 
 <p>If you’re still with me, the hard part is over, and all that’s left is to write out the main function for our program, and make sure all the necessary #defines are there for things to work together.</p>
 
-<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="c1">//previous code from article omitted for brevity
-</span>
+<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="c1">//previous code from article omitted for brevity</span>
+
 <span class="cp">#define VIDEOMODE_0    0x0000
 #define ENABLE_OBJECTS 0x1000
 #define MAPPINGMODE_1D 0x0040
@@ -562,7 +563,7 @@
     <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
 <span class="p">}</span></code></pre></div>
 
-<p>If you want to grab a fully put-together, runnable version of the code, you can find it <a href="https://github.com/khalladay/GBAInput">here</a>, I’m going to omit it here because all the code is already available on this page, and I think a github repo is a far better delivery mechanism for that much code than pasting it here.</p>
+<p>If you want to grab a fully put-together, runnable version of the code, you can find it <a href="https://github.com/khalladay/GBA-By-Example/tree/master/3-UserInput">here</a>, I’m going to omit it here because all the code is already available on this page, and I think a github repo is a far better delivery mechanism for that much code than pasting it here.</p>
 
 <p>This has the disadvantage of only showing one key press at a time (and prioritizing some keys over others), but I’m ok with that, I just wanted a fun example program to show off input handling, and to provide more examples of how to use stuff we’ve done in articles past. I suppose modifying the above to show all the buttons that are currently pressed instead of one is left as an exercise to the reader?  ;)</p>
 
@@ -581,19 +582,19 @@
   <ul class="posts">
     
     <li>
-      <span>04 Dec 2019 &raquo;</span> <a href="/blog/2019/12/04/Recreating-A-Dirty-Gamedev-Hack.html">Recreating An Old "Dirty Gamedev Trick"</a>
+      <span>14 Jul 2021 &raquo;</span> <a href="/blog/2021/07/14/Dll-Search-Order-Hijacking-For-PostProcess-Injection.html">Hooking and Hijacking DirectX 11 Functions In Skyrim</a>
     </li>
     
     <li>
-      <span>18 Apr 2019 &raquo;</span> <a href="/blog/2019/04/18/I-Wrote-A-Book.html">I Wrote A Book About Shaders!</a>
+      <span>13 Nov 2020 &raquo;</span> <a href="/blog/2020/11/13/Hooking-By-Example.html">X64 Function Hooking by Example</a>
     </li>
     
     <li>
-      <span>05 Feb 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/02/05/Bind-Once-Uniform-Data-Vulkan.html">A "Bind Once" Approach to Uniform Data</a>
+      <span>20 May 2020 &raquo;</span> <a href="/blog/2020/05/20/Rendering-With-Notepad.html">Ray Tracing In Notepad.exe At 30 FPS</a>
     </li>
     
     <li>
-      <span>28 Jan 2018 &raquo;</span> <a href="/blog/tutorial/vulkan/2018/01/28/Textue-Arrays-Vulkan.html">Using Arrays of Textures in Vulkan Shaders</a>
+      <span>20 May 2020 &raquo;</span> <a href="/blog/2020/05/20/Hooking-Input-Snake-In-Notepad.html">Hooking Keyboard Input To Play Snake In Notepad.exe</a>
     </li>
     
   </ul>
@@ -610,27 +611,12 @@
   
 
   <p>
-    © Kyle Halladay, 2014 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
+    © Kyle Halladay, 2021 &mdash; built with <a href="http://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/swanson/lagom">Lagom theme</a>
   </p>
 </div>
       </div>
     </div>
   </div>
-
-
-<script type="text/javascript">
-
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-40292745-1']);
-  _gaq.push(['_trackPageview']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-
-</script>
 
 </body>
 </html>
