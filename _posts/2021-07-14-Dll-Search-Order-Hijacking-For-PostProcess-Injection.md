@@ -50,7 +50,7 @@ Creating a proxy version of d3d11.dll that contains every function eported by th
 I had never built a proxy dll before, so my first step was to make an empty one (with just a dllmain function), and see what happens if a progrma loads a dll that doesn't have the functions it expects it to have. This works as well as you might expect. I put a call to MessageBox() in DLLMain to see if things even progressed that far. They didnt. 
 
 <div align="center">
-<img src="/images/post_images/2021-07-14/launching_with_dxgi_that_just_pops_messagebox.png" />
+<img src="/images/post_images/2021-07-14/launching_with_dxgi_that_just_pops_messagebox.PNG" />
 <font size="2">I changed my system's language to french once, some things have never changed back</font>
 <br><br>
 </div>
