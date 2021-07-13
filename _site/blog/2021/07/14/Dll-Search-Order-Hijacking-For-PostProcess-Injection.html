@@ -244,7 +244,7 @@
 
 <p>This by itself wasn’t be the most useful (although I guess I could have figured out the right function by trial and error). Microsoft publishes the symbols for D3D11.dll though, so I had VS grab those from the Microsoft symbol server and used them to get the function names that corresponded with the vtable memory addresses. Once I had that, I could see that the Present function is the 9th element in swapChain vtable.</p>
 
-<p>Of course, Microsoft could update DXGI and change the ordering of function in the vtable at any time, but it works for now, so yolo.</p>
+<p><del>Of course, Microsoft could update DXGI and change the ordering of function in the vtable at any time, but it works for now, so yolo. </del> [Edit: As  @__silent_  pointed out <a href="https://twitter.com/__silent_/status/1414704439693398023">on twitter</a>, this is rather unlikely, since it would require a whole new DXGI SwapChain interface that didn’t inherit from any previous versions of IDXGISwapChain]</p>
 
 <div align="center">
 <img src="/images/post_images/2021-07-14/symbolicated_watchwindow.png" />
